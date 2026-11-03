@@ -5,9 +5,8 @@
       "release-type": "simple",
       "version-file": "VERSION",
       "include-component-in-tag": false,
-      "prerelease": true,
-      "prerelease-type": "alpha",
-      "versioning": "prerelease",
+      "prerelease": false,
+      "versioning": "default",
       "bump-minor-pre-major": true,
       "changelog-path": "CHANGELOG.md"
     }

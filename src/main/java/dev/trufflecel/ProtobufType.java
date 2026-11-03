@@ -1,68 +1,96 @@
 package dev.trufflecel;
 
 import com.google.protobuf.*;
-import com.oracle.truffle.api.interop.InvalidArrayIndexException;
 import com.google.protobuf.Descriptors.*;
 import dev.elide.truffledata.*;
-import dev.elide.truffledata.protobuf.ProtobufAdapter;
+import dev.elide.truffledata.protobuf.*;
 import java.util.*;
 
 /** Descriptor-compiled CEL binding backed by published TruffleData protobuf snapshots. */
 public final class ProtobufType implements ObjectType {
   private static final Map<String, ObjectType> WELL_KNOWN = Cel.newBuilder().build().objectTypes;
   private final Descriptor descriptor;
-  private final ProtobufAdapter adapter;
+  private final ProtoPlan plan;
+  private final ProtoCompiler.Source source;
   private final Map<String, CelType> fields;
   private final Map<Descriptor, ProtobufType> graph;
 
-  /**
-   * A native snapshot plus the immutable protobuf needed for wire round trips and exact equality.
-   */
+  /** A lossless native protobuf value; no protobuf Message is retained. */
   public static final class Value {
-    private final Message message;
-    private final AbstractRow row;
+    private final ProtobufType type;
+    private final ProtoRow row;
 
-    private Value(Message message, AbstractRow row) {
-      this.message = message;
+    private Value(ProtobufType type, ProtoRow row) {
+      this.type = type;
       this.row = row;
     }
 
     @Override
     public boolean equals(Object other) {
-      return other instanceof Value v && message.equals(v.message);
+      return other instanceof Value v
+          && type.descriptor == v.type.descriptor
+          && message().equals(v.message());
     }
 
     @Override
     public int hashCode() {
-      return message.hashCode();
+      return message().hashCode();
     }
 
+    /** Explicit host export. Binary ingestion and CEL field access use the native row directly. */
     public Message message() {
-      return message;
+      try {
+        return DynamicMessage.parseFrom(type.descriptor, toBytes().toByteArray());
+      } catch (InvalidProtocolBufferException e) {
+        throw new IllegalStateException("Invalid native protobuf row", e);
+      }
     }
 
-    public AbstractRow row() {
+    public Bytes toBytes() {
+      return new Bytes(type.plan.encode(row));
+    }
+
+    public ProtoRow row() {
       return row;
     }
   }
 
   public ProtobufType(Descriptor descriptor, Descriptor... additionalTypes) {
-    this(descriptor, new IdentityHashMap<>());
+    this(descriptor, new IdentityHashMap<>(), model(descriptor, additionalTypes));
     for (Descriptor additional : additionalTypes)
-      if (!graph.containsKey(additional)) new ProtobufType(additional, graph);
+      if (!graph.containsKey(additional)) new ProtobufType(additional, graph, model);
   }
 
-  private ProtobufType(Descriptor descriptor, Map<Descriptor, ProtobufType> graph) {
+  private final ProtoPlan.Model model;
+
+  private static ProtoPlan.Model model(Descriptor descriptor, Descriptor[] additionalTypes) {
+    var roots = new ArrayList<Descriptor>();
+    roots.add(descriptor);
+    roots.addAll(Arrays.asList(additionalTypes));
+    return new ProtoPlan.Model(
+        null, ProtoCompiler.definitions(roots), Limits.DEFAULT, 100, 8 * 1024 * 1024);
+  }
+
+  private ProtobufType(
+      Descriptor descriptor, Map<Descriptor, ProtobufType> graph, ProtoPlan.Model model) {
     this.descriptor = descriptor;
     this.graph = graph;
+    this.model = model;
     graph.put(descriptor, this);
-    adapter = new ProtobufAdapter(descriptor, Limits.DEFAULT, 100);
+    plan = model.type(descriptor.getFullName());
+    source = ProtoCompiler.bind(plan, descriptor);
     var types = new LinkedHashMap<String, CelType>();
     for (FieldDescriptor f : descriptor.getFields()) types.put(f.getName(), type(f));
     fields = Map.copyOf(types);
     for (FieldDescriptor f : descriptor.getFields())
       if (f.getJavaType() == FieldDescriptor.JavaType.MESSAGE
-          && !graph.containsKey(f.getMessageType())) new ProtobufType(f.getMessageType(), graph);
+          && !graph.containsKey(f.getMessageType()))
+        new ProtobufType(f.getMessageType(), graph, model);
+  }
+
+  /** The shared native plan for direct binary decoding and row construction. */
+  public ProtoPlan plan() {
+    return plan;
   }
 
   public Environment.Builder register(Environment.Builder builder) {
@@ -83,7 +111,7 @@ public final class ProtobufType implements ObjectType {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT, "Protobuf descriptor differs from adapter");
     try {
-      return new Value(message, adapter.snapshot(message));
+      return new Value(this, source.snapshot(message));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, e.getMessage());
     }
@@ -120,16 +148,16 @@ public final class ProtobufType implements ObjectType {
   }
 
   public boolean accepts(Object value) {
-    return value instanceof Value v && v.message().getDescriptorForType() == descriptor;
+    return value instanceof Value v && v.type.descriptor == descriptor;
   }
 
   public boolean isZero(Object value) {
-    Message message = ((Value) value).message();
-    return message.equals(message.getDefaultInstanceForType());
+    Value v = (Value) value;
+    return v.message().equals(DynamicMessage.getDefaultInstance(descriptor));
   }
 
   public boolean equal(Object a, Object b) {
-    return ((Value) a).message().equals(((Value) b).message());
+    return a.equals(b);
   }
 
   private FieldDescriptor field(String name) {
@@ -140,8 +168,14 @@ public final class ProtobufType implements ObjectType {
 
   public boolean has(Object value, String name) {
     FieldDescriptor f = field(name);
-    Message message = ((Value) value).message();
-    return f.isRepeated() ? message.getRepeatedFieldCount(f) != 0 : message.hasField(f);
+    return ((Value) value).row().has(f.getIndex());
+  }
+
+  /** Ingest a row produced by this type's plan and apply CEL well-known mappings. */
+  public Object input(ProtoRow row) {
+    if (row.plan() != plan)
+      throw Values.error(CelException.Code.INVALID_ARGUMENT, "Protobuf plan differs from adapter");
+    return canonical(new Value(this, row));
   }
 
   public Object get(Object value, String name) {
@@ -149,65 +183,59 @@ public final class ProtobufType implements ObjectType {
     FieldDescriptor f = field(name);
     Object nativeValue = DataLibrary.factory().getUncached().read(v.row(), f.getIndex());
     if (nativeValue == Missing.INSTANCE) {
-      if (f.getJavaType() == FieldDescriptor.JavaType.MESSAGE
-          && (f.getMessageType().getFullName().endsWith("Value")
-              || f.getMessageType().getFullName().equals("google.protobuf.Any"))
-          && WELL_KNOWN.containsKey(f.getMessageType().getFullName())) return CelNull.INSTANCE;
-      return scalar(v.message().getField(f), f, null);
+      String nestedName = f.getMessageType().getFullName();
+      if ((nestedName.endsWith("Value") || nestedName.equals("google.protobuf.Any"))
+          && WELL_KNOWN.containsKey(nestedName)) return CelNull.INSTANCE;
+      ProtobufType nested = graph.get(f.getMessageType());
+      return nested.canonical(new Value(nested, nested.plan.newBuilder().build()));
     }
     if (f.isMapField()) {
       var result = new LinkedHashMap<Object, Object>();
       FieldDescriptor key = f.getMessageType().findFieldByNumber(1);
       FieldDescriptor val = f.getMessageType().findFieldByNumber(2);
-      for (int i = 0; i < v.message().getRepeatedFieldCount(f); i++) {
-        Message entry = (Message) v.message().getRepeatedField(f, i);
-        AbstractRow row = (AbstractRow) element(nativeValue, i);
-        ProtobufType entryType = graph.get(f.getMessageType());
-        Value item = new Value(entry, row);
+      DataArray entries = (DataArray) nativeValue;
+      ProtobufType entryType = graph.get(f.getMessageType());
+      for (int i = 0; i < entries.size(); i++) {
+        Value item = new Value(entryType, (ProtoRow) entries.get(i));
         result.put(entryType.get(item, key.getName()), entryType.get(item, val.getName()));
       }
       return Collections.unmodifiableMap(result);
     }
     if (f.isRepeated()) {
       var result = new ArrayList<Object>();
-      for (int i = 0; i < v.message().getRepeatedFieldCount(f); i++)
-        result.add(scalar(v.message().getRepeatedField(f, i), f, element(nativeValue, i)));
+      DataArray entries = (DataArray) nativeValue;
+      for (int i = 0; i < entries.size(); i++) result.add(scalar(entries.get(i), f));
       return List.copyOf(result);
     }
-    return scalar(v.message().getField(f), f, nativeValue);
+    return scalar(nativeValue, f);
   }
 
-  private static Object element(Object array, int i) {
-    try {
-      return ((DataArray) array).readArrayElement(i);
-    } catch (InvalidArrayIndexException e) {
-      throw new AssertionError(e);
-    }
-  }
-
-  private Object scalar(Object proto, FieldDescriptor f, Object nativeValue) {
+  private Object scalar(Object value, FieldDescriptor f) {
     return switch (f.getType()) {
-      case UINT32, FIXED32 -> new UInt(Integer.toUnsignedLong((Integer) proto));
-      case UINT64, FIXED64 -> new UInt((Long) proto);
-      case BYTES -> new Bytes(((ByteString) proto).toByteArray());
+      case UINT32, FIXED32 -> new UInt((Long) value);
+      case UINT64, FIXED64 ->
+          new UInt(((ExactNumber) value).decimal().toBigIntegerExact().longValue());
+      case BYTES -> {
+        DataArray array = (DataArray) value;
+        byte[] bytes = new byte[(int) array.size()];
+        for (int i = 0; i < bytes.length; i++) bytes[i] = (byte) (long) (Long) array.get(i);
+        yield new Bytes(bytes);
+      }
       case ENUM ->
           f.getEnumType().getFullName().equals("google.protobuf.NullValue")
               ? CelNull.INSTANCE
-              : (long) ((EnumValueDescriptor) proto).getNumber();
+              : value;
       case MESSAGE, GROUP -> {
         ProtobufType nested = graph.get(f.getMessageType());
-        yield nested.canonical(
-            nativeValue == null
-                ? nested.snapshot((Message) proto)
-                : new Value((Message) proto, (AbstractRow) nativeValue));
+        yield nested.canonical(new Value(nested, (ProtoRow) value));
       }
-      default -> Values.in(nativeValue == null ? proto : nativeValue);
+      default -> Values.in(value);
     };
   }
 
   public Object construct(Map<String, Object> values) {
     try {
-      var builder = DynamicMessage.newBuilder(descriptor);
+      var builder = plan.newBuilder();
       var oneofs = new HashSet<OneofDescriptor>();
       for (var entry : values.entrySet()) {
         FieldDescriptor f = field(entry.getKey());
@@ -217,22 +245,26 @@ public final class ProtobufType implements ObjectType {
         if (f.getContainingOneof() != null && !oneofs.add(f.getContainingOneof()))
           throw new IllegalArgumentException("Multiple oneof fields");
         if (f.isMapField()) {
+          var entries = new ArrayList<Object>();
           for (var item : ((Map<?, ?>) value).entrySet()) {
             Descriptor d = f.getMessageType();
-            builder.addRepeatedField(
-                f,
-                DynamicMessage.newBuilder(d)
-                    .setField(
-                        d.findFieldByNumber(1), toProto(item.getKey(), d.findFieldByNumber(1)))
-                    .setField(
-                        d.findFieldByNumber(2), toProto(item.getValue(), d.findFieldByNumber(2)))
-                    .build());
+            ProtobufType entryType = graph.get(d);
+            entries.add(
+                ((Value)
+                        entryType.construct(
+                            Map.of(
+                                d.findFieldByNumber(1).getName(), item.getKey(),
+                                d.findFieldByNumber(2).getName(), item.getValue())))
+                    .row());
           }
+          builder.set(f.getIndex(), new DataArray(entries.toArray()));
         } else if (f.isRepeated()) {
-          for (Object item : (List<?>) value) builder.addRepeatedField(f, toProto(item, f));
-        } else builder.setField(f, toProto(value, f));
+          var entries = new ArrayList<Object>();
+          for (Object item : (List<?>) value) entries.add(toProto(item, f));
+          builder.set(f.getIndex(), new DataArray(entries.toArray()));
+        } else builder.set(f.getIndex(), toProto(value, f));
       }
-      return snapshot(builder.build());
+      return new Value(this, builder.build());
     } catch (IllegalArgumentException
         | IllegalStateException
         | ArithmeticException
@@ -246,30 +278,35 @@ public final class ProtobufType implements ObjectType {
     return switch (f.getJavaType()) {
       case INT ->
           f.getType() == FieldDescriptor.Type.UINT32 || f.getType() == FieldDescriptor.Type.FIXED32
-              ? unsigned32((UInt) value)
-              : Math.toIntExact((Long) value);
+              ? Integer.toUnsignedLong(unsigned32((UInt) value))
+              : (long) Math.toIntExact((Long) value);
       case LONG ->
           f.getType() == FieldDescriptor.Type.UINT64 || f.getType() == FieldDescriptor.Type.FIXED64
-              ? ((UInt) value).bits()
+              ? new ExactNumber(new java.math.BigDecimal(((UInt) value).toBigInteger()))
               : (Long) value;
-      case FLOAT -> ((Double) value).floatValue();
-      case DOUBLE, BOOLEAN, STRING -> value;
-      case BYTE_STRING -> ByteString.copyFrom(((Bytes) value).toByteArray());
+      case FLOAT -> (double) ((Double) value).floatValue();
+      case DOUBLE -> (Double) value;
+      case BOOLEAN -> (Boolean) value;
+      case STRING -> (String) value;
+      case BYTE_STRING -> DataArray.copyOfBytes(((Bytes) value).toByteArray());
       case ENUM ->
-          f.getEnumType()
-              .findValueByNumberCreatingIfUnknown(
+          (long)
+              Math.toIntExact(
                   value == CelNull.INSTANCE
                           && f.getEnumType().getFullName().equals("google.protobuf.NullValue")
-                      ? 0
-                      : Math.toIntExact((Long) value));
+                      ? 0L
+                      : (Long) value);
       case MESSAGE -> messageValue(value, f.getMessageType());
     };
   }
 
-  private Message messageValue(Object value, Descriptor descriptor) {
+  private ProtoRow messageValue(Object value, Descriptor descriptor) {
     String name = descriptor.getFullName();
-    if (value instanceof Value v && v.message().getDescriptorForType() == descriptor)
-      return v.message();
+    ProtobufType nested = graph.get(descriptor);
+    if (value instanceof Value v && v.type.descriptor == descriptor)
+      return v.row().plan() == nested.plan
+          ? v.row()
+          : nested.plan.decode(v.toBytes().toByteArray());
     Map<String, Object> fields;
     switch (name) {
       case "google.protobuf.Timestamp" -> {
@@ -308,13 +345,13 @@ public final class ProtobufType implements ObjectType {
         fields = Map.of(field, mapped);
       }
       case "google.protobuf.Any" -> {
-        Message message = ((Value) value).message();
+        Value message = (Value) value;
         fields =
             Map.of(
                 "type_url",
-                "type.googleapis.com/" + message.getDescriptorForType().getFullName(),
+                "type.googleapis.com/" + message.type.name(),
                 "value",
-                new Bytes(message.toByteArray()));
+                message.toBytes());
       }
       case "google.protobuf.Empty" -> fields = Map.of();
       case "google.protobuf.FieldMask" ->
@@ -325,7 +362,7 @@ public final class ProtobufType implements ObjectType {
         fields = Map.of("value", value);
       }
     }
-    return ((Value) graph.get(descriptor).construct(fields)).message();
+    return ((Value) nested.construct(fields)).row();
   }
 
   private static int unsigned32(UInt value) {
@@ -336,8 +373,8 @@ public final class ProtobufType implements ObjectType {
 
   public Object decode(Bytes bytes) {
     try {
-      return snapshot(DynamicMessage.parseFrom(descriptor, bytes.toByteArray()));
-    } catch (InvalidProtocolBufferException e) {
+      return new Value(this, plan.decode(bytes.toByteArray()));
+    } catch (ContractViolation e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
     }
   }

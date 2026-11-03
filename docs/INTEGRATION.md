@@ -34,7 +34,7 @@ and hash entries are copied into CEL values. No Java methods are exposed to expr
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.1.0-alpha.4` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.1.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.23` Elide GraalVM artifacts.
 No sibling checkout or local Maven cache is required.
 
@@ -77,28 +77,35 @@ var program = env.compile("has(message.owner) && message.count > 0u");
 Object result = program.evaluate(Map.of("message", type.input(myMessage)));
 ```
 
-`input` snapshots via the published `ProtobufAdapter` and applies CEL well-known mappings.
-`snapshot` exposes the raw `ProtobufType.Value` (immutable protobuf plus native row).
-Registration covers the reachable message graph and enums. Supply additional descriptors
-in the constructor for `Any` payload types not reachable through fields. Unknown `Any`
-types fail explicitly. `ObjectType.construct` and `decode` support CEL message literals and
-binary payloads. Native row reads are complemented by descriptor-guided handling of bytes,
-unsigned widths, enum numbers, map entries, readable defaults, and protobuf presence.
-Well-known timestamps, durations, wrappers, Struct/Value/ListValue and registered Any payloads
-map to CEL values. JSON integers become doubles when constructing protobuf Value, as required
-by that protobuf representation.
+`input(Message)` snapshots through TruffleData's bound `ProtoCompiler.Source` and applies
+CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a lossless
+`ProtoRow`; it retains no protobuf `Message`. Field reads use native storage, `ProtoRow.has`
+provides protobuf presence independently of readable defaults, and enums retain numeric values.
+Bytes use compact immutable storage; unsigned integers preserve their full width.
 
-Alpha.3 stores protobuf bytes in compact, immutable byte-backed `DataArray` values;
-regression coverage checks that representation and CEL byte conversion. Enum values are still
-name strings, and readable proto3 scalar defaults still differ from CEL presence semantics.
+Binary decoding and CEL message construction use TruffleData's embedded codec and native
+builders. To reuse a native plan directly:
 
-The compatibility bridge retains the original immutable protobuf message for exact type,
-presence, equality and binary operations; it is not yet a wholly native protobuf object model.
-[TruffleData #1](https://github.com/elide-dev/truffledata/issues/1) requests the metadata,
-presence and native construction APIs needed to remove that sidecar. Descriptor APIs remain
-in the optional bridge, including read-path compatibility conversions. Descriptor-declared
-fields are supported; proto2 extension registries are not exposed by this bridge yet.
-Applications requiring extensions can supply a specialized `ObjectType`.
+```java
+var row = type.plan().decode(wireBytes);
+Object input = type.input(row);
+var value = (ProtobufType.Value) type.decode(new Bytes(wireBytes));
+byte[] roundTrip = value.toBytes().toByteArray();
+```
+
+`input(ProtoRow)` requires the exact plan returned by `type.plan()`. Native decoding retains
+unknown fields and applies protobuf map/oneof semantics. The plan enforces depth, wire-size,
+and value budgets. `Value.message()` explicitly exports a temporary Java message; equality,
+hashing, and zero-value checks currently use that host conversion to preserve their existing
+protobuf semantics. No Java message is retained in the evaluated value graph.
+
+Registration covers reachable messages and enums. Supply additional descriptors for `Any`
+payload types not reachable through fields; unknown `Any` types fail explicitly. Timestamps,
+durations, wrappers, Struct/Value/ListValue and registered Any payloads map to CEL values.
+JSON integers become doubles when constructing protobuf Value, as required by that type.
+Descriptor initialization remains a host operation. TruffleData's lossless plan compiler
+rejects Editions, extension ranges, and MessageSet; applications needing these can supply a
+specialized `ObjectType`. There is no proto2 extension registry in this bridge.
 
 The 2,587-case core and extension suite retains its independent test-only `ProtoSchema` oracle. Separate
 published-artifact tests cover all scalar types, defaults/presence, nested messages, repeated
@@ -126,7 +133,7 @@ already parsed JSON; text parsing and its limits belong to the caller/Oracle JSO
 Library semantics and publication consumption are validated on the JVM. The dedicated
 CodSpeed benchmark also builds and runs as a Linux Native Image using the fallback interpreter. The core does not discover classes, reflect over fields, generate bytecode at runtime,
 or read application resources. The optional protobuf bridge uses explicit descriptors and
-DynamicMessage, so its reachable dependency surface is larger than core; it does not scan
+temporary DynamicMessage exports for host equality/interoperability, so its reachable dependency surface is larger than core; it does not scan
 classes or descriptor resources. The optional JSON bridge uses explicit JSONObject/JSONArray
 access, never reflective bean conversion. The sole generated language-discovery service is produced at build time by
 the Truffle registration processor. RE2/J supplies bounded regular-expression semantics.
