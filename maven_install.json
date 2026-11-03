@@ -7,12 +7,12 @@
     "com.google.googlejavaformat:google-java-format": 1313155323,
     "com.google.guava:guava": 1943808618,
     "com.google.j2objc:j2objc-annotations": 2003271689,
-    "com.google.protobuf:protobuf-java": 1226523227,
+    "com.google.protobuf:protobuf-java": 1938090909,
     "com.google.re2j:re2j": 1525409503,
     "com.h2database:h2": 2037113602,
-    "dev.elide:truffledata-core": 1676449132,
-    "dev.elide:truffledata-jdbc": 2097682376,
-    "dev.elide:truffledata-protobuf": 742278488,
+    "dev.elide:truffledata-core": -131005331,
+    "dev.elide:truffledata-jdbc": 290227913,
+    "dev.elide:truffledata-protobuf": -1065175975,
     "junit:junit": -744267592,
     "org.graalvm.polyglot:polyglot": 2088198898,
     "org.graalvm.sdk:nativeimage": -174189820,
@@ -31,12 +31,12 @@
     "com.google.guava:guava": 1505863269,
     "com.google.guava:listenablefuture": 1588902908,
     "com.google.j2objc:j2objc-annotations": -596695707,
-    "com.google.protobuf:protobuf-java": 250155405,
+    "com.google.protobuf:protobuf-java": -884647484,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1401264984,
-    "dev.elide:truffledata-core": -832586131,
-    "dev.elide:truffledata-jdbc": -1396376657,
-    "dev.elide:truffledata-protobuf": 639448995,
+    "dev.elide:truffledata-core": 1265819306,
+    "dev.elide:truffledata-jdbc": -1496846194,
+    "dev.elide:truffledata-protobuf": -1683548141,
     "junit:junit": 712711302,
     "org.checkerframework:checker-qual": 597850597,
     "org.graalvm.polyglot:polyglot": -1856356204,
@@ -107,9 +107,9 @@
     },
     "com.google.protobuf:protobuf-java": {
       "shasums": {
-        "jar": "c5b582aa127fb62c5fc3077329d522dfb7930b4e9a625c08760b681b2ba5aab7"
+        "jar": "26434a93561a1a44bf7157b2630fa73a5b4d8df20e94df167bc03fcd14abd7e4"
       },
-      "version": "4.33.2"
+      "version": "4.36.1"
     },
     "com.google.re2j:re2j": {
       "shasums": {
@@ -125,21 +125,21 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "f8490d3aeeb3cd07ec95e9906ac40b94159fd6a456cb73a9dfd3bf7b4d9afb36"
+        "jar": "841498fc56498e8f9baa24ae2944892a869c18bd9525a245a7d80a87bbde1896"
       },
-      "version": "0.1.0-alpha.2"
+      "version": "0.1.0-alpha.3"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
-        "jar": "fa9e4064c94b396eaf4efe50a2942a64c9135cc22eb6d07dac5f9eaf62404e3a"
+        "jar": "8bff9e2e2f74893c73051f9b38fbdc13e39f91f80e74b3a68ec22dd1f69644a0"
       },
-      "version": "0.1.0-alpha.2"
+      "version": "0.1.0-alpha.3"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "f3d28c5bf0d67b7e88d6b983b094e38ebc5f0943e65af4963d193d065255c68f"
+        "jar": "0b801d847de9cb90a8f492ebec48731bacf49f0258eb5a9ef7b9951d7802a625"
       },
-      "version": "0.1.0-alpha.2"
+      "version": "0.1.0-alpha.3"
     },
     "junit:junit": {
       "shasums": {

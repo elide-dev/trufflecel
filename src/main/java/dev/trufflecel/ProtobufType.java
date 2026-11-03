@@ -7,7 +7,7 @@ import dev.elide.truffledata.*;
 import dev.elide.truffledata.protobuf.ProtobufAdapter;
 import java.util.*;
 
-/** Descriptor-compiled CEL binding backed by published Truffledata protobuf snapshots. */
+/** Descriptor-compiled CEL binding backed by published TruffleData protobuf snapshots. */
 public final class ProtobufType implements ObjectType {
   private static final Map<String, ObjectType> WELL_KNOWN = Cel.newBuilder().build().objectTypes;
   private final Descriptor descriptor;

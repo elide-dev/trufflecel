@@ -2,7 +2,7 @@
 
 CodSpeed measures eight fixed native-AOT cases on every PR and main push. The integration
 uses the same pinned CodSpeed action and instrument-hooks implementation as Komodo and
-Truffledata. It counts instructions within explicit C callback regions; it does not time
+TruffleData. It counts instructions within explicit C callback regions; it does not time
 Java startup, fixture creation, compilation warmup or shutdown.
 
 The image explicitly sets `truffle.UseFallbackRuntime=true`: it measures the native-compiled
@@ -17,7 +17,7 @@ That separate qualification is unresolved; simulation must not be read as guest-
 | short-circuit | Evaluate boolean error-suppression/short-circuit behavior |
 | comprehension | Filter/map a fixed list and evaluate its size |
 | regex | Match a bounded regular expression through CEL |
-| native-row | Read a Truffledata row and evaluate arithmetic |
+| native-row | Read a TruffleData row and evaluate arithmetic |
 | protobuf | Evaluate a predicate over a protobuf-backed value |
 | json | Evaluate a predicate over an already converted Oracle JSON object |
 

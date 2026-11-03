@@ -15,20 +15,20 @@ boolean allowed = policy.test(Map.of(
 
 Compile once and reuse across threads. Evaluation has its own activation, comprehension
 scopes and operation budget. Host collections are snapshotted, and failures carry stable
-CEL error codes. Native Truffledata rows, protobuf messages and Oracle JSON objects have
+CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
 explicit adapters; expressions cannot discover arbitrary Java methods.
 
 ## Choose an artifact
 
 | Maven coordinate | Purpose |
 | --- | --- |
-| `dev.elide:trufflecel-core` | Compiler, evaluator, Polyglot language and native Truffledata rows |
+| `dev.elide:trufflecel-core` | Compiler, evaluator, Polyglot language and native TruffleData rows |
 | `dev.elide:trufflecel-protobuf` | Optional protobuf construction, ingestion and wire decoding |
 | `dev.elide:trufflecel-json` | Optional Oracle Truffle JSON input conversion |
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
-**Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **Truffledata `0.1.0-alpha.2`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **TruffleData `0.1.0-alpha.3`**.
 
 Use a published version from [Releases](https://github.com/elide-dev/trufflecel/releases):
 
@@ -66,7 +66,7 @@ boolean allowed = program.test(Map.of("balance", 42L, "enabled", true));
 and `resultType` describe the compiled program. Explicit `ObjectType` and function bindings
 extend the environment. The registered Polyglot language ID is `cel`.
 
-For Truffledata, bind a `DataType` to a schema and pass immutable batch/JDBC rows directly.
+For TruffleData, bind a `DataType` to a schema and pass immutable batch/JDBC rows directly.
 For protobuf, register a `ProtobufType` and ingest through `input`. `JsonValues.from` creates
 bounded, immutable CEL snapshots of Oracle `JSONObject` and `JSONArray` trees.
 
@@ -121,13 +121,13 @@ It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
 
 CI requires **98% production line coverage and 90% branch coverage**, including optional
-adapters. Additional tests cover resource limits, concurrency, interop, published Truffledata
+adapters. Additional tests cover resource limits, concurrency, interop, published TruffleData
 artifacts and Maven consumption. The core corpus uses an independent test-only protobuf
 fixture; adapter tests separately exercise the published protobuf implementation.
 
 This does not certify every CEL extension. Full optional/two-variable macro and extended
 string/list/math/network suites, canonical protobuf AST serialization, and a proto2 extension
 registry are not yet provided. The protobuf bridge still retains its immutable source message
-for semantics not exposed by native rows; [Truffledata #1](https://github.com/elide-dev/truffledata/issues/1)
+for semantics not exposed by native rows; [TruffleData #1](https://github.com/elide-dev/truffledata/issues/1)
 tracks those APIs. Native benchmark qualification does not replace qualification of an Elide
 Native Image embedding or establish production size, allocation or JIT performance budgets.

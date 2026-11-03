@@ -1,4 +1,4 @@
-# Elide and Truffledata integration
+# Elide and TruffleData integration
 
 ## Elide
 
@@ -31,16 +31,16 @@ A Polyglot integration can instead use language ID `cel`, MIME type `application
 and `context.getBindings("cel")`. Host object access is explicit: proxy objects, arrays,
 and hash entries are copied into CEL values. No Java methods are exposed to expressions.
 
-## Published Truffledata integration
+## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.1.0-alpha.2` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.1.0-alpha.3` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned to the release's `25.5.5-elide.5` Elide GraalVM artifacts.
 No sibling checkout or local Maven cache is required.
 
 ### Native rows and JDBC
 
-`DataType` binds a type name to an immutable Truffledata `Schema`. It uses `DataLibrary`
+`DataType` binds a type name to an immutable TruffleData `Schema`. It uses `DataLibrary`
 for native reads and presence, rejects duplicate column names, distinguishes `Missing`
 from `DataNull`, and preserves schema identity when accepting rows. Alpha.2 integer-width
 constraints preserve unsigned CEL identity on reads and construction; ARRAY/RECORD kinds
@@ -56,7 +56,7 @@ boolean matches = predicate.test(Map.of("account", batch.row(0)));
 
 Rows from `JdbcCursor.nextBatch()` use the same path; retained batch rows remain valid after
 cursor closure. The embedder owns the connection/cursor lifetime. JDBC and drivers are not
-core runtime dependencies. Live `DynamicRecord` views retain Truffledata's thread-confinement
+core runtime dependencies. Live `DynamicRecord` views retain TruffleData's thread-confinement
 requirements; use immutable batch rows for shared programs/activations.
 
 `DataValues.from` explicitly converts native scalar/array inputs. Exact decimals only become
@@ -88,9 +88,13 @@ Well-known timestamps, durations, wrappers, Struct/Value/ListValue and registere
 map to CEL values. JSON integers become doubles when constructing protobuf Value, as required
 by that protobuf representation.
 
+Alpha.3 stores protobuf bytes in compact, immutable byte-backed `DataArray` values;
+regression coverage checks that representation and CEL byte conversion. Enum values are still
+name strings, and readable proto3 scalar defaults still differ from CEL presence semantics.
+
 The compatibility bridge retains the original immutable protobuf message for exact type,
 presence, equality and binary operations; it is not yet a wholly native protobuf object model.
-[Truffledata #1](https://github.com/elide-dev/truffledata/issues/1) requests the metadata,
+[TruffleData #1](https://github.com/elide-dev/truffledata/issues/1) requests the metadata,
 presence and native construction APIs needed to remove that sidecar. Descriptor APIs remain
 in the optional bridge, including read-path compatibility conversions. Descriptor-declared
 fields are supported; proto2 extension registries are not exposed by this bridge yet.
@@ -99,7 +103,7 @@ Applications requiring extensions can supply a specialized `ObjectType`.
 The core 1,905-case suite retains its independent test-only `ProtoSchema` oracle. Separate
 published-artifact tests cover all scalar types, defaults/presence, nested messages, repeated
 fields/maps, unknown enums, construction, wire decoding and well-known mappings. No tests
-load classes or artifacts from the sibling Truffledata checkout.
+load classes or artifacts from the sibling TruffleData checkout.
 
 ### Oracle Truffle JSON
 
