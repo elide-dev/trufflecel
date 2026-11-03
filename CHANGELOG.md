@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-alpha.2](https://github.com/elide-dev/trufflecel/compare/v0.1.0-alpha.1...v0.1.0-alpha.2) (2026-11-03)
+
+
+### Bug Fixes
+
+* enforce guest JIT compilation and allocation gates ([eeb1876](https://github.com/elide-dev/trufflecel/commit/eeb18768249abc92fdf245e457bcaec9b4fb1699))
+
 ## [0.1.0-alpha.1](https://github.com/elide-dev/trufflecel/compare/v0.1.0-alpha.0...v0.1.0-alpha.1) (2026-11-03)
 
 
