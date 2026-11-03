@@ -117,7 +117,7 @@ def measure(args):
     args.output.mkdir(parents=True, exist_ok=True)
     before = source_digest()
     labels = ["//benchmarks/comparison:jvm", "//benchmarks/comparison:svm"]
-    run(["bazel", "build", *labels])
+    run(["bazel", "build", "--build_runfile_links", "--remote_download_toplevel", *labels])
     paths = {}
     for runtime, label in zip(("jvm", "svm"), labels):
         candidates = run(["bazel", "cquery", label, "--output=files"], capture_output=True, text=True).stdout.splitlines()
