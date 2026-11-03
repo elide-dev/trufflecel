@@ -402,3 +402,35 @@ python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/image
 For fast correctness checks, use `bazel test //benchmarks/comparison:smoke --config=local`.
 The Linux native check is `bazel test //benchmarks/comparison:native_smoke`; it additionally
 requires successful image-build AST initialization and the Truffle blocklist gates.
+
+### Native compiler memory diagnostic
+
+A separate [three-fork diagnostic](benchmarks/compiler-isolate-diagnostic.json) at
+`d415645` compares Native Image's default compiler isolate with compilation in the
+application isolate (`-XX:-CompileInIsolates`) and a 16 MiB compiler-isolate heap
+(`-XX:CompilationIsolateOptions=-Xmx16m`). Both engines receive the same options.
+Each uses the existing fixed-work evaluation harness; timing runs in separate processes.
+All 108 processes pass correctness checks, including last-tier guest compilation for
+TruffleCEL. Median fixed-work peak RSS for TruffleCEL is:
+
+| Configuration | Scalar | Policy | Comprehension |
+| --- | ---: | ---: | ---: |
+| Default | 99.0 MiB | 103.4 MiB | 118.9 MiB |
+| Compiler in application isolate | 88.3 MiB | 89.0 MiB | 93.0 MiB |
+| Separate compiler heap capped at 16 MiB | 99.1 MiB | 101.9 MiB | 107.5 MiB |
+
+cel-java remains around 66–69 MiB across these configurations. Sharing the application
+isolate reduces the gap but does not close it. These are exploratory measurements from
+one BuildBuddy action; its CPU model was not captured, and timing variance prevents a
+controlled claim about latency improvement. The README charts retain the default settings.
+
+On Linux, reproduce one cell after building `//benchmarks/comparison:svm`:
+
+```sh
+/usr/bin/time -f '%M KiB peak RSS' bazel-bin/benchmarks/comparison/trufflecel-comparison \
+  -XX:-CompileInIsolates trufflecel evaluate scalar --memory
+```
+
+Replace the engine with `cel-java` for the paired measurement, repeat in fresh processes,
+and omit the runtime option for the default. An application using a shared compiler
+isolate must also assess GC interference under its own concurrency and workload.
