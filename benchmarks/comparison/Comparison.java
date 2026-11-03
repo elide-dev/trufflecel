@@ -18,7 +18,8 @@ public final class Comparison {
   public static void main(String[] args) throws Exception {
     if (args.length == 1 && args[0].equals("--smoke")) {
       for (String engine : new String[] {"trufflecel", "cel-java"})
-        for (String stage : new String[] {"compile", "evaluate", "image-ast"})
+        for (String stage :
+            new String[] {"compile", "evaluate", "image-ast", "interpret", "image-interpret"})
           for (String fixture : Fixtures.NAMES) run(engine, stage, fixture, true);
     } else {
       if (args.length != 3) throw new IllegalArgumentException("engine stage workload, or --smoke");
@@ -31,50 +32,63 @@ public final class Comparison {
     int k = Arrays.asList(Fixtures.NAMES).indexOf(fixture);
     if (k < 0
         || !(engine.equals("trufflecel") || engine.equals("cel-java"))
-        || !(stage.equals("compile") || stage.equals("evaluate") || stage.equals("image-ast")))
-      throw new IllegalArgumentException("Unknown benchmark");
+        || !Arrays.asList("compile", "evaluate", "image-ast", "interpret", "image-interpret")
+            .contains(stage)) throw new IllegalArgumentException("Unknown benchmark");
+    boolean ours = engine.equals("trufflecel");
+    boolean compile = stage.equals("compile");
+    boolean interpreter = stage.equals("interpret") || stage.equals("image-interpret");
+    boolean imageAst = stage.equals("image-ast") || stage.equals("image-interpret");
     boolean nativeImage = ImageInfo.inImageRuntimeCode();
     if (nativeImage && !ImageExpressions.BUILT_IN_IMAGE)
       throw new AssertionError("Checked ASTs were not created at image build time");
     try (Context context =
-        Context.newBuilder("cel")
-            .allowExperimentalOptions(true)
-            .option("engine.BackgroundCompilation", "false")
-            .option("engine.CompilationFailureAction", "Throw")
-            .option("compiler.TreatPerformanceWarningsAsErrors", "all")
-            .build()) {
-      context.initialize("cel");
-      context.enter();
+        ours
+            ? Context.newBuilder("cel")
+                .allowExperimentalOptions(true)
+                .option("engine.BackgroundCompilation", "false")
+                .option("engine.Compilation", interpreter ? "false" : "true")
+                .option("engine.CompilationFailureAction", "Throw")
+                .option("compiler.TreatPerformanceWarningsAsErrors", "all")
+                .build()
+            : null) {
+      if (context != null) {
+        context.initialize("cel");
+        context.enter();
+      }
       try {
-        Program truffle =
-            stage.equals("image-ast")
-                ? ImageExpressions.TRUFFLE[k].instantiate()
-                : Fixtures.TRUFFLE.compile(Fixtures.SOURCES[k]);
-        CelRuntime.Program java =
-            Fixtures.RUNTIME.createProgram(
-                stage.equals("image-ast")
-                    ? ImageExpressions.JAVA[k]
-                    : Fixtures.JAVA.compile(Fixtures.SOURCES[k]).getAst());
         var inputs = Fixtures.inputs(k);
+        Program truffle = null;
+        Operation evaluate;
+        Operation operation;
+        if (ours) {
+          truffle =
+              imageAst
+                  ? ImageExpressions.Truffle.AST[k].instantiate()
+                  : Fixtures.Truffle.COMPILER.compile(Fixtures.SOURCES[k]);
+          Program program = truffle;
+          evaluate = i -> program.evaluate(inputs.get(i & 3));
+          operation =
+              compile ? i -> Fixtures.Truffle.COMPILER.compile(Fixtures.SOURCES[k]) : evaluate;
+        } else {
+          CelRuntime.Program program =
+              Fixtures.Java.RUNTIME.createProgram(
+                  imageAst
+                      ? ImageExpressions.Java.AST[k]
+                      : Fixtures.Java.COMPILER.compile(Fixtures.SOURCES[k]).getAst());
+          evaluate = i -> program.eval(inputs.get(i & 3));
+          operation =
+              compile
+                  ? i ->
+                      Fixtures.Java.RUNTIME.createProgram(
+                          Fixtures.Java.COMPILER.compile(Fixtures.SOURCES[k]).getAst())
+                  : evaluate;
+        }
         for (int i = 0; i < 4; i++) {
-          if (!Fixtures.EXPECTED[k][i].equals(truffle.evaluate(inputs.get(i)))
-              || !Fixtures.EXPECTED[k][i].equals(java.eval(inputs.get(i))))
+          if (!Fixtures.EXPECTED[k][i].equals(evaluate.run(i)))
             throw new AssertionError("Incorrect " + fixture + " activation " + i);
         }
-        boolean compile = stage.equals("compile");
-        boolean ours = engine.equals("trufflecel");
-        Operation operation =
-            compile
-                ? (ours
-                    ? i -> Fixtures.TRUFFLE.compile(Fixtures.SOURCES[k])
-                    : i ->
-                        Fixtures.RUNTIME.createProgram(
-                            Fixtures.JAVA.compile(Fixtures.SOURCES[k]).getAst()))
-                : (ours
-                    ? i -> truffle.evaluate(inputs.get(i & 3))
-                    : i -> java.eval(inputs.get(i & 3)));
         OptimizedCallTarget target = null;
-        if (ours && !compile) {
+        if (ours && !compile && !interpreter) {
           if (!(truffle.callTarget() instanceof OptimizedCallTarget optimized))
             throw new AssertionError("Optimizing runtime required");
           target = optimized;
@@ -83,6 +97,11 @@ public final class Comparison {
           target.waitForCompilation();
           if (!target.isValidLastTier()) throw new AssertionError("Guest compilation failed");
         }
+        if (interpreter
+            && truffle != null
+            && truffle.callTarget() instanceof OptimizedCallTarget optimized
+            && optimized.isValid())
+          throw new AssertionError("Interpreter case acquired guest machine code");
         if (smoke) {
           sink = operation.run(0);
           return;
@@ -103,21 +122,28 @@ public final class Comparison {
         }
         if (target != null && !target.isValidLastTier())
           throw new AssertionError("Guest code invalidated");
-        long buildNs = ours ? ImageExpressions.TRUFFLE_NS[k] : ImageExpressions.JAVA_NS[k];
+        if (interpreter
+            && truffle != null
+            && truffle.callTarget() instanceof OptimizedCallTarget optimized
+            && optimized.isValid())
+          throw new AssertionError("Interpreter case acquired guest machine code");
+        long buildNs =
+            nativeImage ? (ours ? ImageExpressions.Truffle.NS[k] : ImageExpressions.Java.NS[k]) : 0;
         System.out.printf(
             Locale.ROOT,
             "{\"engine\":\"%s\",\"stage\":\"%s\",\"workload\":\"%s\",\"runtime\":\"%s\","
-                + "\"image_build_ast\":%s,\"image_prepare_ns\":%d,\"guest_compiled\":%s,\"ns_per_op\":%s}%n",
+                + "\"image_build_ast\":%s,\"image_prepare_ns\":%d,\"guest_compiled\":%s,\"interpreter\":%s,\"ns_per_op\":%s}%n",
             engine,
             stage,
             fixture,
             nativeImage ? "svm" : "jvm",
-            ImageExpressions.BUILT_IN_IMAGE,
+            nativeImage && ImageExpressions.BUILT_IN_IMAGE,
             buildNs,
             target != null,
+            interpreter,
             Arrays.toString(samples));
       } finally {
-        context.leave();
+        if (context != null) context.leave();
       }
     }
   }

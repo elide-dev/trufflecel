@@ -165,7 +165,7 @@ TruffleCEL's production dependencies or published POMs.
 
 Three expressions exercise arithmetic, a string/boolean policy, and a list comprehension.
 Both engines receive identical explicit declarations and four alternating, workload-specific
-activations with checked results. There are five paired scenarios (30 engine/workload cells):
+activations with checked results. There are eight paired scenarios (48 engine/workload cells, 144 fresh processes):
 
 | Runtime | Scenario | Timed operation |
 | --- | --- | --- |
@@ -174,6 +174,9 @@ activations with checked results. There are five paired scenarios (30 engine/wor
 | Native Image / SVM | Compile | Parse, check, and create an executable program |
 | Native Image / SVM | Evaluate | Reuse a program compiled during process setup |
 | Native Image / SVM | Image-build AST | Evaluate a checked AST prepared during image construction |
+| GraalVM JVM | Interpret | Evaluate with Truffle guest compilation disabled |
+| Native Image / SVM | Interpret | Evaluate with Truffle guest compilation disabled |
+| Native Image / SVM | Image-build interpret | Interpret a checked AST prepared during image construction |
 
 `Environment.prepare` creates a checked TruffleCEL AST without a call target.
 `PreparedProgram.instantiate` clones that tree and creates its runtime target. The comparison
@@ -185,17 +188,38 @@ The comparison-specific initialization settings also cover the immutable fronten
 retained by cel-java; they are not added to production library configuration. This is **build-time CEL frontend compilation**, not storage
 of Graal guest machine code in the image. The image-build holder also records each frontend's
 preparation time; those cold, order-sensitive observations are retained in the raw results,
-not treated as steady-state compilation benchmarks. Both compiler environments are initialized
-before those timers start. The observations belong to the image build (which may be cached or
+not treated as steady-state compilation benchmarks. Each compiler environment is initialized
+before its frontend timers start. The observations belong to the image build (which may be cached or
 remote), not necessarily to the host that later runs the timing suite.
 
-TruffleCEL evaluation cases require a valid last-tier `OptimizedCallTarget` before and after
+TruffleCEL compiled-evaluation cases require a valid last-tier `OptimizedCallTarget` before and after
 measurement. Guest compilation, context initialization, input fixture creation, and program
 setup are outside evaluation timing. The timed public API includes activation normalization,
 argument dispatch, result conversion, and checksum accumulation. Compilation returns a
 program to a volatile sink without evaluating it; compiler environments are reused. There
 is no claim that moving frontend work into image construction improves warmed evaluation:
 it removes that frontend work from runtime startup, which is a different benefit.
+
+Interpreter cases set `engine.Compilation=false` and assert that their targets have no
+valid guest machine code before and after measurement. Host JVM JIT remains enabled for
+both engines; SVM executes native-AOT interpreter code. These cases use the same
+compiler-capable native executable, not a smaller fallback-only deployment image.
+
+Schema 2 initializes and executes only the selected engine in each process. In particular,
+cel-java does not create a Truffle context, and JVM runs do not initialize the other engine's
+compiler or image-AST holder. Both engines remain on the classpath/in the common native
+executable, whose image heap contains both sets of checked ASTs. This measures the shared
+harness, not the footprint of independently linked production distributions. Historical
+schema-1 timing snapshots predate this setup isolation and contain no RSS samples.
+
+Every schema-2 process is wrapped by Linux `/usr/bin/time -f %M`. Its `peak_rss_kib` is the
+whole-process resident-memory high-water mark, including startup, compiler setup, warmup,
+guest compilation, timed execution, and shutdown. It is not heap size, retained memory, or
+bytes allocated per operation. The time-bounded runs may execute different operation counts.
+`peak-rss.svg` shows median peak RSS over three processes, with min/max whiskers and MiB
+units; `comparison.svg` shows timing, including interpreter cases. RSS and interpreter
+results must be measured before claiming any new wins; the published schema-1 chart below
+remains a historical compiled-evaluation result until refreshed with a complete schema-2 run.
 
 Each cell runs in three fresh processes, in a deterministic shuffled order. Each process
 warms for 500 ms, then records seven batches of at least 150 ms each. Input selection cycles
@@ -211,6 +235,7 @@ Run the complete paired suite on Linux x86_64:
 python3 tools/bench/compare.py run
 # Regenerate the SVG without rerunning any benchmarks:
 python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/comparison.svg
+python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/peak-rss.svg --metric peak-rss
 ```
 
 Bazel builds both executables with pinned toolchains; measurement runs on the same local
