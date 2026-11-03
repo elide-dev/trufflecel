@@ -100,8 +100,23 @@ produced these CodSpeed results with unchanged workloads:
 The compile/evaluate regression exposed per-call default-environment construction in
 `Cel.compile`. Follow-up changes reuse the immutable default environment, use compact
 single-binding activations, defer/reuse local scope storage, and avoid decimal conversion
-for same-type numeric equality. Those changes require their own measured verification;
-the table above reports only the first array-dispatch change.
+for same-type numeric equality. The combined change (`c7b6b6a`,
+[run 41707420064](https://github.com/elide-dev/trufflecel/actions/runs/41707420064)) reduced
+instruction counts in all 14 cases relative to baseline:
+
+| Case | Combined instructions/op | Change from baseline |
+| --- | ---: | ---: |
+| Compile/evaluate | 21,977.63 | −52.9% |
+| Scalar evaluation | 2,133.65 | −17.0% |
+| Comprehension | 26,620.54 | −51.0% |
+| Native row | 2,642.30 | −40.6% |
+| Protobuf | 4,222.81 | −60.2% |
+| JSON | 8,208.55 | −55.0% |
+
+[Saved CodSpeed measurements](benchmarks/codspeed-history.json) include all 14 cases for
+each of these three runs, correctness checksums, source fingerprints, and binary hashes.
+Profile self-cost totals were reconciled with every saved instruction count. These results
+compare TruffleCEL revisions; the separate paired timing suite compares against cel-java.
 
 ## Guest compilation and allocation gates
 
@@ -205,6 +220,24 @@ is standalone and suitable for a README. CI runs the reusable `comparison.yml` w
 alongside CodSpeed and uploads both files as the `cel-comparison` artifact. The workflow
 also supports manual dispatch. Check in an explicitly dated result snapshot when updating
 the README; CI does not silently rewrite the published chart.
+
+The optimized Linux run (`c7b6b6a`, [CI 41707420064](https://github.com/elide-dev/trufflecel/actions/runs/41707420064))
+has lower TruffleCEL median time in all 15 paired comparisons. Each TruffleCEL process
+median is below every cel-java process median within its cell. Across these fixtures,
+compilation speedups range from 45.67× to 190.98×, and evaluation speedups from 1.35× to
+2.65×. The prior losses changed as follows:
+
+| Scenario | Baseline TruffleCEL | Optimized TruffleCEL | cel-java in optimized run |
+| --- | ---: | ---: | ---: |
+| JVM scalar evaluation | 64.64 ns | 31.36 ns | 42.46 ns |
+| SVM comprehension evaluation | 1,105.15 ns | 431.18 ns | 919.32 ns |
+| SVM image-build AST comprehension | 1,107.36 ns | 429.09 ns | 915.66 ns |
+
+The [original baseline samples](benchmarks/comparison-baseline.json) and optimized samples
+come from separate shared runners; use each run's paired cel-java measurements for the
+comparison. The workload definitions, timing harness, warmup, and sample counts were
+unchanged. These measurements support the stated fixture results, not a claim about every
+CEL expression or every machine.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:

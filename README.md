@@ -183,8 +183,14 @@ Captured November 3, 2026 on a shared AMD EPYC 7763 CI runner; this is not a per
 guarantee. Lower is better; bars show the median of three process medians, with minimum/maximum whiskers.
 Image-build preparation embeds checked ASTs, not guest machine code; setup and guest
 compilation are excluded from evaluation timings. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41703453231), and
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41707420064), and
 [comparison methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
+TruffleCEL has lower median time in all **15 paired comparisons** in this snapshot:
+compilation is 46–191× faster and evaluation is 1.35–2.65× faster. Every TruffleCEL process
+median is below every cel-java process median in its comparison. These results apply to
+the three documented workloads and this runner. The [original baseline](docs/benchmarks/comparison-baseline.json)
+and [CodSpeed optimization history](docs/BENCHMARKS.md#finding-instruction-hotspots) are retained.
+
 CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
 
 After successful main checks, Release Please opens version/changelog PRs from conventional
