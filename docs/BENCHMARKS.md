@@ -156,6 +156,13 @@ instructions and 2.6% fewer scalar-evaluation instructions. Compile/evaluate inc
 All 14 profile self-cost totals reconcile with the saved measurements. The local compiled
 comprehension gate drops from 472 to 336 bytes/evaluation, with its limit tightened to 448.
 
+Arithmetic-chain lowering (`a44e445`, [run 41727711499](https://github.com/elide-dev/trufflecel/actions/runs/41727711499))
+reduces scalar-evaluation instructions by another 19.0%, to 1,000.33 instructions/op, and
+compile/evaluate instructions by 3.4%. Math extrema increases by 2.4%; the other cases
+change by at most 1.3%. Every saved profile total is reconciled. Source-based compilation
+retains the original expression nodes for instrumentation; the ordinary Java API combines
+eligible integer arithmetic while preserving budgets, unknowns, and intermediate overflow.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
@@ -349,7 +356,7 @@ importance of reporting allocation and deployment footprint separately. The
 [earlier schema-2 RSS snapshot](benchmarks/comparison-throughput-rss-v2.json) uses timed,
 unequal-work processes and must not be used to claim an RSS improvement from schema 3.
 
-The updated snapshot (`300a638`, [CI 41723855384](https://github.com/elide-dev/trufflecel/actions/runs/41723855384))
+The normalization run (`300a638`, [CI 41723855384](https://github.com/elide-dev/trufflecel/actions/runs/41723855384))
 records 23/24 timing wins, 17/24 allocation wins, and 7/24 fixed-work RSS wins. JVM scalar
 interpretation still trails cel-java. Native interpretation is 1.3–2.0× faster for these
 fixtures, while guest-JIT RSS remains about 103–118 MiB versus cel-java's 63–69 MiB.
@@ -357,6 +364,13 @@ This run uses an AMD EPYC 9V74, whereas the [first allocation snapshot](benchmar
 uses an EPYC 7763; these are paired engine comparisons, not a controlled measurement of
 the change between commits. Small RSS differences also need repeated measurements before
 being treated as regressions or improvements.
+
+The current snapshot (`a44e445`, [CI 41727711499](https://github.com/elide-dev/trufflecel/actions/runs/41727711499))
+records **24/24 timing wins**, including every interpreter case, alongside 17/24 allocation
+wins and 7/24 fixed-work RSS wins. JVM scalar interpretation is 1.16× faster than cel-java
+in this run. Native guest-JIT RSS remains about 100–117 MiB versus 64–69 MiB for cel-java.
+The runner is an AMD EPYC 7763; the results support these paired fixture comparisons and
+do not establish universal speedups or a lower native process footprint.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
