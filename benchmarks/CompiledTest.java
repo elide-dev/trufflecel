@@ -29,15 +29,15 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
-        check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 128);
+        check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",
             Map.of("enabled", true, "x", 2L),
             true,
             Map.of("enabled", false, "x", 0L),
             false,
-            192);
-        check("optional.of(x).orValue(0) > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 640);
+            64);
+        check("optional.of(x).orValue(0) > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 192);
         check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),
@@ -48,8 +48,8 @@ public final class CompiledTest {
         check(
             "xs.filter(v, v % 2 == 0).map(v, v * v).size()",
             Map.of("xs", List.of(1L, 2L, 3L, 4L)), 2L, Map.of("xs", List.of(2L, 4L, 6L)), 3L, 608);
-        check("[x, x + 1].size() == 2", Map.of("x", 10L), true, Map.of("x", -1L), true, 768);
-        check("{'v': x}.v > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 1536);
+        check("[x, x + 1].size() == 2", Map.of("x", 10L), true, Map.of("x", -1L), true, 320);
+        check("{'v': x}.v > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 512);
         check(
             "cidr(s).containsIP('10.1.2.3')",
             Map.of("s", "10.0.0.0/8"),
@@ -63,14 +63,14 @@ public final class CompiledTest {
             11L,
             Map.of("enabled", false, "x", 10L),
             9L,
-            192);
+            64);
         check(
             "x + y",
             Map.of("x", 1L, "y", 2L),
             3L,
             Map.of("x", Unknown.of("x"), "y", 2L),
             Unknown.of("x"),
-            192);
+            64);
         var schema = Schema.of(Field.requiredLong("id"));
         var type = new DataType("Row", schema);
         var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Row")).build();

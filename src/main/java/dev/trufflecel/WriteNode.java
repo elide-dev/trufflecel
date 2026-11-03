@@ -19,8 +19,8 @@ class WriteNode extends CelNode {
     sourceEnd = end;
   }
 
-  Object execute(VirtualFrame frame, Object value) {
-    ((EvalContext) frame.getArguments()[0]).push(name, value);
+  Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
+    ctx.push(name, value);
     return value;
   }
 

@@ -50,6 +50,47 @@ public class RuntimeTest {
   }
 
   @Test
+  public void reentrantEvaluationsKeepIndependentBindingsAndBudgets() throws Exception {
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.enter();
+      try {
+        for (boolean observable : new boolean[] {false, true}) {
+          Program[] current = new Program[1];
+          var environment =
+              Cel.newBuilder()
+                  .variable("x", CelType.INT)
+                  .evaluationBudget(12)
+                  .function(
+                      "recur",
+                      List.of(CelType.INT),
+                      CelType.INT,
+                      args -> current[0].evaluate(Map.of("x", args.get(0))))
+                  .build();
+          String expression = "x == 0 ? 0 : recur(x - 1) + x";
+          current[0] =
+              observable
+                  ? environment.compile(
+                      Source.newBuilder("cel", expression, "reentrant.cel").build())
+                  : environment.compile(expression);
+          assertEquals(55L, current[0].evaluate(Map.of("x", 10L)));
+          assertEquals(6L, current[0].evaluate(Map.of("x", 3L)));
+          String excessive = "x == 0 ? 0 : recur(x - 1) + x + x + x";
+          var limited =
+              observable
+                  ? environment.compile(Source.newBuilder("cel", excessive, "budget.cel").build())
+                  : environment.compile(excessive);
+          assertEquals(
+              CelException.Code.RESOURCE_EXHAUSTED,
+              assertThrows(CelException.class, () -> limited.evaluate(Map.of("x", 1L))).code());
+          assertEquals(3L, current[0].evaluate(Map.of("x", 2L)));
+        }
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
   public void deepScopesRestoreShadowedAndAbsoluteBindings() {
     String nested = "x == 6 && .x == 99";
     for (int i = 6; i >= 1; i--) nested = "[" + i + "].all(x, " + nested + ") && x == " + (i - 1);

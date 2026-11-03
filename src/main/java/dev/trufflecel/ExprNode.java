@@ -9,6 +9,7 @@ import java.util.*;
 @GenerateWrapper
 class ExprNode extends CelNode {
   boolean rootBody, statement;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean observableBindings;
   @Children WriteNode[] bindings;
 
   ExprNode() {
@@ -105,8 +106,7 @@ class ExprNode extends CelNode {
     }
 
     @Override
-    Object execute(VirtualFrame frame) {
-      EvalContext ctx = (EvalContext) frame.getArguments()[0];
+    Object execute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       return scalarBinary(frame, ctx);
     }
@@ -168,13 +168,12 @@ class ExprNode extends CelNode {
 
     @Override
     @com.oracle.truffle.api.nodes.ExplodeLoop
-    Object execute(VirtualFrame frame) {
-      EvalContext ctx = (EvalContext) frame.getArguments()[0];
+    Object execute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
       ctx.charge(operations.length);
       Object left;
       try {
-        left = children[0].execute(frame);
+        left = children[0].execute(frame, ctx);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
         ctx.charge(operations.length);
@@ -215,8 +214,8 @@ class ExprNode extends CelNode {
     }
 
     @Override
-    Object execute(VirtualFrame frame) {
-      ((EvalContext) frame.getArguments()[0]).tick();
+    Object execute(VirtualFrame frame, EvalContext ctx) {
+      ctx.tick();
       return value;
     }
   }
@@ -253,15 +252,14 @@ class ExprNode extends CelNode {
     } else for (ExprNode child : children) child.free(bound, out);
   }
 
-  Object execute(VirtualFrame frame) {
-    EvalContext ctx = (EvalContext) frame.getArguments()[0];
+  Object execute(VirtualFrame frame, EvalContext ctx) {
     ctx.tick();
     return switch (kind) {
       case CONSTANT -> value;
-      case IDENT -> ctx.get(name);
+      case IDENT -> observableBindings ? ctx.getObserved(name) : ctx.get(name);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
-        Object a = children[0].execute(frame), b = children[1].execute(frame);
+        Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
         if (a instanceof Unknown u) yield u;
         if (b instanceof Unknown u) yield u;
         boolean optional = Boolean.TRUE.equals(value) || a instanceof OptionalValue;
@@ -283,22 +281,22 @@ class ExprNode extends CelNode {
       case MAP -> map(frame, ctx);
       case OBJECT -> object(frame, ctx);
       case CONDITIONAL -> {
-        Object condition = children[0].execute(frame);
+        Object condition = children[0].execute(frame, ctx);
         if (condition instanceof Unknown) yield condition;
         if (!(condition instanceof Boolean b)) throw Values.overload("conditional");
-        yield b ? children[1].execute(frame) : children[2].execute(frame);
+        yield b ? children[1].execute(frame, ctx) : children[2].execute(frame, ctx);
       }
       case CALL -> call(frame, ctx);
       case MACRO -> macro(frame, ctx);
     };
   }
 
-  Object executePresence(VirtualFrame frame) {
-    return select(frame, (EvalContext) frame.getArguments()[0], true);
+  Object executePresence(VirtualFrame frame, EvalContext ctx) {
+    return select(frame, ctx, true);
   }
 
   private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
-    return selectValue(ctx, presence, children[0].execute(frame));
+    return selectValue(ctx, presence, children[0].execute(frame, ctx));
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -336,11 +334,11 @@ class ExprNode extends CelNode {
       return scalarBinary(frame, ctx);
     if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
     if (optionalFallback && children.length == 2) {
-      Object first = children[0].execute(frame);
+      Object first = children[0].execute(frame, ctx);
       if (first instanceof Unknown) return first;
       OptionalValue o = optional(first);
       if (o.present()) return name.equals("or") ? o : o.value();
-      Object fallback = children[1].execute(frame);
+      Object fallback = children[1].execute(frame, ctx);
       return name.equals("or") && !(fallback instanceof Unknown) ? optional(fallback) : fallback;
     }
     Object[] args = new Object[children.length];
@@ -348,7 +346,7 @@ class ExprNode extends CelNode {
     Unknown unknown = null;
     for (int i = 0; i < children.length; i++) {
       try {
-        args[i] = children[i].execute(frame);
+        args[i] = children[i].execute(frame, ctx);
         if (args[i] instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
@@ -366,13 +364,13 @@ class ExprNode extends CelNode {
     Object left = null, right = null;
     CelException error = null;
     try {
-      left = children[0].execute(frame);
+      left = children[0].execute(frame, ctx);
     } catch (CelException e) {
       if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
       error = e;
     }
     try {
-      right = children[1].execute(frame);
+      right = children[1].execute(frame, ctx);
     } catch (CelException e) {
       if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
       error = e;
@@ -422,7 +420,7 @@ class ExprNode extends CelNode {
     Unknown unknown = null;
     for (ExprNode child : children) {
       try {
-        Object result = child.execute(frame);
+        Object result = child.execute(frame, ctx);
         if (result instanceof Boolean b) {
           if (b == decisive) return b;
         } else if (result instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
@@ -443,16 +441,16 @@ class ExprNode extends CelNode {
   }
 
   private Object macro(VirtualFrame frame, EvalContext ctx) {
-    if (name.equals("has")) return children[0].executePresence(frame);
-    Object range = children[0].execute(frame);
+    if (name.equals("has")) return children[0].executePresence(frame, ctx);
+    Object range = children[0].execute(frame, ctx);
     if (range instanceof Unknown) return range;
     String[] variables = (String[]) value;
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;
-      bindings[0].execute(frame, o.value());
+      bindings[0].execute(frame, ctx, o.value());
       try {
-        Object mapped = children[1].execute(frame);
+        Object mapped = children[1].execute(frame, ctx);
         if (mapped instanceof Unknown) return mapped;
         return name.equals("optMap") ? OptionalValue.of(mapped) : optional(mapped);
       } finally {
@@ -474,13 +472,13 @@ class ExprNode extends CelNode {
     for (Object item : values) {
       ctx.tick();
       Object key = range instanceof List<?> && variables.length == 2 ? index : item;
-      bindings[0].execute(frame, key);
+      bindings[0].execute(frame, ctx, key);
       if (variables.length == 2)
         bindings[1].execute(
-            frame, range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
+            frame, ctx, range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
       index++;
       try {
-        Object predicate = children[1].execute(frame);
+        Object predicate = children[1].execute(frame, ctx);
         if (predicate instanceof Unknown u) {
           unknown = unknown == null ? u : unknown.merge(u);
           continue;
@@ -494,7 +492,7 @@ class ExprNode extends CelNode {
           if (children.length == 3) {
             if (!(predicate instanceof Boolean b)) throw Values.overload(name);
             if (!b) continue;
-            predicate = children[2].execute(frame);
+            predicate = children[2].execute(frame, ctx);
             if (predicate instanceof Unknown u) {
               unknown = unknown == null ? u : unknown.merge(u);
               continue;
@@ -539,7 +537,7 @@ class ExprNode extends CelNode {
     var list = HostCollections.list();
     Unknown unknown = null;
     for (ExprNode child : children) {
-      Object v = child.execute(frame);
+      Object v = child.execute(frame, ctx);
       if (v instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
       if (child.optionalEntry && !(v instanceof Unknown)) {
         OptionalValue o = optional(v);
@@ -556,7 +554,7 @@ class ExprNode extends CelNode {
     var map = HostCollections.<Object>map();
     Unknown unknown = null;
     for (int i = 0; i < children.length; i += 2) {
-      Object k = children[i].execute(frame), v = children[i + 1].execute(frame);
+      Object k = children[i].execute(frame, ctx), v = children[i + 1].execute(frame, ctx);
       if (k instanceof Unknown u) {
         unknown = unknown == null ? u : unknown.merge(u);
         continue;
@@ -584,7 +582,7 @@ class ExprNode extends CelNode {
     var fields = HostCollections.<String>map();
     String[] names = (String[]) value;
     for (int i = 0; i < children.length; i++) {
-      Object v = children[i].execute(frame);
+      Object v = children[i].execute(frame, ctx);
       if (children[i].optionalEntry && !(v instanceof Unknown)) {
         OptionalValue o = optional(v);
         if (!o.present()) continue;
