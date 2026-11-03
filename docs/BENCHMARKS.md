@@ -122,8 +122,8 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 `-XX:-UseJVMCICompiler`), and 100,000 warmup evaluations before each measurement phase.
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
-fails rather than skips. Scalar evaluation is capped at 512 bytes/op, logical/optional/row
-paths at 640, list construction at 768, protobuf/JSON at 1,024, comprehensions/maps at 1,536,
+fails rather than skips. Scalar evaluation is capped at 256 bytes/op, logical/optional/row
+paths at 640, list construction at 768, protobuf/JSON and comprehensions at 1,024, maps at 1,536,
 and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
 
