@@ -46,7 +46,7 @@ maven_publication = rule(
         "library": attr.label(providers = [JavaInfo], mandatory = True),
         "module": attr.string(mandatory = True),
         "dependencies": attr.string_list(),
-        "graalvm_version": attr.string(default = "25.5.5-elide.5"),
+        "graalvm_version": attr.string(default = "25.5.5-elide.23"),
         "_version": attr.label(default = "//tools/release:version"),
     },
 )

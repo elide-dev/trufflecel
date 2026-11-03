@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<defs>
+ <clipPath id="capsule"><rect x="-340" y="-112" width="680" height="224" rx="112"/></clipPath>
+ <filter id="shadow" x="-50%" y="-70%" width="200%" height="240%"><feGaussianBlur stdDeviation="16"/></filter>
+ <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.8" fill="#E8D9BF" opacity=".45"/></pattern>
+</defs>
+<rect width="1280" height="640" fill="#F8F3E9"/>
+<rect width="1280" height="640" fill="url(#dots)"/>
+<circle cx="875" cy="308" r="228" fill="#F0E9DA"/>
+<circle cx="875" cy="308" r="190" fill="none" stroke="#E4DCCB" stroke-width="2" stroke-dasharray="5 15"/>
+<g fill="none" stroke="#DCCEBB" stroke-width="5" stroke-linecap="round">
+ <path d="M725 98l-15 -28M934 75l9 -28M1090 178l28 -12M1114 391l31 12M711 477l-24 20"/>
+</g>
+<g transform="translate(900 315) rotate(-20)">
+ <ellipse cx="17" cy="136" rx="314" ry="38" fill="#66594F" opacity=".18" filter="url(#shadow)"/>
+ <rect x="-340" y="-112" width="680" height="224" rx="112" fill="#245C90" stroke="#27384A" stroke-width="10"/>
+ <g clip-path="url(#capsule)">
+   <rect x="-343" y="-118" width="355" height="238" fill="#EF8D43"/>
+   <path d="M-326 -20Q-320 -85 -244 -92H4V-46H-233Q-295 -46 -326 -20Z" fill="#F7B276" opacity=".85"/>
+   <path d="M18 -83H232Q297 -75 325 -30Q312 -82 270 -92H18Z" fill="#7DB2D5" opacity=".75"/>
+   <path d="M-295 76Q-160 119 12 76H248Q290 72 312 43Q287 111 228 121H-231Q-278 108 -295 76Z" fill="#142F55" opacity=".18"/>
+   <rect x="2" y="-115" width="15" height="230" fill="#283D4C" opacity=".18"/>
+   <path d="M-293 -55Q-268 -83 -227 -84" fill="none" stroke="#FFE2BE" stroke-width="12" stroke-linecap="round" opacity=".85"/>
+   <path d="M259 -83q28 9 39 33" fill="none" stroke="#B1D5E7" stroke-width="10" stroke-linecap="round" opacity=".75"/>
+ </g>
+ <path d="M9 -110V110" stroke="#263A4A" stroke-width="5" opacity=".72"/>
+ <rect x="-340" y="-112" width="680" height="224" rx="112" fill="none" stroke="#27384A" stroke-width="10"/>
+ <text x="0" y="37" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-size="132" font-weight="900" letter-spacing="5" fill="#26394A" stroke="#26394A" stroke-width="10" stroke-linejoin="round">CEL</text>
+ <text x="0" y="37" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-size="132" font-weight="900" letter-spacing="5" fill="#FFF7E9">CEL</text>
+</g>
+<g font-family="DejaVu Sans,Arial,sans-serif" fill="#273747">
+ <text x="90" y="283" font-size="73" font-weight="800" letter-spacing="-4">TruffleCEL</text>
+ <text x="94" y="329" font-size="21" font-weight="500" letter-spacing=".5" fill="#67717A">Common Expression Language</text>
+ <text x="94" y="360" font-size="21" font-weight="500" letter-spacing=".5" fill="#67717A">on GraalVM Truffle</text>
+</g>
+<path d="M94 398h130" stroke="#EB8F4D" stroke-width="7" stroke-linecap="round"/>
+</svg>

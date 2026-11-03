@@ -10,7 +10,7 @@ upload convention. It produces three thin Maven artifacts under `dev.elide`:
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 
 Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
-required. The POMs pin TruffleData `0.1.0-alpha.4` and Elide GraalVM `25.5.5-elide.5`,
+required. Publications built from the current source tree pin TruffleData `0.1.0-alpha.4` and Elide GraalVM `25.5.5-elide.23`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 
@@ -73,7 +73,7 @@ manual recovery. No external CI secrets or bucket settings are modified by this 
 repositories {
     mavenCentral()
     maven("https://maven.elide.dev")
-    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.5")
+    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.23")
 }
 dependencies {
     implementation("dev.elide:trufflecel-core:<published-version>")
@@ -82,6 +82,8 @@ dependencies {
 }
 ```
 
+Use the GraalVM repository matching the chosen release: `0.1.0-alpha.2` pins
+`25.5.5-elide.5`; the current source tree pins `25.5.5-elide.23`.
 The POMs declare the Elide and GraalVM fork repositories for Maven consumers. Gradle and
 Bazel consumers must explicitly configure them. For Bazel, add the desired coordinates to
 `maven.install` and repin. The embedder supplies the matching Truffle runtime and any JDBC

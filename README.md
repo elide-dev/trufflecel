@@ -1,13 +1,24 @@
-# TruffleCEL
+[![TruffleCEL — Common Expression Language on GraalVM Truffle](docs/images/trufflecel-banner.png)](docs/images/trufflecel.svg)
 
 [![CI](https://github.com/elide-dev/trufflecel/actions/workflows/ci.yml/badge.svg)](https://github.com/elide-dev/trufflecel/actions/workflows/ci.yml)
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json%3Frepository%3Delide-dev/trufflecel)](https://codspeed.io/elide-dev/trufflecel)
+[![Release](https://img.shields.io/github/v/release/elide-dev/trufflecel?include_prereleases)](https://github.com/elide-dev/trufflecel/releases)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
 
-**CEL expressions, executed by Truffle.** TruffleCEL provides an independent parser, gradual
-type checker, and Truffle AST evaluator for embedding in Elide, with no CEL Java dependency.
+**CEL expressions, executed by Truffle.** TruffleCEL brings the
+[Common Expression Language](https://cel.dev/) to [GraalVM Truffle](https://www.graalvm.org/latest/graalvm-as-a-platform/language-implementation-framework/)
+with an independent parser, gradual type checker, and AST evaluator. Embed reusable policies,
+validation rules, and filters in Java or Elide, with no CEL Java dependency.
+
+[Get started](#choose-an-artifact) · [Architecture](#architecture) ·
+[Integration guide](docs/INTEGRATION.md) · [CEL compatibility](#compatibility-and-scope) ·
+[Benchmarks](https://codspeed.io/elide-dev/trufflecel)
 
 ```java
+import dev.trufflecel.Cel;
+import java.util.List;
+import java.util.Map;
+
 var policy = Cel.compile("user.age >= 18 && 'admin' in user.roles");
 boolean allowed = policy.test(Map.of(
     "user", Map.of("age", 30, "roles", List.of("admin"))));
@@ -17,6 +28,53 @@ Compile once and reuse across threads. Evaluation has its own activation, compre
 scopes and operation budget. Host collections are snapshotted, and failures carry stable
 CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
 explicit adapters; expressions cannot discover arbitrary Java methods.
+
+## Architecture
+
+Compile expressions once, then evaluate them against fresh inputs. The frontend implements
+CEL parsing, name resolution, and gradual typing; each `Program` owns a reusable Truffle call
+target. Evaluation state belongs to the individual call.
+
+```mermaid
+flowchart LR
+    Source["CEL source"] --> Parser["Parser"]
+    Parser --> Checker["Type checker"]
+    Env["Declarations and bindings"] --> Checker
+    Checker --> Program["Program / Truffle AST"]
+    Input["Input variables"] --> Activation["Activation, scopes and budget"]
+    Program --> Eval["Evaluate call target"]
+    Activation --> Eval
+    Eval --> Result["CEL value or error"]
+    Program -. "Graal partial evaluation" .-> Code["Compiled guest code"]
+    Code -.-> Eval
+```
+
+Truffle specializes expression execution and can compile hot guest code on a compatible
+GraalVM runtime. Generic collections, libraries, input conversion, and object adapters use
+explicit Truffle boundaries. The JVM and Native Image compilation gates exercise this split
+and enforce allocation, AST-size, and compiler-graph budgets.
+
+```mermaid
+flowchart TB
+    Host["Java / Elide embedder"] --> API["Cel / Environment / Program"]
+    Host --> Polyglot["Polyglot Context: cel"]
+    Polyglot --> Core["trufflecel-core"]
+    API --> Core
+    Rows["TruffleData batch / JDBC rows"] --> Data["DataType schema adapter"]
+    Data --> Core
+    Proto["Protobuf messages and wire data"] --> PB["trufflecel-protobuf / ProtobufType"]
+    PB --> Core
+    JSON["Oracle JSONObject / JSONArray"] --> JS["trufflecel-json / JsonValues"]
+    JS --> Core
+    Core --> Runtime["Embedder-supplied Truffle runtime"]
+    Runtime --> JVM["GraalVM JVM"]
+    Runtime --> Native["Native Image"]
+```
+
+The direct Java API does not require a Polyglot context. Optional adapters keep protobuf and
+Oracle JSON dependencies out of the core JAR. Native TruffleData rows retain their schema;
+host collections and JSON trees are converted to bounded CEL snapshots. See the
+[integration guide](docs/INTEGRATION.md) for object bindings, presence, and numeric semantics.
 
 ## Choose an artifact
 
@@ -28,7 +86,9 @@ explicit adapters; expressions cannot discover arbitrary Java methods.
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
-**Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **TruffleData `0.1.0-alpha.4`**.
+**Java 25** and **TruffleData `0.1.0-alpha.4`**. The current source tree builds against
+**Elide GraalVM `25.5.5-elide.23`**; use the GraalVM version pinned by your chosen release.
+The published `0.1.0-alpha.2` release uses `25.5.5-elide.5`.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
 for available versions:
@@ -40,7 +100,7 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.5")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.1.0-alpha.1")
+    implementation("dev.elide:trufflecel-core:0.1.0-alpha.2")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
 ```
@@ -121,7 +181,7 @@ described in [CI setup](docs/CI.md). Existing versions are immutable.
 
 The conformance suite runs **2,587 cases across 20 upstream core CEL suites and six extension
 suites**, with no per-case skips, pinned to cel-spec revision
-`21ec6f4e52e8d694687ff9ed7408d3eccbb955d7`.
+[`21ec6f4`](https://github.com/cel-expr/cel-spec/tree/21ec6f4e52e8d694687ff9ed7408d3eccbb955d7).
 It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
 
@@ -136,3 +196,16 @@ for APIs, semantics and limits. This does not certify every CEL extension or fut
 binding/block/set/encoder extensions, canonical protobuf AST serialization, and a proto2
 extension registry are not yet provided. Elide Native Image embedding and production size,
 allocation, and JIT performance budgets still need qualification.
+
+## Reference shelf
+
+| Reference | What it covers |
+| --- | --- |
+| [CEL specification](https://github.com/cel-expr/cel-spec) | Upstream language specification, schemas, and conformance tests |
+| [CEL language definition](https://github.com/cel-expr/cel-spec/blob/master/doc/langdef.md) | Syntax, types, evaluation, and standard functions |
+| [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, selected suites, and reproducible import |
+| [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
+| [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
+| [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
+| [Benchmark methodology](docs/BENCHMARKS.md) | CodSpeed simulation and separate guest-JIT qualification |
+| [Publishing](docs/PUBLISHING.md) | Maven consumption, release automation, and artifact verification |
