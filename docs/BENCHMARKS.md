@@ -170,6 +170,12 @@ Other cases change by less than 0.8%; all 14 totals reconcile. The compiled `all
 uses 224 bytes/evaluation locally, down from 336, with a 320-byte limit. The paired suite
 also records lower allocation for comprehensions on both JVM and SVM.
 
+Skipping constructor-only adapters during runtime dispatch and specializing integer
+equality (`b4a0150`, [run 41731020047](https://github.com/elide-dev/trufflecel/actions/runs/41731020047))
+reduces comprehension instructions by 29.9%, short-circuit evaluation by 39.9%, JSON by
+23.9%, protobuf by 17.0%, and native-row access by 7.6%. Other cases change by less than
+1%; all 14 profile totals reconcile. Custom object equality overrides retain precedence.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
