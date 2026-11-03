@@ -12,12 +12,16 @@ final class ImageExpressions {
 
   static {
     try {
+      // Initialize both compiler environments before timing either frontend.
+      var truffle = Fixtures.TRUFFLE;
+      var java = Fixtures.JAVA;
+      var sources = Fixtures.SOURCES;
       for (int i = 0; i < 3; i++) {
         long start = System.nanoTime();
-        TRUFFLE[i] = Fixtures.TRUFFLE.prepare(Fixtures.SOURCES[i]);
+        TRUFFLE[i] = truffle.prepare(sources[i]);
         TRUFFLE_NS[i] = System.nanoTime() - start;
         start = System.nanoTime();
-        JAVA[i] = Fixtures.JAVA.compile(Fixtures.SOURCES[i]).getAst();
+        JAVA[i] = java.compile(sources[i]).getAst();
         JAVA_NS[i] = System.nanoTime() - start;
       }
     } catch (Exception e) {
