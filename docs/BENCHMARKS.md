@@ -1,5 +1,11 @@
 # Continuous simulation benchmarks
 
+Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
+interpretation, and guest-JIT evaluation separate, including image-build AST preparation.
+Use CodSpeed to locate CPU regressions and existing allocation budgets to enforce limits;
+use fixed-work peak RSS as a secondary process-footprint diagnostic. A lower allocation
+rate does not imply a smaller resident process, especially when guest compilation is enabled.
+
 CodSpeed measures 14 fixed native-AOT cases on every PR and main push. The integration
 uses the same pinned CodSpeed action and instrument-hooks implementation as Komodo and
 TruffleData. It counts instructions within explicit C callback regions; it does not time
@@ -114,9 +120,33 @@ instruction counts in all 14 cases relative to baseline:
 | JSON | 8,208.55 | −55.0% |
 
 [Saved CodSpeed measurements](benchmarks/codspeed-history.json) include all 14 cases for
-each of these three runs, correctness checksums, source fingerprints, and binary hashes.
+each recorded run, correctness checksums, source fingerprints, and binary hashes.
 Profile self-cost totals were reconciled with every saved instruction count. These results
 compare TruffleCEL revisions; the separate paired timing suite compares against cel-java.
+
+Adding instrumentation (`76f2851`, [run 41714577130](https://github.com/elide-dev/trufflecel/actions/runs/41714577130))
+increased scalar instructions by 1.7% and comprehension instructions by 4.3%. The next
+change (`94f39d7`, [run 41716755365](https://github.com/elide-dev/trufflecel/actions/runs/41716755365))
+removes temporary scalar argument arrays and repeated operator dispatch, specializes literal
+execution, and stores a single normalized activation binding directly. Relative to the tagged
+implementation:
+
+| Case | Instructions/op | Change |
+| --- | ---: | ---: |
+| Scalar evaluation | 1,267.34 | −41.6% |
+| Comprehension | 25,665.44 | −7.6% |
+| Native row | 2,239.30 | −15.9% |
+| Two-variable transform | 7,561.44 | −19.1% |
+| Compile/evaluate | 21,632.09 | −3.1% |
+| Short-circuit | 2,069.87 | +2.6% |
+| Optional chain | 3,782.21 | +1.7% |
+| Protobuf | 4,293.60 | +1.1% |
+
+The other cases changed by between −1.1% and +0.6%. This is a mixed result, with the largest
+improvement in the targeted scalar path. Local guest-JIT allocation checks report 64 bytes
+per scalar evaluation (previously 104) and 472 bytes for the comprehension fixture
+(previously 512). Neither these local allocation checks nor CodSpeed instruction counts
+prove a particular peak-RSS or wall-clock speedup; the paired suite measures those separately.
 
 ## Guest compilation and allocation gates
 
@@ -248,8 +278,8 @@ initialization for compilation or interpretation.
 The charts are `comparison.svg` (ns/op), `allocations.svg` (heap bytes/op), and
 `peak-rss.svg` (fixed-work peak RSS in MiB). Each uses medians and min/max whiskers across
 three independent processes. Historical schemas 1 and 2 remain renderable; missing
-allocation data is never synthesized. The checked-in README snapshot remains schema 2
-until a complete schema-3 run is available.
+allocation data is never synthesized. The checked-in README snapshot is schema 3;
+earlier raw datasets are retained.
 
 Each timing cell runs in three fresh processes, in a deterministic shuffled order. Each process
 warms for 500 ms, then records seven batches of at least 150 ms each. Input selection cycles
@@ -303,12 +333,21 @@ On SVM, interpreter RSS is approximately 3–9% higher; guest-JIT evaluation RSS
 runs use different shared runner CPUs and setup isolation, so compare engines within each
 run rather than treating their absolute times as a controlled before/after experiment.
 
+The schema-3 run (`a44e273`, [CI 41717938644](https://github.com/elide-dev/trufflecel/actions/runs/41717938644))
+records 23/24 timing wins, 16/24 allocation wins, and 8/24 fixed-work RSS wins for TruffleCEL.
+JVM scalar interpretation remains slower. Native guest-JIT RSS is roughly 103–117 MiB,
+versus 64–69 MiB for cel-java, despite lower scalar allocations. This demonstrates the
+importance of reporting allocation and deployment footprint separately. The
+[earlier schema-2 RSS snapshot](benchmarks/comparison-throughput-rss-v2.json) uses timed,
+unequal-work processes and must not be used to claim an RSS improvement from schema 3.
+
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
 
 ```sh
 python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-comparison.svg
 python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-peak-rss.svg --metric peak-rss
+python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-allocations.svg --metric allocations
 ```
 
 For fast correctness checks, use `bazel test //benchmarks/comparison:smoke --config=local`.

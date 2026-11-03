@@ -181,23 +181,36 @@ checked ASTs embedded at image build time.
 
 ![TruffleCEL versus cel-java: compilation, evaluation, and interpretation](docs/images/cel-comparison.svg)
 
-![TruffleCEL versus cel-java: whole-process peak resident memory](docs/images/cel-peak-rss.svg)
+![TruffleCEL versus cel-java: allocated heap bytes per operation](docs/images/cel-allocations.svg)
 
-Captured November 3, 2026 on a shared Intel Xeon Platinum 8370C CI runner. Lower is better;
-bars show medians across three fresh processes, with minimum/maximum whiskers. TruffleCEL
-has lower median time in **23 of 24 comparisons**; JVM scalar interpretation remains slower.
-Peak RSS is higher for TruffleCEL in **23 of 24 comparisons**, including the guest compiler's
-memory cost. These are workload-specific measurements, not a general performance guarantee.
+<details>
+<summary>Whole-process peak RSS for a fixed workload</summary>
 
-RSS covers each process's entire lifetime, including setup, warmup, and compilation; timing
-excludes setup and guest compilation. Time-bounded runs execute different numbers of
-operations. Both native engines share one benchmark binary, so RSS does not represent
+![TruffleCEL versus cel-java: fixed-work peak resident memory](docs/images/cel-peak-rss.svg)
+
+</details>
+
+Captured November 3, 2026 on a shared AMD EPYC 7763 CI runner. Lower is better; bars show
+medians across three fresh processes, with minimum/maximum whiskers. TruffleCEL has lower
+median time in **23 of 24 comparisons**, lower allocation in **16 of 24**, and lower
+fixed-work peak RSS in **8 of 24**. JVM scalar interpretation remains slower; native guest
+JIT retains a substantial process-memory cost. These are workload-specific measurements,
+not a general performance guarantee.
+
+Allocation and RSS use separate, equal-work processes: 8,192 compilations or 524,288
+evaluations, plus setup. Bytes/op measures current-thread heap allocation; it excludes
+compiler/background threads and native memory. RSS includes the process's entire lifetime,
+including calibration, warmup, and guest compilation. Timing excludes setup and guest
+compilation. Both native engines share one benchmark binary, so RSS does not represent
 standalone deployment footprints. Image-build preparation embeds checked ASTs, not guest
 machine code. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41711452800), and
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41717938644), and
 [methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
-The [original baseline](docs/benchmarks/comparison-baseline.json),
-[earlier timing snapshot](docs/benchmarks/comparison-optimized-v1.json), and
+
+The [earlier time-bounded RSS snapshot](docs/benchmarks/comparison-throughput-rss-v2.json)
+used different operation counts for each engine; its RSS is not directly comparable with
+this fixed-work measurement. The [original timing baseline](docs/benchmarks/comparison-baseline.json),
+[earlier optimized timing snapshot](docs/benchmarks/comparison-optimized-v1.json), and
 [CodSpeed optimization history](docs/BENCHMARKS.md#finding-instruction-hotspots) are retained.
 
 CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
