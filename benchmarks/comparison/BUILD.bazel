@@ -25,6 +25,22 @@ java_test(
     args = ["--smoke"], use_testrunner = False, runtime_deps = [":comparison"],
     jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
 )
+# Fresh processes exercise the allocation counter and the context-free interpreter path.
+java_test(
+    name = "memory_interpret", main_class = "dev.trufflecel.Comparison",
+    args = ["trufflecel", "interpret", "scalar", "--memory"], use_testrunner = False,
+    runtime_deps = [":comparison"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
+)
+java_test(
+    name = "memory_compile", main_class = "dev.trufflecel.Comparison",
+    args = ["trufflecel", "compile", "scalar", "--memory"], use_testrunner = False,
+    runtime_deps = [":comparison"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
+)
+java_test(
+    name = "memory_java", main_class = "dev.trufflecel.Comparison",
+    args = ["cel-java", "evaluate", "scalar", "--memory"], use_testrunner = False,
+    runtime_deps = [":comparison"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
+)
 native_image(
     name = "svm",
     testonly = True,

@@ -137,7 +137,7 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 `-XX:-UseJVMCICompiler`), and 100,000 warmup evaluations before each measurement phase.
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
-fails rather than skips. Scalar evaluation is capped at 256 bytes/op, logical/optional/row
+fails rather than skips. Scalar evaluation is capped at 128 bytes/op, logical/optional/row
 paths at 640, list construction at 768, protobuf/JSON and comprehensions at 1,024, maps at 1,536,
 and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
@@ -165,7 +165,7 @@ TruffleCEL's production dependencies or published POMs.
 
 Three expressions exercise arithmetic, a string/boolean policy, and a list comprehension.
 Both engines receive identical explicit declarations and four alternating, workload-specific
-activations with checked results. There are eight paired scenarios (48 engine/workload cells, 144 fresh processes):
+activations with checked results. There are eight paired scenarios (48 engine/workload cells, 144 timing processes and 144 separate memory processes):
 
 | Runtime | Scenario | Timed operation |
 | --- | --- | --- |
@@ -205,23 +205,53 @@ valid guest machine code before and after measurement. Host JVM JIT remains enab
 both engines; SVM executes native-AOT interpreter code. These cases use the same
 compiler-capable native executable, not a smaller fallback-only deployment image.
 
-Schema 2 initializes and executes only the selected engine in each process. In particular,
+Schemas 2 and 3 initialize and execute only the selected engine in each process. In particular,
 cel-java does not create a Truffle context, and JVM runs do not initialize the other engine's
 compiler or image-AST holder. Both engines remain on the classpath/in the common native
 executable, whose image heap contains both sets of checked ASTs. This measures the shared
 harness, not the footprint of independently linked production distributions. Historical
 schema-1 timing snapshots predate this setup isolation and contain no RSS samples.
 
-Every schema-2 process is wrapped by Linux `/usr/bin/time -f %M`. Its `peak_rss_kib` is the
-whole-process resident-memory high-water mark, including startup, compiler setup, warmup,
-guest compilation, timed execution, and shutdown. It is not heap size, retained memory, or
-bytes allocated per operation. The time-bounded runs may execute different operation counts.
-`peak-rss.svg` shows median peak RSS over three processes, with min/max whiskers and MiB
-units; `comparison.svg` shows timing, including interpreter cases. RSS and interpreter
-results must be measured before claiming any new wins; the published schema-1 chart below
-remains a historical compiled-evaluation result until refreshed with a complete schema-2 run.
+Schema 3 separates timing from memory measurement. Every process is wrapped by Linux
+`/usr/bin/time -f %M`. The timing process retains its whole-lifetime RSS as
+`timed_peak_rss_kib`, preserving the earlier time-bounded measurement. Faster engines may
+execute more work in those runs, so that number mixes work volume with memory behavior.
 
-Each cell runs in three fresh processes, in a deterministic shuffled order. Each process
+Each separate memory process performs one warmup batch and seven measured batches:
+1,024 compilations per batch, or 65,536 evaluations per batch. Thus both engines perform
+8,192 compilations or 524,288 evaluations, plus the same four correctness checks and
+2,000 preparation evaluations in the guest-JIT scenarios. Guest compilation itself is
+required for TruffleCEL's JIT scenarios and included in whole-process RSS. These are bounded
+workloads with fixed warmup, not claims that all host compiler activity has ceased.
+
+`allocated_bytes_per_op` records seven samples from
+`com.sun.management.ThreadMXBean.getThreadAllocatedBytes` on the benchmark thread.
+The counter must be supported, enabled, and pass a calibration that allocates an escaped
+1 MiB array. That common calibration is excluded from bytes/op and included in RSS.
+Allocation measurement covers the public API, normalization, and checksum handling; it
+excludes setup, warmup, and allocations on compiler/background threads. It measures heap
+allocation, not retained objects, native memory, or code-cache size. Unsupported or broken
+accounting fails the run. Zero allocations are valid; negative counters are not.
+
+`peak_rss_kib` now belongs to the fixed-work memory process. It includes startup, compiler
+setup, calibration, warmup, guest compilation, execution, and shutdown. It remains a
+whole-process high-water mark, not retained heap or a standalone deployment footprint.
+Schema-2 RSS uses a different workload and must not be treated as a controlled before/after
+comparison with schema 3.
+
+TruffleCEL compilation and interpretation use the context-free Java API. Interpreter
+processes set `polyglot.engine.Compilation=false` before creating any target and verify
+that no guest machine code appears. JIT cases still create a context to configure and
+require synchronous guest compilation. Neither engine performs unnecessary Polyglot
+initialization for compilation or interpretation.
+
+The charts are `comparison.svg` (ns/op), `allocations.svg` (heap bytes/op), and
+`peak-rss.svg` (fixed-work peak RSS in MiB). Each uses medians and min/max whiskers across
+three independent processes. Historical schemas 1 and 2 remain renderable; missing
+allocation data is never synthesized. The checked-in README snapshot remains schema 2
+until a complete schema-3 run is available.
+
+Each timing cell runs in three fresh processes, in a deterministic shuffled order. Each process
 warms for 500 ms, then records seven batches of at least 150 ms each. Input selection cycles
 through four activations, and every timed batch verifies its result checksum. The SVG shows
 the median of process medians and min/max process medians as whiskers. These are diagnostic
@@ -236,13 +266,14 @@ python3 tools/bench/compare.py run
 # Regenerate the SVG without rerunning any benchmarks:
 python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/comparison.svg
 python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/peak-rss.svg --metric peak-rss
+python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/allocations.svg --metric allocations
 ```
 
 Bazel builds both executables with pinned toolchains; measurement runs on the same local
 host for both runtimes. `comparison.json` records all samples, source commit and digest,
 machine details, engine versions, and image-build preparation observations. `comparison.svg`
 is standalone and suitable for a README. CI runs the reusable `comparison.yml` workflow
-alongside CodSpeed and uploads the JSON and both SVG files as the `cel-comparison` artifact. The workflow
+alongside CodSpeed and uploads the JSON and all three SVG files as the `cel-comparison` artifact. The workflow
 also supports manual dispatch. Check in an explicitly dated result snapshot when updating
 the README; CI does not silently rewrite the published chart.
 
