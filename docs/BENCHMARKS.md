@@ -385,10 +385,17 @@ in this run. Native guest-JIT RSS remains about 100–117 MiB versus 64–69 MiB
 The runner is an AMD EPYC 7763; the results support these paired fixture comparisons and
 do not establish universal speedups or a lower native process footprint.
 
-The current snapshot (`456e1bc`, [CI 41729137565](https://github.com/elide-dev/trufflecel/actions/runs/41729137565))
+The macro-container snapshot (`456e1bc`, [CI 41729137565](https://github.com/elide-dev/trufflecel/actions/runs/41729137565))
 retains 24/24 timing wins and increases allocation wins to **22/24**. Only the JVM policy
 cases still allocate more than cel-java. Fixed-work RSS remains lower in 7/24 comparisons.
 This run uses an AMD EPYC 9V74; the same shared-runner and whole-process memory caveats apply.
+
+The current snapshot (`d415645`, [CI 41733144626](https://github.com/elide-dev/trufflecel/actions/runs/41733144626))
+records **24/24 timing wins and 24/24 allocation wins**. Reusing immutable scalar binding
+snapshots closes the two JVM policy allocation gaps, with mutable host inputs still copied
+before evaluation. Fixed-work RSS is lower in **9/24** comparisons; native guest-JIT process
+memory remains higher. This run uses an Intel Xeon Platinum 8370C. The engine comparisons
+are paired within this run; absolute timings across different runner CPUs are not controlled.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
