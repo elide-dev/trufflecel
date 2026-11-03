@@ -4,8 +4,8 @@
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json%3Frepository%3Delide-dev/trufflecel)](https://codspeed.io/elide-dev/trufflecel)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
 
-**CEL expressions, executed by Truffle.** An independent parser, gradual type checker,
-and Truffle AST evaluator built for embedding in Elide. No CEL Java dependency or fallback.
+**CEL expressions, executed by Truffle.** TruffleCEL provides an independent parser, gradual
+type checker, and Truffle AST evaluator for embedding in Elide, with no CEL Java dependency.
 
 ```java
 var policy = Cel.compile("user.age >= 18 && 'admin' in user.roles");
@@ -30,7 +30,8 @@ All three are thin JARs. The optional bridges depend on the matching core versio
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
 **Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **TruffleData `0.1.0-alpha.4`**.
 
-Use a published version from [Releases](https://github.com/elide-dev/trufflecel/releases):
+Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
+for available versions:
 
 ```kotlin
 repositories {
@@ -39,13 +40,13 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.5")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:<version>")
+    implementation("dev.elide:trufflecel-core:0.1.0-alpha.1")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
 ```
 
-The release pipeline can also stage artifacts locally before a first public release.
-See [publishing](docs/PUBLISHING.md) for Maven/Bazel consumption and release operations.
+See [publishing](docs/PUBLISHING.md) for Maven and Bazel consumption, local staging, and
+release operations.
 
 ## Embed
 
@@ -76,7 +77,7 @@ semantics, native rows, well-known protobuf mappings, and adapter limitations.
 ## Build and verify
 
 Bazelisk selects the pinned Bazel version. Builds default to BuildBuddy Linux amd64 remote
-execution and caching, following Komodo. Dependencies and toolchains are pinned. Configure
+execution and caching. Dependencies and toolchains are pinned. Configure
 credentials outside Git, or append `--config=local` for host JVM execution.
 
 ```sh
@@ -101,23 +102,25 @@ serialized publishing are included. See [CI setup](docs/CI.md) and [Bazel setup]
 
 ## Performance and releases
 
-Every pull request and main update runs 14 **CodSpeed simulation** cases: compilation
-plus evaluation, cached arithmetic, short-circuiting, comprehensions, regex, native rows,
-protobuf, JSON-backed predicates, optionals, two-variable transforms, string formatting,
-list sorting, math extrema and network predicates. Bazel builds a Native Image executable on RBE; the
-Linux CI runner measures named regions with checksum-verified results. Startup, fixture
-creation and warmup are outside the regions. These are native-AOT instruction measurements,
-not JVM/JIT throughput claims. The benchmark explicitly uses Truffle’s fallback interpreter;
-optimizing guest-JIT Native Image qualification remains unresolved. [Benchmark details](docs/BENCHMARKS.md).
+Every pull request and main update runs 14 **CodSpeed simulation** cases covering compilation,
+evaluation, native data adapters, and CEL extensions. Bazel builds a Native Image executable;
+the Linux CI runner measures named regions and verifies their results. Startup, fixture
+creation, and warmup are excluded.
+
+These measurements count native-AOT instructions using Truffle’s fallback interpreter.
+They do not measure JVM/JIT throughput or qualify optimizing guest-JIT execution in Native
+Image. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
 
 After successful main checks, Release Please opens version/changelog PRs from conventional
-commits. Merging a release PR creates a version tag and publishes its exact contents to
-`maven.elide.dev`, with source JARs, POMs and checksums. Existing versions are immutable.
+commits. Merging a release PR creates a version tag. The Maven publisher uses that exact tag to
+publish JARs, sources, POMs, and checksums to `maven.elide.dev`; it requires the R2 credentials
+described in [CI setup](docs/CI.md). Existing versions are immutable.
 
 ## Compatibility and scope
 
-The conformance suite runs **2,587 cases across 20 upstream core CEL suites and six extension suites**, with no
-per-case skips, pinned to cel-spec revision `21ec6f4e52e8d694687ff9ed7408d3eccbb955d7`.
+The conformance suite runs **2,587 cases across 20 upstream core CEL suites and six extension
+suites**, with no per-case skips, pinned to cel-spec revision
+`21ec6f4e52e8d694687ff9ed7408d3eccbb955d7`.
 It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
 
@@ -130,7 +133,5 @@ Optional values, two-variable macros, and extended string/list/math/network libr
 covered by all cases in their pinned upstream suites. See [extension support](docs/EXTENSIONS.md)
 for APIs, semantics and limits. This does not certify every CEL extension or future revision:
 binding/block/set/encoder extensions, canonical protobuf AST serialization, and a proto2
-extension registry are not yet provided. The protobuf bridge still retains its immutable source message
-for semantics not exposed by native rows; [TruffleData #1](https://github.com/elide-dev/truffledata/issues/1)
-tracks those APIs. Native benchmark qualification does not replace qualification of an Elide
-Native Image embedding or establish production size, allocation or JIT performance budgets.
+extension registry are not yet provided. Elide Native Image embedding and production size,
+allocation, and JIT performance budgets still need qualification.
