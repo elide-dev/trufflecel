@@ -101,9 +101,10 @@ serialized publishing are included. See [CI setup](docs/CI.md) and [Bazel setup]
 
 ## Performance and releases
 
-Every pull request and main update runs eight **CodSpeed simulation** cases: compilation
+Every pull request and main update runs 14 **CodSpeed simulation** cases: compilation
 plus evaluation, cached arithmetic, short-circuiting, comprehensions, regex, native rows,
-protobuf and JSON-backed predicates. Bazel builds a Native Image executable on RBE; the
+protobuf, JSON-backed predicates, optionals, two-variable transforms, string formatting,
+list sorting, math extrema and network predicates. Bazel builds a Native Image executable on RBE; the
 Linux CI runner measures named regions with checksum-verified results. Startup, fixture
 creation and warmup are outside the regions. These are native-AOT instruction measurements,
 not JVM/JIT throughput claims. The benchmark explicitly uses Truffle’s fallback interpreter;
@@ -115,7 +116,7 @@ commits. Merging a release PR creates a version tag and publishes its exact cont
 
 ## Compatibility and scope
 
-The conformance suite runs **1,905 cases across 20 upstream core CEL suites**, with no
+The conformance suite runs **2,587 cases across 20 upstream core CEL suites and six extension suites**, with no
 per-case skips, pinned to cel-spec revision `21ec6f4e52e8d694687ff9ed7408d3eccbb955d7`.
 It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
@@ -125,9 +126,11 @@ adapters. Additional tests cover resource limits, concurrency, interop, publishe
 artifacts and Maven consumption. The core corpus uses an independent test-only protobuf
 fixture; adapter tests separately exercise the published protobuf implementation.
 
-This does not certify every CEL extension. Full optional/two-variable macro and extended
-string/list/math/network suites, canonical protobuf AST serialization, and a proto2 extension
-registry are not yet provided. The protobuf bridge still retains its immutable source message
+Optional values, two-variable macros, and extended string/list/math/network libraries are
+covered by all cases in their pinned upstream suites. See [extension support](docs/EXTENSIONS.md)
+for APIs, semantics and limits. This does not certify every CEL extension or future revision:
+binding/block/set/encoder extensions, canonical protobuf AST serialization, and a proto2
+extension registry are not yet provided. The protobuf bridge still retains its immutable source message
 for semantics not exposed by native rows; [TruffleData #1](https://github.com/elide-dev/truffledata/issues/1)
 tracks those APIs. Native benchmark qualification does not replace qualification of an Elide
 Native Image embedding or establish production size, allocation or JIT performance budgets.

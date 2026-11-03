@@ -96,7 +96,7 @@ public final class Environment {
       case "string" -> CelType.STRING;
       case "bytes" -> CelType.BYTES;
       case "null_type" -> CelType.NULL;
-      case "list", "map", "type" -> CelType.of(name);
+      case "list", "map", "type", "optional_type", "net.IP", "net.CIDR" -> CelType.of(name);
       case "google.protobuf.Timestamp" -> CelType.TIMESTAMP;
       case "google.protobuf.Duration" -> CelType.DURATION;
       default -> null;

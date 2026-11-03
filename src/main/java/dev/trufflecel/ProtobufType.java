@@ -123,6 +123,11 @@ public final class ProtobufType implements ObjectType {
     return value instanceof Value v && v.message().getDescriptorForType() == descriptor;
   }
 
+  public boolean isZero(Object value) {
+    Message message = ((Value) value).message();
+    return message.equals(message.getDefaultInstanceForType());
+  }
+
   public boolean equal(Object a, Object b) {
     return ((Value) a).message().equals(((Value) b).message());
   }

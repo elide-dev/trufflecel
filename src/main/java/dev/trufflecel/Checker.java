@@ -48,37 +48,39 @@ final class Checker {
         if (strict) throw failure(n, "undeclared reference: " + n.name);
         return CelType.DYN;
       case SELECT:
-        {
-          CelType operand = check(n.children[0], locals);
-          if (operand.isDyn()) return CelType.DYN;
-          if (operand.name().equals("map")) return parameter(operand, 1);
-          ObjectType type = env.objectTypes.get(operand.name());
-          if (type == null || !type.fields().containsKey(n.name)) {
-            require(n, false, "undefined field: " + n.name);
-            return CelType.DYN;
-          }
-          return type.fields().get(n.name);
-        }
       case INDEX:
         {
-          CelType operand = check(n.children[0], locals), index = check(n.children[1], locals);
-          if (operand.isDyn()) return CelType.DYN;
-          if (operand.name().equals("list")) {
-            require(n, CelType.INT.accepts(index), "list index must be int");
-            return parameter(operand, 0);
+          CelType operand = check(n.children[0], locals);
+          boolean optional = Boolean.TRUE.equals(n.value) || operand.name().equals("optional_type");
+          if (operand.name().equals("optional_type")) operand = parameter(operand, 0);
+          CelType result = CelType.DYN;
+          if (n.kind == ExprNode.Kind.SELECT) {
+            if (operand.name().equals("map")) result = parameter(operand, 1);
+            else if (!operand.isDyn()) {
+              ObjectType type = env.objectTypes.get(operand.name());
+              require(
+                  n,
+                  type != null && type.fields().containsKey(n.name),
+                  "undefined field: " + n.name);
+              if (type != null) result = type.fields().getOrDefault(n.name, CelType.DYN);
+            }
+          } else {
+            CelType index = check(n.children[1], locals);
+            if (operand.name().equals("list")) {
+              require(n, CelType.INT.accepts(index), "list index must be int");
+              result = parameter(operand, 0);
+            } else if (operand.name().equals("map")) {
+              require(n, parameter(operand, 0).accepts(index), "map key type mismatch");
+              result = parameter(operand, 1);
+            } else require(n, operand.isDyn(), "cannot index " + operand);
           }
-          if (operand.name().equals("map")) {
-            require(n, parameter(operand, 0).accepts(index), "map key type mismatch");
-            return parameter(operand, 1);
-          }
-          require(n, false, "cannot index " + operand);
-          return CelType.DYN;
+          return optional ? optional(result) : result;
         }
       case LIST:
         {
           CelType element = null;
           for (ExprNode child : n.children) {
-            CelType t = check(child, locals);
+            CelType t = entryType(child, locals);
             element = element == null ? t : CelType.join(element, t);
           }
           return CelType.list(element == null ? CelType.UNBOUND : element);
@@ -87,7 +89,7 @@ final class Checker {
         {
           CelType key = null, value = null;
           for (int i = 0; i < n.children.length; i += 2) {
-            CelType k = check(n.children[i], locals), v = check(n.children[i + 1], locals);
+            CelType k = check(n.children[i], locals), v = entryType(n.children[i + 1], locals);
             require(
                 n,
                 k.isDyn()
@@ -107,7 +109,8 @@ final class Checker {
           ObjectType type = env.objectTypes.get(name);
           String[] fields = (String[]) n.value;
           for (int i = 0; i < n.children.length; i++) {
-            CelType actual = check(n.children[i], locals), expected = type.fields().get(fields[i]);
+            CelType actual = entryType(n.children[i], locals),
+                expected = type.fields().get(fields[i]);
             if (expected == null) throw failure(n, "undefined field: " + fields[i]);
             require(
                 n,
@@ -129,16 +132,53 @@ final class Checker {
             return CelType.BOOL;
           }
           CelType range = check(n.children[0], locals);
+          String[] variables = (String[]) n.value;
+          var scope = new HashMap<>(locals);
+          if (n.name.equals("optMap") || n.name.equals("optFlatMap")) {
+            require(
+                n,
+                range.isDyn() || range.name().equals("optional_type"),
+                "optional receiver required");
+            scope.put(variables[0], parameter(range, 0));
+            CelType body = check(n.children[1], scope);
+            if (n.name.equals("optMap")) return optional(body);
+            require(
+                n, body.isDyn() || body.name().equals("optional_type"), "optional result required");
+            return body;
+          }
           require(
               n,
               range.isDyn() || range.name().equals("list") || range.name().equals("map"),
               "macro range must be list or map");
-          var scope = new HashMap<>(locals);
-          scope.put((String) n.value, parameter(range, 0));
+          scope.put(
+              variables[0],
+              variables.length == 2 && range.name().equals("list")
+                  ? CelType.INT
+                  : parameter(range, 0));
+          if (variables.length == 2)
+            scope.put(variables[1], parameter(range, range.name().equals("map") ? 1 : 0));
           CelType body = check(n.children[1], scope);
-          if (n.name.equals("map") && n.children.length == 2) return CelType.list(body);
+          if (n.name.equals("sortBy")) {
+            require(n, range.isDyn() || range.name().equals("list"), "sortBy requires list");
+            require(n, ExtensionFunctions.comparable(body), "sortBy key must be comparable");
+            return range;
+          }
+          if (n.name.equals("map") || n.name.startsWith("transform")) {
+            if (n.children.length == 3) {
+              require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
+              body = check(n.children[2], scope);
+            }
+            if (n.name.equals("transformMap")) return CelType.map(scope.get(variables[0]), body);
+            if (n.name.equals("transformMapEntry")) {
+              require(
+                  n,
+                  body.isDyn() || body.name().equals("map"),
+                  "transformMapEntry requires map result");
+              return body;
+            }
+            return CelType.list(body);
+          }
           require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
-          if (n.name.equals("map")) return CelType.list(check(n.children[2], scope));
           if (n.name.equals("filter")) return CelType.list(parameter(range, 0));
           return CelType.BOOL;
         }
@@ -152,7 +192,9 @@ final class Checker {
   private CelType call(ExprNode n, Map<String, CelType> locals) {
     if (Boolean.TRUE.equals(n.value)) {
       String prefix = n.children[0].qualifiedName();
-      if ("optional".equals(prefix) && Set.of("of", "none", "ofNonZeroValue").contains(n.name)) {
+      if (prefix != null && prefix.startsWith(".")) prefix = prefix.substring(1);
+      if (ExtensionFunctions.namespaced(prefix, n.name)
+          || "optional".equals(prefix) && Set.of("of", "none", "ofNonZeroValue").contains(n.name)) {
         n.name = prefix + "." + n.name;
         n.children = Arrays.copyOfRange(n.children, 1, n.children.length);
         n.value = false;
@@ -182,7 +224,25 @@ final class Checker {
     int count = types.size();
     CelType a = count > 0 ? types.get(0).unwrapped() : CelType.DYN,
         b = count > 1 ? types.get(1).unwrapped() : CelType.DYN;
+    CelType extension = ExtensionFunctions.check(n.name, types, strict, n.offset);
+    if (extension != null) return extension;
     switch (n.name) {
+      case "value", "hasValue", "or", "orValue":
+        require(
+            n,
+            count == (n.name.startsWith("or") ? 2 : 1)
+                && (a.isDyn() || a.name().equals("optional_type")),
+            "invalid optional arguments");
+        if (n.name.equals("hasValue")) return CelType.BOOL;
+        if (n.name.equals("or")) {
+          require(n, a.accepts(b), "optional fallback type mismatch");
+          return CelType.join(a, b);
+        }
+        if (n.name.equals("orValue")) {
+          require(n, parameter(a, 0).accepts(b), "optional fallback type mismatch");
+          return CelType.join(parameter(a, 0), b);
+        }
+        return parameter(a, 0);
       case "&&", "||":
         require(
             n,
@@ -300,7 +360,9 @@ final class Checker {
                       CelType.STRING,
                       CelType.BYTES,
                       CelType.TIMESTAMP,
-                      CelType.DURATION);
+                      CelType.DURATION,
+                      CelType.of("net.IP"),
+                      CelType.of("net.CIDR"));
               case "bytes" -> Set.of(CelType.BYTES, CelType.STRING);
               case "timestamp" -> Set.of(CelType.TIMESTAMP, CelType.INT, CelType.STRING);
               default -> Set.of(CelType.DURATION, CelType.STRING);
@@ -331,6 +393,20 @@ final class Checker {
         require(n, false, "undeclared function: " + n.name);
         return CelType.DYN;
     }
+  }
+
+  private static CelType optional(CelType type) {
+    return new CelType("optional_type", List.of(type));
+  }
+
+  private CelType entryType(ExprNode n, Map<String, CelType> locals) {
+    CelType type = check(n, locals);
+    if (!n.optionalEntry) return type;
+    require(
+        n,
+        type.isDyn() || type.name().equals("optional_type"),
+        "optional entry requires optional value");
+    return parameter(type, 0);
   }
 
   private void bind(ExprNode n, CelType expected, CelType actual, Map<String, CelType> bindings) {

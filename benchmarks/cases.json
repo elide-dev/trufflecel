@@ -30,5 +30,29 @@
   {
     "name": "json",
     "checksum": 256
+  },
+  {
+    "name": "optional-chain",
+    "checksum": 10752
+  },
+  {
+    "name": "two-variable-transform",
+    "checksum": 1024
+  },
+  {
+    "name": "string-format",
+    "checksum": 2048
+  },
+  {
+    "name": "list-sort",
+    "checksum": 1024
+  },
+  {
+    "name": "math-extrema",
+    "checksum": 1024
+  },
+  {
+    "name": "network-cidr",
+    "checksum": 256
   }
 ]

@@ -23,7 +23,10 @@ final class Functions {
       throw e;
     } catch (ArithmeticException e) {
       throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
-    } catch (IllegalArgumentException | DateTimeException e) {
+    } catch (IllegalArgumentException
+        | DateTimeException
+        | IndexOutOfBoundsException
+        | ClassCastException e) {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT,
           "invalid argument to " + name + ": " + e.getMessage());
@@ -40,12 +43,28 @@ final class Functions {
         if (v instanceof Long l) return Math.negateExact(l);
         if (v instanceof Double d) return -d;
         break;
+      case "hasValue":
+        return ExprNode.optional(v).present();
+      case "value":
+        OptionalValue optional = ExprNode.optional(v);
+        if (!optional.present())
+          throw Values.error(CelException.Code.INVALID_ARGUMENT, "optional has no value");
+        return optional.value();
       case "optional.of":
         return OptionalValue.of(v);
       case "optional.ofNonZeroValue":
-        return Values.equal(v, 0L) || v.equals(false) || v.equals("") || v == CelNull.INSTANCE
-            ? OptionalValue.none()
-            : OptionalValue.of(v);
+        boolean zero =
+            Values.equal(v, 0L)
+                || v.equals(false)
+                || v.equals("")
+                || v == CelNull.INSTANCE
+                || v instanceof Bytes bytes && bytes.size() == 0
+                || v instanceof List<?> list && list.isEmpty()
+                || v instanceof Map<?, ?> map && map.isEmpty()
+                || v.equals(Duration.ZERO)
+                || v.equals(Instant.EPOCH);
+        for (ObjectType type : env.objectTypes.values()) if (type.accepts(v)) zero = type.isZero(v);
+        return zero ? OptionalValue.none() : OptionalValue.of(v);
       case "dyn":
         return v;
       case "type":
@@ -105,6 +124,7 @@ final class Functions {
         }
         break;
       case "string":
+        if (v instanceof NetworkValue) return v.toString();
         if (v instanceof String) return v;
         if (v instanceof Boolean || v instanceof Long || v instanceof UInt) return v.toString();
         if (v instanceof Double d) return doubleString(d);

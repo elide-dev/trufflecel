@@ -100,7 +100,7 @@ in the optional bridge, including read-path compatibility conversions. Descripto
 fields are supported; proto2 extension registries are not exposed by this bridge yet.
 Applications requiring extensions can supply a specialized `ObjectType`.
 
-The core 1,905-case suite retains its independent test-only `ProtoSchema` oracle. Separate
+The 2,587-case core and extension suite retains its independent test-only `ProtoSchema` oracle. Separate
 published-artifact tests cover all scalar types, defaults/presence, nested messages, repeated
 fields/maps, unknown enums, construction, wire decoding and well-known mappings. No tests
 load classes or artifacts from the sibling TruffleData checkout.

@@ -64,7 +64,20 @@ public final class SimulationBenchmark {
     var jsonInput =
         Map.<String, Object>of(
             "j", JsonValues.from(new JSONObject("{\"id\":42,\"tags\":[\"user\",\"admin\"]}")));
+    var optional = Cel.compile("m.?payload.value.orValue(0)");
+    var optionalInput = Map.<String, Object>of("m", Map.of("payload", Map.of("value", 42L)));
+    var transform = Cel.compile("[1,2,3,4].transformList(i,v,i+v).size()");
+    var format = Cel.compile("'%.2f %s'.format([3.5,'CEL']).size()");
+    var sort = Cel.compile("[4,2,3,1].sortBy(v,-v)[0]");
+    var extrema = Cel.compile("math.greatest([3,1,4,2])");
+    var network = Cel.compile("cidr('192.168.0.0/24').containsIP('192.168.0.42')");
     return List.of(
+        new Case("optional-chain", () -> (Long) optional.evaluate(optionalInput), 42),
+        new Case("two-variable-transform", () -> (Long) transform.evaluate(), 4),
+        new Case("string-format", () -> (Long) format.evaluate(), 8),
+        new Case("list-sort", () -> (Long) sort.evaluate(), 4),
+        new Case("math-extrema", () -> (Long) extrema.evaluate(), 4),
+        new Case("network-cidr", () -> network.test() ? 1 : 0, 1),
         new Case(
             "compile-evaluate", () -> (Long) Cel.compile("x * 2 + 1").evaluate(activation), 85),
         new Case("evaluate-scalar", () -> (Long) scalar.evaluate(activation), 85),

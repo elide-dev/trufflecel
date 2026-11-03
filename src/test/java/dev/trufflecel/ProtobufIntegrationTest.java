@@ -103,6 +103,8 @@ public class ProtobufIntegrationTest {
             .test(Map.of("r", value)));
     assertTrue(env.compile("test.Record{int32: 7}.int32 == 7").test());
     var empty = type.snapshot(DynamicMessage.getDefaultInstance(descriptor));
+    assertFalse(env.compile("optional.ofNonZeroValue(r).hasValue()").test(Map.of("r", empty)));
+    assertTrue(env.compile("optional.ofNonZeroValue(r).hasValue()").test(Map.of("r", value)));
     assertFalse(type.has(empty, "int32"));
     assertFalse(type.has(empty, "items"));
     assertEquals(0L, type.get(empty, "int32"));
