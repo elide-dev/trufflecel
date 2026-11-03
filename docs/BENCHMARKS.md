@@ -148,6 +148,14 @@ per scalar evaluation (previously 104) and 472 bytes for the comprehension fixtu
 (previously 512). Neither these local allocation checks nor CodSpeed instruction counts
 prove a particular peak-RSS or wall-clock speedup; the paired suite measures those separately.
 
+The next change (`300a638`, [run 41723855384](https://github.com/elide-dev/trufflecel/actions/runs/41723855384))
+adds integer division, remainder, and comparison fast paths, and normalizes host lists into
+a single owned snapshot. Relative to `94f39d7`, CodSpeed reports 13.2% fewer comprehension
+instructions and 2.6% fewer scalar-evaluation instructions. Compile/evaluate increases by
+2.9%, and protobuf and JSON each increase by 3.7%; the other cases change by at most 1.2%.
+All 14 profile self-cost totals reconcile with the saved measurements. The local compiled
+comprehension gate drops from 472 to 336 bytes/evaluation, with its limit tightened to 448.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
@@ -340,6 +348,15 @@ versus 64–69 MiB for cel-java, despite lower scalar allocations. This demonstr
 importance of reporting allocation and deployment footprint separately. The
 [earlier schema-2 RSS snapshot](benchmarks/comparison-throughput-rss-v2.json) uses timed,
 unequal-work processes and must not be used to claim an RSS improvement from schema 3.
+
+The updated snapshot (`300a638`, [CI 41723855384](https://github.com/elide-dev/trufflecel/actions/runs/41723855384))
+records 23/24 timing wins, 17/24 allocation wins, and 7/24 fixed-work RSS wins. JVM scalar
+interpretation still trails cel-java. Native interpretation is 1.3–2.0× faster for these
+fixtures, while guest-JIT RSS remains about 103–118 MiB versus cel-java's 63–69 MiB.
+This run uses an AMD EPYC 9V74, whereas the [first allocation snapshot](benchmarks/comparison-allocation-baseline-v3.json)
+uses an EPYC 7763; these are paired engine comparisons, not a controlled measurement of
+the change between commits. Small RSS differences also need repeated measurements before
+being treated as regressions or improvements.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
