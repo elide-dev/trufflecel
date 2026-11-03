@@ -114,6 +114,99 @@ class ExprNode extends CelNode {
     return new LiteralNode(value, offset);
   }
 
+  ExprNode lowerArithmetic() {
+    int count = 0;
+    ExprNode leaf = this;
+    while (leaf.kind == Kind.CALL
+        && !Boolean.TRUE.equals(leaf.value)
+        && leaf.children.length == 2
+        && (leaf.name.equals("+") || leaf.name.equals("-") || leaf.name.equals("*"))
+        && leaf.children[1].kind == Kind.CONSTANT
+        && leaf.children[1].value instanceof Long) {
+      count++;
+      leaf = leaf.children[0];
+    }
+    if (count >= 2) return new ArithmeticChain(this, count, leaf.lowerArithmetic());
+    for (int i = 0; i < children.length; i++) children[i] = children[i].lowerArithmetic();
+    return this;
+  }
+
+  /**
+   * Constant-right arithmetic keeps intermediates unboxed and preserves source evaluation order.
+   */
+  private static final class ArithmeticChain extends ExprNode {
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final int[] operations;
+
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final long[] constants;
+
+    private final String firstOperation;
+
+    ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
+      super(Kind.CALL, outer.name, false, outer.offset, leaf);
+      operations = new int[count];
+      constants = new long[count];
+      ExprNode node = outer;
+      for (int i = count - 1; i >= 0; i--) {
+        operations[i] = node.name.charAt(0);
+        constants[i] = (Long) node.children[1].value;
+        node = node.children[0];
+      }
+      firstOperation =
+          switch (operations[0]) {
+            case '+' -> "+";
+            case '-' -> "-";
+            default -> "*";
+          };
+      sourceRange(outer.sourceStart, outer.sourceEnd);
+      optionalEntry = outer.optionalEntry;
+      statement = outer.statement;
+    }
+
+    @Override
+    @com.oracle.truffle.api.nodes.ExplodeLoop
+    Object execute(VirtualFrame frame) {
+      EvalContext ctx = (EvalContext) frame.getArguments()[0];
+      // The original outer-to-inner operator visits all precede evaluation of the left operand.
+      ctx.charge(operations.length);
+      Object left;
+      try {
+        left = children[0].execute(frame);
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        ctx.charge(operations.length);
+        throw e;
+      }
+      if (left instanceof Unknown) {
+        ctx.charge(operations.length);
+        return left;
+      }
+      if (left instanceof Long number) {
+        long result = number;
+        for (int i = 0; i < operations.length; i++) {
+          ctx.tick(); // The right literal's visit still consumes its original budget.
+          try {
+            result =
+                switch (operations[i]) {
+                  case '+' -> Math.addExact(result, constants[i]);
+                  case '-' -> Math.subtractExact(result, constants[i]);
+                  default -> Math.multiplyExact(result, constants[i]);
+                };
+          } catch (ArithmeticException e) {
+            // Outer constants are evaluated even when an inner operation fails.
+            ctx.charge(operations.length - i - 1);
+            throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+          }
+        }
+        return result;
+      }
+      // These operators require matching numeric types; every right operand is a CEL int.
+      ctx.charge(operations.length);
+      throw Values.overload(firstOperation);
+    }
+  }
+
   private static final class LiteralNode extends ExprNode {
     LiteralNode(Object value, int offset) {
       super(Kind.CONSTANT, "", value, offset);

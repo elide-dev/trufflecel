@@ -5,6 +5,8 @@ import java.util.concurrent.*;
 import java.time.*;
 import java.math.BigInteger;
 import org.junit.Test;
+import org.graalvm.polyglot.Context;
+import com.oracle.truffle.api.source.Source;
 import static org.junit.Assert.*;
 
 public class RuntimeTest {
@@ -173,6 +175,99 @@ public class RuntimeTest {
         CelException.Code.RESOURCE_EXHAUSTED,
         assertThrows(CelException.class, () -> Values.in(Collections.nCopies(1_000_001, 1L)))
             .code());
+  }
+
+  @Test
+  public void arithmeticLoweringPreservesSourceResultsErrorsAndBudgets() {
+    try (var context = Context.newBuilder("cel").build()) {
+      context.enter();
+      try {
+        for (String expression :
+            List.of(
+                "x * 2 + 1",
+                "(x - 4) * 3 + 7",
+                "x * 2 - 1",
+                "x + 2 - 3",
+                "1 + 2 + 3",
+                "(x * 2 + 1) + (y * 3 + 2)",
+                "1 / x * 2 + 1",
+                "missing * 2 + 1")) {
+          var source = Source.newBuilder("cel", expression, "arithmetic.cel").build();
+          for (int budget = 1; budget <= 16; budget++) {
+            var template =
+                Cel.newBuilder()
+                    .inferVariables(true)
+                    .evaluationBudget(budget)
+                    .build()
+                    .prepare(expression);
+            var lowered = template.instantiate();
+            var original = template.instantiate(source);
+            for (Object value :
+                Arrays.asList(
+                    Long.MIN_VALUE,
+                    Long.MAX_VALUE,
+                    Long.MAX_VALUE / 2 + 1,
+                    -1L,
+                    0L,
+                    42L,
+                    3.5,
+                    "text",
+                    new UInt(1),
+                    null,
+                    Unknown.of("x"))) {
+              var input = new HashMap<String, Object>();
+              input.put("x", value);
+              input.put("y", 3L);
+              assertEquals(
+                  expression + " budget=" + budget + " x=" + value,
+                  evaluationOutcome(original, input),
+                  evaluationOutcome(lowered, input));
+            }
+          }
+        }
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  private static Object evaluationOutcome(Program program, Map<String, ?> input) {
+    try {
+      return program.evaluate(input);
+    } catch (CelException e) {
+      return List.of(e.code(), e.getMessage());
+    }
+  }
+
+  @Test
+  public void arithmeticLoweringDoesNotMoveHostCallsAcrossBudgetFailures() {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    try (var context = Context.newBuilder("cel").build()) {
+      context.enter();
+      try {
+        for (int budget = 1; budget <= 10; budget++) {
+          String expression = "step() * 2 + 1";
+          var template =
+              Cel.newBuilder()
+                  .evaluationBudget(budget)
+                  .function(
+                      "step", List.of(), CelType.INT, ignored -> (long) calls.incrementAndGet())
+                  .build()
+                  .prepare(expression);
+          var lowered = template.instantiate();
+          var original =
+              template.instantiate(Source.newBuilder("cel", expression, "host-call.cel").build());
+          calls.set(0);
+          Object expected = evaluationOutcome(original, Map.of());
+          int expectedCalls = calls.get();
+          calls.set(0);
+          assertEquals(expected, evaluationOutcome(lowered, Map.of()));
+          assertEquals(expectedCalls, calls.get());
+        }
+      } finally {
+        context.leave();
+      }
+    }
   }
 
   @Test

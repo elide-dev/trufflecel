@@ -48,6 +48,12 @@ try (var context = org.graalvm.polyglot.Context.newBuilder("cel").build()) {
 checked AST. Its source text must exactly match the prepared expression. Both APIs require
 language ID `cel` and an entered context; CEL initialization happens automatically.
 
+Programs created without a `Source` may combine constant-right integer arithmetic, such as
+`x * 2 + 1`, into fewer execution nodes. Intermediate overflow checks, unknown propagation,
+and the original evaluation budget are preserved. The `Source` APIs retain every original
+operator and literal, including when instantiating a template that has already produced an
+optimized program, so tools continue to receive the complete sequence of source events.
+
 Instrumentation wrappers and interop exports are generated at build time. Source sections,
 node metadata, and scope snapshots are created when tools request them. No runtime classpath
 scanning or reflection registration is introduced. Attached instruments can add allocation
