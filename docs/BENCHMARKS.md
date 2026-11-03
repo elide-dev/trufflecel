@@ -164,6 +164,13 @@ alongside CodSpeed and uploads both files as the `cel-comparison` artifact. The 
 also supports manual dispatch. Check in an explicitly dated result snapshot when updating
 the README; CI does not silently rewrite the published chart.
 
+The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
+[standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
+
+```sh
+python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-comparison.svg
+```
+
 For fast correctness checks, use `bazel test //benchmarks/comparison:smoke --config=local`.
 The Linux native check is `bazel test //benchmarks/comparison:native_smoke`; it additionally
 requires successful image-build AST initialization and the Truffle blocklist gates.

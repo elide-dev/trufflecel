@@ -172,6 +172,21 @@ Separate JVM and Native Image gates require guest compilation, enforce allocatio
 AST-size budgets, and reject compilation blocklist violations. CodSpeed does not measure
 JVM/JIT throughput. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
 
+A separate timing suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
+arithmetic, a policy expression, and a list comprehension. It measures compilation and warm
+evaluation on the JVM and Native Image (SVM), including evaluation of checked ASTs embedded
+at image build time. TruffleCEL evaluation must reach the final guest-JIT tier.
+
+![TruffleCEL versus cel-java: compilation and evaluation timings](docs/images/cel-comparison.svg)
+
+Captured November 3, 2026 on a shared AMD EPYC 7763 CI runner; this is not a performance
+guarantee. Lower is better; bars show the median of three process medians, with minimum/maximum whiskers.
+Image-build preparation embeds checked ASTs, not guest machine code; setup and guest
+compilation are excluded from evaluation timings. See the [raw measurements](docs/benchmarks/comparison.json),
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41703453231), and
+[comparison methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
+CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
+
 After successful main checks, Release Please opens version/changelog PRs from conventional
 commits. Merging a release PR creates a version tag. The Maven publisher uses that exact tag to
 publish JARs, sources, POMs, and checksums to `maven.elide.dev`; it requires the R2 credentials
@@ -207,5 +222,5 @@ allocation, and JIT performance budgets still need qualification.
 | [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
 | [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
 | [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
-| [Benchmark methodology](docs/BENCHMARKS.md) | CodSpeed simulation and separate guest-JIT qualification |
+| [Benchmark methodology](docs/BENCHMARKS.md) | Paired cel-java timings, SVG results, CodSpeed simulation, and guest-JIT qualification |
 | [Publishing](docs/PUBLISHING.md) | Maven consumption, release automation, and artifact verification |
