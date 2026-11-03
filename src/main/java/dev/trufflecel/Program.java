@@ -38,6 +38,8 @@ public final class Program {
     singleVariable = variables.size() == 1 ? variables.iterator().next() : null;
     this.resultType = resultType;
     this.environment = environment;
+    // Tooling receives the complete source tree, including every literal and operator event.
+    if (truffleSource == null) body = body.lowerArithmetic();
     body.rootBody = true;
     target = new ExpressionRoot(body, language, truffleSource).getCallTarget();
   }

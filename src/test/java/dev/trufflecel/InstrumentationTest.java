@@ -155,6 +155,14 @@ public class InstrumentationTest {
         assertEquals(4L, env.compile(source).evaluate(Map.of("x", 3L)));
         assertEquals(8L, env.prepare("x + 1").instantiate(source).evaluate(Map.of("x", 7L)));
         assertEquals(List.of(3L, 7L), events.localValues);
+        var arithmetic = env.prepare("x * 2 + 1");
+        assertEquals(7L, arithmetic.instantiate().evaluate(Map.of("x", 3L)));
+        events.sections.clear();
+        var arithmeticSource =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", "x * 2 + 1", "arithmetic.cel")
+                .build();
+        assertEquals(7L, arithmetic.instantiate(arithmeticSource).evaluate(Map.of("x", 3L)));
+        assertTrue(events.sections.containsAll(List.of("x * 2 + 1", "x * 2", "x", "2", "1")));
         var other =
             com.oracle.truffle.api.source.Source.newBuilder("cel", "x - 1", "other.cel").build();
         assertThrows(IllegalArgumentException.class, () -> env.prepare("x + 1").instantiate(other));
