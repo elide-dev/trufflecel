@@ -19,6 +19,12 @@ public interface ObjectType {
 
   boolean accepts(Object value);
 
+  /** Whether an object is empty for optional.ofNonZeroValue; adapters may refine this. */
+  default boolean isZero(Object value) {
+    for (String field : fields().keySet()) if (has(value, field)) return false;
+    return true;
+  }
+
   default Object decode(Bytes bytes) {
     throw new CelException(
         CelException.Code.INVALID_ARGUMENT, "binary decoding is not registered for " + name());

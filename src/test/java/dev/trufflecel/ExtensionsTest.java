@@ -1,0 +1,202 @@
+package dev.trufflecel;
+
+import static org.junit.Assert.*;
+import java.util.*;
+import org.junit.Test;
+
+public class ExtensionsTest {
+  private static void yes(String expression) {
+    assertTrue(expression, Cel.compile(expression).test());
+  }
+
+  private static void invalid(String expression) {
+    assertThrows(
+        expression,
+        CelException.class,
+        () -> Cel.newBuilder().build().parse(expression).evaluate());
+  }
+
+  @Test
+  public void optionalLazinessPresenceAndLiteralValidation() {
+    yes("optional.of(1).or(optional.of(1/0)).value() == 1");
+    yes("optional.of(1).orValue(1/0) == 1");
+    yes("[?optional.none(), ?optional.of(null)] == [null]");
+    yes("{?'a': optional.none(), 'a': 2} == {'a': 2}");
+    yes(".optional.of(1).value() == 1");
+    yes("optional.ofNonZeroValue(b'').hasValue() == false");
+    yes("optional.ofNonZeroValue(duration('0s')).hasValue() == false");
+    yes("optional.ofNonZeroValue(timestamp(0)).hasValue() == false");
+    yes("[1][?-1] == optional.none()");
+    yes("[1][?dyn(18446744073709551615u)] == optional.none()");
+    for (String expr :
+        List.of(
+            "optional.none().value()",
+            "dyn(1).hasValue()",
+            "dyn(1).orValue(2)",
+            "optional.none().or(dyn(1))",
+            "[?dyn(1)]",
+            "{?'x': dyn(1)}",
+            "dyn(1)[?0]",
+            "optional.of(1).x",
+            "optional.of(1).optFlatMap(x,dyn(x))")) invalid(expr);
+    for (String expr :
+        List.of(
+            "[?1]",
+            "{?'a':1}",
+            "1.hasValue()",
+            "optional.of(1).orValue('x')",
+            "optional.of(1).or(2)",
+            "1.optMap(x,x)",
+            "optional.of(1).optFlatMap(x,x)"))
+      assertThrows(expr, CelException.class, () -> Cel.newBuilder().build().compile(expr));
+    Environment e = Cel.newBuilder().variable("x", CelType.DYN).build();
+    assertEquals(Unknown.of("x"), e.compile("x.orValue(1)").evaluate(Map.of("x", Unknown.of("x"))));
+    assertEquals(
+        Unknown.of("x"),
+        e.compile("optional.of(1).optMap(v,x)").evaluate(Map.of("x", Unknown.of("x"))));
+    assertEquals(
+        Set.of("external"),
+        Cel.compile("[1].transformList(i,v, optional.of(v).optMap(i,i+external).value())")
+            .variables());
+  }
+
+  @Test
+  public void twoVariableScopesTransformsAndErrorSuppression() {
+    yes("[2,3].transformMap(i,v,i+v) == {0:2,1:4}");
+    yes("{'a':1,'b':2}.transformMapEntry(k,v,{v:k}) == {1:'a',2:'b'}");
+    yes("{'a':1,'b':2}.transformMapEntry(k,v,v==2,{v:k}) == {2:'b'}");
+    yes("[1,2].transformList(i,v,[3,4].transformList(i,v,i+v)) == [[3,5],[3,5]]");
+    yes("[1,2].all(i,v,i==0 || [2,3].exists(i,v,i==1 && v==3))");
+    yes("[1,2].existsOne(i,v,i+v==3)");
+    yes("[1,2].existsOne(v,v==2)");
+    invalid("{'a':1,'b':2}.transformMapEntry(k,v,{0:v})");
+    invalid("{'a':1}.transformMapEntry(k,v,dyn(v))");
+    for (String expr :
+        List.of(
+            "[1].all(i,i,true)",
+            "[1].transformList(1,v,v)",
+            "[1].transformList(i,v)",
+            "[1].transformMapEntry(i,v,v)",
+            "{}.sortBy(v,v)",
+            "[[1]].sort()",
+            "[1].sortBy(v,[v])"))
+      assertThrows(expr, CelException.class, () -> Cel.newBuilder().build().compile(expr));
+    Environment env = Cel.newBuilder().variable("u", CelType.DYN).build();
+    for (String expr :
+        List.of(
+            "[1].transformList(i,v,u)",
+            "[1].transformList(i,v,true,u)",
+            "[1].sortBy(v,u)",
+            "[1].existsOne(i,v,u)"))
+      assertEquals(Unknown.of("u"), env.compile(expr).evaluate(Map.of("u", Unknown.of("u"))));
+  }
+
+  @Test
+  public void unicodeStringsFormattingAndLimits() {
+    yes("'a😀b'.substring(1,2) == '😀' && 'a😀b'.indexOf('b') == 2");
+    yes("'\\u001ctext\\u001f'.trim() == '\\u001ctext\\u001f'");
+    yes("'a😀b'.reverse() == 'b😀a'");
+    yes("'😀a'.split('') == ['😀','a'] && ''.split('') == []");
+    yes("'abc'.split('',2) == ['a','bc']");
+    yes("'ab'.replace('','x') == 'xaxbx'");
+    yes("'ab'.replace('','x',2) == 'xaxb'");
+    yes("'ab'.replace('a','x',0) == 'ab'");
+    yes("strings.quote('\\u0001') == '\"\\\\u0001\"'");
+    yes("'%.0f'.format([2.5]) == '2'");
+    yes("'%.0e'.format([2.5]) == '2e+00'");
+    yes("'%.0e'.format([9.5]) == '1e+01'");
+    yes("'%.2e'.format([-0.00125]) == '-1.25e-03'");
+    yes("'%.1e %.1f'.format([-0.0,-0.0]) == '-0.0e+00 -0.0'");
+    yes("'%x'.format([18446744073709551615u]) == 'ffffffffffffffff'");
+    for (String expr :
+        List.of(
+            "'%'.format([])",
+            "'%.f'.format([1.0])",
+            "'%.1001f'.format([1.0])",
+            "'%d'.format([1.5])",
+            "dyn([1]).join()",
+            "'a'.charAt(9223372036854775807)",
+            "'a'.split('a',9223372036854775807)",
+            "'a'.replace('a','b',9223372036854775807)",
+            "[1].slice(0,9223372036854775807)")) invalid(expr);
+    for (String expr :
+        List.of(
+            "lists.range(100)",
+            "'abc'.replace('','012345678901234567890123456789')",
+            "['longstring','longstring'].join('longseparator')",
+            "[1,2,3,4,5].distinct()",
+            "[[1,2],[3,4]].flatten()")) {
+      CelException ex =
+          assertThrows(
+              expr,
+              CelException.class,
+              () -> Cel.newBuilder().evaluationBudget(10).build().compile(expr).evaluate());
+      assertEquals(expr, CelException.Code.RESOURCE_EXHAUSTED, ex.code());
+    }
+  }
+
+  @Test
+  public void nestedFormattingConsumesBudgetBeforeBuildingOutput() {
+    var env = Cel.newBuilder().variable("items", CelType.DYN).evaluationBudget(100).build();
+    var program = env.compile("'%s'.format([items])");
+    CelException e =
+        assertThrows(
+            CelException.class, () -> program.evaluate(Map.of("items", List.of("x".repeat(200)))));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, e.code());
+  }
+
+  @Test
+  public void numericBoundariesAndOverloadValidation() {
+    yes("math.greatest(9223372036854775807,9223372036854775808.0) == 9223372036854775808.0");
+    yes("math.least(9223372036854775807,9223372036854775808.0) == 9223372036854775807");
+    yes("math.round(4503599627370497.0) == 4503599627370497.0");
+    yes("math.isNaN(math.greatest([1.0,0.0/0.0]))");
+    yes("math.greatest([1.0,1.0/0.0]) == 1.0/0.0");
+    yes("math.bitShiftRight(-1,63) == 1 && math.bitShiftLeft(1u,63) == 9223372036854775808u");
+    for (String expr :
+        List.of(
+            "math.greatest([])",
+            "math.least(dyn(['x']))",
+            "math.greatest()",
+            "math.bitAnd(1,1u)",
+            "math.bitShiftLeft(1,1u)",
+            "math.ceil(1)",
+            "math.abs(true)",
+            "math.sign(1,2)",
+            "[1,1u].sort()")) invalid(expr);
+    for (String expr :
+        List.of(
+            "math.greatest()",
+            "math.ceil(1)",
+            "math.bitAnd(1,1u)",
+            "math.abs(true)",
+            "'a'.split(1)",
+            "'a'.replace(1,2)",
+            "[1].join()",
+            "lists.range('1')",
+            "cidr(1)",
+            "ip(1)",
+            "1.family()"))
+      assertThrows(expr, CelException.class, () -> Cel.newBuilder().build().compile(expr));
+  }
+
+  @Test
+  public void networkParsingNeverResolvesNamesAndKeepsAddressBits() {
+    yes("ip('ff12::1').isLinkLocalMulticast() && !ip('ff01::1').isLinkLocalMulticast()");
+    yes("!isCIDR('::/01') && !isCIDR('1.2.3.4/+24')");
+    yes("!isIP('example.com') && !isIP('127.1') && !isIP('012.0.0.1') && !isIP('1.2.3.256')");
+    yes("!isIP('') && !isIP('1:2:3:4:5:6:7') && !isIP('1:2:3:4:5:6:7:8:9')");
+    yes("!isIP('1::2::3') && !isIP('1:2:3:4:5:6:7:') && !isIP('[]')");
+    yes("string(ip('1:0:0:2:0:0:3:4')) == '1::2:0:0:3:4'");
+    yes("string(ip('1:2:3:4:5:6:0:0')) == '1:2:3:4:5:6::'");
+    yes("string(ip('1:2:3:4:5:6:7:8')) == '1:2:3:4:5:6:7:8'");
+    yes("string(ip('::192.0.2.1')) == '::c000:201'");
+    yes(
+        "isCIDR('1.2.3.4/0') && !isCIDR('1.2.3.4/33') && !isCIDR('::/129') && !isCIDR('::') && !isCIDR('::/-1')");
+    yes("cidr('1.2.3.4/0').masked() == cidr('0.0.0.0/0') && cidr('::/0').containsIP('ffff::')");
+    yes("cidr('1.2.3.4/24') != cidr('1.2.3.0/24') && cidr('1.2.3.4/24').ip() == ip('1.2.3.4')");
+    invalid("cidr('1.2.3.0/24').containsIP('example.com')");
+    invalid("cidr('1.2.3.0/24').containsCIDR('example.com')");
+    yes("!isIP('123456789012345678901234567890123456789012345678901234567890')");
+  }
+}

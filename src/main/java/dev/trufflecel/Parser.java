@@ -124,9 +124,12 @@ final class Parser {
           var entries = new ArrayList<ExprNode>();
           if (!accept("}"))
             do {
+              boolean optional = accept("?");
               entries.add(expression(0));
               expect(":");
-              entries.add(expression(0));
+              ExprNode entry = expression(0);
+              entry.optionalEntry = optional;
+              entries.add(entry);
               if (accept("}")) break;
               expect(",");
               if (accept("}")) break;
@@ -144,16 +147,18 @@ final class Parser {
     while (true) {
       if (++chain > env.maxDepth) throw error("selection nesting limit exceeded");
       if (accept(".")) {
+        boolean optional = accept("?");
         String name = identifier(true);
         if (accept("(")) {
           var args = arguments(")");
           args.add(0, node);
           node = call(name, true, node.offset, args);
-        } else node = new ExprNode(ExprNode.Kind.SELECT, name, null, node.offset, node);
+        } else node = new ExprNode(ExprNode.Kind.SELECT, name, optional, node.offset, node);
       } else if (accept("[")) {
+        boolean optional = accept("?");
         ExprNode index = expression(0);
         expect("]");
-        node = new ExprNode(ExprNode.Kind.INDEX, "", null, node.offset, node, index);
+        node = new ExprNode(ExprNode.Kind.INDEX, "", optional, node.offset, node, index);
       } else if (token.kind.equals("{") && node.qualifiedName() != null) {
         take();
         String name = node.qualifiedName();
@@ -161,11 +166,14 @@ final class Parser {
         var values = new ArrayList<ExprNode>();
         if (!accept("}"))
           do {
+            boolean optional = accept("?");
             String field = identifier(true);
             if (names.contains(field)) throw error("duplicate field: " + field);
             names.add(field);
             expect(":");
-            values.add(expression(0));
+            ExprNode entry = expression(0);
+            entry.optionalEntry = optional;
+            values.add(entry);
             if (accept("}")) break;
             expect(",");
             if (accept("}")) break;
@@ -187,14 +195,40 @@ final class Parser {
         if (args.get(0).kind != ExprNode.Kind.SELECT) throw error("has requires a field selection");
         return new ExprNode(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));
       }
-      if (receiver && Set.of("all", "exists", "exists_one", "map", "filter").contains(name)) {
-        if (args.size() != 3 && !(name.equals("map") && args.size() == 4))
+      if (receiver
+          && Set.of(
+                  "all",
+                  "exists",
+                  "exists_one",
+                  "existsOne",
+                  "map",
+                  "filter",
+                  "transformList",
+                  "transformMap",
+                  "transformMapEntry",
+                  "optMap",
+                  "optFlatMap",
+                  "sortBy")
+              .contains(name)) {
+        boolean two =
+            name.startsWith("transform")
+                || Set.of("all", "exists", "existsOne").contains(name) && args.size() == 4;
+        int variables = two ? 2 : 1;
+        int minimum = variables + 2;
+        boolean filtered =
+            Set.of("map", "transformList", "transformMap", "transformMapEntry").contains(name);
+        if (args.size() != minimum && !(filtered && args.size() == minimum + 1))
           throw error("invalid macro arguments");
-        ExprNode variable = args.remove(1);
-        if (variable.kind != ExprNode.Kind.IDENT || variable.name.contains("."))
-          throw error("macro variable must be an identifier");
+        String[] names = new String[variables];
+        for (int i = 0; i < variables; i++) {
+          ExprNode variable = args.remove(1);
+          if (variable.kind != ExprNode.Kind.IDENT || variable.name.contains("."))
+            throw error("macro variable must be an identifier");
+          names[i] = variable.name;
+        }
+        if (two && names[0].equals(names[1])) throw error("macro variables must differ");
         return new ExprNode(
-            ExprNode.Kind.MACRO, name, variable.name, offset, args.toArray(ExprNode[]::new));
+            ExprNode.Kind.MACRO, name, names, offset, args.toArray(ExprNode[]::new));
       }
     }
     return new ExprNode(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
@@ -215,7 +249,10 @@ final class Parser {
     var result = new ArrayList<ExprNode>();
     if (!accept(end))
       do {
-        result.add(expression(0));
+        boolean optional = accept("?");
+        ExprNode entry = expression(0);
+        entry.optionalEntry = optional;
+        result.add(entry);
         if (accept(end)) break;
         expect(",");
         if (accept(end)) break;

@@ -15,8 +15,13 @@ final class EvalContext {
   }
 
   void tick() {
-    if (--remaining < 0)
+    charge(1);
+  }
+
+  void charge(long cost) {
+    if (cost < 0 || cost > remaining)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "evaluation budget exceeded");
+    remaining -= cost;
   }
 
   Object get(String name) {

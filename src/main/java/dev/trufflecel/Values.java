@@ -64,6 +64,9 @@ final class Values {
     if (v instanceof Instant) return CelType.TIMESTAMP;
     if (v instanceof Duration) return CelType.DURATION;
     if (v instanceof CelType) return CelType.TYPE;
+    if (v instanceof NetworkValue.Address) return CelType.of("net.IP");
+    if (v instanceof NetworkValue.Prefix) return CelType.of("net.CIDR");
+    if (v instanceof OptionalValue) return CelType.of("optional_type");
     return CelType.DYN;
   }
 
@@ -78,6 +81,8 @@ final class Values {
   }
 
   static boolean equal(Object a, Object b) {
+    if (a instanceof OptionalValue x && b instanceof OptionalValue y)
+      return x.present() == y.present() && (!x.present() || equal(x.value(), y.value()));
     if (numeric(a) && numeric(b)) {
       if (a instanceof Double d && !Double.isFinite(d))
         return b instanceof Double e && d.doubleValue() == e.doubleValue();

@@ -1,6 +1,6 @@
 # Continuous simulation benchmarks
 
-CodSpeed measures eight fixed native-AOT cases on every PR and main push. The integration
+CodSpeed measures 14 fixed native-AOT cases on every PR and main push. The integration
 uses the same pinned CodSpeed action and instrument-hooks implementation as Komodo and
 TruffleData. It counts instructions within explicit C callback regions; it does not time
 Java startup, fixture creation, compilation warmup or shutdown.
@@ -20,6 +20,12 @@ That separate qualification is unresolved; simulation must not be read as guest-
 | native-row | Read a TruffleData row and evaluate arithmetic |
 | protobuf | Evaluate a predicate over a protobuf-backed value |
 | json | Evaluate a predicate over an already converted Oracle JSON object |
+| optional-chain | Read nested optional fields and apply a lazy fallback |
+| two-variable-transform | Transform a list using index and value bindings |
+| string-format | Format numeric/string values and compute the result size |
+| list-sort | Sort by a computed key and select the first item |
+| math-extrema | Find the maximum of a numeric list |
+| network-cidr | Parse a numeric CIDR/IP and test containment |
 
 Each case executes 256 operations. Checksums in `benchmarks/cases.json` are checked after
 the measurement; a volatile result prevents dead-code elimination. Preparation and 16 warmup

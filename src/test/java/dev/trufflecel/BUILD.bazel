@@ -117,3 +117,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "extensions",
+    srcs = ["ExtensionsTest.java"],
+    test_class = "dev.trufflecel.ExtensionsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
