@@ -112,6 +112,16 @@ class ExprNode extends CelNode {
     }
   }
 
+  String firstIdentifier() {
+    if (kind == Kind.IDENT) return name;
+    if (kind == Kind.CONSTANT) return null;
+    for (ExprNode child : children) {
+      String identifier = child.firstIdentifier();
+      if (identifier != null) return identifier;
+    }
+    return null;
+  }
+
   boolean hasBindings() {
     if (bindings != null) return true;
     for (ExprNode child : children) if (child.hasBindings()) return true;
