@@ -4,6 +4,8 @@ import java.util.Set;
 
 /** Entry points matching Elide's compile-once/evaluate-many embedding model. */
 public final class Cel {
+  private static final Environment DEFAULT = new Environment.Builder().inferVariables(true).build();
+
   private Cel() {}
 
   public static Environment.Builder newBuilder() {
@@ -12,7 +14,7 @@ public final class Cel {
 
   /** Infer free identifiers as dyn. Use an explicit environment for strict checking. */
   public static Program compile(String expression) {
-    return newBuilder().inferVariables(true).build().compile(expression);
+    return DEFAULT.compile(expression);
   }
 
   public static Program compile(String expression, Set<String> variables) {

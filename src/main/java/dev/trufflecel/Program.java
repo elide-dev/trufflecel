@@ -56,6 +56,12 @@ public final class Program {
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   private EvalContext activation(Map<String, ?> variables) {
+    if (variables.isEmpty()) return new EvalContext(environment, Map.of());
+    if (variables.size() == 1) {
+      var binding = variables.entrySet().iterator().next();
+      return new EvalContext(
+          environment, Collections.singletonMap(binding.getKey(), Values.in(binding.getValue())));
+    }
     var activation = new HashMap<String, Object>();
     variables.forEach((name, value) -> activation.put(name, Values.in(value)));
     return new EvalContext(environment, activation);
