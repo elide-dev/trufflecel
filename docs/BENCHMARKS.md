@@ -176,6 +176,22 @@ reduces comprehension instructions by 29.9%, short-circuit evaluation by 39.9%, 
 23.9%, protobuf by 17.0%, and native-row access by 7.6%. Other cases change by less than
 1%; all 14 profile totals reconcile. Custom object equality overrides retain precedence.
 
+Moving unobservable evaluation contexts into the guest target (`78a4c2c`,
+[run 41737027259](https://github.com/elide-dev/trufflecel/actions/runs/41737027259))
+reduces comprehension instructions by 15.1% and scalar instructions by 5.5% relative to
+`d415645`. Its paired suite retains 24/24 timing and allocation wins, but only 9/24 RSS
+wins. Native comprehension peak RSS reaches about 139 MiB: expanding context construction
+inside the guest compiler has a process-memory cost despite lower evaluation allocations.
+
+Keeping escaping local contexts outside the guest target (`325e7cb`,
+[simulation run 41740534860](https://github.com/elide-dev/trufflecel/actions/runs/41740534860))
+retains 14.1% fewer comprehension instructions and 12.6% fewer two-variable-transform
+instructions relative to `d415645`. Scalar instructions increase 4.5%, short-circuit
+instructions increase 2.6%, and compile/evaluate increases 1.0%; these are tradeoffs, not
+universal improvements. All 14 profile totals reconcile for both runs. Separate native
+diagnostics place comprehension peak RSS near 120 MiB after the change; a full paired
+suite is needed to qualify the resulting footprint across execution modes.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
@@ -195,9 +211,10 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 `-XX:-UseJVMCICompiler`), and 100,000 warmup evaluations before each measurement phase.
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
-fails rather than skips. Scalar evaluation is capped at 128 bytes/op, logical/optional/row
-paths at 640, list construction at 768, protobuf/JSON and comprehensions at 1,024, maps at 1,536,
-and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed
+fails rather than skips. Scalar, logical, conditional, and addition fixtures are capped at
+64 bytes/op; optional evaluation at 192; list construction and `all` at 320; filter/map at
+608; maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
+at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
 
 `bazel test //benchmarks:jit_smoke` builds a separate Linux amd64 Native Image containing
