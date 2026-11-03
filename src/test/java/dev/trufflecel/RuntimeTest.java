@@ -182,6 +182,29 @@ public class RuntimeTest {
   }
 
   @Test
+  public void singleEntryInputsWorkWithLargerDeclarationEnvironments() {
+    var environment =
+        Cel.newBuilder()
+            .variable("unused", CelType.DYN)
+            .variable("x", CelType.DYN)
+            .variable("y", CelType.DYN)
+            .build();
+    for (Program program :
+        List.of(environment.compile("x"), environment.prepare("x").instantiate())) {
+      assertEquals(Set.of("unused", "x", "y"), program.variables());
+      assertEquals(3L, program.evaluate(Map.of("x", 3)));
+      assertNull(program.evaluate(Collections.singletonMap("x", null)));
+      assertEquals(
+          CelException.Code.UNDECLARED,
+          assertThrows(CelException.class, () -> program.evaluate(Map.of("y", 3))).code());
+    }
+    assertEquals(4L, environment.compile(".x + 1").evaluate(Map.of("x", 3)));
+    // The first syntactic identifier can be local; the input must still bind the global y.
+    assertEquals(
+        List.of(4L, 5L), environment.compile("[1,2].map(x, x + y)").evaluate(Map.of("y", 3)));
+  }
+
+  @Test
   public void singletonActivationsSnapshotInputsOnEveryEvaluation() {
     var values = new ArrayList<>(List.of(1L));
     var input = new HashMap<String, Object>();

@@ -11,7 +11,7 @@ import java.util.*;
 public final class Program {
   private final String source;
   private final Set<String> variables;
-  private final String singleVariable;
+  private final String bindingHint;
   private final CelType resultType;
   private final Environment environment;
   private final boolean contextInArguments;
@@ -36,7 +36,11 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    singleVariable = variables.size() == 1 ? variables.iterator().next() : null;
+    String identifier = body.firstIdentifier();
+    bindingHint =
+        identifier != null
+            ? (identifier.startsWith(".") ? identifier.substring(1) : identifier)
+            : variables.size() == 1 ? variables.iterator().next() : null;
     this.resultType = resultType;
     this.environment = environment;
     // Tooling receives the complete source tree, including every literal and operator event.
@@ -86,10 +90,11 @@ public final class Program {
   private Object[] arguments(Map<String, ?> variables) {
     if (variables.isEmpty()) return arguments(Map.of(), null);
     if (variables.size() == 1) {
-      if (singleVariable != null) {
-        Object value = variables.get(singleVariable);
-        if (value != null || variables.containsKey(singleVariable))
-          return arguments(singleVariable, Values.in(value));
+      // This is only a lookup hint; unmatched single-entry inputs retain their actual key.
+      if (bindingHint != null) {
+        Object value = variables.get(bindingHint);
+        if (value != null || variables.containsKey(bindingHint))
+          return arguments(bindingHint, Values.in(value));
       }
       var binding = variables.entrySet().iterator().next();
       return arguments(binding.getKey(), Values.in(binding.getValue()));
