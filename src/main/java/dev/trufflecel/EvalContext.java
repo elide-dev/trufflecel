@@ -16,6 +16,13 @@ final class EvalContext {
     remaining = environment.budget;
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  Map<String, Object> visibleBindings() {
+    var visible = new LinkedHashMap<String, Object>(activation);
+    for (int i = 0; i < scopeSize; i += 2) visible.put((String) scopes[i], scopes[i + 1]);
+    return Collections.unmodifiableMap(visible);
+  }
+
   void tick() {
     charge(1);
   }

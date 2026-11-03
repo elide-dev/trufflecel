@@ -242,7 +242,7 @@ Bazel builds both executables with pinned toolchains; measurement runs on the sa
 host for both runtimes. `comparison.json` records all samples, source commit and digest,
 machine details, engine versions, and image-build preparation observations. `comparison.svg`
 is standalone and suitable for a README. CI runs the reusable `comparison.yml` workflow
-alongside CodSpeed and uploads both files as the `cel-comparison` artifact. The workflow
+alongside CodSpeed and uploads the JSON and both SVG files as the `cel-comparison` artifact. The workflow
 also supports manual dispatch. Check in an explicitly dated result snapshot when updating
 the README; CI does not silently rewrite the published chart.
 
@@ -258,17 +258,26 @@ compilation speedups range from 45.67× to 190.98×, and evaluation speedups fro
 | SVM comprehension evaluation | 1,105.15 ns | 431.18 ns | 919.32 ns |
 | SVM image-build AST comprehension | 1,107.36 ns | 429.09 ns | 915.66 ns |
 
-The [original baseline samples](benchmarks/comparison-baseline.json) and optimized samples
+The [original baseline samples](benchmarks/comparison-baseline.json) and [optimized schema-1 samples](benchmarks/comparison-optimized-v1.json)
 come from separate shared runners; use each run's paired cel-java measurements for the
 comparison. The workload definitions, timing harness, warmup, and sample counts were
 unchanged. These measurements support the stated fixture results, not a claim about every
 CEL expression or every machine.
+
+The expanded schema-2 run (`ad3fdcb`, [CI 41711452800](https://github.com/elide-dev/trufflecel/actions/runs/41711452800))
+adds interpreter execution and whole-process peak RSS. TruffleCEL leads in 23/24 timing
+cells; JVM scalar interpretation is about 1.92× slower. Peak RSS is higher in 23/24 cells.
+On SVM, interpreter RSS is approximately 3–9% higher; guest-JIT evaluation RSS is about
+54–84% higher. These are the baseline gaps for further optimization. Schema-1 and schema-2
+runs use different shared runner CPUs and setup isolation, so compare engines within each
+run rather than treating their absolute times as a controlled before/after experiment.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
 
 ```sh
 python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-comparison.svg
+python3 tools/bench/compare.py render docs/benchmarks/comparison.json docs/images/cel-peak-rss.svg --metric peak-rss
 ```
 
 For fast correctness checks, use `bazel test //benchmarks/comparison:smoke --config=local`.

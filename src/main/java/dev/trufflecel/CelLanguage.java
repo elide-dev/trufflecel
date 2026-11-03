@@ -1,11 +1,13 @@
 package dev.trufflecel;
 
 import com.oracle.truffle.api.*;
+import com.oracle.truffle.api.instrumentation.*;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.interop.*;
 import com.oracle.truffle.api.library.*;
 import java.util.*;
+import org.graalvm.polyglot.Context;
 
 /** Polyglot registration; the direct Java API does not require a Polyglot Context. */
 @TruffleLanguage.Registration(
@@ -15,7 +17,26 @@ import java.util.*;
     defaultMimeType = "application/cel",
     characterMimeTypes = "application/cel",
     contextPolicy = TruffleLanguage.ContextPolicy.SHARED)
+@ProvidedTags({
+  StandardTags.ExpressionTag.class,
+  StandardTags.StatementTag.class,
+  StandardTags.RootTag.class,
+  StandardTags.RootBodyTag.class,
+  StandardTags.CallTag.class,
+  StandardTags.ReadVariableTag.class,
+  StandardTags.WriteVariableTag.class
+})
 public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
+  private static final LanguageReference<CelLanguage> LANGUAGE =
+      LanguageReference.create(CelLanguage.class);
+
+  static CelLanguage current(com.oracle.truffle.api.source.Source source) {
+    if (!"cel".equals(source.getLanguage()))
+      throw new IllegalArgumentException("Expected a CEL source");
+    Context.getCurrent().initialize("cel");
+    return LANGUAGE.get(null);
+  }
+
   private static final ContextReference<Scope> CONTEXT = ContextReference.create(CelLanguage.class);
 
   @Override
@@ -33,7 +54,12 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     final String sourceName = request.getSource().getName();
     final Program program;
     try {
-      program = Cel.compile(request.getSource().getCharacters().toString());
+      program =
+          Cel.newBuilder()
+              .inferVariables(true)
+              .build()
+              .prepare(request.getSource().getCharacters().toString())
+              .adopt(this, request.getSource());
     } catch (CelException failure) {
       throw new GuestException(failure, true);
     }

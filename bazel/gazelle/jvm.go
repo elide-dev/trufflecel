@@ -44,6 +44,7 @@ func (*java) Kinds() map[string]rule.KindInfo {
 var imports = regexp.MustCompile(`(?m)^\s*import\s+(?:static\s+)?([\w.]+)`)
 var packages = regexp.MustCompile(`(?m)^\s*package\s+([\w.]+)\s*;`)
 var external = map[string]string{
+	"com.oracle.truffle.runtime.":     "@maven//:org_graalvm_truffle_truffle_runtime",
 	"dev.elide.truffledata.":          "@maven//:dev_elide_truffledata_core",
 	"dev.elide.truffledata.protobuf.": "@maven//:dev_elide_truffledata_protobuf",
 	"dev.elide.truffledata.jdbc.":     "@maven//:dev_elide_truffledata_jdbc",

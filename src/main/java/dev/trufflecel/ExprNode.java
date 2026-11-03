@@ -1,10 +1,55 @@
 package dev.trufflecel;
 
 import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.instrumentation.*;
 import java.util.*;
 
 /** Each parsed expression becomes an adopted Truffle AST node, never a delegated interpreter. */
-final class ExprNode extends Node {
+@GenerateWrapper
+class ExprNode extends CelNode {
+  boolean rootBody, statement;
+  @Children WriteNode[] bindings;
+
+  ExprNode() {
+    this(Kind.CONSTANT, "", null, 0);
+  }
+
+  ExprNode sourceRange(int start, int end) {
+    sourceStart = start;
+    sourceEnd = end;
+    return this;
+  }
+
+  @GenerateWrapper.OutgoingConverter
+  final Object instrumentResult(Object result) {
+    return GuestValue.wrap(result);
+  }
+
+  @Override
+  public WrapperNode createWrapper(ProbeNode probe) {
+    var wrapper = new ExprNodeWrapper(this, probe);
+    // Collection/object parents inspect this flag after executing a child through its probe.
+    wrapper.optionalEntry = optionalEntry;
+    return wrapper;
+  }
+
+  @Override
+  public boolean hasTag(Class<? extends Tag> tag) {
+    return tag == StandardTags.ExpressionTag.class
+        || (rootBody || statement) && tag == StandardTags.StatementTag.class
+        || rootBody && (tag == StandardTags.RootTag.class || tag == StandardTags.RootBodyTag.class)
+        || kind == Kind.CALL && tag == StandardTags.CallTag.class
+        || kind == Kind.IDENT && tag == StandardTags.ReadVariableTag.class;
+  }
+
+  @Override
+  public Object getNodeObject() {
+    return kind == Kind.IDENT
+        ? GuestValue.wrap(Map.of(StandardTags.ReadVariableTag.NAME, name))
+        : null;
+  }
+
   enum Kind {
     CONSTANT,
     IDENT,
@@ -71,14 +116,15 @@ final class ExprNode extends Node {
     } else for (ExprNode child : children) child.free(bound, out);
   }
 
-  Object execute(EvalContext ctx) {
+  Object execute(VirtualFrame frame) {
+    EvalContext ctx = (EvalContext) frame.getArguments()[0];
     ctx.tick();
     return switch (kind) {
       case CONSTANT -> value;
       case IDENT -> ctx.get(name);
-      case SELECT -> select(ctx, false);
+      case SELECT -> select(frame, ctx, false);
       case INDEX -> {
-        Object a = children[0].execute(ctx), b = children[1].execute(ctx);
+        Object a = children[0].execute(frame), b = children[1].execute(frame);
         if (a instanceof Unknown u) yield u;
         if (b instanceof Unknown u) yield u;
         boolean optional = Boolean.TRUE.equals(value) || a instanceof OptionalValue;
@@ -96,22 +142,26 @@ final class ExprNode extends Node {
           throw e;
         }
       }
-      case LIST -> list(ctx);
-      case MAP -> map(ctx);
-      case OBJECT -> object(ctx);
+      case LIST -> list(frame, ctx);
+      case MAP -> map(frame, ctx);
+      case OBJECT -> object(frame, ctx);
       case CONDITIONAL -> {
-        Object condition = children[0].execute(ctx);
+        Object condition = children[0].execute(frame);
         if (condition instanceof Unknown) yield condition;
         if (!(condition instanceof Boolean b)) throw Values.overload("conditional");
-        yield b ? children[1].execute(ctx) : children[2].execute(ctx);
+        yield b ? children[1].execute(frame) : children[2].execute(frame);
       }
-      case CALL -> call(ctx);
-      case MACRO -> macro(ctx);
+      case CALL -> call(frame, ctx);
+      case MACRO -> macro(frame, ctx);
     };
   }
 
-  private Object select(EvalContext ctx, boolean presence) {
-    return selectValue(ctx, presence, children[0].execute(ctx));
+  Object executePresence(VirtualFrame frame) {
+    return select(frame, (EvalContext) frame.getArguments()[0], true);
+  }
+
+  private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
+    return selectValue(ctx, presence, children[0].execute(frame));
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -144,14 +194,14 @@ final class ExprNode extends Node {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object call(EvalContext ctx) {
-    if (name.equals("&&") || name.equals("||")) return logical(ctx);
+  private Object call(VirtualFrame frame, EvalContext ctx) {
+    if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
     if (optionalFallback && children.length == 2) {
-      Object first = children[0].execute(ctx);
+      Object first = children[0].execute(frame);
       if (first instanceof Unknown) return first;
       OptionalValue o = optional(first);
       if (o.present()) return name.equals("or") ? o : o.value();
-      Object fallback = children[1].execute(ctx);
+      Object fallback = children[1].execute(frame);
       return name.equals("or") && !(fallback instanceof Unknown) ? optional(fallback) : fallback;
     }
     Object[] args = new Object[children.length];
@@ -159,7 +209,7 @@ final class ExprNode extends Node {
     Unknown unknown = null;
     for (int i = 0; i < children.length; i++) {
       try {
-        args[i] = children[i].execute(ctx);
+        args[i] = children[i].execute(frame);
         if (args[i] instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
@@ -173,13 +223,13 @@ final class ExprNode extends Node {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object logical(EvalContext ctx) {
+  private Object logical(VirtualFrame frame, EvalContext ctx) {
     boolean decisive = name.equals("||");
     CelException error = null;
     Unknown unknown = null;
     for (ExprNode child : children) {
       try {
-        Object result = child.execute(ctx);
+        Object result = child.execute(frame);
         if (result instanceof Boolean b) {
           if (b == decisive) return b;
         } else if (result instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
@@ -199,17 +249,17 @@ final class ExprNode extends Node {
     throw Values.overload("optional");
   }
 
-  private Object macro(EvalContext ctx) {
-    if (name.equals("has")) return children[0].select(ctx, true);
-    Object range = children[0].execute(ctx);
+  private Object macro(VirtualFrame frame, EvalContext ctx) {
+    if (name.equals("has")) return children[0].executePresence(frame);
+    Object range = children[0].execute(frame);
     if (range instanceof Unknown) return range;
     String[] variables = (String[]) value;
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;
-      ctx.push(variables[0], o.value());
+      bindings[0].execute(frame, o.value());
       try {
-        Object mapped = children[1].execute(ctx);
+        Object mapped = children[1].execute(frame);
         if (mapped instanceof Unknown) return mapped;
         return name.equals("optMap") ? OptionalValue.of(mapped) : optional(mapped);
       } finally {
@@ -227,12 +277,13 @@ final class ExprNode extends Node {
     for (Object item : values) {
       ctx.tick();
       Object key = range instanceof List<?> && variables.length == 2 ? index : item;
-      ctx.push(variables[0], key);
+      bindings[0].execute(frame, key);
       if (variables.length == 2)
-        ctx.push(variables[1], range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
+        bindings[1].execute(
+            frame, range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
       index++;
       try {
-        Object predicate = children[1].execute(ctx);
+        Object predicate = children[1].execute(frame);
         if (predicate instanceof Unknown u) {
           unknown = unknown == null ? u : unknown.merge(u);
           continue;
@@ -246,7 +297,7 @@ final class ExprNode extends Node {
           if (children.length == 3) {
             if (!(predicate instanceof Boolean b)) throw Values.overload(name);
             if (!b) continue;
-            predicate = children[2].execute(ctx);
+            predicate = children[2].execute(frame);
             if (predicate instanceof Unknown u) {
               unknown = unknown == null ? u : unknown.merge(u);
               continue;
@@ -287,11 +338,11 @@ final class ExprNode extends Node {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object list(EvalContext ctx) {
+  private Object list(VirtualFrame frame, EvalContext ctx) {
     var list = HostCollections.list();
     Unknown unknown = null;
     for (ExprNode child : children) {
-      Object v = child.execute(ctx);
+      Object v = child.execute(frame);
       if (v instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
       if (child.optionalEntry && !(v instanceof Unknown)) {
         OptionalValue o = optional(v);
@@ -304,11 +355,11 @@ final class ExprNode extends Node {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object map(EvalContext ctx) {
+  private Object map(VirtualFrame frame, EvalContext ctx) {
     var map = HostCollections.<Object>map();
     Unknown unknown = null;
     for (int i = 0; i < children.length; i += 2) {
-      Object k = children[i].execute(ctx), v = children[i + 1].execute(ctx);
+      Object k = children[i].execute(frame), v = children[i + 1].execute(frame);
       if (k instanceof Unknown u) {
         unknown = unknown == null ? u : unknown.merge(u);
         continue;
@@ -332,11 +383,11 @@ final class ExprNode extends Node {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object object(EvalContext ctx) {
+  private Object object(VirtualFrame frame, EvalContext ctx) {
     var fields = HostCollections.<String>map();
     String[] names = (String[]) value;
     for (int i = 0; i < children.length; i++) {
-      Object v = children[i].execute(ctx);
+      Object v = children[i].execute(frame);
       if (children[i].optionalEntry && !(v instanceof Unknown)) {
         OptionalValue o = optional(v);
         if (!o.present()) continue;

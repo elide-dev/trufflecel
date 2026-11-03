@@ -1,4 +1,4 @@
-load("@rules_java//java:defs.bzl", "java_library", "java_test")
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin", "java_test")
 
 java_test(
     name = "conformance",
@@ -126,5 +126,27 @@ java_test(
         ":test_support",
         "//:trufflecel",
         "@maven//:junit_junit",
+    ],
+)
+
+java_plugin(
+    name = "instrument_processor",
+    processor_class = "com.oracle.truffle.dsl.processor.InstrumentRegistrationProcessor",
+    deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
+)
+
+java_test(
+    name = "instrumentation",
+    srcs = ["InstrumentationTest.java"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED"],
+    plugins = [":instrument_processor"],
+    test_class = "dev.trufflecel.InstrumentationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_graalvm_truffle_truffle_runtime",
     ],
 )

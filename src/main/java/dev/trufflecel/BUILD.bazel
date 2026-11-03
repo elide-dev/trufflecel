@@ -12,6 +12,12 @@ java_plugin(
     deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
 )
 
+java_plugin(
+    name = "instrumentable_processor",
+    processor_class = "com.oracle.truffle.dsl.processor.InstrumentableProcessor",
+    deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
+)
+
 java_library(
     name = "trufflecel",
     srcs = [
@@ -19,6 +25,7 @@ java_library(
         "Cel.java",
         "CelException.java",
         "CelLanguage.java",
+        "CelNode.java",
         "CelNull.java",
         "CelType.java",
         "Checker.java",
@@ -42,15 +49,18 @@ java_library(
         "Unknown.java",
         "Values.java",
         "WellKnownTypes.java",
+        "WriteNode.java",
     ],
     plugins = [
         ":truffle_processor",
         ":language_processor",
+        ":instrumentable_processor",
     ],
     visibility = ["//visibility:public"],
     deps = [
         "@maven//:com_google_re2j_re2j",
         "@maven//:dev_elide_truffledata_core",
+        "@maven//:org_graalvm_polyglot_polyglot",
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )

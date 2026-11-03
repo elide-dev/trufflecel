@@ -3,6 +3,8 @@ package dev.trufflecel;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
+import com.oracle.truffle.api.source.Source;
+import com.oracle.truffle.api.source.SourceSection;
 import java.util.*;
 
 /** A reusable Truffle call target. Evaluations have independent activations and budgets. */
@@ -19,11 +21,23 @@ public final class Program {
       CelType resultType,
       ExprNode body,
       Environment environment) {
+    this(source, variables, resultType, body, environment, null, null);
+  }
+
+  Program(
+      String source,
+      Set<String> variables,
+      CelType resultType,
+      ExprNode body,
+      Environment environment,
+      CelLanguage language,
+      Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
     this.resultType = resultType;
     this.environment = environment;
-    target = new ExpressionRoot(body).getCallTarget();
+    body.rootBody = true;
+    target = new ExpressionRoot(body, language, truffleSource).getCallTarget();
   }
 
   public String source() {
@@ -80,14 +94,22 @@ public final class Program {
   private static final class ExpressionRoot extends RootNode {
     @Child private ExprNode body;
 
-    ExpressionRoot(ExprNode body) {
-      super(null);
+    private final SourceSection section;
+
+    ExpressionRoot(ExprNode body, CelLanguage language, Source source) {
+      super(language);
       this.body = body;
+      section = source == null ? null : source.createSection(0, source.getLength());
+    }
+
+    @Override
+    public SourceSection getSourceSection() {
+      return section;
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
-      return body.execute((EvalContext) frame.getArguments()[0]);
+      return body.execute(frame);
     }
 
     @Override

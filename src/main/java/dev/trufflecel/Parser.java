@@ -28,7 +28,7 @@ final class Parser {
           "while");
   private final String source;
   private final Environment env;
-  private int cursor, depth;
+  private int cursor, depth, consumedEnd;
   private Token token;
 
   Parser(String source, Environment env) {
@@ -51,13 +51,19 @@ final class Parser {
         Token op = take();
         int prec = precedence(op.kind);
         ExprNode right = expression(prec + 1);
-        left = new ExprNode(ExprNode.Kind.CALL, op.kind, false, op.offset, left, right);
+        left =
+            new ExprNode(ExprNode.Kind.CALL, op.kind, false, op.offset, left, right)
+                .sourceRange(left.sourceStart, right.sourceEnd);
       }
       if (min == 0 && accept("?")) {
         ExprNode yes = expression(0);
         expect(":");
         ExprNode no = expression(0);
-        left = new ExprNode(ExprNode.Kind.CONDITIONAL, "", null, left.offset, left, yes, no);
+        yes.statement = true;
+        no.statement = true;
+        left =
+            new ExprNode(ExprNode.Kind.CONDITIONAL, "", null, left.offset, left, yes, no)
+                .sourceRange(left.sourceStart, no.sourceEnd);
       }
       return left;
     } finally {
@@ -77,6 +83,11 @@ final class Parser {
   }
 
   private ExprNode unary() {
+    int start = token.offset;
+    return unaryValue().sourceRange(start, consumedEnd);
+  }
+
+  private ExprNode unaryValue() {
     if (token.kind.equals("!") || token.kind.equals("-")) {
       Token op = take();
       int count = 1;
@@ -85,7 +96,7 @@ final class Parser {
       }
       if (op.kind.equals("-") && count % 2 == 1 && token.kind.equals("NUMBER")) {
         Token number = take();
-        return postfix(number(number, true));
+        return postfix(number(number, true).sourceRange(op.offset, consumedEnd));
       }
       ExprNode child = primary();
       child = postfix(child);
@@ -97,6 +108,11 @@ final class Parser {
   }
 
   private ExprNode primary() {
+    int start = token.offset;
+    return primaryValue().sourceRange(start, consumedEnd);
+  }
+
+  private ExprNode primaryValue() {
     Token t = take();
     switch (t.kind) {
       case "NUMBER":
@@ -144,6 +160,7 @@ final class Parser {
 
   private ExprNode postfix(ExprNode node) {
     int chain = 0;
+    int start = node.sourceStart;
     while (true) {
       if (++chain > env.maxDepth) throw error("selection nesting limit exceeded");
       if (accept(".")) {
@@ -186,6 +203,7 @@ final class Parser {
                 node.offset,
                 values.toArray(ExprNode[]::new));
       } else return node;
+      node.sourceRange(start, consumedEnd);
     }
   }
 
@@ -220,15 +238,20 @@ final class Parser {
         if (args.size() != minimum && !(filtered && args.size() == minimum + 1))
           throw error("invalid macro arguments");
         String[] names = new String[variables];
+        WriteNode[] bindings = new WriteNode[variables];
         for (int i = 0; i < variables; i++) {
           ExprNode variable = args.remove(1);
           if (variable.kind != ExprNode.Kind.IDENT || variable.name.contains("."))
             throw error("macro variable must be an identifier");
           names[i] = variable.name;
+          bindings[i] = new WriteNode(variable.name, variable.sourceStart, variable.sourceEnd);
         }
         if (two && names[0].equals(names[1])) throw error("macro variables must differ");
-        return new ExprNode(
-            ExprNode.Kind.MACRO, name, names, offset, args.toArray(ExprNode[]::new));
+        ExprNode macro =
+            new ExprNode(ExprNode.Kind.MACRO, name, names, offset, args.toArray(ExprNode[]::new));
+        macro.bindings = bindings;
+        for (int i = 1; i < macro.children.length; i++) macro.children[i].statement = true;
+        return macro;
       }
     }
     return new ExprNode(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
@@ -301,6 +324,7 @@ final class Parser {
 
   private Token take() {
     Token result = token;
+    consumedEnd = cursor;
     token = next();
     return result;
   }

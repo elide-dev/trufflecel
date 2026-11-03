@@ -25,7 +25,7 @@ class PublicationTest(unittest.TestCase):
                 prefix = directory / version / (artifact + '-' + version)
                 root = ET.parse(str(prefix) + '.pom').getroot()
                 expected = {
-                    'core': {'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j'},
+                    'core': {'org.graalvm.polyglot:polyglot', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j'},
                     'protobuf': {'dev.elide:trufflecel-core', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'dev.elide:truffledata-protobuf', 'com.google.protobuf:protobuf-java'},
                     'json': {'dev.elide:trufflecel-core', 'org.graalvm.shadowed:json'},
                 }[module]
