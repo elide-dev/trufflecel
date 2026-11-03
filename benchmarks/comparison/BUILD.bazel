@@ -35,7 +35,7 @@ native_image(
     extra_args = [
         "--gc=serial", "-J-Xmx4g", "--parallelism=4", "-march=compatibility",
         "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
-        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common.collect,com.google.common.base,com.google.protobuf,com.google.re2j",
+        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
         "--initialize-at-run-time=dev.trufflecel.Comparison",
         "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods",
         "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions",
