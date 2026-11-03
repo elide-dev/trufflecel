@@ -49,17 +49,23 @@ final class EvalContext {
     remaining -= cost;
   }
 
-  // Preserve stable guest compilation when instruments materialize frames and inspect bindings.
+  // Scoped reads remain opaque to avoid expanding dynamic scope walks in each compiled loop.
+  // Observable reads use the same boundary so instruments can safely materialize frames.
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  Object getObserved(String name) {
-    return get(name);
-  }
-
-  Object get(String name) {
-    if (name.startsWith(".")) name = absoluteName(name);
+  Object getBoundary(String name) {
+    if (name.startsWith(".")) name = name.substring(1);
     else {
       for (int i = scopeSize - 2; i >= 0; i -= 2) if (name.equals(scopes[i])) return scopes[i + 1];
     }
+    return rootBinding(name);
+  }
+
+  Object get(String name) {
+    if (scopeSize != 0 || name.startsWith(".")) return getBoundary(name);
+    return rootBinding(name);
+  }
+
+  private Object rootBinding(String name) {
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value =
         singleName == null
@@ -72,11 +78,6 @@ final class EvalContext {
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   private static CelException undeclared(String name) {
     return Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
-  }
-
-  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private static String absoluteName(String name) {
-    return name.substring(1);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary

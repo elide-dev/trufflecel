@@ -9,7 +9,7 @@ import java.util.*;
 @GenerateWrapper
 class ExprNode extends CelNode {
   boolean rootBody, statement;
-  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean observableBindings;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
   @Children WriteNode[] bindings;
 
   ExprNode() {
@@ -110,6 +110,12 @@ class ExprNode extends CelNode {
       ctx.tick();
       return scalarBinary(frame, ctx);
     }
+  }
+
+  boolean hasBindings() {
+    if (bindings != null) return true;
+    for (ExprNode child : children) if (child.hasBindings()) return true;
+    return false;
   }
 
   static ExprNode constant(Object value, int offset) {
@@ -256,7 +262,7 @@ class ExprNode extends CelNode {
     ctx.tick();
     return switch (kind) {
       case CONSTANT -> value;
-      case IDENT -> observableBindings ? ctx.getObserved(name) : ctx.get(name);
+      case IDENT -> boundaryReads ? ctx.getBoundary(name) : ctx.get(name);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
         Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
