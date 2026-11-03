@@ -84,7 +84,24 @@ value iteration, iterator `hasNext`, entry `getValue`, and value-iterator constr
 accounted for about 37% of instructions. Equality traversed registered object types on each
 comparison. The first optimization precomputes that traversal as an array in the immutable
 environment, retaining the same adapter order and custom equality behavior. This baseline
-identifies the target; a subsequent measured run must establish the improvement.
+identifies the target.
+
+The first array-dispatch change (`4e9d35a`, [run 41706099612](https://github.com/elide-dev/trufflecel/actions/runs/41706099612))
+produced these CodSpeed results with unchanged workloads:
+
+| Case | Baseline instructions/op | Array dispatch | Change |
+| --- | ---: | ---: | ---: |
+| Comprehension | 54,359.79 | 29,905.04 | −45.0% |
+| Short-circuit | 5,467.48 | 2,406.77 | −56.0% |
+| Protobuf | 10,605.37 | 7,470.19 | −29.6% |
+| JSON | 18,255.39 | 9,087.50 | −50.2% |
+| Compile/evaluate | 46,701.28 | 50,701.77 | +8.6% |
+
+The compile/evaluate regression exposed per-call default-environment construction in
+`Cel.compile`. Follow-up changes reuse the immutable default environment, use compact
+single-binding activations, defer/reuse local scope storage, and avoid decimal conversion
+for same-type numeric equality. Those changes require their own measured verification;
+the table above reports only the first array-dispatch change.
 
 ## Guest compilation and allocation gates
 

@@ -82,6 +82,31 @@ public class RuntimeTest {
   }
 
   @Test
+  public void singletonActivationsSnapshotInputsOnEveryEvaluation() {
+    var values = new ArrayList<>(List.of(1L));
+    var input = new HashMap<String, Object>();
+    input.put("xs", values);
+    var env =
+        Cel.newBuilder()
+            .variable("xs", CelType.list(CelType.INT))
+            .function(
+                "mutate",
+                List.of(),
+                CelType.BOOL,
+                ignored -> {
+                  values.set(0, 2L);
+                  input.put("xs", List.of(3L));
+                  return true;
+                })
+            .build();
+    var program = env.compile("mutate() && xs[0] == 1");
+    assertTrue(program.test(input));
+    assertFalse(program.test(input));
+    assertEquals(Set.of("one"), Cel.compile("one").variables());
+    assertEquals(Set.of("two"), Cel.compile("two").variables());
+  }
+
+  @Test
   public void arithmeticAgainstIndependentIntegerOracle() {
     var random = new Random(0xCE1);
     for (String op : List.of("+", "-", "*", "/", "%")) {
