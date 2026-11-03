@@ -1,0 +1,17 @@
+alias(name = "trufflecel", actual = "//src/main/java/dev/trufflecel:trufflecel", visibility = ["//visibility:public"])
+
+alias(name = "gazelle", actual = "//bazel/gazelle:update", tags = ["manual"])
+
+exports_files(["maven_install.json"])
+
+alias(name = "trufflecel-protobuf", actual = "//src/main/java/dev/trufflecel:protobuf", visibility = ["//visibility:public"])
+alias(name = "trufflecel-json", actual = "//src/main/java/dev/trufflecel:json", visibility = ["//visibility:public"])
+
+filegroup(
+    name = "ci_sources",
+    srcs = glob([".github/scripts/*.py", ".github/workflows/*.yml"]) + [
+        "VERSION", "release-please-config.json", ".release-please-manifest.json",
+        "//tools/release:maven_repo.py",
+    ],
+    visibility = ["//visibility:public"],
+)

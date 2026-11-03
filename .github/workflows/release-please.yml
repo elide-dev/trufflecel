@@ -1,0 +1,59 @@
+name: Release - Please
+on:
+  workflow_call:
+    secrets:
+      ELIDEBOT_APP_ID:
+        required: false
+      ELIDEBOT_PRIVATE_KEY:
+        required: false
+      RELEASE_PLEASE_TOKEN:
+        required: false
+    outputs:
+      release_created:
+        value: ${{ jobs.release.outputs.release_created }}
+      version:
+        value: ${{ jobs.release.outputs.version }}
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - name: Check release identity
+        id: identity
+        env:
+          APP_ID: ${{ secrets.ELIDEBOT_APP_ID }}
+          APP_KEY: ${{ secrets.ELIDEBOT_PRIVATE_KEY }}
+          RELEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if [[ -n "$APP_ID" && -n "$APP_KEY" ]]; then
+            echo 'app=true' >> "$GITHUB_OUTPUT"
+          elif [[ -z "$RELEASE_TOKEN" ]]; then
+            echo 'Configure ELIDEBOT_APP_ID + ELIDEBOT_PRIVATE_KEY or RELEASE_PLEASE_TOKEN so release PRs trigger CI.' >&2
+            exit 1
+          fi
+      - name: Scoped Elide bot token
+        if: steps.identity.outputs.app == 'true'
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.ELIDEBOT_APP_ID }}
+          private-key: ${{ secrets.ELIDEBOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          token: ${{ steps.app.outputs.token || secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

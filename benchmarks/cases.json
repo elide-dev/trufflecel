@@ -1,0 +1,34 @@
+[
+  {
+    "name": "compile-evaluate",
+    "checksum": 21760
+  },
+  {
+    "name": "evaluate-scalar",
+    "checksum": 21760
+  },
+  {
+    "name": "short-circuit",
+    "checksum": 256
+  },
+  {
+    "name": "comprehension",
+    "checksum": 1024
+  },
+  {
+    "name": "regex",
+    "checksum": 256
+  },
+  {
+    "name": "native-row",
+    "checksum": 21504
+  },
+  {
+    "name": "protobuf",
+    "checksum": 256
+  },
+  {
+    "name": "json",
+    "checksum": 256
+  }
+]

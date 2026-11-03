@@ -1,0 +1,57 @@
+name: Benchmark - CodSpeed simulation
+on:
+  workflow_call:
+    secrets:
+      BUILDBUDDY_API_KEY:
+        required: false
+      BUILDBUDDY_APIKEY:
+        required: false
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  simulation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Reserve disk for native build
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+      - name: Configure BuildBuddy
+        env:
+          BUILDBUDDY_API_KEY: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY) || '' }}
+        run: .github/scripts/configure-buildbuddy.sh
+      - name: Install Bazelisk
+        run: .github/scripts/install-bazelisk.sh
+      - name: Check measurement driver
+        run: python3 -m unittest discover -s tools/bench -p 'test_*.py'
+      - name: Build native simulation image
+        run: python3 tools/bench/bench.py prepare
+      - name: Native correctness smoke
+        run: python3 tools/bench/bench.py smoke
+      - name: Measure all 8 cases
+        uses: CodSpeedHQ/action@373d6868929f444bc08d901fd0eb0ad52a8875ea # v5.2.1; shared with Komodo
+        with:
+          mode: simulation
+          runner-version: '5.2.1'
+          run: |
+            set -e
+            trap 'mkdir -p build/simulation/profiles; cp -R "$CODSPEED_PROFILE_FOLDER"/. build/simulation/profiles/' EXIT
+            python3 tools/bench/bench.py run
+      - name: Remove BuildBuddy credentials
+        if: always()
+        run: rm -f user.bazelrc
+      - name: Preserve measurements and native symbols
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: codspeed-simulation
+          path: build/simulation/
+          retention-days: 14

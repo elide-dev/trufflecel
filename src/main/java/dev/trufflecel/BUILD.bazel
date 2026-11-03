@@ -1,0 +1,75 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
+java_plugin(
+    name = "truffle_processor",
+    processor_class = "com.oracle.truffle.dsl.processor.TruffleProcessor",
+    deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
+)
+
+java_plugin(
+    name = "language_processor",
+    processor_class = "com.oracle.truffle.dsl.processor.LanguageRegistrationProcessor",
+    deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
+)
+
+java_library(
+    name = "trufflecel",
+    srcs = [
+        "Bytes.java",
+        "Cel.java",
+        "CelException.java",
+        "CelLanguage.java",
+        "CelNull.java",
+        "CelType.java",
+        "Checker.java",
+        "DataType.java",
+        "DataValues.java",
+        "Environment.java",
+        "EvalContext.java",
+        "ExprNode.java",
+        "Functions.java",
+        "GuestException.java",
+        "GuestValue.java",
+        "ObjectType.java",
+        "OptionalValue.java",
+        "Parser.java",
+        "Program.java",
+        "UInt.java",
+        "Unknown.java",
+        "Values.java",
+        "WellKnownTypes.java",
+    ],
+    plugins = [
+        ":truffle_processor",
+        ":language_processor",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:com_google_re2j_re2j",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_library(
+    name = "json",
+    srcs = ["JsonValues.java"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":trufflecel",
+        "@maven//:org_graalvm_shadowed_json",
+    ],
+)
+
+java_library(
+    name = "protobuf",
+    srcs = ["ProtobufType.java"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":trufflecel",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:dev_elide_truffledata_protobuf",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)

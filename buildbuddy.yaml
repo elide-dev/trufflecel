@@ -1,0 +1,36 @@
+# BuildBuddy GitHub app installation enables these workflows. GitHub Actions is also supported.
+# The workflow service injects authentication. PRs use an isolated action-cache namespace.
+actions:
+  - name: JVM (main)
+    container_image: ubuntu-24.04
+    resource_requests:
+      cpu: 8
+      memory: 16GB
+      disk: 30GB
+    triggers:
+      push:
+        branches: [main]
+    steps:
+      - run: bazel run //bazel/gazelle:check --config=workflows
+      - run: bazel run //tools:format --config=workflows -- --check
+      - run: bazel test //... --config=workflows
+      - run: bazel coverage //src/test/... --config=workflows
+      - run: bazel run //tools:coverage --config=workflows
+      - run: bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json //tools/release:publications --config=workflows
+  - name: JVM (pull request)
+    container_image: ubuntu-24.04
+    resource_requests:
+      cpu: 8
+      memory: 16GB
+      disk: 30GB
+    triggers:
+      pull_request:
+        branches: [main]
+        merge_with_base: true
+    steps:
+      - run: bazel run //bazel/gazelle:check --config=workflows --config=untrusted
+      - run: bazel run //tools:format --config=workflows --config=untrusted -- --check
+      - run: bazel test //... --config=workflows --config=untrusted
+      - run: bazel coverage //src/test/... --config=workflows --config=untrusted
+      - run: bazel run //tools:coverage --config=workflows --config=untrusted
+      - run: bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json //tools/release:publications --config=workflows --config=untrusted

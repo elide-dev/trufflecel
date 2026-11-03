@@ -1,0 +1,29 @@
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+gazelle_binary(name = "gazelle_bin", languages = [":java"], tags = ["manual"])
+
+go_library(
+    name = "java",
+    srcs = ["jvm.go"],
+    importpath = "dev.elide/trufflecel/gazelle",
+    deps = ["@gazelle//config", "@gazelle//label", "@gazelle//language", "@gazelle//repo", "@gazelle//resolve", "@gazelle//rule"],
+)
+
+go_test(name = "test", srcs = ["jvm_test.go"], embed = [":java"], deps = ["@gazelle//language", "@gazelle//rule"])
+
+gazelle(
+    name = "update",
+    args = ["-r=false", "-index=false", "src/main/java/dev/trufflecel", "src/test/java/dev/trufflecel"],
+    gazelle = ":gazelle_bin",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+gazelle(
+    name = "check",
+    args = ["-mode=diff", "-r=false", "-index=false", "src/main/java/dev/trufflecel", "src/test/java/dev/trufflecel"],
+    gazelle = ":gazelle_bin",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
