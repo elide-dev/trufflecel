@@ -86,7 +86,7 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
-**Java 25**, **Elide GraalVM `25.5.5-elide.23`**, and **TruffleData `0.1.0-alpha.4`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.23`**, and **TruffleData `0.1.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
 for available versions:
@@ -98,21 +98,10 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.23")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.1.0-alpha.2")
+    implementation("dev.elide:trufflecel-core:0.1.0")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
-configurations.configureEach {
-    resolutionStrategy.eachDependency {
-        if (requested.group.startsWith("org.graalvm.")) {
-            useVersion("25.5.5-elide.23")
-        }
-    }
-}
 ```
-
-The version alignment above upgrades the older GraalVM dependencies declared by the
-published `0.1.0-alpha.2` POMs. Publications built from the current source already pin `.23`.
-Keep the embedder's Truffle runtime on the same version.
 
 See [publishing](docs/PUBLISHING.md) for Maven and Bazel consumption, local staging, and
 release operations.
@@ -137,7 +126,9 @@ and `resultType` describe the compiled program. Explicit `ObjectType` and functi
 extend the environment. The registered Polyglot language ID is `cel`.
 
 For TruffleData, bind a `DataType` to a schema and pass immutable batch/JDBC rows directly.
-For protobuf, register a `ProtobufType` and ingest through `input`. `JsonValues.from` creates
+For protobuf, register a `ProtobufType` and ingest messages or native `ProtoRow` values through
+`input`. Binary decoding and message construction use TruffleData’s embedded codec and native
+representation, with no retained Java-message sidecar. `JsonValues.from` creates
 bounded, immutable CEL snapshots of Oracle `JSONObject` and `JSONArray` trees.
 
 [Integration notes](docs/INTEGRATION.md) cover Elide's Kotlin facade, numeric and presence

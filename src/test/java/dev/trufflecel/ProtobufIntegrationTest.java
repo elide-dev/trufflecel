@@ -5,7 +5,7 @@ import com.google.protobuf.*;
 import com.google.protobuf.DescriptorProtos.*;
 import com.google.protobuf.Descriptors.*;
 import dev.elide.truffledata.*;
-import dev.elide.truffledata.protobuf.ProtobufAdapter;
+import dev.elide.truffledata.protobuf.ProtoRow;
 import java.util.*;
 import org.junit.Test;
 
@@ -117,7 +117,7 @@ public class ProtobufIntegrationTest {
   }
 
   @Test
-  public void publishedRowsPreserveCompactBytesButNeedCelPresenceAndEnumBridge() throws Exception {
+  public void nativeRowsPreserveCompactBytesPresenceAndNumericEnums() throws Exception {
     Descriptor descriptor = descriptor();
     var proto =
         DynamicMessage.newBuilder(descriptor)
@@ -127,18 +127,20 @@ public class ProtobufIntegrationTest {
                 descriptor.findEnumTypeByName("State").findValueByNumberCreatingIfUnknown(123))
             .setField(descriptor.findFieldByName("bytes"), ByteString.copyFrom(new byte[] {-1}))
             .build();
-    var adapter = new ProtobufAdapter(descriptor, Limits.DEFAULT, 100);
-    var row = adapter.snapshot(proto);
+    ProtobufType type = new ProtobufType(descriptor);
+    var value = type.snapshot(proto);
+    ProtoRow row = value.row();
     var data = DataLibrary.factory().getUncached();
-    assertTrue(data.isPresent(row, descriptor.findFieldByName("int32").getIndex()));
+    assertFalse(row.has(descriptor.findFieldByName("int32").getIndex()));
     assertFalse(proto.hasField(descriptor.findFieldByName("int32")));
     var binary = (DataArray) data.read(row, descriptor.findFieldByName("bytes").getIndex());
     assertTrue(binary.isBytes());
     assertEquals(1, binary.size());
     assertEquals(255L, binary.get(0));
-    assertTrue(data.read(row, descriptor.findFieldByName("enum").getIndex()) instanceof String);
-    ProtobufType type = new ProtobufType(descriptor);
-    var value = type.snapshot(proto);
+    assertEquals(123L, data.read(row, descriptor.findFieldByName("enum").getIndex()));
+    assertSame(type.plan(), row.plan());
+    assertEquals(value, type.input(row));
+    assertEquals(value, type.decode(value.toBytes()));
     assertEquals(123L, type.get(value, "enum"));
     assertEquals(new Bytes(new byte[] {-1}), type.get(value, "bytes"));
     assertFalse(type.has(value, "int32"));
@@ -321,5 +323,71 @@ public class ProtobufIntegrationTest {
     for (String field : List.of("int32", "int64", "sint32", "sint64", "sfixed32", "sfixed64"))
       assertThrows(
           field, CelException.class, () -> env.parse("test.Record{" + field + ": 1u}").evaluate());
+  }
+
+  @Test
+  public void nativeConstructionWireAndRowInputs() throws Exception {
+    Descriptor d = descriptor();
+    var type = new ProtobufType(d);
+    ProtoRow row =
+        type.plan()
+            .newBuilder()
+            .set(d.findFieldByName("string").getIndex(), "native")
+            .set(d.findFieldByName("enum").getIndex(), 456L)
+            .build();
+    var value = (ProtobufType.Value) type.input(row);
+    assertSame(row, value.row());
+    var env = type.register(Cel.newBuilder()).variable("r", CelType.of(type.name())).build();
+    assertTrue(
+        env.compile("r.string == 'native' && r.enum == 456 && !has(r.int32)")
+            .test(Map.of("r", type.decode(value.toBytes()))));
+    var other = new ProtobufType(d);
+    assertThrows(CelException.class, () -> type.input(other.plan().newBuilder().build()));
+    var nested = (ProtobufType.Value) other.construct(Map.of("string", "remapped"));
+    var parent = type.construct(Map.of("message", nested));
+    assertEquals(nested, type.get(parent, "message"));
+    assertFalse(value.equals(new ProtobufType(descriptor()).construct(Map.of("string", "native"))));
+    var wrapper = new ProtobufType(Int64Value.getDescriptor());
+    assertEquals(42L, wrapper.input(wrapper.plan().decode(new byte[] {8, 42})));
+  }
+
+  @Test
+  public void nativeCodecPreservesUnknownFieldsAndMapSemantics() throws Exception {
+    Descriptor d = descriptor();
+    var type = new ProtobufType(d);
+    var unknown =
+        UnknownFieldSet.newBuilder()
+            .addField(100, UnknownFieldSet.Field.newBuilder().addVarint(77).build())
+            .build();
+    var message = DynamicMessage.newBuilder(d).setUnknownFields(unknown).build();
+    var value = (ProtobufType.Value) type.decode(new Bytes(message.toByteArray()));
+    assertEquals(unknown, value.message().getUnknownFields());
+    assertArrayEquals(message.toByteArray(), value.toBytes().toByteArray());
+    assertEquals(type.snapshot(message), value);
+    assertFalse(type.isZero(value));
+    assertFalse(type.equal(value, type.construct(Map.of())));
+    Map<String, Long> forward = new LinkedHashMap<>();
+    forward.put("a", 1L);
+    forward.put("b", 2L);
+    Map<String, Long> reverse = new LinkedHashMap<>();
+    reverse.put("b", 2L);
+    reverse.put("a", 1L);
+    assertEquals(
+        type.construct(Map.of("labels", forward)), type.construct(Map.of("labels", reverse)));
+    Descriptor entry = d.findFieldByName("labels").getMessageType();
+    var duplicate = DynamicMessage.newBuilder(d);
+    for (long n : new long[] {1, 2})
+      duplicate.addRepeatedField(
+          d.findFieldByName("labels"),
+          DynamicMessage.newBuilder(entry)
+              .setField(entry.findFieldByNumber(1), "key")
+              .setField(entry.findFieldByNumber(2), n)
+              .build());
+    var decoded = type.decode(new Bytes(duplicate.build().toByteArray()));
+    assertEquals(Map.of("key", 2L), type.get(decoded, "labels"));
+    for (byte[] wire : new byte[][] {{0}, {18, 127}, {(byte) 0xff}})
+      assertEquals(
+          CelException.Code.INVALID_ARGUMENT,
+          assertThrows(CelException.class, () -> type.decode(new Bytes(wire))).code());
   }
 }

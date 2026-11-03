@@ -90,9 +90,17 @@ public final class CompiledTest {
         check(
             proto.compile("p.name == 'CEL'"),
             Map.of(
-                "p", protoType.input(com.google.protobuf.Type.newBuilder().setName("CEL").build())),
+                "p",
+                protoType.input(
+                    protoType
+                        .plan()
+                        .decode(
+                            com.google.protobuf.Type.newBuilder()
+                                .setName("CEL")
+                                .build()
+                                .toByteArray()))),
             true,
-            Map.of("p", protoType.input(com.google.protobuf.Type.getDefaultInstance())),
+            Map.of("p", protoType.input(protoType.plan().newBuilder().build())),
             false,
             1024);
         check(

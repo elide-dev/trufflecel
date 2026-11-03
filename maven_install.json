@@ -10,9 +10,9 @@
     "com.google.protobuf:protobuf-java": 1938090909,
     "com.google.re2j:re2j": 1525409503,
     "com.h2database:h2": 2037113602,
-    "dev.elide:truffledata-core": -1938459794,
-    "dev.elide:truffledata-jdbc": -1517226550,
-    "dev.elide:truffledata-protobuf": 1422336858,
+    "dev.elide:truffledata-core": -1021111145,
+    "dev.elide:truffledata-jdbc": -400248077,
+    "dev.elide:truffledata-protobuf": -1360433021,
     "junit:junit": -744267592,
     "org.graalvm.polyglot:polyglot": 1417549448,
     "org.graalvm.sdk:nativeimage": 2975926,
@@ -32,11 +32,12 @@
     "com.google.guava:listenablefuture": 1588902908,
     "com.google.j2objc:j2objc-annotations": -596695707,
     "com.google.protobuf:protobuf-java": -884647484,
+    "com.google.protobuf:protobuf-java-util": 175139658,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1401264984,
-    "dev.elide:truffledata-core": -2124002594,
-    "dev.elide:truffledata-jdbc": -762595897,
-    "dev.elide:truffledata-protobuf": -801025902,
+    "dev.elide:truffledata-core": -100730687,
+    "dev.elide:truffledata-jdbc": -1655750251,
+    "dev.elide:truffledata-protobuf": -175504957,
     "junit:junit": 712711302,
     "org.checkerframework:checker-qual": 597850597,
     "org.graalvm.polyglot:polyglot": -302578925,
@@ -111,6 +112,12 @@
       },
       "version": "4.36.1"
     },
+    "com.google.protobuf:protobuf-java-util": {
+      "shasums": {
+        "jar": "90722adb6fa80fb0dba8d49602abae2d14f8483e922cae29431d78edbfd4d040"
+      },
+      "version": "4.36.1"
+    },
     "com.google.re2j:re2j": {
       "shasums": {
         "jar": "7b52c72156dd7f98b3237a5b35c1d34fba381b21048c89208913ad80a45dfbd7"
@@ -125,21 +132,21 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "e7d65fd9b7a1cdd8c6b1859891dd8badd11054787b7e1902e2002c186f7f271e"
+        "jar": "7d9e98a477b4c6f295de21bc998801b3f2d278ffaef524baff36cb2ed9f818b2"
       },
-      "version": "0.1.0-alpha.4"
+      "version": "0.1.0"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
-        "jar": "db172bf9e515eef77178cf403b172c96e11b734cc193cb09aec5bb201880cca3"
+        "jar": "b13a418c1941c73d8db72a18f6dee0c6d351106e6b5be1a6c38975579d0ef3f6"
       },
-      "version": "0.1.0-alpha.4"
+      "version": "0.1.0"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "936de89c9b72392052f501f7098291a0a8a200aa8e7700036709dfe02bc7dcfb"
+        "jar": "492e058137a9b23e152f5b9daee628e566860923cd0196544a18f914bd18c0bf"
       },
-      "version": "0.1.0-alpha.4"
+      "version": "0.1.0"
     },
     "junit:junit": {
       "shasums": {
@@ -241,6 +248,12 @@
       "com.google.j2objc:j2objc-annotations",
       "org.checkerframework:checker-qual"
     ],
+    "com.google.protobuf:protobuf-java-util": [
+      "com.google.code.findbugs:jsr305",
+      "com.google.code.gson:gson",
+      "com.google.errorprone:error_prone_annotations",
+      "com.google.protobuf:protobuf-java"
+    ],
     "dev.elide:truffledata-core": [
       "org.graalvm.truffle:truffle-api",
       "org.jspecify:jspecify"
@@ -252,6 +265,7 @@
     ],
     "dev.elide:truffledata-protobuf": [
       "com.google.protobuf:protobuf-java",
+      "com.google.protobuf:protobuf-java-util",
       "dev.elide:truffledata-core",
       "org.graalvm.truffle:truffle-api",
       "org.jspecify:jspecify"
@@ -337,6 +351,9 @@
     "com.google.protobuf:protobuf-java": [
       "com.google.protobuf",
       "com.google.protobuf.compiler"
+    ],
+    "com.google.protobuf:protobuf-java-util": [
+      "com.google.protobuf.util"
     ],
     "com.google.re2j:re2j": [
       "com.google.re2j"
@@ -610,6 +627,7 @@
       "com.google.guava:listenablefuture",
       "com.google.j2objc:j2objc-annotations",
       "com.google.protobuf:protobuf-java",
+      "com.google.protobuf:protobuf-java-util",
       "com.google.re2j:re2j",
       "com.h2database:h2",
       "dev.elide:truffledata-core",
@@ -640,6 +658,7 @@
       "com.google.guava:listenablefuture",
       "com.google.j2objc:j2objc-annotations",
       "com.google.protobuf:protobuf-java",
+      "com.google.protobuf:protobuf-java-util",
       "com.google.re2j:re2j",
       "com.h2database:h2",
       "dev.elide:truffledata-core",
@@ -670,6 +689,7 @@
       "com.google.guava:listenablefuture",
       "com.google.j2objc:j2objc-annotations",
       "com.google.protobuf:protobuf-java",
+      "com.google.protobuf:protobuf-java-util",
       "com.google.re2j:re2j",
       "com.h2database:h2",
       "dev.elide:truffledata-core",

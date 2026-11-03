@@ -59,7 +59,8 @@ public final class SimulationBenchmark {
             .variable("p", CelType.of("Record"))
             .build()
             .compile("p.id == 42u");
-    var protoInput = Map.<String, Object>of("p", type.input(message));
+    var protoInput =
+        Map.<String, Object>of("p", type.input(type.plan().decode(message.toByteArray())));
     var jsonProgram = Cel.compile("j.id == 42 && j.tags.exists(t,t == 'admin')");
     var jsonInput =
         Map.<String, Object>of(

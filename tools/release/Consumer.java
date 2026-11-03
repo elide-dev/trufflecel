@@ -21,7 +21,8 @@ public final class Consumer {
     var type = new DataType("Row", schema);
     var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Row")).build();
     if (!env.compile("r.id == 42").test(Map.of("r", row))) throw new AssertionError("native row");
-    Object proto = new ProtobufType(Int64Value.getDescriptor()).input(Int64Value.of(42));
+    var protoType = new ProtobufType(Int64Value.getDescriptor());
+    Object proto = protoType.input(protoType.plan().decode(new byte[] {8, 42}));
     Object json = JsonValues.from(new JSONObject("{\"id\":42}"));
     if (!Cel.compile("p == j.id").test(Map.of("p", proto, "j", json))) {
       throw new AssertionError("optional adapters");
