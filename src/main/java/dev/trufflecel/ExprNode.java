@@ -450,10 +450,14 @@ class ExprNode extends CelNode {
       }
     }
     Object[] values = HostCollections.range(range);
-    var mapped = HostCollections.<Object>map();
-    var sortKeys = HostCollections.list();
+    boolean mapResult = name.equals("transformMap") || name.equals("transformMapEntry");
+    boolean sorting = name.equals("sortBy");
+    boolean mapping = name.equals("map") || name.startsWith("transform");
+    boolean filtering = name.equals("filter");
+    var mapped = mapResult ? HostCollections.<Object>map() : null;
+    var sortKeys = sorting ? HostCollections.list() : null;
     long index = 0;
-    var result = HostCollections.list();
+    var result = !mapResult && (sorting || mapping || filtering) ? HostCollections.list() : null;
     long count = 0;
     Unknown unknown = null;
     CelException error = null;
@@ -471,12 +475,12 @@ class ExprNode extends CelNode {
           unknown = unknown == null ? u : unknown.merge(u);
           continue;
         }
-        if (name.equals("sortBy")) {
+        if (sorting) {
           HostCollections.add(sortKeys, predicate);
           HostCollections.add(result, item);
           continue;
         }
-        if (name.equals("map") || name.startsWith("transform")) {
+        if (mapping) {
           if (children.length == 3) {
             if (!(predicate instanceof Boolean b)) throw Values.overload(name);
             if (!b) continue;
@@ -498,7 +502,7 @@ class ExprNode extends CelNode {
         if (name.equals("exists") && b) return true;
         if (b) {
           count++;
-          if (name.equals("filter")) HostCollections.add(result, item);
+          if (filtering) HostCollections.add(result, item);
         }
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
