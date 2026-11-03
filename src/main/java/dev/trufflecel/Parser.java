@@ -419,16 +419,41 @@ final class Parser {
           && (source.charAt(cursor) == 'u' || source.charAt(cursor) == 'U')) cursor++;
       return new Token("NUMBER", source.substring(start, cursor), null, start);
     }
-    for (String op : List.of("&&", "||", "==", "!=", "<=", ">="))
-      if (source.startsWith(op, cursor)) {
-        cursor += 2;
-        return new Token(op, op, null, start);
-      }
-    if ("+-*/%<>!?:.,()[]{}".indexOf(c) >= 0) {
-      cursor++;
-      return new Token(String.valueOf(c), String.valueOf(c), null, start);
+    // Share operator spellings instead of allocating a table and strings for each token.
+    String op =
+        switch (c) {
+          case '&' -> followedBy('&') ? "&&" : null;
+          case '|' -> followedBy('|') ? "||" : null;
+          case '=' -> followedBy('=') ? "==" : null;
+          case '!' -> followedBy('=') ? "!=" : "!";
+          case '<' -> followedBy('=') ? "<=" : "<";
+          case '>' -> followedBy('=') ? ">=" : ">";
+          case '+' -> "+";
+          case '-' -> "-";
+          case '*' -> "*";
+          case '/' -> "/";
+          case '%' -> "%";
+          case '?' -> "?";
+          case ':' -> ":";
+          case '.' -> ".";
+          case ',' -> ",";
+          case '(' -> "(";
+          case ')' -> ")";
+          case '[' -> "[";
+          case ']' -> "]";
+          case '{' -> "{";
+          case '}' -> "}";
+          default -> null;
+        };
+    if (op != null) {
+      cursor += op.length();
+      return new Token(op, op, null, start);
     }
     throw new CelException(CelException.Code.SYNTAX, "unexpected character: " + c, cursor);
+  }
+
+  private boolean followedBy(char expected) {
+    return cursor + 1 < source.length() && source.charAt(cursor + 1) == expected;
   }
 
   private static boolean asciiDigit(char c) {

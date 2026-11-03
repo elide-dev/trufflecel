@@ -18,7 +18,6 @@ public class ParserTest {
             "{1:}",
             "1 2",
             "@",
-            "1 & 2",
             "f(1,)",
             "a..b",
             "has(a)",
@@ -56,6 +55,15 @@ public class ParserTest {
     assertEquals(CelException.Code.SYNTAX, e.code());
     assertTrue(e.offset() >= 0);
     assertTrue(e.getMessage().contains("offset"));
+  }
+
+  @Test
+  public void incompleteOperatorsReportTheirOriginalOffset() {
+    for (String suffix : List.of("&", "|", "=", "& 2", "| 2", "= 2")) {
+      var failure = assertThrows(CelException.class, () -> Cel.compile("1 " + suffix));
+      assertEquals(CelException.Code.SYNTAX, failure.code());
+      assertEquals(2, failure.offset());
+    }
   }
 
   @Test
