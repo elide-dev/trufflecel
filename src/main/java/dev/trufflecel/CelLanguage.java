@@ -64,32 +64,38 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     Object getMembers(boolean includeInternal) {
       return GuestValue.wrap(List.copyOf(values.keySet()));
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     boolean isMemberReadable(String name) {
       return values.containsKey(name);
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     Object readMember(String name) throws UnknownIdentifierException {
       if (!values.containsKey(name)) throw UnknownIdentifierException.create(name);
       return GuestValue.wrap(values.get(name));
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     boolean isMemberModifiable(String name) {
       return values.containsKey(name);
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     boolean isMemberInsertable(String name) {
       return !values.containsKey(name);
     }
 
     @ExportMessage
+    @CompilerDirectives.TruffleBoundary
     void writeMember(String name, Object value) throws UnsupportedTypeException {
       try {
         values.put(name, GuestValue.unwrap(value, 0));

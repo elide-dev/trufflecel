@@ -46,10 +46,19 @@ public final class Program {
     return Values.out(evaluateInternal(variables));
   }
 
+  RootCallTarget callTarget() {
+    return target;
+  }
+
   Object evaluateInternal(Map<String, ?> variables) {
+    return target.call(activation(variables));
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private EvalContext activation(Map<String, ?> variables) {
     var activation = new HashMap<String, Object>();
     variables.forEach((name, value) -> activation.put(name, Values.in(value)));
-    return target.call(new EvalContext(environment, activation));
+    return new EvalContext(environment, activation);
   }
 
   public boolean test() {

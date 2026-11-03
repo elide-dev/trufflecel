@@ -62,3 +62,35 @@ jobs:
       - name: Remove credentials
         if: always()
         run: rm -f user.bazelrc
+  native-jit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Reserve disk for guest compiler
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+      - name: Configure BuildBuddy
+        env:
+          BUILDBUDDY_API_KEY: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY) || '' }}
+        run: .github/scripts/configure-buildbuddy.sh
+      - name: Install Bazelisk
+        run: .github/scripts/install-bazelisk.sh
+      - name: Enforce native blocklist and guest compilation
+        run: bazel test //benchmarks:jit_smoke
+      - name: Preserve native JIT results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: trufflecel-native-jit
+          path: |
+            bazel-testlogs/benchmarks/jit_smoke/test.log
+            bazel-testlogs/benchmarks/jit_smoke/test.xml
+      - name: Remove credentials
+        if: always()
+        run: rm -f user.bazelrc

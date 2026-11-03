@@ -1,7 +1,7 @@
-# JVM library artifacts; hermetic Java 25 toolchains and an opt-in native simulation benchmark.
+# JVM library artifacts; pinned GraalVM 25 runtime for guest-compilation tests.
 common --java_language_version=25
 common --tool_java_language_version=25
-common --java_runtime_version=remotejdk_25
+common --java_runtime_version=graalvm_25
 common --tool_java_runtime_version=remotejdk_25
 common --repo_env=ANDROID_HOME=
 common --repo_env=ANDROID_SDK_ROOT=

@@ -96,81 +96,14 @@ final class ExprNode extends Node {
           throw e;
         }
       }
-      case LIST -> {
-        var list = new ArrayList<Object>(children.length);
-        Unknown unknown = null;
-        for (ExprNode child : children) {
-          Object v = child.execute(ctx);
-          if (v instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
-          if (child.optionalEntry && !(v instanceof Unknown)) {
-            OptionalValue o = optional(v);
-            if (!o.present()) continue;
-            v = o.value();
-          }
-          list.add(v);
-        }
-        yield unknown == null ? List.copyOf(list) : unknown;
-      }
-      case MAP -> {
-        var map = new LinkedHashMap<Object, Object>();
-        Unknown unknown = null;
-        for (int i = 0; i < children.length; i += 2) {
-          Object k = children[i].execute(ctx), v = children[i + 1].execute(ctx);
-          if (k instanceof Unknown u) {
-            unknown = unknown == null ? u : unknown.merge(u);
-            continue;
-          }
-          if (v instanceof Unknown u) {
-            unknown = unknown == null ? u : unknown.merge(u);
-            continue;
-          }
-          if (children[i + 1].optionalEntry) {
-            OptionalValue o = optional(v);
-            if (!o.present()) continue;
-            v = o.value();
-          }
-          if (!Values.validKey(k))
-            throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid map key");
-          if (Values.key(map, k) != null)
-            throw Values.error(CelException.Code.INVALID_ARGUMENT, "duplicate map key: " + k);
-          map.put(k, v);
-        }
-        yield unknown == null ? Collections.unmodifiableMap(map) : unknown;
-      }
-      case OBJECT -> {
-        var fields = new LinkedHashMap<String, Object>();
-        String[] names = (String[]) value;
-        for (int i = 0; i < children.length; i++) {
-          Object v = children[i].execute(ctx);
-          if (children[i].optionalEntry && !(v instanceof Unknown)) {
-            OptionalValue o = optional(v);
-            if (!o.present()) continue;
-            v = o.value();
-          }
-          if (v instanceof Unknown) yield v;
-          fields.put(names[i], v);
-        }
-        try {
-          Object constructed =
-              ctx.environment.objectTypes.get(name).construct(Collections.unmodifiableMap(fields));
-          if (constructed instanceof WellKnownTypes.Any any) {
-            String type = any.typeUrl().substring(any.typeUrl().lastIndexOf('/') + 1);
-            ObjectType adapter = ctx.environment.objectTypes.get(type);
-            if (adapter == null)
-              throw Values.error(
-                  CelException.Code.INVALID_ARGUMENT, "unregistered Any type: " + type);
-            constructed = adapter.decode(any.bytes());
-          }
-          yield constructed;
-        } catch (ArithmeticException | java.time.DateTimeException e) {
-          throw Values.error(CelException.Code.OVERFLOW, "protobuf value out of range");
-        }
-      }
+      case LIST -> list(ctx);
+      case MAP -> map(ctx);
+      case OBJECT -> object(ctx);
       case CONDITIONAL -> {
         Object condition = children[0].execute(ctx);
         if (condition instanceof Unknown) yield condition;
         if (!(condition instanceof Boolean b)) throw Values.overload("conditional");
-        yield children[b ? 1 : 2].execute(ctx);
+        yield b ? children[1].execute(ctx) : children[2].execute(ctx);
       }
       case CALL -> call(ctx);
       case MACRO -> macro(ctx);
@@ -178,7 +111,11 @@ final class ExprNode extends Node {
   }
 
   private Object select(EvalContext ctx, boolean presence) {
-    Object operand = children[0].execute(ctx);
+    return selectValue(ctx, presence, children[0].execute(ctx));
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private Object selectValue(EvalContext ctx, boolean presence, Object operand) {
     if (operand instanceof Unknown) return operand;
     boolean lifted = Boolean.TRUE.equals(value) || operand instanceof OptionalValue;
     if (operand instanceof OptionalValue o) {
@@ -206,6 +143,7 @@ final class ExprNode extends Node {
     throw Values.overload("select " + name);
   }
 
+  @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object call(EvalContext ctx) {
     if (name.equals("&&") || name.equals("||")) return logical(ctx);
     if (optionalFallback && children.length == 2) {
@@ -234,6 +172,7 @@ final class ExprNode extends Node {
     return Functions.apply(name, args, ctx.environment);
   }
 
+  @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object logical(EvalContext ctx) {
     boolean decisive = name.equals("||");
     CelException error = null;
@@ -277,14 +216,11 @@ final class ExprNode extends Node {
         ctx.pop();
       }
     }
-    Iterable<?> values;
-    if (range instanceof List<?> list) values = list;
-    else if (range instanceof Map<?, ?> map) values = map.keySet();
-    else throw Values.overload(name);
-    var mapped = new LinkedHashMap<Object, Object>();
-    var sortKeys = new ArrayList<Object>();
+    Object[] values = HostCollections.range(range);
+    var mapped = HostCollections.<Object>map();
+    var sortKeys = HostCollections.list();
     long index = 0;
-    var result = new ArrayList<Object>();
+    var result = HostCollections.list();
     long count = 0;
     Unknown unknown = null;
     CelException error = null;
@@ -293,7 +229,7 @@ final class ExprNode extends Node {
       Object key = range instanceof List<?> && variables.length == 2 ? index : item;
       ctx.push(variables[0], key);
       if (variables.length == 2)
-        ctx.push(variables[1], range instanceof Map<?, ?> m ? m.get(item) : item);
+        ctx.push(variables[1], range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
       index++;
       try {
         Object predicate = children[1].execute(ctx);
@@ -302,8 +238,8 @@ final class ExprNode extends Node {
           continue;
         }
         if (name.equals("sortBy")) {
-          sortKeys.add(predicate);
-          result.add(item);
+          HostCollections.add(sortKeys, predicate);
+          HostCollections.add(result, item);
           continue;
         }
         if (name.equals("map") || name.startsWith("transform")) {
@@ -316,16 +252,11 @@ final class ExprNode extends Node {
               continue;
             }
           }
-          if (name.equals("transformMap")) mapped.put(key, predicate);
+          if (name.equals("transformMap")) HostCollections.put(mapped, key, predicate);
           else if (name.equals("transformMapEntry")) {
             if (!(predicate instanceof Map<?, ?> entries)) throw Values.overload(name);
-            for (var entry : entries.entrySet()) {
-              if (!Values.validKey(entry.getKey()) || Values.key(mapped, entry.getKey()) != null)
-                throw Values.error(
-                    CelException.Code.INVALID_ARGUMENT, "invalid or duplicate transformed key");
-              mapped.put(entry.getKey(), entry.getValue());
-            }
-          } else result.add(predicate);
+            HostCollections.mergeEntries(mapped, entries);
+          } else HostCollections.add(result, predicate);
           continue;
         }
         if (!(predicate instanceof Boolean b)) throw Values.overload(name);
@@ -333,7 +264,7 @@ final class ExprNode extends Node {
         if (name.equals("exists") && b) return true;
         if (b) {
           count++;
-          if (name.equals("filter")) result.add(item);
+          if (name.equals("filter")) HostCollections.add(result, item);
         }
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
@@ -349,9 +280,89 @@ final class ExprNode extends Node {
       case "all" -> true;
       case "exists" -> false;
       case "exists_one", "existsOne" -> count == 1;
-      case "transformMap", "transformMapEntry" -> Collections.unmodifiableMap(mapped);
+      case "transformMap", "transformMapEntry" -> HostCollections.freezeMap(mapped);
       case "sortBy" -> ExtensionFunctions.sortBy(result, sortKeys, ctx);
-      default -> List.copyOf(result);
+      default -> HostCollections.freezeList(result);
     };
+  }
+
+  @com.oracle.truffle.api.nodes.ExplodeLoop
+  private Object list(EvalContext ctx) {
+    var list = HostCollections.list();
+    Unknown unknown = null;
+    for (ExprNode child : children) {
+      Object v = child.execute(ctx);
+      if (v instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
+      if (child.optionalEntry && !(v instanceof Unknown)) {
+        OptionalValue o = optional(v);
+        if (!o.present()) continue;
+        v = o.value();
+      }
+      HostCollections.add(list, v);
+    }
+    return unknown == null ? HostCollections.freezeList(list) : unknown;
+  }
+
+  @com.oracle.truffle.api.nodes.ExplodeLoop
+  private Object map(EvalContext ctx) {
+    var map = HostCollections.<Object>map();
+    Unknown unknown = null;
+    for (int i = 0; i < children.length; i += 2) {
+      Object k = children[i].execute(ctx), v = children[i + 1].execute(ctx);
+      if (k instanceof Unknown u) {
+        unknown = unknown == null ? u : unknown.merge(u);
+        continue;
+      }
+      if (v instanceof Unknown u) {
+        unknown = unknown == null ? u : unknown.merge(u);
+        continue;
+      }
+      if (children[i + 1].optionalEntry) {
+        OptionalValue o = optional(v);
+        if (!o.present()) continue;
+        v = o.value();
+      }
+      if (!Values.validKey(k))
+        throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid map key");
+      if (Values.key(map, k) != null)
+        throw Values.error(CelException.Code.INVALID_ARGUMENT, "duplicate map key");
+      HostCollections.put(map, k, v);
+    }
+    return unknown == null ? HostCollections.freezeMap(map) : unknown;
+  }
+
+  @com.oracle.truffle.api.nodes.ExplodeLoop
+  private Object object(EvalContext ctx) {
+    var fields = HostCollections.<String>map();
+    String[] names = (String[]) value;
+    for (int i = 0; i < children.length; i++) {
+      Object v = children[i].execute(ctx);
+      if (children[i].optionalEntry && !(v instanceof Unknown)) {
+        OptionalValue o = optional(v);
+        if (!o.present()) continue;
+        v = o.value();
+      }
+      if (v instanceof Unknown) return v;
+      HostCollections.put(fields, names[i], v);
+    }
+    return construct(ctx, fields);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private Object construct(EvalContext ctx, Map<String, Object> fields) {
+    try {
+      Object constructed =
+          ctx.environment.objectTypes.get(name).construct(Collections.unmodifiableMap(fields));
+      if (constructed instanceof WellKnownTypes.Any any) {
+        String type = any.typeUrl().substring(any.typeUrl().lastIndexOf('/') + 1);
+        ObjectType adapter = ctx.environment.objectTypes.get(type);
+        if (adapter == null)
+          throw Values.error(CelException.Code.INVALID_ARGUMENT, "unregistered Any type: " + type);
+        constructed = adapter.decode(any.bytes());
+      }
+      return constructed;
+    } catch (ArithmeticException | java.time.DateTimeException e) {
+      throw Values.error(CelException.Code.OVERFLOW, "protobuf value out of range");
+    }
   }
 }

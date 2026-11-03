@@ -24,6 +24,7 @@ final class EvalContext {
     remaining -= cost;
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object get(String name) {
     if (name.startsWith(".")) {
       name = name.substring(1);
@@ -35,10 +36,12 @@ final class EvalContext {
     throw Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   void push(String name, Object value) {
     scopes.push(Map.of(name, value));
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   void pop() {
     scopes.pop();
   }

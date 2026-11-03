@@ -22,6 +22,7 @@ final class GuestValue implements TruffleObject {
     return new GuestValue(value);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object unwrap(Object value, int depth) throws InteropException {
     return unwrap(value, depth, new int[] {1_000_000});
   }
@@ -122,6 +123,7 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   boolean fitsInFloat() {
     return value instanceof UInt u
         && new java.math.BigDecimal(u.toBigInteger().floatValue())
@@ -130,6 +132,7 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   boolean fitsInDouble() {
     return value instanceof UInt u
         && new java.math.BigDecimal(u.toBigInteger().doubleValue())
@@ -162,18 +165,21 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   java.math.BigInteger asBigInteger() throws UnsupportedMessageException {
     if (!fitsInBigInteger()) throw UnsupportedMessageException.create();
     return ((UInt) value).toBigInteger();
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   float asFloat() throws UnsupportedMessageException {
     if (!fitsInFloat()) throw UnsupportedMessageException.create();
     return ((UInt) value).toBigInteger().floatValue();
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   double asDouble() throws UnsupportedMessageException {
     if (!fitsInDouble()) throw UnsupportedMessageException.create();
     return ((UInt) value).toBigInteger().doubleValue();
@@ -190,6 +196,7 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   long getArraySize() throws UnsupportedMessageException {
     if (value instanceof List<?> l) return l.size();
     if (value instanceof Bytes b) return b.size();
@@ -197,6 +204,7 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   boolean isArrayElementReadable(long index) {
     return index >= 0
         && (value instanceof List<?> l && index < l.size()
@@ -204,6 +212,7 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object readArrayElement(long index) throws InvalidArrayIndexException {
     if (!isArrayElementReadable(index)) throw InvalidArrayIndexException.create(index);
     return value instanceof Bytes b
@@ -217,17 +226,20 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object getMembers(boolean includeInternal) throws UnsupportedMessageException {
     if (!(value instanceof Map<?, ?> m)) throw UnsupportedMessageException.create();
     return wrap(m.keySet().stream().filter(k -> k instanceof String).toList());
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   boolean isMemberReadable(String member) {
     return value instanceof Map<?, ?> m && m.containsKey(member);
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object readMember(String member) throws UnknownIdentifierException {
     if (!isMemberReadable(member)) throw UnknownIdentifierException.create(member);
     return wrap(((Map<?, ?>) value).get(member));
@@ -239,18 +251,21 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   long getHashSize() throws UnsupportedMessageException {
     if (value instanceof Map<?, ?> m) return m.size();
     throw UnsupportedMessageException.create();
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   boolean isHashEntryReadable(Object key) {
     return value instanceof Map<?, ?> m
         && Values.key(m, key instanceof GuestValue guest ? guest.value : Values.in(key)) != null;
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object readHashValue(Object key) throws UnknownKeyException {
     if (!(value instanceof Map<?, ?> m)) throw UnknownKeyException.create(key);
     Object k = Values.key(m, key instanceof GuestValue guest ? guest.value : Values.in(key));
@@ -259,12 +274,14 @@ final class GuestValue implements TruffleObject {
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object getHashEntriesIterator() throws UnsupportedMessageException {
     if (!(value instanceof Map<?, ?> m)) throw UnsupportedMessageException.create();
     return new Entries(m.entrySet().iterator());
   }
 
   @ExportMessage
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object toDisplayString(boolean allowSideEffects) {
     return value.toString();
   }
@@ -283,11 +300,13 @@ final class GuestValue implements TruffleObject {
     }
 
     @ExportMessage
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
     boolean hasIteratorNextElement() {
       return iterator.hasNext();
     }
 
     @ExportMessage
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
     Object getIteratorNextElement() throws StopIterationException {
       if (!iterator.hasNext()) throw StopIterationException.create();
       var entry = iterator.next();
