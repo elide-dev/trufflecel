@@ -107,6 +107,75 @@ public class RuntimeTest {
   }
 
   @Test
+  public void activationsPreserveMissingBindingsNullsAndSnapshots() {
+    var values = new ArrayList<>(List.of(1L));
+    var env =
+        Cel.newBuilder()
+            .inferVariables(true)
+            .function(
+                "mutate",
+                List.of(),
+                CelType.BOOL,
+                ignored -> {
+                  values.set(0, 2L);
+                  return true;
+                })
+            .build();
+    var prepared = env.prepare("mutate() && xs[0] == expected");
+    var first = prepared.instantiate();
+    var second = prepared.instantiate();
+    assertTrue(first.test(Map.of("xs", values, "expected", 1L)));
+    assertTrue(second.test(Map.of("xs", values, "expected", 2L)));
+    assertFalse(first.test(Map.of("xs", values, "expected", 1L)));
+    var input = new LinkedHashMap<String, Object>();
+    input.put("a", null);
+    input.put("b", 1L);
+    var nullCheck = Cel.compile("a == null && b == 1");
+    assertTrue(nullCheck.test(input));
+    input.put("unused", 4L);
+    assertTrue(nullCheck.test(input));
+    input.remove("b");
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(CelException.class, () -> nullCheck.evaluate(input)).code());
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(CelException.class, () -> Cel.compile("a + b").evaluate(Map.of("a", 1L)))
+            .code());
+    assertTrue(
+        Cel.compile("[1].all(x, x == 1 && .x == y) && x == y").test(Map.of("x", 9L, "y", 9L)));
+    assertEquals(
+        10L, Cel.compile("a + b + c + d").evaluate(Map.of("a", 1, "b", 2, "c", 3, "d", 4)));
+  }
+
+  @Test
+  public void normalizedListSnapshotsAreIndependentImmutableAndBounded() {
+    byte[] bytes = {1, 2};
+    var nested = new ArrayList<>(List.of(3));
+    var input = new ArrayList<Object>(Arrays.asList(null, 1, 2.5f, bytes, nested));
+    var snapshot = (List<?>) Values.in(input);
+    input.clear();
+    bytes[0] = 9;
+    nested.set(0, 4);
+    assertEquals(CelNull.INSTANCE, snapshot.get(0));
+    assertEquals(1L, snapshot.get(1));
+    assertEquals(2.5, snapshot.get(2));
+    assertArrayEquals(new byte[] {1, 2}, (byte[]) Values.out(snapshot.get(3)));
+    assertEquals(List.of(3L), snapshot.get(4));
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
+    assertThrows(UnsupportedOperationException.class, () -> snapshot.remove(0));
+    assertThrows(IndexOutOfBoundsException.class, () -> snapshot.get(-1));
+    assertThrows(IndexOutOfBoundsException.class, () -> snapshot.get(5));
+    assertEquals(List.of(), Values.in(List.of()));
+    Iterable<Integer> iterable = () -> List.of(1, 2).iterator();
+    assertEquals(List.of(1L, 2L), Values.in(iterable));
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> Values.in(Collections.nCopies(1_000_001, 1L)))
+            .code());
+  }
+
+  @Test
   public void arithmeticAgainstIndependentIntegerOracle() {
     var random = new Random(0xCE1);
     for (String op : List.of("+", "-", "*", "/", "%")) {

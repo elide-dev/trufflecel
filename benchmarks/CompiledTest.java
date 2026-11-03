@@ -44,7 +44,7 @@ public final class CompiledTest {
             true,
             Map.of("xs", List.of(1L, -2L)),
             false,
-            1024);
+            448);
         check("[x, x + 1].size() == 2", Map.of("x", 10L), true, Map.of("x", -1L), true, 768);
         check("{'v': x}.v > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 1536);
         check(

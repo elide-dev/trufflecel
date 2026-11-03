@@ -74,17 +74,40 @@ class ExprNode extends CelNode {
   @Children ExprNode[] children;
 
   ExprNode(Kind kind, String name, Object value, int offset, ExprNode... children) {
-    scalarOperator =
-        kind == Kind.CALL
-                && name.length() == 1
-                && (name.equals("+") || name.equals("-") || name.equals("*"))
-            ? name.charAt(0)
-            : 0;
+    scalarOperator = kind == Kind.CALL ? scalarCode(name) : 0;
     this.kind = kind;
     this.name = name;
     this.value = value;
     this.offset = offset;
     this.children = children;
+  }
+
+  private static int scalarCode(String name) {
+    return switch (name) {
+      case "+", "-", "*", "/", "%", "<", ">" -> name.charAt(0);
+      case "<=" -> 'L';
+      case ">=" -> 'G';
+      default -> 0;
+    };
+  }
+
+  static ExprNode binary(String name, int offset, ExprNode left, ExprNode right) {
+    return scalarCode(name) == 0 || name.equals("+") || name.equals("-") || name.equals("*")
+        ? new ExprNode(Kind.CALL, name, false, offset, left, right)
+        : new ScalarBinaryNode(name, offset, left, right);
+  }
+
+  private static final class ScalarBinaryNode extends ExprNode {
+    ScalarBinaryNode(String name, int offset, ExprNode left, ExprNode right) {
+      super(Kind.CALL, name, false, offset, left, right);
+    }
+
+    @Override
+    Object execute(VirtualFrame frame) {
+      EvalContext ctx = (EvalContext) frame.getArguments()[0];
+      ctx.tick();
+      return scalarBinary(frame, ctx);
+    }
   }
 
   static ExprNode constant(Object value, int offset) {
@@ -244,7 +267,7 @@ class ExprNode extends CelNode {
   }
 
   // Avoid temporary argument arrays and repeated string dispatch in the interpreter.
-  private Object scalarBinary(VirtualFrame frame, EvalContext ctx) {
+  final Object scalarBinary(VirtualFrame frame, EvalContext ctx) {
     Object left = null, right = null;
     CelException error = null;
     try {
@@ -267,6 +290,19 @@ class ExprNode extends CelNode {
         return switch (scalarOperator) {
           case '+' -> Math.addExact(x, y);
           case '-' -> Math.subtractExact(x, y);
+          case '<' -> x < y;
+          case '>' -> x > y;
+          case 'L' -> x <= y;
+          case 'G' -> x >= y;
+          case '/' -> {
+            if (y == 0) throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
+            if (x == Long.MIN_VALUE && y == -1) throw new ArithmeticException();
+            yield x / y;
+          }
+          case '%' -> {
+            if (y == 0) throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
+            yield x % y;
+          }
           default -> Math.multiplyExact(x, y);
         };
       } catch (ArithmeticException e) {

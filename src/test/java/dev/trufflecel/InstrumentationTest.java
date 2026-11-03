@@ -168,6 +168,36 @@ public class InstrumentationTest {
   }
 
   @Test
+  public void multipleInputsExposeScopesAndSurvivePreparedCloning() throws Exception {
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.enter();
+      try {
+        String text = "[1].all(x, x < y) && x >= y";
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", text, "multiple-inputs.cel")
+                .build();
+        var prepared =
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .variable("y", CelType.INT)
+                .build()
+                .prepare(text);
+        var first = prepared.instantiate(source);
+        var second = prepared.instantiate(source);
+        assertTrue(first.test(Map.of("x", 3L, "y", 2L)));
+        assertFalse(second.test(Map.of("x", 1L, "y", 2L)));
+        assertEquals(List.of(1L, 3L, 1L, 1L), events.localValues);
+        assertTrue(events.sections.contains("x < y"));
+        assertTrue(events.sections.contains("x >= y"));
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
   public void instrumentedProgramsStillCompile() throws Exception {
     try (Context context =
         Context.newBuilder("cel")
