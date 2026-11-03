@@ -128,7 +128,9 @@ The comparison-specific initialization settings also cover the immutable fronten
 retained by cel-java; they are not added to production library configuration. This is **build-time CEL frontend compilation**, not storage
 of Graal guest machine code in the image. The image-build holder also records each frontend's
 preparation time; those cold, order-sensitive observations are retained in the raw results,
-not treated as steady-state compilation benchmarks.
+not treated as steady-state compilation benchmarks. Both compiler environments are initialized
+before those timers start. The observations belong to the image build (which may be cached or
+remote), not necessarily to the host that later runs the timing suite.
 
 TruffleCEL evaluation cases require a valid last-tier `OptimizedCallTarget` before and after
 measurement. Guest compilation, context initialization, input fixture creation, and program
