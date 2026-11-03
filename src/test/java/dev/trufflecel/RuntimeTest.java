@@ -84,6 +84,63 @@ public class RuntimeTest {
   }
 
   @Test
+  public void customEqualityCanOverridePrimitivesAndWellKnownConstructors() {
+    var builder = Cel.newBuilder().variable("a", CelType.INT).variable("b", CelType.INT);
+    var standard = builder.build();
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    builder.objectType(
+        new ObjectType() {
+          @Override
+          public String name() {
+            return "google.protobuf.Int64Value";
+          }
+
+          @Override
+          public Map<String, CelType> fields() {
+            return Map.of("value", CelType.INT);
+          }
+
+          @Override
+          public Object construct(Map<String, Object> fields) {
+            return fields.getOrDefault("value", 0L);
+          }
+
+          @Override
+          public Object get(Object value, String field) {
+            return value;
+          }
+
+          @Override
+          public boolean has(Object value, String field) {
+            return field.equals("value");
+          }
+
+          @Override
+          public boolean accepts(Object value) {
+            return value instanceof Long;
+          }
+
+          @Override
+          public boolean equal(Object a, Object b) {
+            calls.incrementAndGet();
+            return (Long) a % 10 == (Long) b % 10;
+          }
+        });
+    var custom = builder.build();
+    var input = Map.of("a", 1001L, "b", 2001L);
+    assertFalse(standard.compile("a == b").test(input));
+    assertTrue(standard.compile("a != b").test(input));
+    assertTrue(custom.compile("a == b").test(input));
+    assertFalse(custom.compile("a != b").test(input));
+    assertFalse(custom.compile("a == b").test(Map.of("a", 1001L, "b", 1002L)));
+    assertTrue(custom.compile("a != b").test(Map.of("a", 1001L, "b", 1002L)));
+    assertTrue(custom.compile("google.protobuf.Int64Value{value: 11} == 21").test());
+    assertEquals(5, calls.get());
+    assertFalse(standard.compile("google.protobuf.Int64Value{value: 11} == 21").test());
+    assertEquals(5, calls.get());
+  }
+
+  @Test
   public void singletonActivationsSnapshotInputsOnEveryEvaluation() {
     var values = new ArrayList<>(List.of(1L));
     var input = new HashMap<String, Object>();

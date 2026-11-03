@@ -87,6 +87,8 @@ class ExprNode extends CelNode {
       case "+", "-", "*", "/", "%", "<", ">" -> name.charAt(0);
       case "<=" -> 'L';
       case ">=" -> 'G';
+      case "==" -> 'E';
+      case "!=" -> 'N';
       default -> 0;
     };
   }
@@ -387,6 +389,14 @@ class ExprNode extends CelNode {
           case '>' -> x > y;
           case 'L' -> x <= y;
           case 'G' -> x >= y;
+          case 'E' ->
+              ctx.environment.runtimeObjectTypes.length == 0
+                  ? x.longValue() == y.longValue()
+                  : Functions.apply(name, new Object[] {left, right}, ctx.environment);
+          case 'N' ->
+              ctx.environment.runtimeObjectTypes.length == 0
+                  ? x.longValue() != y.longValue()
+                  : Functions.apply(name, new Object[] {left, right}, ctx.environment);
           case '/' -> {
             if (y == 0) throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
             if (x == Long.MIN_VALUE && y == -1) throw new ArithmeticException();
