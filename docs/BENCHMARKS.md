@@ -439,5 +439,5 @@ On Linux, reproduce one cell after building `//benchmarks/comparison:svm`:
 ```
 
 Replace the engine with `cel-java` for the paired measurement, repeat in fresh processes,
-and omit the runtime option for the default. An application using a shared compiler
+and omit the runtime option for the default. An application compiling in its application
 isolate must also assess GC interference under its own concurrency and workload.

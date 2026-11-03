@@ -14,6 +14,7 @@ public final class Program {
   private final String singleVariable;
   private final CelType resultType;
   private final Environment environment;
+  private final boolean instrumentable;
   private final RootCallTarget target;
 
   Program(
@@ -38,10 +39,17 @@ public final class Program {
     singleVariable = variables.size() == 1 ? variables.iterator().next() : null;
     this.resultType = resultType;
     this.environment = environment;
+    instrumentable = truffleSource != null;
     // Tooling receives the complete source tree, including every literal and operator event.
     if (truffleSource == null) body = body.lowerArithmetic();
+    else
+      body.accept(
+          node -> {
+            if (node instanceof ExprNode expression) expression.observableBindings = true;
+            return true;
+          });
     body.rootBody = true;
-    target = new ExpressionRoot(body, language, truffleSource).getCallTarget();
+    target = new ExpressionRoot(body, environment, language, truffleSource).getCallTarget();
   }
 
   public String source() {
@@ -69,28 +77,41 @@ public final class Program {
   }
 
   Object evaluateInternal(Map<String, ?> variables) {
-    return target.call(activation(variables));
+    Object[] arguments = arguments(variables);
+    // Source-backed programs retain their context in the frame for late-attached tooling.
+    if (instrumentable) {
+      arguments[0] = context(environment, arguments);
+      arguments[1] = null;
+    }
+    return target.call(arguments);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private EvalContext activation(Map<String, ?> variables) {
-    if (variables.isEmpty()) return new EvalContext(environment, Map.of());
+  private Object[] arguments(Map<String, ?> variables) {
+    if (variables.isEmpty()) return new Object[] {Map.of(), null};
     if (variables.size() == 1) {
       if (singleVariable != null) {
         Object value = variables.get(singleVariable);
         if (value != null || variables.containsKey(singleVariable))
-          return new EvalContext(environment, singleVariable, Values.in(value));
+          return new Object[] {singleVariable, Values.in(value)};
       }
       var binding = variables.entrySet().iterator().next();
-      return new EvalContext(environment, binding.getKey(), Values.in(binding.getValue()));
+      return new Object[] {binding.getKey(), Values.in(binding.getValue())};
     }
     if (variables.size() <= 4) {
       var snapshot = immutableScalarBindings(variables);
-      if (snapshot != null) return new EvalContext(environment, snapshot);
+      if (snapshot != null) return new Object[] {snapshot, null};
     }
     var activation = new HashMap<String, Object>();
     variables.forEach((name, value) -> activation.put(name, Values.in(value)));
-    return new EvalContext(environment, activation);
+    return new Object[] {activation, null};
+  }
+
+  @SuppressWarnings("unchecked")
+  private static EvalContext context(Environment environment, Object[] arguments) {
+    return arguments[0] instanceof String name
+        ? new EvalContext(environment, name, arguments[1])
+        : new EvalContext(environment, (Map<String, Object>) arguments[0]);
   }
 
   @SuppressWarnings("unchecked")
@@ -124,10 +145,12 @@ public final class Program {
     @Child private ExprNode body;
 
     private final SourceSection section;
+    private final Environment environment;
 
-    ExpressionRoot(ExprNode body, CelLanguage language, Source source) {
+    ExpressionRoot(ExprNode body, Environment environment, CelLanguage language, Source source) {
       super(language);
       this.body = body;
+      this.environment = environment;
       section = source == null ? null : source.createSection(0, source.getLength());
     }
 
@@ -138,7 +161,12 @@ public final class Program {
 
     @Override
     public Object execute(VirtualFrame frame) {
-      return body.execute(frame);
+      // Creating the context inside the call target lets partial escape analysis remove it.
+      EvalContext context =
+          section == null
+              ? context(environment, frame.getArguments())
+              : (EvalContext) frame.getArguments()[0];
+      return body.execute(frame, context);
     }
 
     @Override

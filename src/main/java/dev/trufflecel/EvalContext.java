@@ -49,19 +49,39 @@ final class EvalContext {
     remaining -= cost;
   }
 
+  // Preserve stable guest compilation when instruments materialize frames and inspect bindings.
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  Object getObserved(String name) {
+    return get(name);
+  }
+
   Object get(String name) {
-    if (name.startsWith(".")) name = name.substring(1);
+    if (name.startsWith(".")) name = absoluteName(name);
     else {
       for (int i = scopeSize - 2; i >= 0; i -= 2) if (name.equals(scopes[i])) return scopes[i + 1];
     }
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value =
         singleName == null
-            ? activationMap().get(name)
+            ? lookup(activationMap(), name)
             : singleName.equals(name) ? activation : null;
     if (value != null) return value;
-    throw Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
+    throw undeclared(name);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static CelException undeclared(String name) {
+    return Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static String absoluteName(String name) {
+    return name.substring(1);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static Object lookup(Map<String, Object> activation, String name) {
+    return activation.get(name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
