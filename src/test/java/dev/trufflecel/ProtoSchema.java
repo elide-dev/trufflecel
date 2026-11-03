@@ -7,7 +7,7 @@ import java.util.*;
 
 /**
  * Test-only protobuf fixture adapter for upstream conformance. Production protobuf objects belong
- * to Truffledata and enter through ObjectType. This class is not shipped.
+ * to TruffleData and enter through ObjectType. This class is not shipped.
  */
 public final class ProtoSchema {
   /** Scalar numbers follow google.protobuf.FieldDescriptorProto.Type. */

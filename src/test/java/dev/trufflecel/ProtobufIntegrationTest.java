@@ -115,7 +115,7 @@ public class ProtobufIntegrationTest {
   }
 
   @Test
-  public void publishedRowsLoseCelPresenceAndTypeInformation() throws Exception {
+  public void publishedRowsPreserveCompactBytesButNeedCelPresenceAndEnumBridge() throws Exception {
     Descriptor descriptor = descriptor();
     var proto =
         DynamicMessage.newBuilder(descriptor)
@@ -130,10 +130,17 @@ public class ProtobufIntegrationTest {
     var data = DataLibrary.factory().getUncached();
     assertTrue(data.isPresent(row, descriptor.findFieldByName("int32").getIndex()));
     assertFalse(proto.hasField(descriptor.findFieldByName("int32")));
-    assertTrue(data.read(row, descriptor.findFieldByName("bytes").getIndex()) instanceof DataArray);
+    var binary = (DataArray) data.read(row, descriptor.findFieldByName("bytes").getIndex());
+    assertTrue(binary.isBytes());
+    assertEquals(1, binary.size());
+    assertEquals(255L, binary.get(0));
     assertTrue(data.read(row, descriptor.findFieldByName("enum").getIndex()) instanceof String);
     ProtobufType type = new ProtobufType(descriptor);
-    assertEquals(123L, type.get(type.snapshot(proto), "enum"));
+    var value = type.snapshot(proto);
+    assertEquals(123L, type.get(value, "enum"));
+    assertEquals(new Bytes(new byte[] {-1}), type.get(value, "bytes"));
+    assertFalse(type.has(value, "int32"));
+    assertEquals(new UInt(-1), type.get(value, "uint64"));
   }
 
   @Test

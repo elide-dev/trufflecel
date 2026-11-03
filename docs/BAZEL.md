@@ -84,7 +84,7 @@ changing Maven coordinates, regenerate the Maven lock with:
 REPIN=1 bazel run @maven//:pin --config=local
 ```
 
-The Java toolchains target Java 25 to match Truffledata. Optional protobuf and JSON Java
+The Java toolchains target Java 25 to match TruffleData. Optional protobuf and JSON Java
 libraries are generated separately from core; their dependencies cannot leak into the core
 closure. The Maven repository list includes the Elide release repository and versioned
 GraalVM fork repository. Repin with `REPIN=1 bazel run @maven//:pin --config=local`.

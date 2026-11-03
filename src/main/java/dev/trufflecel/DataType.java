@@ -3,7 +3,7 @@ package dev.trufflecel;
 import dev.elide.truffledata.*;
 import java.util.*;
 
-/** Explicit schema binding for native Truffledata rows, including JDBC batches. */
+/** Explicit schema binding for native TruffleData rows, including JDBC batches. */
 public final class DataType implements ObjectType {
   private final String name;
   private final Schema schema;

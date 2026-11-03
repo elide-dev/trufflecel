@@ -1,16 +1,16 @@
 # Maven publishing
 
-The release pipeline follows Truffledata's Bazel publications and Komodo's R2/rclone
+The release pipeline follows TruffleData's Bazel publications and Komodo's R2/rclone
 upload convention. It produces three thin Maven artifacts under `dev.elide`:
 
 | Artifact | Runtime dependencies in addition to core |
 | --- | --- |
-| `trufflecel-core` | Truffle API, RE2/J, Truffledata core |
-| `trufflecel-protobuf` | Truffledata protobuf, protobuf-java, Truffledata core, Truffle API |
+| `trufflecel-core` | Truffle API, RE2/J, TruffleData core |
+| `trufflecel-protobuf` | TruffleData protobuf, protobuf-java, TruffleData core, Truffle API |
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 
 Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
-required. The POMs pin Truffledata `0.1.0-alpha.2` and Elide GraalVM `25.5.5-elide.5`,
+required. The POMs pin TruffleData `0.1.0-alpha.3` and Elide GraalVM `25.5.5-elide.5`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 
@@ -36,7 +36,7 @@ only a staging example, not a statement that a release has been published.
 The publishing host needs Bash, Python 3, curl, rclone and Bazelisk. Builds and JVM tests
 continue to use the hermetic Bazel toolchains and configured BuildBuddy RBE/cache.
 Configure rclone credentials outside the repository, using remote `elide:` and bucket
-`elide-maven`, as in Truffledata. Override with `MAVEN_BUCKET` when needed.
+`elide-maven`, as in TruffleData. Override with `MAVEN_BUCKET` when needed.
 
 ```sh
 # From a clean, committed checkout; writes to the public repository:
