@@ -65,6 +65,11 @@ final class Values {
     public int size() {
       return values.length;
     }
+
+    @Override
+    public Object[] toArray() {
+      return values.clone();
+    }
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary

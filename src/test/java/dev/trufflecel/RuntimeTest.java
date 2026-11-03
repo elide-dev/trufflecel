@@ -161,6 +161,9 @@ public class RuntimeTest {
     nested.set(0, 4);
     assertEquals(CelNull.INSTANCE, snapshot.get(0));
     assertEquals(1L, snapshot.get(1));
+    Object[] copy = snapshot.toArray();
+    copy[1] = 99L;
+    assertEquals(1L, snapshot.get(1));
     assertEquals(2.5, snapshot.get(2));
     assertArrayEquals(new byte[] {1, 2}, (byte[]) Values.out(snapshot.get(3)));
     assertEquals(List.of(3L), snapshot.get(4));
