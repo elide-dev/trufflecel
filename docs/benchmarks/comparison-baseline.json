@@ -1,0 +1,1732 @@
+{
+  "schema": 1,
+  "forks": 3,
+  "captured_at": "2026-11-03T19:36:21.994298+00:00",
+  "commit": "f2437800a29dd618d8b9cc597c8305d8989dd8ba",
+  "dirty": false,
+  "sources_sha256": "b046e32700aaf72bf6a597fb688c87cd8723246d703673c4021dfa27119c3d0f",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "kernel": "7.0.0-1017-azure",
+    "logical_cpus": 4
+  },
+  "versions": {
+    "cel-java": "0.15.0",
+    "graalvm": "25.5.5-elide.23"
+  },
+  "svm_binary_sha256": "f156d1fef254f72aecc970a904fa068ccb160640a84669e461da744c34c6bdd0",
+  "results": [
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 7856860,
+      "guest_compiled": false,
+      "ns_per_op": [
+        926.7482659458926,
+        715.4343425671551,
+        616.0969094669117,
+        618.0265946061644,
+        618.2345150975739,
+        696.4126521674584,
+        564.2772234420115
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 242636,
+      "guest_compiled": true,
+      "ns_per_op": [
+        255.6497174274651,
+        149.7159974610373,
+        137.90408680718994,
+        297.3324097856418,
+        137.08505665204677,
+        141.21354951054218,
+        138.78937892290384
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 6289249,
+      "guest_compiled": false,
+      "ns_per_op": [
+        66.52050282381656,
+        51.5357777457124,
+        38.94348555056161,
+        51.04586976761913,
+        44.00406231225593,
+        37.666819926796734,
+        38.8959329883007
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        307341.0423387097,
+        308436.1451612903,
+        306946.46975806454,
+        306351.26008064515,
+        305147.30241935485,
+        307123.8004032258,
+        308555.21774193546
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        308.7941727311644,
+        306.69177009746204,
+        306.2499551005747,
+        308.4495394736842,
+        306.95233924829756,
+        307.91916751510774,
+        311.1900370917419
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1585099,
+      "guest_compiled": false,
+      "ns_per_op": [
+        604743.77734375,
+        628174.4083333333,
+        469461.55625,
+        401705.0651041667,
+        368908.25231481483,
+        419888.1548913043,
+        367153.8966346154
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1429056,
+      "guest_compiled": false,
+      "ns_per_op": [
+        899558.3125,
+        809702.3385416666,
+        731110.5048076923,
+        627580.06640625,
+        567682.6433823529,
+        501997.6085526316,
+        459395.15178571426
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 7776335,
+      "guest_compiled": false,
+      "ns_per_op": [
+        838.846024454578,
+        628.4725808882637,
+        624.8157232809168,
+        633.9683952613516,
+        591.6061047424623,
+        662.4117937853107,
+        552.0394891713747
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        900.3754560291859,
+        901.0638560867895,
+        900.2798780195552,
+        905.5930447048611,
+        907.531927244582,
+        907.5031564434985,
+        904.907081886574
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 6048064,
+      "guest_compiled": false,
+      "ns_per_op": [
+        368.83574821035245,
+        268.3506288633242,
+        196.71448315290365,
+        189.25906790011305,
+        195.39714149508168,
+        138.5764434593363,
+        135.11066927743832
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        76.00775980185497,
+        76.3021469116211,
+        76.04986007462686,
+        76.24063740079364,
+        76.40639058221412,
+        75.99092357914019,
+        76.26898621550826
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1107.7533967391305,
+        1091.496697509311,
+        1096.197882593458,
+        1107.3633033608492,
+        1120.6313635277247,
+        1108.6854324196597,
+        1107.129665389151
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 313629,
+      "guest_compiled": true,
+      "ns_per_op": [
+        82.58160633454277,
+        189.8759366898898,
+        69.28445878783847,
+        53.54503556782875,
+        53.54803655875902,
+        83.74554775707446,
+        51.69610684550066
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 11411,
+      "guest_compiled": false,
+      "ns_per_op": [
+        3604.7155180699733,
+        2258.625030113226,
+        1842.7647528498428,
+        1989.5913033099937,
+        2066.03809497576,
+        1414.54993964997,
+        1414.1612085218703
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1095.5566807827104,
+        1091.7246930283984,
+        1093.4489053754664,
+        1104.0727327565914,
+        1105.3813853578154,
+        1107.9833190571833,
+        1105.667194870283
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1099.6125923428706,
+        1096.8540157710281,
+        1097.6454383192884,
+        1110.477206143466,
+        1114.07845113852,
+        1110.1438136245265,
+        1109.857333096591
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 222388,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1069.1848673724955,
+        515.1775043936731,
+        467.19027016932273,
+        677.0416110349307,
+        566.8235085227273,
+        446.6226449361662,
+        449.0607189894636
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        247861.77467105264,
+        249905.84539473685,
+        256631.88851351352,
+        248303.66940789475,
+        249001.44407894736,
+        246997.62828947368,
+        248079.35032894736
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        898.7167129984663,
+        900.2911026305684,
+        898.8558461944018,
+        900.1355684432515,
+        897.1971760321101,
+        898.7267901648773,
+        897.6124557331547
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        166.31057680370319,
+        166.16181532641053,
+        174.01198434716449,
+        166.26834884751773,
+        165.4093260478408,
+        168.68195096610535,
+        167.19631776034237
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        75.72086843019125,
+        76.1036424512987,
+        75.84313721524721,
+        75.80211887532342,
+        76.04379805508694,
+        75.87257319856273,
+        76.28334957123796
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        249974.6875,
+        249703.02467105264,
+        247659.8125,
+        247815.87828947368,
+        247173.38815789475,
+        247369.43092105264,
+        246245.00320512822
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 7035107,
+      "guest_compiled": false,
+      "ns_per_op": [
+        809.5325340987569,
+        619.657864528277,
+        593.647366048836,
+        592.4645435730536,
+        643.9704094058727,
+        522.8562597569135,
+        514.1446306195176
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 5130930,
+      "guest_compiled": false,
+      "ns_per_op": [
+        175.55616784938587,
+        171.50591939201053,
+        241.82589539052827,
+        155.2792958399576,
+        141.4561977658098,
+        159.28085926882304,
+        149.5927078679474
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        907.06493687113,
+        909.9988087751548,
+        906.6654028207109,
+        907.381536619582,
+        906.4391723821484,
+        902.2728846153847,
+        903.3585504140987
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 402607,
+      "guest_compiled": false,
+      "ns_per_op": [
+        556308.3492647059,
+        570294.8860294118,
+        387537.3775,
+        330330.3405172414,
+        357677.0763888889,
+        312952.8266129032,
+        290692.17992424243
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1095.3461375584113,
+        1093.2935226212687,
+        1093.8577862639925,
+        1106.106316332547,
+        1122.0809930688335,
+        1108.9827135515122,
+        1108.1789121573725
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 5835385,
+      "guest_compiled": false,
+      "ns_per_op": [
+        252.07342909946237,
+        206.63613749559238,
+        179.4506288751531,
+        209.4277455436919,
+        140.13009904800336,
+        136.90498959550234,
+        177.85148069992414
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        166.73908028093882,
+        167.079656535144,
+        166.52471627237853,
+        167.05524203606043,
+        167.27913016521552,
+        167.84335277320253,
+        168.85337326238837
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        310418.3004032258,
+        305072.69153225806,
+        307981.2620967742,
+        305386.72782258067,
+        305859.4717741936,
+        302965.34274193546,
+        306616.9435483871
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        941.2770114365971,
+        930.7079799107142,
+        934.2104523288217,
+        936.2422561401758,
+        932.1691611188394,
+        934.0749713873407,
+        932.5461546104929
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 232957,
+      "guest_compiled": true,
+      "ns_per_op": [
+        222.1259313992608,
+        112.66126180662373,
+        181.21730780380335,
+        168.4265144438057,
+        109.85337794689727,
+        110.35403940089454,
+        130.28508071238053
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1411923,
+      "guest_compiled": false,
+      "ns_per_op": [
+        604030.05078125,
+        631638.90234375,
+        432699.5653409091,
+        366844.0528846154,
+        349243.5578703704,
+        404724.765625,
+        341191.765625
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 316304,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1036.3922744589222,
+        699.2945070107398,
+        418.14272300731096,
+        506.50235454447323,
+        611.7735761351774,
+        434.781229879507,
+        422.08899725521957
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        209.41496995621873,
+        209.22292540610496,
+        211.55283731949459,
+        209.3730796713112,
+        208.99459616842012,
+        209.88573379297995,
+        209.80282318519514
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        76.53795123922414,
+        76.52893645112316,
+        76.28209460833767,
+        76.05727899062175,
+        75.93478161845685,
+        77.42638618195032,
+        76.40498323200548
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        76.04564472894498,
+        76.12858449314668,
+        76.36380154030367,
+        75.93115645652456,
+        76.3262459090465,
+        76.10379312094156,
+        76.11794814805793
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        248759.68421052632,
+        252067.62828947368,
+        249617.82730263157,
+        248369.69243421053,
+        250763.28453947368,
+        250611.47039473685,
+        248759.125
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        76.69021970291847,
+        76.56937740918595,
+        76.68833226999084,
+        76.29701334635416,
+        76.54727608589157,
+        76.36726131809593,
+        76.76866126113586
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        234492.8171875,
+        233925.61432926828,
+        233655.76219512196,
+        234254.57012195123,
+        234485.490625,
+        233589.3719512195,
+        233704.13109756098
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        312.84675111785907,
+        310.3514653090259,
+        310.4544491525424,
+        320.05472376774986,
+        310.2656312036792,
+        310.0104545379429,
+        315.2460622310382
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 286238,
+      "guest_compiled": true,
+      "ns_per_op": [
+        69.92116879847852,
+        189.04132056451613,
+        64.63534514256563,
+        52.4253457854299,
+        61.460515169489305,
+        91.53107244318181,
+        50.645302642381814
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 367961,
+      "guest_compiled": true,
+      "ns_per_op": [
+        783.5468071106284,
+        729.4035778140548,
+        529.0348988887636,
+        547.7863974883178,
+        639.899354359989,
+        490.6872286872385,
+        478.2450454985726
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1235091,
+      "guest_compiled": false,
+      "ns_per_op": [
+        878373.1704545454,
+        796976.4519230769,
+        703934.9732142857,
+        628252.265625,
+        497080.25986842107,
+        495763.3092105263,
+        517486.890625
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        898.9420293328221,
+        904.4502797067901,
+        903.7154215620185,
+        907.4446050212848,
+        920.3090168759811,
+        912.1171206745723,
+        899.8778098638803
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 321484,
+      "guest_compiled": true,
+      "ns_per_op": [
+        61.66372749066085,
+        194.55269417123174,
+        89.63685499368977,
+        57.61015809347655,
+        55.28054318985849,
+        120.19318830128205,
+        54.391933247470526
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 258716,
+      "guest_compiled": false,
+      "ns_per_op": [
+        18691.850846613546,
+        9335.16013681592,
+        6993.487565201192,
+        6397.989469645293,
+        7167.137652788388,
+        4686.810782108945,
+        4473.870885019084
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 176552,
+      "guest_compiled": false,
+      "ns_per_op": [
+        6835.655657798834,
+        5595.758949880668,
+        4721.702668680766,
+        3655.705726120858,
+        3640.958389945652,
+        3511.069309247473,
+        2483.9479470198676
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        313.81154853118306,
+        310.9135900198939,
+        312.88639965963694,
+        312.111321884984,
+        311.091995919586,
+        328.6698255325112,
+        316.3348666014571
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 451148,
+      "guest_compiled": false,
+      "ns_per_op": [
+        533495.0,
+        528641.8923611111,
+        378072.8725,
+        338145.33035714284,
+        357452.31944444444,
+        323249.19166666665,
+        295588.75
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 9869,
+      "guest_compiled": false,
+      "ns_per_op": [
+        4038.451469638243,
+        2462.64841082217,
+        1677.2348166368515,
+        1903.9761802030457,
+        1831.0906494140625,
+        1314.9899807152876,
+        1320.1858543368066
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        235846.0921875,
+        234718.896875,
+        234101.91768292684,
+        234204.21341463414,
+        233223.83536585365,
+        232690.25762195123,
+        232038.26981707316
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": false,
+      "ns_per_op": [
+        4170.662811387901,
+        4188.433089548906,
+        4188.002149397053,
+        4203.623879426266,
+        4167.266666666666,
+        4170.23443752779,
+        4213.366436433063
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        213.9626816926798,
+        213.19521587395417,
+        212.99505293529626,
+        213.61675600391908,
+        212.93102459574854,
+        212.6255726142961,
+        214.80634135584677
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        166.61912118815752,
+        165.24278566518612,
+        164.56248244875036,
+        164.8727863850591,
+        165.02805657737258,
+        165.2004257559205,
+        167.42265401785716
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": false,
+      "ns_per_op": [
+        6816.166424418605,
+        6808.848175381264,
+        6784.523516642547,
+        6771.3374548736465,
+        6787.776818017366,
+        6817.090661337209,
+        6803.010333575055
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        212.50691737672227,
+        212.51489275516678,
+        211.88535735267536,
+        212.69792139292196,
+        213.45822091302367,
+        211.5573034183213,
+        211.2796714469178
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 151735,
+      "guest_compiled": false,
+      "ns_per_op": [
+        10071.542494629432,
+        6467.567155172414,
+        5542.892139479905,
+        6838.0184948979595,
+        4861.380734836703,
+        4302.141513761468,
+        4772.02851602238
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": false,
+      "ns_per_op": [
+        2386.277297022143,
+        2445.0379237288134,
+        2394.812196679438,
+        2418.458311839051,
+        2402.986273065095,
+        2398.4697812739832,
+        2396.1104810886786
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 377179,
+      "guest_compiled": false,
+      "ns_per_op": [
+        737175.0721153846,
+        586460.96484375,
+        482264.53125,
+        400552.7473958333,
+        320839.61666666664,
+        356891.00694444444,
+        304504.0080645161
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 11762,
+      "guest_compiled": false,
+      "ns_per_op": [
+        3254.183096147171,
+        1943.4885079809287,
+        1615.2001101135015,
+        2313.9916090819347,
+        1576.055051269121,
+        1316.9852156201714,
+        1378.4035501489573
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 164970,
+      "guest_compiled": false,
+      "ns_per_op": [
+        7591.429409385113,
+        6693.627810492505,
+        5122.99006147541,
+        4008.7148888413853,
+        3440.3878669724772,
+        4325.916590701914,
+        2517.5590594790547
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        319265.7479166667,
+        319364.89375,
+        316427.97708333336,
+        314733.91875,
+        318017.52708333335,
+        314761.97291666665,
+        317059.14375
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": false,
+      "ns_per_op": [
+        7086.184240362812,
+        7036.303450862716,
+        7042.825591216216,
+        7041.08619557057,
+        7024.524297752809,
+        7028.0661048689135,
+        7033.682717554389
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": false,
+      "ns_per_op": [
+        4152.83215234721,
+        4160.304347826087,
+        4244.480760525124,
+        4167.457527777778,
+        4162.090074345318,
+        4181.162700624164,
+        4172.514908767245
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        312.60297916666667,
+        309.9394190408514,
+        309.6840312169836,
+        309.5885354760961,
+        312.95713135678056,
+        309.30301574868076,
+        311.68557180851064
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 194886,
+      "guest_compiled": true,
+      "ns_per_op": [
+        196.85535590569364,
+        120.65212981907555,
+        201.91868191310712,
+        147.07508255678965,
+        117.58628783983748,
+        121.30937079538398,
+        157.15563195561813
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        166.4990212180398,
+        165.6358752296495,
+        165.61271264662238,
+        165.51634756248234,
+        165.77937698903818,
+        165.79307262199436,
+        167.7796072054824
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": true,
+      "ns_per_op": [
+        76.58917849790878,
+        76.53994620232497,
+        76.67875770822428,
+        76.47890482268694,
+        76.85847990310205,
+        76.48851069948441,
+        76.48616572575382
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 6130565,
+      "guest_compiled": false,
+      "ns_per_op": [
+        88.93894891106389,
+        48.55155544421659,
+        40.7191026211779,
+        52.10728798512937,
+        49.043509177791265,
+        38.81870678411726,
+        38.937559441241945
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        165.57089639552134,
+        165.78144116867043,
+        165.74849096790157,
+        165.25227258706994,
+        164.99700542827983,
+        165.54441097281074,
+        167.44272171090182
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        309.10713755933546,
+        307.6541646161417,
+        307.3919871689827,
+        309.70739875132136,
+        309.32944632255936,
+        310.23559441137564,
+        313.87838109266204
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 6477310,
+      "guest_compiled": false,
+      "ns_per_op": [
+        80.33426232177132,
+        95.37114334106445,
+        41.34793576009103,
+        39.70983890027785,
+        60.167059470941574,
+        39.44208490046109,
+        39.37739241734427
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1099.7496921904315,
+        1098.545953300562,
+        1092.1889475675046,
+        1110.0717847419508,
+        1113.1438863851993,
+        1111.2841131036932,
+        1106.107827240566
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        166.4599620472301,
+        167.1097381130596,
+        166.84927124857631,
+        166.6857135238908,
+        166.22559175531916,
+        165.29090267983074,
+        167.63951547304063
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 66893264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        235893.8984375,
+        234476.9578125,
+        236795.91875,
+        235064.6078125,
+        234629.2609375,
+        234526.1125,
+        236003.5109375
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 201338,
+      "guest_compiled": false,
+      "ns_per_op": [
+        10605.892816742082,
+        6790.011404779146,
+        5789.402391975309,
+        6585.1135884831465,
+        5003.106523479189,
+        4270.345820277529,
+        5008.747462606838
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "cel-java",
+      "stage": "evaluate",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 32871642,
+      "guest_compiled": false,
+      "ns_per_op": [
+        312.6353625,
+        309.82871135042285,
+        310.8565256133952,
+        310.49557650291314,
+        310.64074920508745,
+        311.56707079013825,
+        314.79928965829754
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        204.01346588931432,
+        202.4779554682101,
+        202.00392779429507,
+        201.84878250947295,
+        203.07834156271656,
+        204.17520279834494,
+        203.11671225086656
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": false,
+      "ns_per_op": [
+        6859.498491221653,
+        6778.117322976878,
+        6747.574100719425,
+        6790.489364590876,
+        6748.9138489208635,
+        6787.082850940666,
+        6750.5349622030235
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "evaluate",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 4365325,
+      "guest_compiled": true,
+      "ns_per_op": [
+        1096.4750219042055,
+        1091.3585602886405,
+        1095.7299576518692,
+        1109.4709283435727,
+        1114.2197228493346,
+        1108.530851252363,
+        1105.1536458333333
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 92253,
+      "guest_compiled": false,
+      "ns_per_op": [
+        6581.354122807017,
+        4746.025999493927,
+        3765.2811997991967,
+        2763.3121131741823,
+        3564.73552756654,
+        2609.669496242694,
+        2432.275275616083
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "comprehension",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1111779,
+      "guest_compiled": false,
+      "ns_per_op": [
+        1009896.8875,
+        783451.0260416666,
+        875019.5511363636,
+        628518.5458333333,
+        678570.9553571428,
+        522627.3888888889,
+        542277.21875
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        202.87863727292387,
+        203.32516346070437,
+        203.19722905469834,
+        202.72513971160498,
+        203.49249267578125,
+        203.7924553416203,
+        204.12695244470567
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "image-ast",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": true,
+      "ns_per_op": [
+        205.9885695847979,
+        205.75441099016854,
+        207.0064864999117,
+        206.5715985195629,
+        207.42371957964602,
+        205.36692334223898,
+        206.41546043941528
+      ],
+      "fork": 1
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 696780,
+      "guest_compiled": false,
+      "ns_per_op": [
+        4159.728759982254,
+        4146.25641025641,
+        4178.895972593583,
+        4153.347680469442,
+        4153.091148139947,
+        4186.744056919643,
+        4154.153882365972
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "image-ast",
+      "workload": "comprehension",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 21492174,
+      "guest_compiled": false,
+      "ns_per_op": [
+        900.8737339189709,
+        905.2358277874229,
+        902.8318627214946,
+        906.1108904076507,
+        909.4131661821706,
+        901.6544050480769,
+        897.7849767898163
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": false,
+      "ns_per_op": [
+        2384.717351220753,
+        2382.3683149136177,
+        2352.6627666248432,
+        2371.148504678806,
+        2395.7168018650996,
+        2356.191442573511,
+        2367.258189219894
+      ],
+      "fork": 2
+    },
+    {
+      "engine": "trufflecel",
+      "stage": "compile",
+      "workload": "scalar",
+      "runtime": "svm",
+      "image_build_ast": true,
+      "image_prepare_ns": 1739530,
+      "guest_compiled": false,
+      "ns_per_op": [
+        2395.050638569604,
+        2373.687911392405,
+        2367.780097853535,
+        2379.7584232233503,
+        2389.5117864424055,
+        2363.0135931199598,
+        2369.8397529069766
+      ],
+      "fork": 0
+    },
+    {
+      "engine": "cel-java",
+      "stage": "compile",
+      "workload": "policy",
+      "runtime": "jvm",
+      "image_build_ast": false,
+      "image_prepare_ns": 1370264,
+      "guest_compiled": false,
+      "ns_per_op": [
+        607770.953125,
+        635420.9708333333,
+        431334.88920454547,
+        394088.1015625,
+        361438.9350961539,
+        418639.04619565216,
+        359005.96527777775
+      ],
+      "fork": 2
+    }
+  ]
+}
