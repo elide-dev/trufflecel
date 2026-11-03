@@ -166,6 +166,38 @@ public class RuntimeTest {
   }
 
   @Test
+  public void scalarActivationSnapshotsSurviveMutationDuringEvaluation() {
+    var input = new HashMap<String, Object>();
+    input.put("a", 1L);
+    input.put("b", 2L);
+    var environment =
+        Cel.newBuilder()
+            .inferVariables(true)
+            .function(
+                "mutate",
+                List.of(),
+                CelType.BOOL,
+                ignored -> {
+                  input.put("a", 11L);
+                  input.put("b", 12L);
+                  return true;
+                })
+            .build();
+    var program = environment.compile("mutate() && a == 1 && b == 2");
+    assertTrue(program.test(input));
+    assertFalse(program.test(input));
+    assertTrue(
+        environment
+            .compile("a == 1.5 && b == 'x' && enabled")
+            .test(Map.of("a", 1.5, "b", "x", "enabled", true)));
+    assertEquals(
+        15L,
+        environment
+            .compile("a + b + c + d + e")
+            .evaluate(Map.of("a", 1L, "b", 2L, "c", 3L, "d", 4L, "e", 5L)));
+  }
+
+  @Test
   public void activationsPreserveMissingBindingsNullsAndSnapshots() {
     var values = new ArrayList<>(List.of(1L));
     var env =
