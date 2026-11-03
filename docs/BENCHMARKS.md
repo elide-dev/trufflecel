@@ -66,8 +66,8 @@ embedding of the library.
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
 `bazel test //...`. It requires an optimizing runtime and valid last-tier guest code before
 and after measurement. Background compilation is disabled, compilation failures throw,
-all Truffle performance warnings are errors, and partial-evaluation graphs are capped at
-10,000 nodes. Each tested AST is limited to 128 nodes.
+all Truffle performance warnings are errors, and the partial-evaluation graph-size budget
+is 10,000. Each tested AST is limited to 128 nodes.
 
 The test covers scalar arithmetic, lazy logic, optionals, comprehensions, list/map literals,
 conditionals, unknown propagation, native rows, protobuf, JSON, and network operations.
@@ -76,8 +76,10 @@ checks that compiled execution still enforces evaluation limits.
 
 Allocation budgets measure the complete `Program.evaluate` call, including activation
 creation and host-data snapshots. Fixture creation and warmup are excluded. The test requires
-JVM thread-allocation accounting, synchronous host compilation (`-Xbatch`), and 100,000
-warmup evaluations before each measurement phase. Unsupported accounting or an interpreter-only runtime
+JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
+`-XX:-UseJVMCICompiler`), and 100,000 warmup evaluations before each measurement phase.
+Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
+deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
 fails rather than skips. Scalar evaluation is capped at 512 bytes/op, logical/optional/row
 paths at 640, list construction at 768, protobuf/JSON at 1,024, comprehensions/maps at 1,536,
 and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed
