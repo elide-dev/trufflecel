@@ -192,6 +192,23 @@ universal improvements. All 14 profile totals reconcile for both runs. Separate 
 diagnostics place comprehension peak RSS near 120 MiB after the change; a full paired
 suite is needed to qualify the resulting footprint across execution modes.
 
+Using a checked identifier as a single-binding lookup hint (`65c9089`) avoids allocating
+map-entry iterators when an environment declares more variables than the activation supplies.
+Unmatched keys retain the existing lookup behavior. A [paired native diagnostic](benchmarks/binding-lookup-diagnostic.json)
+on an Intel Xeon 2.70 GHz worker records the following medians across three fresh processes:
+
+| Guest-JIT evaluation | TruffleCEL bytes/op | cel-java bytes/op | TruffleCEL peak RSS | cel-java peak RSS |
+| --- | ---: | ---: | ---: | ---: |
+| Scalar | 16 | 216 | 62.2 MiB | 68.5 MiB |
+| Policy | 116 | 412 | 108.1 MiB | 66.6 MiB |
+| Comprehension | 384 | 648 | 119.3 MiB | 66.0 MiB |
+
+This is a scalar RSS win in the diagnostic, with policy and comprehension still behind.
+Both engines use default runtime options and the unchanged fixed-work harness. The saved
+report identifies the base revision and applied patch: this measurement predates inclusion
+of the lexer optimization. It covers native guest-JIT evaluation only; the README charts
+remain the explicitly dated full-suite snapshot until the next complete matrix is available.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
