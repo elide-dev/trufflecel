@@ -129,7 +129,7 @@ final class ExprNode extends Node {
       if (!present) throw Values.error(CelException.Code.NO_SUCH_KEY, "no such key: " + name);
       return map.get(name);
     }
-    for (ObjectType type : ctx.environment.objectTypes.values())
+    for (ObjectType type : ctx.environment.runtimeObjectTypes)
       if (type.accepts(operand)) {
         if (!type.fields().containsKey(name))
           throw Values.error(CelException.Code.NO_SUCH_FIELD, "no such field: " + name);

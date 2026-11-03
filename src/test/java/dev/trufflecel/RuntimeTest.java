@@ -60,6 +60,28 @@ public class RuntimeTest {
   }
 
   @Test
+  public void numericEqualityPreservesSpecialValuesAndMixedPrecision() {
+    var equal = Cel.compile("x == y");
+    for (Object[] pair :
+        List.of(
+            new Object[] {Long.MIN_VALUE, Long.MIN_VALUE},
+            new Object[] {new UInt(-1L), new UInt(-1L)},
+            new Object[] {-0.0, 0.0},
+            new Object[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY},
+            new Object[] {42L, new UInt(42L)}))
+      assertTrue(equal.test(Map.of("x", pair[0], "y", pair[1])));
+    for (Object[] pair :
+        List.of(
+            new Object[] {Long.MAX_VALUE, Long.MAX_VALUE - 1},
+            new Object[] {new UInt(-1L), new UInt(-2L)},
+            new Object[] {Double.NaN, Double.NaN},
+            new Object[] {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},
+            new Object[] {9007199254740993L, 9007199254740992.0},
+            new Object[] {-1L, new UInt(-1L)}))
+      assertFalse(equal.test(Map.of("x", pair[0], "y", pair[1])));
+  }
+
+  @Test
   public void arithmeticAgainstIndependentIntegerOracle() {
     var random = new Random(0xCE1);
     for (String op : List.of("+", "-", "*", "/", "%")) {

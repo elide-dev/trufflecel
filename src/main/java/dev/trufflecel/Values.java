@@ -86,6 +86,9 @@ final class Values {
   static boolean equal(Object a, Object b) {
     if (a instanceof OptionalValue x && b instanceof OptionalValue y)
       return x.present() == y.present() && (!x.present() || equal(x.value(), y.value()));
+    if (a instanceof Long x && b instanceof Long y) return x.longValue() == y.longValue();
+    if (a instanceof UInt x && b instanceof UInt y) return x.bits() == y.bits();
+    if (a instanceof Double x && b instanceof Double y) return x.doubleValue() == y.doubleValue();
     if (numeric(a) && numeric(b)) {
       if (a instanceof Double d && !Double.isFinite(d))
         return b instanceof Double e && d.doubleValue() == e.doubleValue();
