@@ -1,0 +1,104 @@
+# JVM library artifacts; hermetic Java 25 toolchains and an opt-in native simulation benchmark.
+common --java_language_version=25
+common --tool_java_language_version=25
+common --java_runtime_version=remotejdk_25
+common --tool_java_runtime_version=remotejdk_25
+common --repo_env=ANDROID_HOME=
+common --repo_env=ANDROID_SDK_ROOT=
+build --incompatible_strict_action_env
+build --nojava_header_compilation
+build --experimental_java_classpath=off
+build --@rules_go//go/config:pure
+test --test_output=errors
+test --nozip_undeclared_test_outputs
+test --remote_download_regex=.*/testlogs/.*
+
+# ---- BuildBuddy best practices (docs/BAZEL.md; after BuildBuddy's own shared.bazelrc).
+# BLAKE3 digests: faster hashing of inputs (BuildBuddy's caches accept them).
+startup --digest_function=BLAKE3
+# Repository annotations on every invocation (repo URL, commit, branch, tree status).
+common --enable_platform_specific_config
+common:linux --workspace_status_command=$(pwd)/tools/workspace_status.sh
+common:macos --workspace_status_command=$(pwd)/tools/workspace_status.sh
+# Outputs per platform (switching between macOS and remote Linux builds wipes nothing), lost inputs recovered within the
+# build, clickable timing profiles.
+common --experimental_platform_in_output_dir
+common --rewind_lost_inputs
+common --experimental_profile_include_target_label
+common --experimental_profile_include_primary_output
+common --noslim_profile
+common --repo_env=DO_NOT_TRACK=1
+# Cache hits across configurations for actions that support path mapping (Java compiles across target/exec).
+common --experimental_output_paths=strip
+
+# The default for builds/tests is one Linux amd64 execution and cache profile, including on macOS.
+# Supply the organization's API key in user.bazelrc; --config=local explicitly opts into host execution.
+common --config=remote
+
+# BuildBuddy (--config=buildbuddy): remote cache and build results. Authenticated only: the API key header
+# (`common --remote_header=x-buildbuddy-api-key=<key>` in user.bazelrc or ~/.bazelrc; a secret in CI) keeps invocations
+# private to the organization, so never enable this config without one.
+common:buildbuddy --bes_results_url=https://app.buildbuddy.io/invocation/
+common:buildbuddy --bes_backend=grpcs://remote.buildbuddy.io
+common:buildbuddy --remote_cache=grpcs://remote.buildbuddy.io
+# Repository downloads through BuildBuddy's cache (JDK, Go, and Maven archives), else directly.
+common:buildbuddy --experimental_remote_downloader=grpcs://remote.buildbuddy.io
+common:buildbuddy --experimental_remote_downloader_local_fallback
+common:buildbuddy --remote_cache_compression
+common:buildbuddy --experimental_remote_cache_chunking
+common:buildbuddy --remote_timeout=10m
+# Cache namespace: bump the suffix to start from an empty cache.
+common:buildbuddy --remote_instance_name=elide-dev/trufflecel/v1
+common:buildbuddy --build_metadata=REPO_URL=https://github.com/elide-dev/trufflecel
+# Build without the bytes: only top-level outputs (and test results) come back.
+common:buildbuddy --remote_download_toplevel
+# Local results never enter the shared cache. RBE results come from the same Linux inputs on every client.
+common:buildbuddy --noremote_upload_local_results
+common:ci --build_metadata=ROLE=CI
+# Correctness jobs need test results, not every wildcard target's distribution/jar/native outputs.
+# Keep `build`/`run` downloads unchanged for jobs that package or execute their outputs locally.
+test:ci --remote_download_minimal
+
+# Remote execution (--config=remote, implies buildbuddy): every action on BuildBuddy's Linux executors in Firecracker
+# microVMs from the pinned builder image (//bazel/platforms:rbe_linux_amd64), with the build's own
+# hermetic toolchains as inputs. Targets build for that platform; host-sensitive gates stay local (no-remote-exec).
+common:remote --config=buildbuddy
+common:remote --remote_executor=grpcs://remote.buildbuddy.io
+common:remote --platforms=//bazel/platforms:rbe_linux_amd64
+common:remote --host_platform=//bazel/platforms:rbe_linux_amd64
+common:remote --jobs=100
+common:remote --spawn_strategy=remote
+common:remote --noremote_local_fallback
+common:remote --experimental_inmemory_jdeps_files
+common:remote --experimental_inmemory_dotd_files
+common:remote --disk_cache=
+# Tests and tools execute remotely: no local runfiles trees (they hold whole JDKs and fill small CI disks).
+common:remote --nobuild_runfile_links
+common:remote --verbose_failures
+
+# Explicit host execution for performance measurements and workspace tools (bazel run). Never write host results to
+# the remote cache: host tools may differ from the pinned executor image.
+common:local --remote_executor=
+common:local --remote_cache=
+common:local --bes_backend=
+common:local --bes_results_url=
+common:local --experimental_remote_downloader=
+common:local --platforms=@bazel_tools//tools:host_platform
+common:local --host_platform=@bazel_tools//tools:host_platform
+common:local --spawn_strategy=worker,sandboxed,local
+common:local --build_runfile_links
+common:local --jobs=auto
+common:local --noremote_upload_local_results
+# BuildBuddy Workflows (buildbuddy.yaml) runs, tagged as CI.
+common:workflows --build_metadata=ROLE=CI
+test:workflows --remote_download_minimal
+# Untrusted builds (pull requests holding a write-capable key): their own cache namespace, isolated from main's.
+common:untrusted --remote_instance_name=elide-dev/trufflecel/untrusted/v1
+
+
+coverage --combined_report=lcov
+coverage --instrumentation_filter=//src/main/java/dev/trufflecel[/:]
+coverage --remote_download_toplevel
+
+# Credentials stay outside version control.
+try-import %workspace%/user.bazelrc

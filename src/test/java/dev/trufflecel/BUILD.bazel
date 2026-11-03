@@ -1,0 +1,119 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
+java_test(
+    name = "conformance",
+    srcs = ["ConformanceTest.java"],
+    data = [
+        "//third_party/cel-spec:corpus.json",
+        "//third_party/cel-spec:schemas.json",
+    ],
+    test_class = "dev.trufflecel.ConformanceTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "test_support",
+    testonly = True,
+    srcs = [
+        "ProtoSchema.java",
+        "TestObjects.java",
+    ],
+    deps = [
+        "//:trufflecel",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
+java_test(
+    name = "checker",
+    srcs = ["CheckerTest.java"],
+    test_class = "dev.trufflecel.CheckerTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "interop",
+    srcs = ["InteropTest.java"],
+    test_class = "dev.trufflecel.InteropTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "parser",
+    srcs = ["ParserTest.java"],
+    test_class = "dev.trufflecel.ParserTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "runtime",
+    srcs = ["RuntimeTest.java"],
+    test_class = "dev.trufflecel.RuntimeTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "dataIntegration",
+    srcs = ["DataIntegrationTest.java"],
+    test_class = "dev.trufflecel.DataIntegrationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:com_h2database_h2",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:dev_elide_truffledata_jdbc",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "jsonIntegration",
+    srcs = ["JsonIntegrationTest.java"],
+    test_class = "dev.trufflecel.JsonIntegrationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-json",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_shadowed_json",
+    ],
+)
+
+java_test(
+    name = "protobufIntegration",
+    srcs = ["ProtobufIntegrationTest.java"],
+    test_class = "dev.trufflecel.ProtobufIntegrationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:dev_elide_truffledata_protobuf",
+        "@maven//:junit_junit",
+    ],
+)

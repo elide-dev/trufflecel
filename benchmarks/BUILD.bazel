@@ -1,0 +1,39 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+load("@rules_graalvm//graalvm:defs.bzl", "native_image")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//bazel:simulation.bzl", "simulation_image")
+java_library(
+    name = "benchmarks",
+    srcs = ["NativeHooks.java", "SimulationBenchmark.java"],
+    deps = ["//:trufflecel", "//:trufflecel-protobuf", "//:trufflecel-json",
+            "@maven//:dev_elide_truffledata_core", "@maven//:com_google_protobuf_protobuf_java",
+            "@maven//:org_graalvm_sdk_nativeimage", "@maven//:org_graalvm_shadowed_json"],
+)
+java_test(
+    name = "smoke", main_class = "dev.trufflecel.bench.SimulationBenchmark",
+    args = ["--smoke"], use_testrunner = False, runtime_deps = [":benchmarks"],
+)
+native_image(
+    name = "native",
+    cc_deps = ["//benchmarks/native:hooks"],
+    data = ["//benchmarks/native:celbench.h"],
+    debug = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB", "EstimatedFreeDiskBytes": "16GB"},
+    executable_name = "trufflecel-bench",
+    extra_args = ["--gc=serial", "-Dtruffle.UseFallbackRuntime=true", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata",
+                  "--initialize-at-run-time=dev.trufflecel.bench", "--parallelism=8", "-march=compatibility",
+                  "-H:+UnlockExperimentalVMOptions", "-H:-DeleteLocalSymbols", "-H:+PreserveFramePointer",
+                  "-H:-UnlockExperimentalVMOptions"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    main_class = "dev.trufflecel.bench.SimulationBenchmark",
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+    deps = [":benchmarks", "@maven//:org_graalvm_truffle_truffle_runtime"],
+)
+simulation_image(name = "simulation", image = ":native", tags = ["manual"],
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
+filegroup(name = "native_debug", srcs = [":native"], output_group = "debug_files", tags = ["manual"])
+sh_test(name = "native_smoke", srcs = ["native_smoke.sh"], args = ["$(rootpath :simulation)"],
+    data = [":simulation"], tags = ["manual"],
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
+exports_files(["cases.json"])

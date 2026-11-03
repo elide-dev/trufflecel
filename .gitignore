@@ -1,0 +1,8 @@
+/bazel-*
+*.class
+.DS_Store
+
+/user.bazelrc
+
+/build/
+__pycache__/

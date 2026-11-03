@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+jobs:
+  bazel:
+    name: Bazel
+    uses: ./.github/workflows/check.bazel.yml
+    secrets: inherit
+  benchmarks:
+    name: Benchmarks
+    uses: ./.github/workflows/benchmarks.yml
+    permissions:
+      contents: read
+      id-token: write
+    secrets: inherit
+  release:
+    name: Release Please
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [bazel, benchmarks]
+    uses: ./.github/workflows/release-please.yml
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets: inherit
+  publish:
+    name: Maven publication
+    needs: release
+    if: needs.release.outputs.release_created == 'true'
+    uses: ./.github/workflows/publish.maven.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+    secrets: inherit
