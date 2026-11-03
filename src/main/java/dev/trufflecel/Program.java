@@ -11,6 +11,7 @@ import java.util.*;
 public final class Program {
   private final String source;
   private final Set<String> variables;
+  private final String singleVariable;
   private final CelType resultType;
   private final Environment environment;
   private final RootCallTarget target;
@@ -34,6 +35,7 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
+    singleVariable = variables.size() == 1 ? variables.iterator().next() : null;
     this.resultType = resultType;
     this.environment = environment;
     body.rootBody = true;
@@ -72,9 +74,13 @@ public final class Program {
   private EvalContext activation(Map<String, ?> variables) {
     if (variables.isEmpty()) return new EvalContext(environment, Map.of());
     if (variables.size() == 1) {
+      if (singleVariable != null) {
+        Object value = variables.get(singleVariable);
+        if (value != null || variables.containsKey(singleVariable))
+          return new EvalContext(environment, singleVariable, Values.in(value));
+      }
       var binding = variables.entrySet().iterator().next();
-      return new EvalContext(
-          environment, Collections.singletonMap(binding.getKey(), Values.in(binding.getValue())));
+      return new EvalContext(environment, binding.getKey(), Values.in(binding.getValue()));
     }
     var activation = new HashMap<String, Object>();
     variables.forEach((name, value) -> activation.put(name, Values.in(value)));

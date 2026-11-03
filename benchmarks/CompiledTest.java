@@ -29,7 +29,7 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
-        check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 256);
+        check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 128);
         check(
             "enabled && 10 / x > 1",
             Map.of("enabled", true, "x", 2L),

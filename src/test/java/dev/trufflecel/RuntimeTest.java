@@ -162,6 +162,18 @@ public class RuntimeTest {
 
   @Test
   public void errorAndUnknownTruthTables() {
+    assertEquals(Unknown.of("x"), Cel.compile("(1/0) + x").evaluate(Map.of("x", Unknown.of("x"))));
+    for (int budget : new int[] {1, 2}) {
+      var limited =
+          Cel.newBuilder().inferVariables(true).evaluationBudget(budget).build().compile("x + y");
+      assertEquals(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(
+                  CelException.class,
+                  () -> limited.evaluate(Map.of("x", Unknown.of("x"), "y", Unknown.of("y"))))
+              .code());
+    }
+
     assertFalse(Cel.compile("(1/0 == 0) && false").test());
     assertTrue(Cel.compile("(1/0 == 0) || true").test());
     assertEquals(2L, Cel.compile("false ? 1/0 : 2").evaluate());

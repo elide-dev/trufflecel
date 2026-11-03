@@ -70,9 +70,16 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean extensionCall;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalFallback;
   final int offset;
+  private final int scalarOperator;
   @Children ExprNode[] children;
 
   ExprNode(Kind kind, String name, Object value, int offset, ExprNode... children) {
+    scalarOperator =
+        kind == Kind.CALL
+                && name.length() == 1
+                && (name.equals("+") || name.equals("-") || name.equals("*"))
+            ? name.charAt(0)
+            : 0;
     this.kind = kind;
     this.name = name;
     this.value = value;
@@ -81,7 +88,19 @@ class ExprNode extends CelNode {
   }
 
   static ExprNode constant(Object value, int offset) {
-    return new ExprNode(Kind.CONSTANT, "", value, offset);
+    return new LiteralNode(value, offset);
+  }
+
+  private static final class LiteralNode extends ExprNode {
+    LiteralNode(Object value, int offset) {
+      super(Kind.CONSTANT, "", value, offset);
+    }
+
+    @Override
+    Object execute(VirtualFrame frame) {
+      ((EvalContext) frame.getArguments()[0]).tick();
+      return value;
+    }
   }
 
   String qualifiedName() {
@@ -195,6 +214,8 @@ class ExprNode extends CelNode {
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object call(VirtualFrame frame, EvalContext ctx) {
+    if (scalarOperator != 0 && children.length == 2 && !extensionCall)
+      return scalarBinary(frame, ctx);
     if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
     if (optionalFallback && children.length == 2) {
       Object first = children[0].execute(frame);
@@ -220,6 +241,39 @@ class ExprNode extends CelNode {
     if (error != null) throw error;
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);
+  }
+
+  // Avoid temporary argument arrays and repeated string dispatch in the interpreter.
+  private Object scalarBinary(VirtualFrame frame, EvalContext ctx) {
+    Object left = null, right = null;
+    CelException error = null;
+    try {
+      left = children[0].execute(frame);
+    } catch (CelException e) {
+      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+      error = e;
+    }
+    try {
+      right = children[1].execute(frame);
+    } catch (CelException e) {
+      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+      error = e;
+    }
+    if (left instanceof Unknown u) return right instanceof Unknown v ? u.merge(v) : u;
+    if (right instanceof Unknown) return right;
+    if (error != null) throw error;
+    if (left instanceof Long x && right instanceof Long y) {
+      try {
+        return switch (scalarOperator) {
+          case '+' -> Math.addExact(x, y);
+          case '-' -> Math.subtractExact(x, y);
+          default -> Math.multiplyExact(x, y);
+        };
+      } catch (ArithmeticException e) {
+        throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+      }
+    }
+    return Functions.apply(name, new Object[] {left, right}, ctx.environment);
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop

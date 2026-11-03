@@ -4,7 +4,8 @@ import java.util.*;
 
 final class EvalContext {
   final Environment environment;
-  final Map<String, Object> activation;
+  private final Object activation;
+  private final String singleName;
   // Allocate only for expressions with local bindings; reuse slots across loop iterations.
   private Object[] scopes;
   private int scopeSize;
@@ -13,12 +14,27 @@ final class EvalContext {
   EvalContext(Environment environment, Map<String, Object> activation) {
     this.environment = environment;
     this.activation = activation;
+    singleName = null;
     remaining = environment.budget;
+  }
+
+  EvalContext(Environment environment, String name, Object value) {
+    this.environment = environment;
+    singleName = name;
+    activation = value;
+    remaining = environment.budget;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, Object> activationMap() {
+    return (Map<String, Object>) activation;
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Map<String, Object> visibleBindings() {
-    var visible = new LinkedHashMap<String, Object>(activation);
+    var visible = new LinkedHashMap<String, Object>();
+    if (singleName != null) visible.put(singleName, activation);
+    else visible.putAll(activationMap());
     for (int i = 0; i < scopeSize; i += 2) visible.put((String) scopes[i], scopes[i + 1]);
     return Collections.unmodifiableMap(visible);
   }
@@ -40,7 +56,10 @@ final class EvalContext {
       for (int i = scopeSize - 2; i >= 0; i -= 2) if (name.equals(scopes[i])) return scopes[i + 1];
     }
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
-    Object value = activation.get(name);
+    Object value =
+        singleName == null
+            ? activationMap().get(name)
+            : singleName.equals(name) ? activation : null;
     if (value != null) return value;
     throw Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
   }
