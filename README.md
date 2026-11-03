@@ -133,6 +133,8 @@ bounded, immutable CEL snapshots of Oracle `JSONObject` and `JSONArray` trees.
 
 [Integration notes](docs/INTEGRATION.md) cover Elide's Kotlin facade, numeric and presence
 semantics, native rows, well-known protobuf mappings, and adapter limitations.
+[Instrumentation](docs/INSTRUMENTATION.md) covers source tags for coverage and profiling,
+debugger breakpoints, local scopes, and source-aware Java embedding.
 
 ## Build and verify
 
@@ -172,24 +174,31 @@ Separate JVM and Native Image gates require guest compilation, enforce allocatio
 AST-size budgets, and reject compilation blocklist violations. CodSpeed does not measure
 JVM/JIT throughput. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
 
-A separate timing suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
-arithmetic, a policy expression, and a list comprehension. It measures compilation and warm
-evaluation on the JVM and Native Image (SVM), including evaluation of checked ASTs embedded
-at image build time. TruffleCEL evaluation must reach the final guest-JIT tier.
+A separate suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
+arithmetic, a policy expression, and a list comprehension. It measures compilation,
+guest-JIT evaluation, and interpretation on the JVM and Native Image (SVM), including
+checked ASTs embedded at image build time.
 
-![TruffleCEL versus cel-java: compilation and evaluation timings](docs/images/cel-comparison.svg)
+![TruffleCEL versus cel-java: compilation, evaluation, and interpretation](docs/images/cel-comparison.svg)
 
-Captured November 3, 2026 on a shared AMD EPYC 7763 CI runner; this is not a performance
-guarantee. Lower is better; bars show the median of three process medians, with minimum/maximum whiskers.
-Image-build preparation embeds checked ASTs, not guest machine code; setup and guest
-compilation are excluded from evaluation timings. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41707420064), and
-[comparison methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
-TruffleCEL has lower median time in all **15 paired comparisons** in this snapshot:
-compilation is 46–191× faster and evaluation is 1.35–2.65× faster. Every TruffleCEL process
-median is below every cel-java process median in its comparison. These results apply to
-the three documented workloads and this runner. The [original baseline](docs/benchmarks/comparison-baseline.json)
-and [CodSpeed optimization history](docs/BENCHMARKS.md#finding-instruction-hotspots) are retained.
+![TruffleCEL versus cel-java: whole-process peak resident memory](docs/images/cel-peak-rss.svg)
+
+Captured November 3, 2026 on a shared Intel Xeon Platinum 8370C CI runner. Lower is better;
+bars show medians across three fresh processes, with minimum/maximum whiskers. TruffleCEL
+has lower median time in **23 of 24 comparisons**; JVM scalar interpretation remains slower.
+Peak RSS is higher for TruffleCEL in **23 of 24 comparisons**, including the guest compiler's
+memory cost. These are workload-specific measurements, not a general performance guarantee.
+
+RSS covers each process's entire lifetime, including setup, warmup, and compilation; timing
+excludes setup and guest compilation. Time-bounded runs execute different numbers of
+operations. Both native engines share one benchmark binary, so RSS does not represent
+standalone deployment footprints. Image-build preparation embeds checked ASTs, not guest
+machine code. See the [raw measurements](docs/benchmarks/comparison.json),
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41711452800), and
+[methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
+The [original baseline](docs/benchmarks/comparison-baseline.json),
+[earlier timing snapshot](docs/benchmarks/comparison-optimized-v1.json), and
+[CodSpeed optimization history](docs/BENCHMARKS.md#finding-instruction-hotspots) are retained.
 
 CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
 

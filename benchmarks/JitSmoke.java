@@ -1,6 +1,9 @@
 package dev.trufflecel;
 
+import com.oracle.truffle.api.debug.Breakpoint;
+import com.oracle.truffle.api.debug.Debugger;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.graalvm.polyglot.Context;
@@ -22,6 +25,27 @@ public final class JitSmoke {
       if (aggregate.getMember("items").getArrayElement(1).asLong() != 2L
           || !aggregate.getMember("large").asBigInteger().toString().equals("18446744073709551615"))
         throw new AssertionError("Native Polyglot aggregate interop");
+      var debugSource =
+          org.graalvm.polyglot.Source.newBuilder(
+                  "cel", "[1,2].map(x,\n x + 1).size()", "native-debug.cel")
+              .build();
+      context.eval(debugSource);
+      var locals = new ArrayList<String>();
+      try (var session =
+          Debugger.find(context.getEngine())
+              .startSession(
+                  event ->
+                      locals.add(
+                          event
+                              .getTopStackFrame()
+                              .getScope()
+                              .getDeclaredValue("x")
+                              .toDisplayString()))) {
+        session.install(Breakpoint.newBuilder(debugSource.getURI()).lineIs(2).build());
+        if (context.eval(debugSource).asLong() != 2 || !locals.equals(List.of("1", "2")))
+          throw new AssertionError("Native debugger source scopes: " + locals);
+      }
+      System.out.println("Native debugger qualification passed");
       context.enter();
       try {
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false);

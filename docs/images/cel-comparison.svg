@@ -1,135 +1,203 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980" role="img" aria-labelledby="title desc">
-<title id="title">TruffleCEL and upstream cel-java comparison</title>
-<desc id="desc">Median nanoseconds per operation across independent processes. Lower is better. Whiskers show the minimum and maximum process medians.</desc>
-<rect width="1200" height="980" rx="16" fill="#f8f3e9"/>
-<style>text{font-family:system-ui,sans-serif;fill:#243746}.heading{font-size:25px;font-weight:700}.label{font-size:14px}.small{font-size:12px}.panel{font-size:17px;font-weight:650}</style>
-<text x="32" y="42" class="heading">TruffleCEL vs cel-java · public API costs</text>
-<text x="32" y="68" class="label">Lower is better · 3 fresh processes per cell · 7 timed samples per process · linear scale within each panel</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1360" viewBox="0 0 1200 1360" role="img" aria-labelledby="title desc">
+<title id="title">TruffleCEL vs cel-java · Public API costs</title>
+<desc id="desc">Median time per operation · setup and guest compilation excluded. Lower is better. Whiskers show the minimum and maximum across three independent processes.</desc>
+<rect width="1200" height="1360" rx="16" fill="#f8f3e9"/>
+<style>text{font-family:system-ui,sans-serif;fill:#243746}.heading{font-size:25px;font-weight:700}.label{font-size:14px}.small{font-size:12px}.panel{font-size:16px;font-weight:650}</style>
+<text x="32" y="42" class="heading">TruffleCEL vs cel-java · Public API costs</text>
+<text x="32" y="68" class="label">Lower is better · Median time per operation · setup and guest compilation excluded</text>
 <rect x="32" y="84" width="14" height="14" fill="#ef8d40"/><text x="54" y="96" class="label">TruffleCEL</text>
 <rect x="175" y="84" width="14" height="14" fill="#28618b"/><text x="197" y="96" class="label">cel-java 0.15.0 (planner)</text>
 <rect x="32" y="128" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="155" class="panel">JVM · Compile + create program</text>
 <text x="48" y="180" class="label">scalar</text>
 <rect x="177" y="169" width="0.87" height="14" fill="#ef8d40"/>
-<path d="M177.82,176 H177.91" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="181" class="small">1.93 µs</text>
-<rect x="177" y="191" width="165.57" height="14" fill="#28618b"/>
-<path d="M337.40,198 H347.58" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="203" class="small">368.63 µs</text>
+<path d="M177.85,176 H177.92" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="181" class="small">1.87 µs</text>
+<rect x="177" y="191" width="143.81" height="14" fill="#28618b"/>
+<path d="M320.31,198 H329.93" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="203" class="small">308.91 µs</text>
 <text x="48" y="241" class="label">policy</text>
-<rect x="177" y="230" width="1.69" height="14" fill="#ef8d40"/>
-<path d="M178.67,237 H178.69" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="242" class="small">3.76 µs</text>
-<rect x="177" y="252" width="180.92" height="14" fill="#28618b"/>
-<path d="M348.91,259 H365.96" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="264" class="small">402.80 µs</text>
+<rect x="177" y="230" width="1.66" height="14" fill="#ef8d40"/>
+<path d="M178.63,237 H178.78" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="242" class="small">3.56 µs</text>
+<rect x="177" y="252" width="177.89" height="14" fill="#28618b"/>
+<path d="M352.77,259 H357.16" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="264" class="small">382.11 µs</text>
 <text x="48" y="302" class="label">comprehension</text>
-<rect x="177" y="291" width="2.53" height="14" fill="#ef8d40"/>
-<path d="M179.41,298 H179.72" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="303" class="small">5.63 µs</text>
-<rect x="177" y="313" width="268.90" height="14" fill="#28618b"/>
-<path d="M443.57,320 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="325" class="small">598.67 µs</text>
+<rect x="177" y="291" width="2.55" height="14" fill="#ef8d40"/>
+<path d="M179.42,298 H179.59" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="303" class="small">5.47 µs</text>
+<rect x="177" y="313" width="268.43" height="14" fill="#28618b"/>
+<path d="M436.47,320 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="325" class="small">576.60 µs</text>
 <rect x="616" y="128" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="155" class="panel">SVM · Compile + create program</text>
 <text x="632" y="180" class="label">scalar</text>
-<rect x="761" y="169" width="2.06" height="14" fill="#ef8d40"/>
-<path d="M763.06,176 H763.08" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="181" class="small">2.36 µs</text>
-<rect x="761" y="191" width="205.19" height="14" fill="#28618b"/>
-<path d="M964.47,198 H966.69" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="203" class="small">235.58 µs</text>
+<rect x="761" y="169" width="2.51" height="14" fill="#ef8d40"/>
+<path d="M763.51,176 H763.52" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="181" class="small">2.63 µs</text>
+<rect x="761" y="191" width="209.26" height="14" fill="#28618b"/>
+<path d="M969.95,198 H970.50" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="203" class="small">219.63 µs</text>
 <text x="632" y="241" class="label">policy</text>
-<rect x="761" y="230" width="3.55" height="14" fill="#ef8d40"/>
-<path d="M764.54,237 H764.59" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="242" class="small">4.07 µs</text>
-<rect x="761" y="252" width="216.00" height="14" fill="#28618b"/>
-<path d="M975.74,259 H977.34" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="264" class="small">247.99 µs</text>
+<rect x="761" y="230" width="4.39" height="14" fill="#ef8d40"/>
+<path d="M765.38,237 H765.40" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="242" class="small">4.60 µs</text>
+<rect x="761" y="252" width="220.39" height="14" fill="#28618b"/>
+<path d="M980.74,259 H982.86" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="264" class="small">231.31 µs</text>
 <text x="632" y="302" class="label">comprehension</text>
-<rect x="761" y="291" width="5.83" height="14" fill="#ef8d40"/>
-<path d="M766.82,298 H766.87" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="303" class="small">6.69 µs</text>
-<rect x="761" y="313" width="266.16" height="14" fill="#28618b"/>
-<path d="M1025.03,320 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="325" class="small">305.57 µs</text>
+<rect x="761" y="291" width="7.02" height="14" fill="#ef8d40"/>
+<path d="M767.99,298 H768.06" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="303" class="small">7.37 µs</text>
+<rect x="761" y="313" width="268.44" height="14" fill="#28618b"/>
+<path d="M1029.15,320 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="325" class="small">281.74 µs</text>
 <rect x="32" y="386" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="413" class="panel">JVM · Evaluate · runtime-compiled AST</text>
 <text x="48" y="438" class="label">scalar</text>
-<rect x="177" y="427" width="13.85" height="14" fill="#ef8d40"/>
-<path d="M190.58,434 H191.15" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="439" class="small">31.4 ns</text>
-<rect x="177" y="449" width="18.75" height="14" fill="#28618b"/>
-<path d="M195.08,456 H195.76" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="461" class="small">42.5 ns</text>
+<rect x="177" y="427" width="14.29" height="14" fill="#ef8d40"/>
+<path d="M190.63,434 H192.99" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="439" class="small">33.1 ns</text>
+<rect x="177" y="449" width="19.92" height="14" fill="#28618b"/>
+<path d="M193.82,456 H197.13" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="461" class="small">46.1 ns</text>
 <text x="48" y="499" class="label">policy</text>
-<rect x="177" y="488" width="48.36" height="14" fill="#ef8d40"/>
-<path d="M223.37,495 H228.08" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="500" class="small">109.5 ns</text>
-<rect x="177" y="510" width="76.19" height="14" fill="#28618b"/>
-<path d="M245.61,517 H254.13" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="522" class="small">172.5 ns</text>
+<rect x="177" y="488" width="37.19" height="14" fill="#ef8d40"/>
+<path d="M214.18,495 H216.07" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="500" class="small">86.1 ns</text>
+<rect x="177" y="510" width="73.97" height="14" fill="#28618b"/>
+<path d="M247.07,517 H253.05" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="522" class="small">171.3 ns</text>
 <text x="48" y="560" class="label">comprehension</text>
-<rect x="177" y="549" width="151.58" height="14" fill="#ef8d40"/>
-<path d="M323.44,556 H353.73" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="561" class="small">343.3 ns</text>
-<rect x="177" y="571" width="269.54" height="14" fill="#28618b"/>
-<path d="M435.43,578 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="583" class="small">610.4 ns</text>
+<rect x="177" y="549" width="154.35" height="14" fill="#ef8d40"/>
+<path d="M330.07,556 H335.95" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="561" class="small">357.5 ns</text>
+<rect x="177" y="571" width="265.23" height="14" fill="#28618b"/>
+<path d="M436.33,578 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="583" class="small">614.2 ns</text>
 <rect x="616" y="386" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="413" class="panel">SVM · Evaluate · runtime-compiled AST</text>
 <text x="632" y="438" class="label">scalar</text>
-<rect x="761" y="427" width="18.81" height="14" fill="#ef8d40"/>
-<path d="M779.49,434 H780.19" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="439" class="small">64.2 ns</text>
-<rect x="761" y="449" width="49.13" height="14" fill="#28618b"/>
-<path d="M809.92,456 H810.30" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="461" class="small">167.8 ns</text>
+<rect x="761" y="427" width="16.49" height="14" fill="#ef8d40"/>
+<path d="M777.48,434 H777.53" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="439" class="small">60.3 ns</text>
+<rect x="761" y="449" width="49.92" height="14" fill="#28618b"/>
+<path d="M810.85,456 H811.33" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="461" class="small">182.7 ns</text>
 <text x="632" y="499" class="label">policy</text>
-<rect x="761" y="488" width="54.35" height="14" fill="#ef8d40"/>
-<path d="M815.11,495 H815.47" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="500" class="small">185.6 ns</text>
-<rect x="761" y="510" width="90.36" height="14" fill="#28618b"/>
-<path d="M850.59,517 H851.41" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="522" class="small">308.6 ns</text>
+<rect x="761" y="488" width="53.74" height="14" fill="#ef8d40"/>
+<path d="M814.71,495 H814.95" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="500" class="small">196.7 ns</text>
+<rect x="761" y="510" width="93.12" height="14" fill="#28618b"/>
+<path d="M854.07,517 H854.54" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="522" class="small">340.8 ns</text>
 <text x="632" y="560" class="label">comprehension</text>
-<rect x="761" y="549" width="126.25" height="14" fill="#ef8d40"/>
-<path d="M886.48,556 H887.40" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="561" class="small">431.2 ns</text>
-<rect x="761" y="571" width="269.18" height="14" fill="#28618b"/>
-<path d="M1029.90,578 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="583" class="small">919.3 ns</text>
+<rect x="761" y="549" width="137.11" height="14" fill="#ef8d40"/>
+<path d="M898.09,556 H898.31" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="561" class="small">501.8 ns</text>
+<rect x="761" y="571" width="269.66" height="14" fill="#28618b"/>
+<path d="M1030.23,578 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="583" class="small">986.9 ns</text>
 <rect x="32" y="644" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="671" class="panel">SVM · Evaluate · image-build checked AST</text>
 <text x="48" y="696" class="label">scalar</text>
-<rect x="177" y="685" width="18.56" height="14" fill="#ef8d40"/>
-<path d="M195.40,692 H195.65" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="697" class="small">63.4 ns</text>
-<rect x="177" y="707" width="49.17" height="14" fill="#28618b"/>
-<path d="M225.77,714 H226.25" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="719" class="small">167.9 ns</text>
+<rect x="177" y="685" width="16.07" height="14" fill="#ef8d40"/>
+<path d="M193.05,692 H193.07" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="697" class="small">60.4 ns</text>
+<rect x="177" y="707" width="49.20" height="14" fill="#28618b"/>
+<path d="M226.00,714 H226.77" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="719" class="small">184.9 ns</text>
 <text x="48" y="757" class="label">policy</text>
-<rect x="177" y="746" width="54.96" height="14" fill="#ef8d40"/>
-<path d="M231.43,753 H232.58" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="758" class="small">187.6 ns</text>
-<rect x="177" y="768" width="89.64" height="14" fill="#28618b"/>
-<path d="M266.36,775 H267.92" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="780" class="small">306.0 ns</text>
+<rect x="177" y="746" width="52.33" height="14" fill="#ef8d40"/>
+<path d="M229.20,753 H230.17" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="758" class="small">196.7 ns</text>
+<rect x="177" y="768" width="93.30" height="14" fill="#28618b"/>
+<path d="M270.03,775 H270.46" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="780" class="small">350.6 ns</text>
 <text x="48" y="818" class="label">comprehension</text>
-<rect x="177" y="807" width="125.69" height="14" fill="#ef8d40"/>
-<path d="M302.51,814 H303.12" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="819" class="small">429.1 ns</text>
-<rect x="177" y="829" width="268.22" height="14" fill="#28618b"/>
-<path d="M444.95,836 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="841" class="small">915.7 ns</text>
-<text x="632" y="686" class="label">Timing, not CodSpeed instruction counts.</text>
-<text x="632" y="709" class="label">SVM embeds checked ASTs, not guest machine code.</text>
-<text x="632" y="732" class="label">TruffleCEL evaluation requires last-tier guest JIT.</text>
-<text x="632" y="755" class="label">Warmup, input setup, and guest compilation excluded.</text>
-<text x="632" y="778" class="label">Compilation includes parsing, checking, and planning.</text>
-<text x="632" y="801" class="label">Whiskers: min/max process medians, not confidence intervals.</text>
-<text x="632" y="824" class="label">Shared CI hardware: diagnostic, not a performance guarantee.</text>
-<text x="32" y="916" class="small">Captured 2026-11-03T20:07:17.465066+00:00 · source c7b6b6a814aa · GraalVM 25.5.5-elide.23</text>
-<text x="32" y="938" class="small">Linux x86_64 · AMD EPYC 7763 64-Core Processor</text>
-<text x="32" y="960" class="small">Raw samples, exact sources, machine details and image-build preparation timings accompany this SVG.</text>
+<rect x="177" y="807" width="132.22" height="14" fill="#ef8d40"/>
+<path d="M308.31,814 H309.31" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="819" class="small">496.9 ns</text>
+<rect x="177" y="829" width="269.71" height="14" fill="#28618b"/>
+<path d="M446.42,836 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="841" class="small">1.01 µs</text>
+<rect x="616" y="644" width="552" height="242" rx="10" fill="white"/>
+<text x="632" y="671" class="panel">JVM · Interpret · runtime-compiled AST</text>
+<text x="632" y="696" class="label">scalar</text>
+<rect x="761" y="685" width="35.27" height="14" fill="#ef8d40"/>
+<path d="M796.12,692 H796.36" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="697" class="small">83.5 ns</text>
+<rect x="761" y="707" width="18.38" height="14" fill="#28618b"/>
+<path d="M777.72,714 H780.27" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="719" class="small">43.5 ns</text>
+<text x="632" y="757" class="label">policy</text>
+<rect x="761" y="746" width="61.32" height="14" fill="#ef8d40"/>
+<path d="M821.19,753 H824.19" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="758" class="small">145.2 ns</text>
+<rect x="761" y="768" width="70.62" height="14" fill="#28618b"/>
+<path d="M827.89,775 H831.75" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="780" class="small">167.2 ns</text>
+<text x="632" y="818" class="label">comprehension</text>
+<rect x="761" y="807" width="238.87" height="14" fill="#ef8d40"/>
+<path d="M995.56,814 H1002.33" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="819" class="small">565.6 ns</text>
+<rect x="761" y="829" width="265.76" height="14" fill="#28618b"/>
+<path d="M1013.36,836 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="841" class="small">629.3 ns</text>
+<rect x="32" y="902" width="552" height="242" rx="10" fill="white"/>
+<text x="48" y="929" class="panel">SVM · Interpret · runtime-compiled AST</text>
+<text x="48" y="954" class="label">scalar</text>
+<rect x="177" y="943" width="38.40" height="14" fill="#ef8d40"/>
+<path d="M215.36,950 H215.48" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="955" class="small">140.8 ns</text>
+<rect x="177" y="965" width="50.17" height="14" fill="#28618b"/>
+<path d="M227.06,972 H227.36" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="977" class="small">183.9 ns</text>
+<text x="48" y="1015" class="label">policy</text>
+<rect x="177" y="1004" width="68.71" height="14" fill="#ef8d40"/>
+<path d="M245.66,1011 H246.25" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1016" class="small">251.9 ns</text>
+<rect x="177" y="1026" width="93.08" height="14" fill="#28618b"/>
+<path d="M269.67,1033 H270.56" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1038" class="small">341.2 ns</text>
+<text x="48" y="1076" class="label">comprehension</text>
+<rect x="177" y="1065" width="227.21" height="14" fill="#ef8d40"/>
+<path d="M404.17,1072 H404.50" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1077" class="small">832.9 ns</text>
+<rect x="177" y="1087" width="269.77" height="14" fill="#28618b"/>
+<path d="M446.62,1094 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1099" class="small">988.9 ns</text>
+<rect x="616" y="902" width="552" height="242" rx="10" fill="white"/>
+<text x="632" y="929" class="panel">SVM · Interpret · image-build checked AST</text>
+<text x="632" y="954" class="label">scalar</text>
+<rect x="761" y="943" width="37.35" height="14" fill="#ef8d40"/>
+<path d="M798.04,950 H798.48" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="955" class="small">141.3 ns</text>
+<rect x="761" y="965" width="48.94" height="14" fill="#28618b"/>
+<path d="M809.49,972 H810.04" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="977" class="small">185.2 ns</text>
+<text x="632" y="1015" class="label">policy</text>
+<rect x="761" y="1004" width="66.62" height="14" fill="#ef8d40"/>
+<path d="M827.16,1011 H827.68" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1016" class="small">252.1 ns</text>
+<rect x="761" y="1026" width="92.56" height="14" fill="#28618b"/>
+<path d="M853.43,1033 H853.68" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1038" class="small">350.2 ns</text>
+<text x="632" y="1076" class="label">comprehension</text>
+<rect x="761" y="1065" width="221.22" height="14" fill="#ef8d40"/>
+<path d="M980.59,1072 H982.45" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1077" class="small">837.0 ns</text>
+<rect x="761" y="1087" width="267.93" height="14" fill="#28618b"/>
+<path d="M1028.49,1094 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1099" class="small">1.01 µs</text>
+<text x="32" y="1184" class="label">3 fresh processes per cell; min/max process whiskers.</text>
+<text x="616" y="1184" class="label">Linear scale within each panel; not confidence intervals.</text>
+<text x="32" y="1207" class="label">Interpret: guest JIT disabled; host JVM JIT / native AOT allowed.</text>
+<text x="616" y="1207" class="label">SVM embeds checked ASTs, not guest machine code.</text>
+<text x="32" y="1230" class="label">RSS is whole-process high-water memory, not bytes/op.</text>
+<text x="616" y="1230" class="label">One engine executes per process; common native image.</text>
+<text x="32" y="1284" class="small">Captured 2026-11-03T20:30:46.688921+00:00 · source ad3fdcbe6366 · GraalVM 25.5.5-elide.23</text>
+<text x="32" y="1306" class="small">Linux x86_64 · Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz</text>
+<text x="32" y="1328" class="small">Shared CI hardware: diagnostic results for these fixtures, not a performance guarantee. Raw samples accompany this SVG.</text>
 </svg>

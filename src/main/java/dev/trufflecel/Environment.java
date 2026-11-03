@@ -38,6 +38,14 @@ public final class Environment {
     maxDepth = b.maxDepth;
   }
 
+  /**
+   * Compile an instrumentable program in an entered Polyglot context; initializes CEL if needed.
+   */
+  public Program compile(com.oracle.truffle.api.source.Source source) {
+    var language = CelLanguage.current(source);
+    return prepare(source.getCharacters().toString()).adopt(language, source);
+  }
+
   public Program compile(String source) {
     return compile(source, true);
   }

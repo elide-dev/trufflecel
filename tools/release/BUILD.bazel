@@ -10,6 +10,7 @@ release_version(
 
 DEPENDENCIES = {
     "core": [
+        "org.graalvm.polyglot:polyglot:25.5.5-elide.23",
         "org.graalvm.truffle:truffle-api:25.5.5-elide.23",
         "dev.elide:truffledata-core:0.1.0",
         "com.google.re2j:re2j:1.8",

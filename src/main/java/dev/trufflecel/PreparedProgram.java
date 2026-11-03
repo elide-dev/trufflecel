@@ -31,6 +31,24 @@ public final class PreparedProgram {
     return new Program(source, variables, result, NodeUtil.cloneNode(expression), environment);
   }
 
+  /** Instantiate with instrumentation in an entered Polyglot context; initializes CEL if needed. */
+  public Program instantiate(com.oracle.truffle.api.source.Source truffleSource) {
+    if (!source.contentEquals(truffleSource.getCharacters()))
+      throw new IllegalArgumentException("Source text differs from the prepared expression");
+    return new Program(
+        source,
+        variables,
+        result,
+        NodeUtil.cloneNode(expression),
+        environment,
+        CelLanguage.current(truffleSource),
+        truffleSource);
+  }
+
+  Program adopt(CelLanguage language, com.oracle.truffle.api.source.Source truffleSource) {
+    return new Program(source, variables, result, expression, environment, language, truffleSource);
+  }
+
   // Consume a freshly parsed tree only; public templates always clone before adoption.
   Program adopt() {
     return new Program(source, variables, result, expression, environment);
