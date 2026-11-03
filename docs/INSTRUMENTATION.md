@@ -54,9 +54,11 @@ and the original evaluation budget are preserved. The `Source` APIs retain every
 operator and literal, including when instantiating a template that has already produced an
 optimized program, so tools continue to receive the complete sequence of source events.
 
-Programs without a `Source` create evaluation state inside the call target, allowing guest
-compilation to eliminate it on eligible paths. Source-backed programs keep that state in
-their frame arguments and retain the binding-read boundary used by instrumented compilation.
+Expressions without local bindings or source instrumentation create evaluation state inside
+the call target, allowing guest compilation to eliminate it on eligible paths. Comprehensions
+keep their escaping state outside guest compilation to limit compilation cost. Source-backed
+programs also keep that state in their frame arguments and retain the binding-read boundary
+used by instrumented compilation.
 Each evaluation still has independent bindings, local scopes, and a resource budget,
 including reentrant evaluations from host functions.
 
