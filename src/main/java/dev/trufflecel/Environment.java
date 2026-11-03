@@ -28,7 +28,10 @@ public final class Environment {
     variables = Map.copyOf(b.variables);
     constants = Map.copyOf(b.constants);
     objectTypes = Map.copyOf(b.objectTypes);
-    runtimeObjectTypes = objectTypes.values().toArray(ObjectType[]::new);
+    var runtimeTypes = new ArrayList<ObjectType>();
+    for (var entry : objectTypes.entrySet())
+      if (!b.constructorOnlyTypes.contains(entry.getKey())) runtimeTypes.add(entry.getValue());
+    runtimeObjectTypes = runtimeTypes.toArray(ObjectType[]::new);
     functions = Map.copyOf(b.functions);
     container = b.container;
     inferVariables = b.inferVariables;
@@ -128,6 +131,7 @@ public final class Environment {
     private final Map<String, CelType> variables = new LinkedHashMap<>();
     private final Map<String, Object> constants = new LinkedHashMap<>();
     private final Map<String, ObjectType> objectTypes = new LinkedHashMap<>();
+    private final Set<String> constructorOnlyTypes = new HashSet<>();
     private final Map<String, FunctionBinding> functions = new LinkedHashMap<>();
     private String container = "";
     private boolean inferVariables, macros = true;
@@ -149,7 +153,17 @@ public final class Environment {
     }
 
     public Builder objectType(ObjectType type) {
-      objectTypes.put(type.name(), type);
+      String name = type.name();
+      objectTypes.put(name, type);
+      constructorOnlyTypes.remove(name);
+      return this;
+    }
+
+    // Well-known factories unwrap to CEL values and never accept runtime objects.
+    Builder constructorType(ObjectType type) {
+      String name = type.name();
+      objectTypes.put(name, type);
+      constructorOnlyTypes.add(name);
       return this;
     }
 

@@ -130,7 +130,7 @@ final class WellKnownTypes {
       String shortName,
       Map<String, CelType> fields,
       Function<Map<String, Object>, Object> factory) {
-    b.objectType(
+    b.constructorType(
         new ObjectType() {
           @Override
           public String name() {
