@@ -210,6 +210,8 @@ final class Checker {
       String resolved = env.resolve(n.name, env.functions.keySet());
       if (resolved != null) n.name = resolved;
     }
+    n.extensionCall = ExtensionFunctions.supports(n.name);
+    n.optionalFallback = n.name.equals("or") || n.name.equals("orValue");
     var types = new ArrayList<CelType>();
     for (ExprNode child : n.children) types.add(check(child, locals));
     var custom = env.functions.get(n.name);

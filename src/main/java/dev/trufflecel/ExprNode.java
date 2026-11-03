@@ -22,6 +22,8 @@ final class ExprNode extends Node {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal String name;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal Object value;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalEntry;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean extensionCall;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalFallback;
   final int offset;
   @Children ExprNode[] children;
 
@@ -206,7 +208,7 @@ final class ExprNode extends Node {
 
   private Object call(EvalContext ctx) {
     if (name.equals("&&") || name.equals("||")) return logical(ctx);
-    if (Set.of("or", "orValue").contains(name) && children.length == 2) {
+    if (optionalFallback && children.length == 2) {
       Object first = children[0].execute(ctx);
       if (first instanceof Unknown) return first;
       OptionalValue o = optional(first);
@@ -228,7 +230,7 @@ final class ExprNode extends Node {
     }
     if (unknown != null) return unknown;
     if (error != null) throw error;
-    if (ExtensionFunctions.supports(name)) return ExtensionFunctions.apply(name, args, ctx);
+    if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);
   }
 
