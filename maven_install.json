@@ -10,9 +10,9 @@
     "com.google.protobuf:protobuf-java": 1938090909,
     "com.google.re2j:re2j": 1525409503,
     "com.h2database:h2": 2037113602,
-    "dev.elide:truffledata-core": -131005331,
-    "dev.elide:truffledata-jdbc": 290227913,
-    "dev.elide:truffledata-protobuf": -1065175975,
+    "dev.elide:truffledata-core": -1938459794,
+    "dev.elide:truffledata-jdbc": -1517226550,
+    "dev.elide:truffledata-protobuf": 1422336858,
     "junit:junit": -744267592,
     "org.graalvm.polyglot:polyglot": 2088198898,
     "org.graalvm.sdk:nativeimage": -174189820,
@@ -34,9 +34,9 @@
     "com.google.protobuf:protobuf-java": -884647484,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1401264984,
-    "dev.elide:truffledata-core": 1265819306,
-    "dev.elide:truffledata-jdbc": -1496846194,
-    "dev.elide:truffledata-protobuf": -1683548141,
+    "dev.elide:truffledata-core": -582775783,
+    "dev.elide:truffledata-jdbc": -219291903,
+    "dev.elide:truffledata-protobuf": -257721908,
     "junit:junit": 712711302,
     "org.checkerframework:checker-qual": 597850597,
     "org.graalvm.polyglot:polyglot": -1856356204,
@@ -125,21 +125,21 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "841498fc56498e8f9baa24ae2944892a869c18bd9525a245a7d80a87bbde1896"
+        "jar": "e7d65fd9b7a1cdd8c6b1859891dd8badd11054787b7e1902e2002c186f7f271e"
       },
-      "version": "0.1.0-alpha.3"
+      "version": "0.1.0-alpha.4"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
-        "jar": "8bff9e2e2f74893c73051f9b38fbdc13e39f91f80e74b3a68ec22dd1f69644a0"
+        "jar": "db172bf9e515eef77178cf403b172c96e11b734cc193cb09aec5bb201880cca3"
       },
-      "version": "0.1.0-alpha.3"
+      "version": "0.1.0-alpha.4"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "0b801d847de9cb90a8f492ebec48731bacf49f0258eb5a9ef7b9951d7802a625"
+        "jar": "936de89c9b72392052f501f7098291a0a8a200aa8e7700036709dfe02bc7dcfb"
       },
-      "version": "0.1.0-alpha.3"
+      "version": "0.1.0-alpha.4"
     },
     "junit:junit": {
       "shasums": {
