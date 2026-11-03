@@ -5,7 +5,9 @@ import java.util.*;
 final class EvalContext {
   final Environment environment;
   final Map<String, Object> activation;
-  private final Deque<Map<String, Object>> scopes = new ArrayDeque<>();
+  // Allocate only for expressions with local bindings; reuse slots across loop iterations.
+  private Object[] scopes;
+  private int scopeSize;
   private long remaining;
 
   EvalContext(Environment environment, Map<String, Object> activation) {
@@ -26,23 +28,27 @@ final class EvalContext {
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object get(String name) {
-    if (name.startsWith(".")) {
-      name = name.substring(1);
-      if (activation.containsKey(name)) return activation.get(name);
-      throw Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
+    if (name.startsWith(".")) name = name.substring(1);
+    else {
+      for (int i = scopeSize - 2; i >= 0; i -= 2) if (name.equals(scopes[i])) return scopes[i + 1];
     }
-    for (var scope : scopes) if (scope.containsKey(name)) return scope.get(name);
-    if (activation.containsKey(name)) return activation.get(name);
+    // Program normalizes host nulls to CelNull, so null denotes an absent binding.
+    Object value = activation.get(name);
+    if (value != null) return value;
     throw Values.error(CelException.Code.UNDECLARED, "no value for variable: " + name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   void push(String name, Object value) {
-    scopes.push(Map.of(name, value));
+    if (scopes == null) scopes = new Object[8];
+    else if (scopeSize == scopes.length) scopes = Arrays.copyOf(scopes, scopeSize * 2);
+    scopes[scopeSize++] = name;
+    scopes[scopeSize++] = value;
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   void pop() {
-    scopes.pop();
+    scopes[--scopeSize] = null;
+    scopes[--scopeSize] = null;
   }
 }

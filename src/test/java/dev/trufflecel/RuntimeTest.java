@@ -48,6 +48,18 @@ public class RuntimeTest {
   }
 
   @Test
+  public void deepScopesRestoreShadowedAndAbsoluteBindings() {
+    String nested = "x == 6 && .x == 99";
+    for (int i = 6; i >= 1; i--) nested = "[" + i + "].all(x, " + nested + ") && x == " + (i - 1);
+    var p = Cel.compile("[0].all(x, " + nested + ") && x == 99");
+    assertTrue(p.test(Map.of("x", 99L)));
+    assertFalse(p.test(Map.of("x", 98L)));
+    assertTrue(Cel.compile("[null].all(x, x == null)").test());
+    assertNull(Cel.compile("x").evaluate(Collections.singletonMap("x", null)));
+    assertThrows(CelException.class, () -> Cel.compile(".x").evaluate());
+  }
+
+  @Test
   public void arithmeticAgainstIndependentIntegerOracle() {
     var random = new Random(0xCE1);
     for (String op : List.of("+", "-", "*", "/", "%")) {
