@@ -76,7 +76,8 @@ checks that compiled execution still enforces evaluation limits.
 
 Allocation budgets measure the complete `Program.evaluate` call, including activation
 creation and host-data snapshots. Fixture creation and warmup are excluded. The test requires
-JVM thread-allocation accounting; unsupported accounting or an interpreter-only runtime
+JVM thread-allocation accounting, synchronous host compilation (`-Xbatch`), and 100,000
+warmup evaluations before each measurement phase. Unsupported accounting or an interpreter-only runtime
 fails rather than skips. Scalar evaluation is capped at 512 bytes/op, logical/optional/row
 paths at 640, list construction at 768, protobuf/JSON at 1,024, comprehensions/maps at 1,536,
 and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed

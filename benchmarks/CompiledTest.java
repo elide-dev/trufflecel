@@ -110,7 +110,7 @@ public final class CompiledTest {
                 .evaluationBudget(4)
                 .build()
                 .compile("enabled || (1+2+3+4 > 0)");
-        for (int i = 0; i < 20000; i++) assertTrue(limited.test(Map.of("enabled", true)));
+        for (int i = 0; i < 100000; i++) assertTrue(limited.test(Map.of("enabled", true)));
         OptimizedCallTarget limitedTarget = (OptimizedCallTarget) limited.callTarget();
         limitedTarget.compile(true);
         limitedTarget.waitForCompilation();
@@ -146,7 +146,7 @@ public final class CompiledTest {
     assertTrue(
         "Optimizing Truffle runtime required", program.callTarget() instanceof OptimizedCallTarget);
     OptimizedCallTarget target = (OptimizedCallTarget) program.callTarget();
-    for (int i = 0; i < 20000; i++) sink = program.evaluate(input);
+    for (int i = 0; i < 100000; i++) sink = program.evaluate(input);
     target.compile(true);
     target.waitForCompilation();
     assertTrue("Guest last-tier compilation required: " + source, target.isValidLastTier());
@@ -154,7 +154,7 @@ public final class CompiledTest {
     assertEquals(changedExpected, program.evaluate(changed));
     // Rewarm after changing profiles; invalidation must not turn the measurement into interpreter
     // work.
-    for (int i = 0; i < 10000; i++) sink = program.evaluate(input);
+    for (int i = 0; i < 100000; i++) sink = program.evaluate(input);
     target.compile(true);
     target.waitForCompilation();
     ThreadMXBean bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
