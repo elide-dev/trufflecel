@@ -6,9 +6,8 @@ TruffleData. It counts instructions within explicit C callback regions; it does 
 Java startup, fixture creation, compilation warmup or shutdown.
 
 The image explicitly sets `truffle.UseFallbackRuntime=true`: it measures the native-compiled
-interpreter, with no guest compiler included. Enabling the optimizing guest compiler currently
-exposes Truffle runtime-compilation blocklist violations through generic collection paths.
-That separate qualification is unresolved; simulation must not be read as guest-JIT evidence.
+interpreter, with no guest compiler included. Guest compilation has separate mandatory
+JVM and Native Image gates below; simulation must not be read as guest-JIT throughput evidence.
 
 | Case | Measured work per operation |
 | --- | --- |
@@ -61,3 +60,38 @@ simulation runner environment or named-region profile output is missing.
 No production library dependency on CodSpeed, its native hooks, or the benchmark SDK is
 introduced. These targets qualify this executable and workloads, not every possible native
 embedding of the library.
+
+## Guest compilation and allocation gates
+
+`bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
+`bazel test //...`. It requires an optimizing runtime and valid last-tier guest code before
+and after measurement. Background compilation is disabled, compilation failures throw,
+all Truffle performance warnings are errors, and partial-evaluation graphs are capped at
+10,000 nodes. Each tested AST is limited to 128 nodes.
+
+The test covers scalar arithmetic, lazy logic, optionals, comprehensions, list/map literals,
+conditionals, unknown propagation, native rows, protobuf, JSON, and network operations.
+Changed inputs check that compiled expressions remain dynamic; a resource-budget regression
+checks that compiled execution still enforces evaluation limits.
+
+Allocation budgets measure the complete `Program.evaluate` call, including activation
+creation and host-data snapshots. Fixture creation and warmup are excluded. The test requires
+JVM thread-allocation accounting; unsupported accounting or an interpreter-only runtime
+fails rather than skips. Scalar evaluation is capped at 512 bytes/op, logical/optional/row
+paths at 640, list construction at 768, protobuf/JSON at 1,024, comprehensions/maps at 1,536,
+and CIDR parsing/containment at 20,000. These are bounded regression budgets for the fixed
+fixtures, not zero-allocation claims or limits for arbitrary inputs.
+
+`bazel test //benchmarks:jit_smoke` builds a separate Linux amd64 Native Image containing
+the optimizing guest compiler. `TruffleCheckBlockListMethods` and
+`TruffleCheckNeverPartOfCompilation` are explicitly enabled. The smoke executable runs all
+14 workload correctness cases, then requires actual last-tier guest compilation and changed
+input correctness for scalar, lazy, comprehension, map, and optional expressions. It never
+sets `truffle.UseFallbackRuntime`. This manual Bazel target is explicitly required by CI,
+and release creation depends on its success.
+
+Generic Java collections, extension libraries, host bindings, and data adapters use explicit
+Truffle boundaries. Arithmetic, lazy evaluation, AST child evaluation, and comprehension
+control flow remain eligible for partial evaluation. These gates qualify the tested JVM and
+native workloads; they do not establish Elide embedding throughput or a production image-size
+budget. Production JARs do not depend on the Truffle runtime or compiler test APIs.

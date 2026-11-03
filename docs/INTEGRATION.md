@@ -133,7 +133,7 @@ the Truffle registration processor. RE2/J supplies bounded regular-expression se
 Date/time functions use the JDK time-zone database.
 
 The benchmark native image and workload smoke checks are qualified separately from the
-embedder. Native guest-JIT compilation currently has unresolved collection-path blocklist
-violations; production image size, peak allocation and compiled Truffle throughput have not
-been qualified. The embedder must provide the matching Truffle runtime and
+embedder. Dedicated JVM compilation/allocation and native guest-JIT gates enforce the
+contracts described in [benchmark details](BENCHMARKS.md). Production image size, peak
+allocation across arbitrary inputs, and compiled throughput in Elide still need qualification. The embedder must provide the matching Truffle runtime and
 its Native Image integration. No speculative reflection/resource configuration is shipped.

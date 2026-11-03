@@ -223,6 +223,7 @@ final class ExtensionFunctions {
     return result;
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object apply(String name, Object[] args, EvalContext ctx) {
     // Runtime validation remains mandatory for dyn and unchecked programs.
     try {
@@ -329,6 +330,7 @@ final class ExtensionFunctions {
       else out.add(item);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object sortBy(List<?> values, List<?> keys, EvalContext ctx) {
     var order = new ArrayList<Integer>();
     Class<?> kind = null;

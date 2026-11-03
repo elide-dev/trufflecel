@@ -40,7 +40,7 @@ go_sdk.download(version = "1.25.3")
 bazel_dep(name = "rules_cc", version = "0.2.26")
 register_toolchains("//bazel/platforms:cc_toolchain")
 
-# Benchmark-only Native Image toolchain and pinned CodSpeed region hooks.
+# Pinned GraalVM JVM/Native Image toolchains for compilation gates and benchmarks.
 bazel_dep(name = "rules_graalvm", version = "0.12.0")
 git_override(
     module_name = "rules_graalvm",
@@ -50,6 +50,8 @@ git_override(
 gvm = use_extension("@rules_graalvm//:extensions.bzl", "graalvm")
 gvm.graalvm(
     name = "graalvm_linux_amd64",
+    toolchain_prefix = "graalvm",
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
     distribution = "ce",
     java_version = "25",
     platform = "linux-x64",
@@ -58,7 +60,20 @@ gvm.graalvm(
     strip_prefixes = {"linux-x64": "graalvm-ce-25.5.5-elide.5-linux-amd64"},
     urls = {"linux-x64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.5/dist/graalvm-ce-25.5.5-elide.5-linux-amd64.tar.gz"},
 )
-use_repo(gvm, "graalvm_linux_amd64", "graalvm_linux_amd64_toolchains")
+gvm.graalvm(
+    name = "graalvm_macos_aarch64",
+    toolchain_prefix = "graalvm",
+    target_compatible_with = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
+    distribution = "ce",
+    java_version = "25",
+    platform = "macos-aarch64",
+    version = "25.5.5-elide.5",
+    sha256s = {"macos-aarch64": "c5e25b18682482dc14a1678ff4a327ed198319e672390bff7ae63122b3e81104"},
+    strip_prefixes = {"macos-aarch64": "graalvm-ce-25.5.5-elide.5-macos-aarch64"},
+    urls = {"macos-aarch64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.5/dist/graalvm-ce-25.5.5-elide.5-macos-aarch64.tar.gz"},
+)
+use_repo(gvm, "graalvm_linux_amd64", "graalvm_linux_amd64_toolchains", "graalvm_macos_aarch64", "graalvm_macos_aarch64_toolchains")
+register_toolchains("@graalvm_macos_aarch64_toolchains//:all")
 register_toolchains("@graalvm_linux_amd64_toolchains//:all")
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(

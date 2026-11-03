@@ -13,6 +13,7 @@ public record Unknown(Set<String> attributes) {
     return new Unknown(Set.of(attribute));
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Unknown merge(Unknown other) {
     var merged = new TreeSet<>(attributes);
     merged.addAll(other.attributes);

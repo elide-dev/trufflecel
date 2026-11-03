@@ -9,6 +9,7 @@ import java.math.BigInteger;
 final class Values {
   private Values() {}
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object in(Object v) {
     return in(v, 0, new int[] {1_000_000});
   }
@@ -35,6 +36,7 @@ final class Values {
     return v;
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object out(Object v) {
     if (v == CelNull.INSTANCE) return null;
     if (v instanceof Bytes b) return b.toByteArray();
@@ -80,6 +82,7 @@ final class Values {
     return new BigDecimal((Double) v);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static boolean equal(Object a, Object b) {
     if (a instanceof OptionalValue x && b instanceof OptionalValue y)
       return x.present() == y.present() && (!x.present() || equal(x.value(), y.value()));
@@ -106,6 +109,7 @@ final class Values {
     return a.equals(b);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object key(Map<?, ?> map, Object key) {
     if (map.containsKey(key)) return key;
     if (numeric(key))
@@ -120,6 +124,7 @@ final class Values {
         || key instanceof String;
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object index(Object value, Object index) {
     if (value instanceof Map<?, ?> m) {
       Object k = key(m, index);
@@ -145,10 +150,12 @@ final class Values {
     throw overload("index");
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static CelException error(CelException.Code code, String message) {
     return new CelException(code, message);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static CelException overload(String name) {
     return error(CelException.Code.NO_OVERLOAD, "no matching overload: " + name);
   }

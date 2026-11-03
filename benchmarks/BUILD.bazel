@@ -37,3 +37,54 @@ sh_test(name = "native_smoke", srcs = ["native_smoke.sh"], args = ["$(rootpath :
     data = [":simulation"], tags = ["manual"],
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
 exports_files(["cases.json"])
+
+java_test(
+    name = "compiled",
+    exec_properties = {"EstimatedCPU": "2", "EstimatedMemory": "4GB"},
+    srcs = ["CompiledTest.java"],
+    test_class = "dev.trufflecel.CompiledTest",
+    size = "medium",
+    jvm_flags = ["-ea", "--enable-native-access=ALL-UNNAMED"],
+    deps = ["//:trufflecel", "@maven//:junit_junit", "@maven//:org_graalvm_truffle_truffle_api",
+            "@maven//:org_graalvm_truffle_truffle_runtime", "@maven//:org_graalvm_polyglot_polyglot",
+            "@maven//:dev_elide_truffledata_core", "//:trufflecel-protobuf", "//:trufflecel-json",
+            "@maven//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_shadowed_json"],
+)
+
+# The simulation remains deterministic AOT; this independent gate includes the guest compiler.
+java_library(
+    name = "jit_support",
+    testonly = True,
+    srcs = ["JitSmoke.java"],
+    deps = [":benchmarks", "//:trufflecel", "@maven//:org_graalvm_truffle_truffle_runtime",
+            "@maven//:org_graalvm_polyglot_polyglot"],
+)
+native_image(
+    name = "native_jit",
+    testonly = True,
+    cc_deps = ["//benchmarks/native:hooks"],
+    data = ["//benchmarks/native:celbench.h"],
+    debug = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB", "EstimatedFreeDiskBytes": "16GB"},
+    executable_name = "trufflecel-jit",
+    extra_args = ["--gc=serial", "-J-Xmx4g",
+                  "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata",
+                  "--initialize-at-run-time=dev.trufflecel.bench", "--parallelism=4", "-march=compatibility",
+                  "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-DeleteLocalSymbols", "-H:+PreserveFramePointer",
+                  "-H:-UnlockExperimentalVMOptions"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    main_class = "dev.trufflecel.JitSmoke",
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+    deps = [":jit_support", "@maven//:org_graalvm_truffle_truffle_runtime"],
+)
+sh_test(
+    name = "jit_smoke",
+    exec_properties = {"EstimatedCPU": "2", "EstimatedMemory": "4GB"},
+    srcs = ["jit_smoke.sh"],
+    args = ["$(rootpath :native_jit)"],
+    data = [":native_jit"],
+    size = "large",
+    tags = ["manual"],
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)

@@ -13,6 +13,40 @@ final class Functions {
   private Functions() {}
 
   static Object apply(String name, Object[] a, Environment env) {
+    // Primitive scalar operations stay in the guest graph; generic libraries are host calls.
+    if (a.length == 1) {
+      if (name.equals("!") && a[0] instanceof Boolean b) return !b;
+      if (name.equals("neg") && a[0] instanceof Long l) {
+        try {
+          return Math.negateExact(l);
+        } catch (ArithmeticException e) {
+          throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+        }
+      }
+    }
+    if (a.length == 2 && a[0] instanceof Long x && a[1] instanceof Long y) {
+      switch (name) {
+        case "<":
+          return x < y;
+        case "<=":
+          return x <= y;
+        case ">":
+          return x > y;
+        case ">=":
+          return x >= y;
+        case "+", "-", "*", "/", "%":
+          try {
+            return arithmetic(name, x, y);
+          } catch (ArithmeticException e) {
+            throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+          }
+      }
+    }
+    return applyHost(name, a, env);
+  }
+
+  @TruffleBoundary
+  private static Object applyHost(String name, Object[] a, Environment env) {
     try {
       if (name.equals("optional.none") && a.length == 0) return OptionalValue.none();
       if (a.length == 1) return unary(name, a[0], env);
@@ -246,19 +280,7 @@ final class Functions {
       };
     }
     if (a instanceof UInt x && b instanceof UInt y) {
-      BigInteger p = x.toBigInteger(), q = y.toBigInteger();
-      if ((op.equals("/") || op.equals("%")) && q.signum() == 0)
-        throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
-      BigInteger r =
-          switch (op) {
-            case "+" -> p.add(q);
-            case "-" -> p.subtract(q);
-            case "*" -> p.multiply(q);
-            case "/" -> p.divide(q);
-            default -> p.remainder(q);
-          };
-      if (r.signum() < 0 || r.bitLength() > 64) throw new ArithmeticException();
-      return new UInt(r.longValue());
+      return unsignedArithmetic(op, x, y);
     }
     if (a instanceof Double x && b instanceof Double y)
       return switch (op) {
@@ -269,6 +291,23 @@ final class Functions {
         default -> throw Values.overload(op);
       };
     throw Values.overload(op);
+  }
+
+  @TruffleBoundary
+  private static Object unsignedArithmetic(String op, UInt x, UInt y) {
+    BigInteger p = x.toBigInteger(), q = y.toBigInteger();
+    if ((op.equals("/") || op.equals("%")) && q.signum() == 0)
+      throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
+    BigInteger r =
+        switch (op) {
+          case "+" -> p.add(q);
+          case "-" -> p.subtract(q);
+          case "*" -> p.multiply(q);
+          case "/" -> p.divide(q);
+          default -> p.remainder(q);
+        };
+    if (r.signum() < 0 || r.bitLength() > 64) throw new ArithmeticException();
+    return new UInt(r.longValue());
   }
 
   @TruffleBoundary

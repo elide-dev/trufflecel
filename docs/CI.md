@@ -4,7 +4,10 @@
 `check.bazel.yml` and `benchmarks.yml`. Successful main pushes then call
 `release-please.yml`; a newly created release calls `publish.maven.yml` directly in the
 same dependency chain. This avoids relying on a second workflow being triggered by a bot's
-GitHub release event. Failed correctness or simulation checks block release creation.
+GitHub release event. Failed correctness, guest-JIT, allocation, or simulation checks block
+release creation. `check.bazel.yml` runs both the JVM suite (including `//benchmarks:compiled`)
+and `//benchmarks:jit_smoke`, which builds with Truffle blocklist checks enabled and verifies
+actual native guest compilation.
 
 Jobs use Ubuntu 24.04, commit-pinned actions, StepSecurity harden-runner in audit mode,
 explicit permissions, timeouts and non-persistent checkout credentials. Only CodSpeed

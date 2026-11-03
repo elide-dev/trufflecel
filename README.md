@@ -108,8 +108,9 @@ the Linux CI runner measures named regions and verifies their results. Startup, 
 creation, and warmup are excluded.
 
 These measurements count native-AOT instructions using Truffle’s fallback interpreter.
-They do not measure JVM/JIT throughput or qualify optimizing guest-JIT execution in Native
-Image. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
+Separate JVM and Native Image gates require guest compilation, enforce allocation and
+AST-size budgets, and reject compilation blocklist violations. CodSpeed does not measure
+JVM/JIT throughput. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
 
 After successful main checks, Release Please opens version/changelog PRs from conventional
 commits. Merging a release PR creates a version tag. The Maven publisher uses that exact tag to
