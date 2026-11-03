@@ -55,3 +55,6 @@ jobs:
           name: codspeed-simulation
           path: build/simulation/
           retention-days: 14
+  comparison:
+    uses: ./.github/workflows/comparison.yml
+    secrets: inherit

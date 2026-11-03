@@ -257,4 +257,19 @@ public class RuntimeTest {
     assertEquals(OptionalValue.none(), Cel.compile("optional.ofNonZeroValue(0)").evaluate());
     assertEquals(OptionalValue.of(1L), Cel.compile("optional.ofNonZeroValue(1)").evaluate());
   }
+
+  @org.junit.Test
+  public void preparedExpressionsInstantiateIndependentPrograms() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    var prepared = env.prepare("[x, x + 1].map(v, v * 2)[1]");
+    var first = prepared.instantiate();
+    var second = prepared.instantiate();
+    assertEquals(8L, first.evaluate(Map.of("x", 3L)));
+    assertEquals(22L, second.evaluate(Map.of("x", 10L)));
+    assertEquals(4L, first.evaluate(Map.of("x", 1L)));
+    assertEquals(-2L, prepared.instantiate().evaluate(Map.of("x", -2L)));
+    assertEquals(CelType.INT, first.resultType());
+    assertEquals(Set.of("x"), first.variables());
+    assertThrows(CelException.class, () -> env.prepare("x + true"));
+  }
 }

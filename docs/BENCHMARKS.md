@@ -98,3 +98,70 @@ Truffle boundaries. Arithmetic, lazy evaluation, AST child evaluation, and compr
 control flow remain eligible for partial evaluation. These gates qualify the tested JVM and
 native workloads; they do not establish Elide embedding throughput or a production image-size
 budget. Production JARs do not depend on the Truffle runtime or compiler test APIs.
+
+## Comparison with upstream cel-java
+
+The bounded comparison uses upstream [cel-java 0.15.0](https://github.com/cel-expr/cel-java/tree/v0.15.0)
+and its recommended planner runtime. Its Maven graph is pinned separately in
+`cel_java_install.json` and is referenced only by test/benchmark targets. It does not change
+TruffleCEL's production dependencies or published POMs.
+
+Three expressions exercise arithmetic, a string/boolean policy, and a list comprehension.
+Both engines receive identical explicit declarations and four alternating, workload-specific
+activations with checked results. There are five paired scenarios (30 engine/workload cells):
+
+| Runtime | Scenario | Timed operation |
+| --- | --- | --- |
+| GraalVM JVM | Compile | Parse, check, and create an executable program |
+| GraalVM JVM | Evaluate | Reuse a program compiled during process setup |
+| Native Image / SVM | Compile | Parse, check, and create an executable program |
+| Native Image / SVM | Evaluate | Reuse a program compiled during process setup |
+| Native Image / SVM | Image-build AST | Evaluate a checked AST prepared during image construction |
+
+`Environment.prepare` creates a checked TruffleCEL AST without a call target.
+`PreparedProgram.instantiate` clones that tree and creates its runtime target. The comparison
+image initializes `ImageExpressions` at image build time, stores both engines' checked ASTs,
+and asserts that provenance at runtime. Truffle targets and cel-java executable plans are
+created after process startup. The image-build template uses only standard declarations;
+application-provided constants and function bindings must themselves be safe for the image heap.
+The comparison-specific initialization settings also cover the immutable frontend dependencies
+retained by cel-java; they are not added to production library configuration. This is **build-time CEL frontend compilation**, not storage
+of Graal guest machine code in the image. The image-build holder also records each frontend's
+preparation time; those cold, order-sensitive observations are retained in the raw results,
+not treated as steady-state compilation benchmarks.
+
+TruffleCEL evaluation cases require a valid last-tier `OptimizedCallTarget` before and after
+measurement. Guest compilation, context initialization, input fixture creation, and program
+setup are outside evaluation timing. The timed public API includes activation normalization,
+argument dispatch, result conversion, and checksum accumulation. Compilation returns a
+program to a volatile sink without evaluating it; compiler environments are reused. There
+is no claim that moving frontend work into image construction improves warmed evaluation:
+it removes that frontend work from runtime startup, which is a different benefit.
+
+Each cell runs in three fresh processes, in a deterministic shuffled order. Each process
+warms for 500 ms, then records seven batches of at least 150 ms each. Input selection cycles
+through four activations, and every timed batch verifies its result checksum. The SVG shows
+the median of process medians and min/max process medians as whiskers. These are diagnostic
+wall-clock measurements, not confidence intervals or CodSpeed instruction counts. Shared CI
+machines, GC, host compilation, and timer/checksum overhead can affect small differences.
+No timing threshold gates CI; incorrect results or missing guest compilation do fail it.
+
+Run the complete paired suite on Linux x86_64:
+
+```sh
+python3 tools/bench/compare.py run
+# Regenerate the SVG without rerunning any benchmarks:
+python3 tools/bench/compare.py render build/comparison/comparison.json build/comparison/comparison.svg
+```
+
+Bazel builds both executables with pinned toolchains; measurement runs on the same local
+host for both runtimes. `comparison.json` records all samples, source commit and digest,
+machine details, engine versions, and image-build preparation observations. `comparison.svg`
+is standalone and suitable for a README. CI runs the reusable `comparison.yml` workflow
+alongside CodSpeed and uploads both files as the `cel-comparison` artifact. The workflow
+also supports manual dispatch. Check in an explicitly dated result snapshot when updating
+the README; CI does not silently rewrite the published chart.
+
+For fast correctness checks, use `bazel test //benchmarks/comparison:smoke --config=local`.
+The Linux native check is `bazel test //benchmarks/comparison:native_smoke`; it additionally
+requires successful image-build AST initialization and the Truffle blocklist gates.
