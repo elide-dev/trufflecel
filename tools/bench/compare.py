@@ -55,7 +55,7 @@ def validate(data):
         seen.add(key)
         if len(item["ns_per_op"]) != 7 or any(not math.isfinite(n) or n <= 0 for n in item["ns_per_op"]):
             raise ValueError("Invalid samples")
-        if item["runtime"] == "svm" and not item["image_build_ast"]:
+        if item["runtime"] == "svm" and (not item["image_build_ast"] or item["image_prepare_ns"] <= 0):
             raise ValueError("Missing image-build AST preparation")
         if item["engine"] == "trufflecel" and item["stage"] != "compile" and not item["guest_compiled"]:
             raise ValueError("Missing guest compilation")
@@ -130,7 +130,9 @@ def measure(args):
             "dirty": bool(run(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip()),
             "sources_sha256": before, "host": {"system": platform.system(), "machine": platform.machine(),
             "cpu": cpu, "kernel": platform.release(), "logical_cpus": os.cpu_count()},
-            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.23"}, "results": []}
+            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.23"},
+            "svm_binary_sha256": hashlib.sha256(paths["svm"].read_bytes()).hexdigest(),
+            "results": []}
     jobs = list(itertools.product(PANELS, WORKLOADS, ENGINES, range(3)))
     random.Random(20261103).shuffle(jobs)
     for panel, workload, engine, fork in jobs:
