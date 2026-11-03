@@ -17,6 +17,7 @@ public final class Environment {
   final Map<String, CelType> variables;
   final Map<String, Object> constants;
   final Map<String, ObjectType> objectTypes;
+  final ObjectType[] runtimeObjectTypes;
   final Map<String, FunctionBinding> functions;
   final String container;
   final boolean inferVariables, macros;
@@ -27,6 +28,7 @@ public final class Environment {
     variables = Map.copyOf(b.variables);
     constants = Map.copyOf(b.constants);
     objectTypes = Map.copyOf(b.objectTypes);
+    runtimeObjectTypes = objectTypes.values().toArray(ObjectType[]::new);
     functions = Map.copyOf(b.functions);
     container = b.container;
     inferVariables = b.inferVariables;
