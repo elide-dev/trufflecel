@@ -11,6 +11,9 @@ final class Values {
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Object in(Object v) {
+    // Canonical scalar inputs have no nested data to count or snapshot.
+    if (v instanceof Long || v instanceof Boolean || v instanceof String || v instanceof Double)
+      return v;
     return in(v, 0, new int[] {1_000_000});
   }
 
@@ -27,6 +30,15 @@ final class Values {
       m.forEach((k, value) -> r.put(in(k, depth + 1, remaining), in(value, depth + 1, remaining)));
       return Collections.unmodifiableMap(r);
     }
+    if (v instanceof List<?> values) {
+      int size = values.size();
+      if (size == 0) return List.of();
+      if (size > remaining[0])
+        throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
+      Object[] snapshot = values.toArray();
+      for (int i = 0; i < snapshot.length; i++) snapshot[i] = in(snapshot[i], depth + 1, remaining);
+      return new InputList(snapshot);
+    }
     if (v instanceof Iterable<?> values) {
       var r = new ArrayList<Object>();
       values.forEach(value -> r.add(in(value, depth + 1, remaining)));
@@ -34,6 +46,25 @@ final class Values {
     }
     if (v instanceof Object[] values) return in(Arrays.asList(values), depth + 1, remaining);
     return v;
+  }
+
+  /** Owns a normalized snapshot; no host array or mutable list is retained. */
+  private static final class InputList extends AbstractList<Object> implements RandomAccess {
+    private final Object[] values;
+
+    InputList(Object[] values) {
+      this.values = values;
+    }
+
+    @Override
+    public Object get(int index) {
+      return values[index];
+    }
+
+    @Override
+    public int size() {
+      return values.length;
+    }
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary

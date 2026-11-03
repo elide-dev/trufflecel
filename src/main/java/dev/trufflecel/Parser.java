@@ -52,7 +52,7 @@ final class Parser {
         int prec = precedence(op.kind);
         ExprNode right = expression(prec + 1);
         left =
-            new ExprNode(ExprNode.Kind.CALL, op.kind, false, op.offset, left, right)
+            ExprNode.binary(op.kind, op.offset, left, right)
                 .sourceRange(left.sourceStart, right.sourceEnd);
       }
       if (min == 0 && accept("?")) {
