@@ -8,7 +8,7 @@ GitHub release event. Failed correctness or simulation checks block release crea
 
 Jobs use Ubuntu 24.04, commit-pinned actions, StepSecurity harden-runner in audit mode,
 explicit permissions, timeouts and non-persistent checkout credentials. Only CodSpeed
-measurement gets OIDC permission; only Release Please gets repository/PR write permission.
+measurement gets OIDC permission; only Release Please gets repository/PR write permission and permission to dispatch checks.
 The publisher has read-only GitHub access and scoped R2 credentials in its upload step.
 
 ## Repository provisioning
@@ -18,14 +18,15 @@ Provide these existing organization conventions to `elide-dev/trufflecel`:
 | Secret or service | Purpose |
 | --- | --- |
 | `BUILDBUDDY_API_KEY` or `BUILDBUDDY_APIKEY` | RBE and cache; without it CI explicitly builds on the hosted Linux runner |
-| `ELIDEBOT_APP_ID`, `ELIDEBOT_PRIVATE_KEY` | Scoped GitHub App installation token for release PRs and tags |
-| `RELEASE_PLEASE_TOKEN` | Alternative fine-grained bot PAT if the Elide app is unavailable |
 | `CLOUDFLARE_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Publishing to the `elide-maven` R2 bucket |
 | CodSpeed GitHub integration | Enable `elide-dev/trufflecel`; uploads use GitHub OIDC, without a stored CodSpeed token |
 
-The release identity needs Contents and Pull requests write access to this repository. A
-plain `GITHUB_TOKEN` is deliberately not the fallback: its release PR updates would not
-trigger normal PR CI. Use the Elide app or a bot PAT. Do not copy credentials into the repo.
+Release Please uses the built-in `GITHUB_TOKEN`, with Contents, Pull requests and Actions
+write permissions. No bot app or PAT is required. Following Studio's convention, it explicitly
+dispatches `ci.yml` on each created/updated release branch. Those runs execute the same Bazel
+and simulation checks; they cannot run Release Please or publish because those jobs require
+a main push. Publishing still runs directly after release creation in the main CI chain.
+The repository must allow GitHub Actions to create pull requests (already enabled here).
 Fork PRs get no BuildBuddy key; their builds use the local Linux profile.
 
 The files must be committed and pushed to the repository for GitHub to run them. Branch
