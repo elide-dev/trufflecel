@@ -97,12 +97,12 @@ final class Functions {
                 || v instanceof Map<?, ?> map && map.isEmpty()
                 || v.equals(Duration.ZERO)
                 || v.equals(Instant.EPOCH);
-        for (ObjectType type : env.objectTypes.values()) if (type.accepts(v)) zero = type.isZero(v);
+        for (ObjectType type : env.runtimeObjectTypes) if (type.accepts(v)) zero = type.isZero(v);
         return zero ? OptionalValue.none() : OptionalValue.of(v);
       case "dyn":
         return v;
       case "type":
-        for (ObjectType type : env.objectTypes.values())
+        for (ObjectType type : env.runtimeObjectTypes)
           if (type.accepts(v)) return CelType.of(type.name());
         return Values.type(v);
       case "size":
@@ -201,7 +201,7 @@ final class Functions {
     switch (name) {
       case "==", "!=":
         boolean equal = Values.equal(a, b);
-        for (ObjectType type : env.objectTypes.values())
+        for (ObjectType type : env.runtimeObjectTypes)
           if (type.accepts(a) && type.accepts(b)) {
             equal = type.equal(a, b);
             break;

@@ -61,6 +61,31 @@ No production library dependency on CodSpeed, its native hooks, or the benchmark
 introduced. These targets qualify this executable and workloads, not every possible native
 embedding of the library.
 
+## Finding instruction hotspots
+
+Download the `codspeed-simulation` artifact from a completed CI run and inspect its named
+regions with the checked-in analyzer:
+
+```sh
+gh run download RUN_ID --name codspeed-simulation --dir /tmp/cel-profile
+python3 tools/bench/codspeed_profile.py /tmp/cel-profile/profiles --case comprehension
+```
+
+The report ranks **self instructions**, excluding call-edge costs to avoid double counting,
+and verifies their sum against the measured region total. Native compiler inlining can
+attribute work to callers, so interpret the symbols alongside source and the CodSpeed
+call graph. These are fallback-interpreter costs; confirm improvements in the paired
+JVM/SVM timing suite before making compiled-throughput claims.
+
+The November 3 baseline ([run 41703453231](https://github.com/elide-dev/trufflecel/actions/runs/41703453231),
+source `f2437800a29d`) measured 2,570.63 instructions/op for scalar evaluation and
+54,359.79 for comprehension. In the comprehension profile, immutable-map entry iteration,
+value iteration, iterator `hasNext`, entry `getValue`, and value-iterator construction together
+accounted for about 37% of instructions. Equality traversed registered object types on each
+comparison. The first optimization precomputes that traversal as an array in the immutable
+environment, retaining the same adapter order and custom equality behavior. This baseline
+identifies the target; a subsequent measured run must establish the improvement.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
