@@ -30,6 +30,16 @@ maven.install(
 )
 use_repo(maven, "maven")
 
+# Upstream CEL is comparison-only; keep its dependency graph out of production resolution.
+maven.install(
+    name = "cel_java",
+    lock_file = "//:cel_java_install.json",
+    artifacts = ["dev.cel:cel:0.15.0"],
+    repositories = ["https://repo.maven.apache.org/maven2"],
+    fail_if_repin_required = True,
+)
+use_repo(maven, "cel_java")
+
 bazel_dep(name = "gazelle", version = "0.47.0", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.59.0", dev_dependency = True)
 bazel_dep(name = "platforms", version = "1.0.0")

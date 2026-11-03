@@ -45,7 +45,18 @@ public final class Environment {
     return compile(source, false);
   }
 
+  /**
+   * Parse and type-check without creating a runtime call target, suitable for image construction.
+   */
+  public PreparedProgram prepare(String source) {
+    return prepare(source, true);
+  }
+
   private Program compile(String source, boolean check) {
+    return prepare(source, check).adopt();
+  }
+
+  private PreparedProgram prepare(String source, boolean check) {
     Objects.requireNonNull(source);
     if (source.length() > maxSourceLength)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
@@ -72,7 +83,7 @@ public final class Environment {
     }
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
-    return new Program(source, declarations.keySet(), result, node, this);
+    return new PreparedProgram(source, declarations.keySet(), result, node, this);
   }
 
   String resolve(String name, Set<String> names) {

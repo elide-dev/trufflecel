@@ -36,6 +36,7 @@ java_library(
         "ObjectType.java",
         "OptionalValue.java",
         "Parser.java",
+        "PreparedProgram.java",
         "Program.java",
         "UInt.java",
         "Unknown.java",
