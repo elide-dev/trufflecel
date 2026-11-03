@@ -84,9 +84,30 @@ public final class Program {
       var binding = variables.entrySet().iterator().next();
       return new EvalContext(environment, binding.getKey(), Values.in(binding.getValue()));
     }
+    if (variables.size() <= 4) {
+      var snapshot = immutableScalarBindings(variables);
+      if (snapshot != null) return new EvalContext(environment, snapshot);
+    }
     var activation = new HashMap<String, Object>();
     variables.forEach((name, value) -> activation.put(name, Values.in(value)));
     return new EvalContext(environment, activation);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> immutableScalarBindings(Map<String, ?> variables) {
+    Map<String, ?> snapshot;
+    try {
+      snapshot = Map.copyOf(variables);
+    } catch (NullPointerException e) {
+      // Host nulls remain supported by the normalizing path.
+      return null;
+    }
+    for (Object value : snapshot.values())
+      if (!(value instanceof Long
+          || value instanceof Boolean
+          || value instanceof String
+          || value instanceof Double)) return null;
+    return (Map<String, Object>) snapshot;
   }
 
   public boolean test() {
