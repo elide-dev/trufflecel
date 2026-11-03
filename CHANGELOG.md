@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.0](https://github.com/elide-dev/trufflecel/compare/v0.1.0-alpha.2...v0.1.0) (2026-11-03)
+
+
+### Features
+
+* adopt TruffleData 0.1.0 native protobuf rows and codec ([5e053f5](https://github.com/elide-dev/trufflecel/commit/5e053f538156e4c9a03a378fa51ce19e8a89f85f))
+
+
+### Bug Fixes
+
+* **deps:** align GraalVM toolchains and libraries with elide.23 ([a42b848](https://github.com/elide-dev/trufflecel/commit/a42b84854ab991abfd8042cde791969bbc93868e))
+
 ## [0.1.0-alpha.2](https://github.com/elide-dev/trufflecel/compare/v0.1.0-alpha.1...v0.1.0-alpha.2) (2026-11-03)
 
 
