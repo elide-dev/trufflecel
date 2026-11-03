@@ -163,6 +163,13 @@ change by at most 1.3%. Every saved profile total is reconciled. Source-based co
 retains the original expression nodes for instrumentation; the ordinary Java API combines
 eligible integer arithmetic while preserving budgets, unknowns, and intermediate overflow.
 
+Allocating only the containers each macro needs (`456e1bc`,
+[run 41729137565](https://github.com/elide-dev/trufflecel/actions/runs/41729137565)) reduces
+comprehension instructions by 4.7%, two-variable transforms by 5.1%, and JSON by 3.9%.
+Other cases change by less than 0.8%; all 14 totals reconcile. The compiled `all` fixture
+uses 224 bytes/evaluation locally, down from 336, with a 320-byte limit. The paired suite
+also records lower allocation for comprehensions on both JVM and SVM.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
@@ -365,12 +372,17 @@ uses an EPYC 7763; these are paired engine comparisons, not a controlled measure
 the change between commits. Small RSS differences also need repeated measurements before
 being treated as regressions or improvements.
 
-The current snapshot (`a44e445`, [CI 41727711499](https://github.com/elide-dev/trufflecel/actions/runs/41727711499))
+The arithmetic-chain run (`a44e445`, [CI 41727711499](https://github.com/elide-dev/trufflecel/actions/runs/41727711499))
 records **24/24 timing wins**, including every interpreter case, alongside 17/24 allocation
 wins and 7/24 fixed-work RSS wins. JVM scalar interpretation is 1.16× faster than cel-java
 in this run. Native guest-JIT RSS remains about 100–117 MiB versus 64–69 MiB for cel-java.
 The runner is an AMD EPYC 7763; the results support these paired fixture comparisons and
 do not establish universal speedups or a lower native process footprint.
+
+The current snapshot (`456e1bc`, [CI 41729137565](https://github.com/elide-dev/trufflecel/actions/runs/41729137565))
+retains 24/24 timing wins and increases allocation wins to **22/24**. Only the JVM policy
+cases still allocate more than cel-java. Fixed-work RSS remains lower in 7/24 comparisons.
+This run uses an AMD EPYC 9V74; the same shared-runner and whole-process memory caveats apply.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
