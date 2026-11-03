@@ -10,7 +10,7 @@ upload convention. It produces three thin Maven artifacts under `dev.elide`:
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 
 Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
-required. The POMs pin TruffleData `0.1.0-alpha.3` and Elide GraalVM `25.5.5-elide.5`,
+required. The POMs pin TruffleData `0.1.0-alpha.4` and Elide GraalVM `25.5.5-elide.5`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 

@@ -34,7 +34,7 @@ and hash entries are copied into CEL values. No Java methods are exposed to expr
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.1.0-alpha.3` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.1.0-alpha.4` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned to the release's `25.5.5-elide.5` Elide GraalVM artifacts.
 No sibling checkout or local Maven cache is required.
 

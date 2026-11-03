@@ -28,7 +28,7 @@ explicit adapters; expressions cannot discover arbitrary Java methods.
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
-**Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **TruffleData `0.1.0-alpha.3`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.5`**, and **TruffleData `0.1.0-alpha.4`**.
 
 Use a published version from [Releases](https://github.com/elide-dev/trufflecel/releases):
 
