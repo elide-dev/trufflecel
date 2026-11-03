@@ -18,22 +18,28 @@ final class Fixtures {
     "enabled && email.endsWith('@example.com') && x >= 18",
     "xs.filter(v, v % 2 == 0).map(v, v * v).size()"
   };
-  static final Environment TRUFFLE =
-      Cel.newBuilder()
-          .variable("x", CelType.INT)
-          .variable("enabled", CelType.BOOL)
-          .variable("email", CelType.STRING)
-          .variable("xs", CelType.list(CelType.INT))
-          .build();
-  static final CelCompiler JAVA =
-      CelCompilerFactory.standardCelCompilerBuilder()
-          .setStandardMacros(CelStandardMacro.values())
-          .addVar("x", SimpleType.INT)
-          .addVar("enabled", SimpleType.BOOL)
-          .addVar("email", SimpleType.STRING)
-          .addVar("xs", ListType.create(SimpleType.INT))
-          .build();
-  static final CelRuntime RUNTIME = CelRuntimeFactory.plannerRuntimeBuilder().build();
+
+  static final class Truffle {
+    static final Environment COMPILER =
+        Cel.newBuilder()
+            .variable("x", CelType.INT)
+            .variable("enabled", CelType.BOOL)
+            .variable("email", CelType.STRING)
+            .variable("xs", CelType.list(CelType.INT))
+            .build();
+  }
+
+  static final class Java {
+    static final CelCompiler COMPILER =
+        CelCompilerFactory.standardCelCompilerBuilder()
+            .setStandardMacros(CelStandardMacro.values())
+            .addVar("x", SimpleType.INT)
+            .addVar("enabled", SimpleType.BOOL)
+            .addVar("email", SimpleType.STRING)
+            .addVar("xs", ListType.create(SimpleType.INT))
+            .build();
+    static final CelRuntime RUNTIME = CelRuntimeFactory.plannerRuntimeBuilder().build();
+  }
 
   static final List<Map<String, Object>> INPUTS =
       List.of(
