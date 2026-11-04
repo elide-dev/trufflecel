@@ -1,0 +1,19 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_test")
+
+java_library(
+    name = "service",
+    srcs = ["ConformanceServer.java"],
+    visibility = ["//visibility:public"],
+    deps = ["//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:io_grpc_grpc_api", "@maven//:io_grpc_grpc_netty_shaded", "@maven//:io_grpc_grpc_protobuf", "@maven//:io_grpc_grpc_stub"],
+)
+
+java_test(
+    name = "test",
+    srcs = ["ConformanceServerTest.java"],
+    test_class = "dev.trufflecel.ConformanceServerTest",
+    deps = [":service", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:io_grpc_grpc_api", "@maven//:io_grpc_grpc_netty_shaded", "@maven//:io_grpc_grpc_stub", "@maven//:junit_junit"],
+)
+
+java_binary(name = "server", main_class = "dev.trufflecel.ConformanceServer", runtime_deps = [":service"])

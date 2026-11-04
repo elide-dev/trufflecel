@@ -10,6 +10,15 @@ import java.util.*;
 @GenerateWrapper
 class ExprNode extends CelNode {
   boolean rootBody, statement;
+  long canonicalId;
+  CelType checkedType;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
+
+  void resolveBlocks(ExprNode owner) {
+    if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
+    for (ExprNode child : children) child.resolveBlocks(kind == Kind.BLOCK ? this : owner);
+  }
+
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private int localSlot = -1;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean frameLocalReads;
@@ -68,7 +77,8 @@ class ExprNode extends CelNode {
     MAP,
     OBJECT,
     CONDITIONAL,
-    MACRO
+    MACRO,
+    COMPREHENSION
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal Kind kind;
@@ -140,7 +150,8 @@ class ExprNode extends CelNode {
   boolean escapesContext() {
     if (kind == Kind.CONSTANT) return false;
     if (kind == Kind.IDENT) return name.startsWith(".");
-    if (kind == Kind.BLOCK
+    if (kind == Kind.COMPREHENSION
+        || kind == Kind.BLOCK
         || extensionCall
         || kind == Kind.SELECT
         || kind == Kind.OBJECT
@@ -150,6 +161,10 @@ class ExprNode extends CelNode {
   }
 
   void resolveLocals(ArrayList<String> locals, FrameDescriptor frameDescriptor) {
+    if (kind == Kind.COMPREHENSION) {
+      ((ComprehensionNode) this).resolveComprehensionLocals(locals);
+      return;
+    }
     if (kind == Kind.CONSTANT) return;
     if (kind == Kind.IDENT) {
       localSlot = locals.lastIndexOf(name);
@@ -335,6 +350,18 @@ class ExprNode extends CelNode {
       }
     }
     if (kind == Kind.IDENT && !bound.contains(name)) out.add(name);
+    if (kind == Kind.COMPREHENSION) {
+      children[0].free(bound, out);
+      children[1].free(bound, out);
+      var inner = new HashSet<>(bound);
+      inner.addAll(Arrays.asList((String[]) value));
+      children[2].free(inner, out);
+      children[3].free(inner, out);
+      var resultScope = new HashSet<>(bound);
+      resultScope.add(((String[]) value)[0]);
+      children[4].free(resultScope, out);
+      return;
+    }
     if (kind == Kind.MACRO && !name.equals("has")) {
       children[0].free(bound, out);
       var inner = new HashSet<>(bound);
@@ -346,13 +373,18 @@ class ExprNode extends CelNode {
   Object execute(VirtualFrame frame, EvalContext ctx) {
     ctx.tick();
     return switch (kind) {
-      case BLOCK -> block(frame.materialize(), ctx);
-      case BLOCK_INDEX -> ctx.block.read(Math.toIntExact((Long) value));
+      case BLOCK -> block(frame, ctx);
+      case BLOCK_INDEX ->
+          ctx.block.read(
+              blockOwner.children[Math.toIntExact((Long) value)],
+              Math.toIntExact((Long) value),
+              frame);
       case CONSTANT -> value;
       case IDENT ->
-          localSlot >= 0
-              ? (frameLocalReads ? frame.getAuxiliarySlot(localSlot) : ctx.getLocal(localSlot))
-              : boundaryReads ? ctx.getBoundary(name) : ctx.get(name);
+          checkedValue(
+              localSlot >= 0
+                  ? (frameLocalReads ? frame.getAuxiliarySlot(localSlot) : ctx.getLocal(localSlot))
+                  : boundaryReads ? ctx.getBoundary(name) : ctx.get(name));
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
         Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
@@ -384,7 +416,13 @@ class ExprNode extends CelNode {
       }
       case CALL -> call(frame, ctx);
       case MACRO -> macro(frame, ctx);
+      case COMPREHENSION -> ((ComprehensionNode) this).executeComprehension(frame, ctx);
     };
+  }
+
+  private static Object checkedValue(Object value) {
+    if (value instanceof CelException error) throw error;
+    return value;
   }
 
   Object executePresence(VirtualFrame frame, EvalContext ctx) {
@@ -436,6 +474,15 @@ class ExprNode extends CelNode {
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object call(VirtualFrame frame, EvalContext ctx) {
+    if (name.equals("@not_strictly_false")) {
+      try {
+        return !Boolean.FALSE.equals(children[0].execute(frame, ctx));
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        return true;
+      }
+    }
+
     if ((scalarOperator != 0 || stringPredicate) && children.length == 2 && !extensionCall)
       return scalarBinary(frame, ctx);
     if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
@@ -547,8 +594,19 @@ class ExprNode extends CelNode {
     throw Values.overload("optional");
   }
 
+  private Object block(VirtualFrame frame, EvalContext ctx) {
+    if (getSourceSection() != null) return instrumentedBlock(frame.materialize(), ctx);
+    ctx.charge(children.length);
+    EvalContext scoped = ctx.fork();
+    scoped.block = new BlockScope(children, null, scoped);
+    EvalContext body = ctx.fork();
+    body.block = scoped.block;
+    return children[children.length - 1].execute(frame, body);
+  }
+
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private Object block(com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
+  private Object instrumentedBlock(
+      com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
     ctx.charge(children.length);
     EvalContext scoped = ctx.fork();
     VirtualFrame captured = forkFrame(frame, scoped);
@@ -567,20 +625,33 @@ class ExprNode extends CelNode {
   }
 
   static final class BlockScope {
-    private final ExprNode[] expressions;
     private final VirtualFrame frame;
     private final EvalContext context;
     private final Object[] results;
     private int depth;
 
     BlockScope(ExprNode[] expressions, VirtualFrame frame, EvalContext context) {
-      this.expressions = expressions;
       this.frame = frame;
       this.context = context;
       results = new Object[expressions.length - 1];
     }
 
-    Object read(int index) {
+    Object read(ExprNode initializer, int index, VirtualFrame callerFrame) {
+      if (frame != null) return readInstrumented(initializer, index);
+      return readValue(initializer, index, callerFrame);
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private Object readInstrumented(ExprNode initializer, int index) {
+      return readValue(initializer, index, frame);
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private Object instrumentedInitializer(ExprNode initializer, EvalContext localContext) {
+      return initializer.execute(forkFrame(frame, localContext), localContext);
+    }
+
+    private Object readValue(ExprNode initializer, int index, VirtualFrame callerFrame) {
       Object result = results[index];
       if (result == null) {
         if (depth >= context.environment.maxDepth)
@@ -589,7 +660,10 @@ class ExprNode extends CelNode {
         depth++;
         try {
           EvalContext localContext = context.fork();
-          result = expressions[index].execute(forkFrame(frame, localContext), localContext);
+          result =
+              frame == null
+                  ? initializer.execute(callerFrame, localContext)
+                  : instrumentedInitializer(initializer, localContext);
         } catch (CelException e) {
           result = e;
         } finally {

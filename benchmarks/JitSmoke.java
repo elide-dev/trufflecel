@@ -66,6 +66,14 @@ public final class JitSmoke {
         check("cel.bind(v, x + 1, v > 5)", Map.of("x", 10L), true, Map.of("x", 0L), false);
         check(
             "cel.block([x + 1], cel.index(0) > 5)", Map.of("x", 10L), true, Map.of("x", 0L), false);
+        check(
+            "json.parse(s).value().a == 1",
+            Map.of("s", "{\"a\":1}"),
+            true,
+            Map.of("s", "{\"a\":2}"),
+            false);
+        check(
+            "yaml.parse(s).value().a == 1", Map.of("s", "a: 1"), true, Map.of("s", "a: 2"), false);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false);
       } finally {
         context.leave();

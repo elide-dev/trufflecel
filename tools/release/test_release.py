@@ -34,7 +34,7 @@ class PublicationTest(unittest.TestCase):
                         for name in ('LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE'):
                             self.assertEqual(jar.read('META-INF/' + name), Path(name).read_bytes())
                 expected = {
-                    'core': {'org.graalvm.polyglot:polyglot', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j'},
+                    'core': {'org.graalvm.polyglot:polyglot', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j', 'com.google.code.gson:gson', 'org.snakeyaml:snakeyaml-engine'},
                     'protobuf': {'dev.elide:trufflecel-core', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'dev.elide:truffledata-protobuf', 'com.google.protobuf:protobuf-java'},
                     'json': {'dev.elide:trufflecel-core', 'org.graalvm.shadowed:json'},
                 }[module]
