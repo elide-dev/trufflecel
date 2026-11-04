@@ -53,3 +53,18 @@ the right to contribute, and retain third-party attribution and license notices.
 No separate contributor license agreement (CLA), copyright assignment, or
 Developer Certificate of Origin sign-off is required. Contributions must follow
 the [code of conduct](CODE_OF_CONDUCT.md).
+
+## Review standards
+
+Use a pull request for changes to main and seek review from a maintainer other than
+the author. Reviewers should check correctness and CEL compatibility, error and
+unknown semantics, resource limits, thread safety, dependency/license changes,
+instrumentation and Native Image behavior, and whether tests demonstrate the change.
+Security-sensitive changes also require reviewing the
+[threat model](docs/THREAT_MODEL.md). All relevant CI checks must pass before merge;
+coverage exclusions or relaxed allocation limits need a documented technical reason.
+Keep review discussion and resolution in the PR. Document any emergency administrative
+bypass and arrange follow-up review before release.
+
+Dependency update procedures and the OpenSSF readiness roadmap are in
+[maintenance](docs/MAINTENANCE.md). Coding agents should also read [AGENTS.md](AGENTS.md).
