@@ -15,6 +15,7 @@ public final class Environment {
   }
 
   final Map<String, CelType> variables;
+  private final Set<String> variableNames;
   final Map<String, Object> constants;
   final Map<String, ObjectType> objectTypes;
   final ObjectType[] runtimeObjectTypes;
@@ -26,6 +27,7 @@ public final class Environment {
 
   private Environment(Builder b) {
     variables = Map.copyOf(b.variables);
+    variableNames = Set.copyOf(variables.keySet());
     constants = Map.copyOf(b.constants);
     objectTypes = Map.copyOf(b.objectTypes);
     var runtimeTypes = new ArrayList<ObjectType>();
@@ -84,7 +86,7 @@ public final class Environment {
       for (ExprNode child : item.node().children)
         pending.push(new Pending(child, item.depth() + 1));
     }
-    var declarations = new LinkedHashMap<>(variables);
+    Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();
       node.free(Set.of(), free);
@@ -92,11 +94,19 @@ public final class Environment {
         if (resolve(name, constants.keySet()) == null
             && resolve(name, objectTypes.keySet()) == null
             && builtinType(name) == null
-            && resolve(name, declarations.keySet()) == null) declarations.put(name, CelType.DYN);
+            && resolve(name, declarations.keySet()) == null) {
+          if (declarations == variables) declarations = new LinkedHashMap<>(variables);
+          declarations.put(name, CelType.DYN);
+        }
     }
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
-    return new PreparedProgram(source, declarations.keySet(), result, node, this);
+    return new PreparedProgram(
+        source,
+        declarations == variables ? variableNames : declarations.keySet(),
+        result,
+        node,
+        this);
   }
 
   String resolve(String name, Set<String> names) {
