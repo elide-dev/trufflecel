@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/elide-dev/trufflecel/compare/v0.3.0...v0.4.0) (2026-11-04)
+
+
+### Features
+
+* complete supported README capabilities ([#12](https://github.com/elide-dev/trufflecel/issues/12)) ([224d464](https://github.com/elide-dev/trufflecel/commit/224d4643222cfcad8a94e0155e86a3987a06d248))
+* dual-license TruffleCEL and establish community policies ([e508358](https://github.com/elide-dev/trufflecel/commit/e50835802bb3ee7d30e46a98eb58d1ad02fe8811))
+* support the complete CEL conformance corpus with TruffleData 0.4.0 ([9b423d3](https://github.com/elide-dev/trufflecel/commit/9b423d3c30ea8b673397f61032b711f5c153e24a))
+
+
+### Bug Fixes
+
+* align Go SDK with updated Gazelle dependencies ([334f2c6](https://github.com/elide-dev/trufflecel/commit/334f2c61b1feedcf960dcecfdac4d44c403539a6))
+
 ## [0.3.0](https://github.com/elide-dev/trufflecel/compare/v0.2.0...v0.3.0) (2026-11-04)
 
 
