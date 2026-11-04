@@ -48,6 +48,11 @@ final class Values {
     return v;
   }
 
+  /** Internal read-only iteration may share our owned snapshot; public toArray still copies. */
+  static Object[] listRange(List<?> list) {
+    return list instanceof InputList input ? input.values : list.toArray();
+  }
+
   /** Owns a normalized snapshot; no host array or mutable list is retained. */
   private static final class InputList extends AbstractList<Object> implements RandomAccess {
     private final Object[] values;

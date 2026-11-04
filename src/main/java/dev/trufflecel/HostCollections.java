@@ -44,7 +44,7 @@ final class HostCollections {
 
   @TruffleBoundary
   static Object[] range(Object range) {
-    if (range instanceof List<?> list) return list.toArray();
+    if (range instanceof List<?> list) return Values.listRange(list);
     if (range instanceof Map<?, ?> map) return map.keySet().toArray();
     throw Values.overload("comprehension");
   }

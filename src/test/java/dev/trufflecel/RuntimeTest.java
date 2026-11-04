@@ -432,6 +432,30 @@ public class RuntimeTest {
   }
 
   @Test
+  public void comprehensionRangesKeepSnapshotsAcrossHostMutation() {
+    var input = new ArrayList<>(List.of(1L, 2L, 3L));
+    var environment =
+        Cel.newBuilder()
+            .variable("xs", CelType.list(CelType.INT))
+            .function(
+                "edit",
+                List.of(CelType.INT),
+                CelType.INT,
+                args -> {
+                  input.clear();
+                  return args.get(0);
+                })
+            .build();
+    var program = environment.compile("xs.map(x, edit(x))");
+    assertEquals(List.of(1L, 2L, 3L), program.evaluate(Map.of("xs", input)));
+    assertTrue(input.isEmpty());
+    input.addAll(List.of(4L, 5L));
+    assertEquals(List.of(4L, 5L), program.evaluate(Map.of("xs", input)));
+    assertTrue(input.isEmpty());
+    assertEquals(List.of(), program.evaluate(Map.of("xs", input)));
+  }
+
+  @Test
   public void arithmeticLoweringPreservesSourceResultsErrorsAndBudgets() {
     try (var context = Context.newBuilder("cel").build()) {
       context.enter();
