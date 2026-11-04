@@ -231,6 +231,34 @@ pass the native JIT/blocklist and comparison checks. The saved report includes a
 measurements, binary hashes, worker CPU models, and independently reconstructed source hashes.
 These runs do not measure the combined implementation; its full CI matrix remains separate.
 
+The combined lookup changes (`717f203`,
+[run 41743793856](https://github.com/elide-dev/trufflecel/actions/runs/41743793856)) retain
+24/24 timing and allocation wins and 14/24 RSS wins. CodSpeed reports 15.5% fewer
+comprehension instructions, 20.4% fewer two-variable-transform instructions, and 4.0% fewer
+JSON instructions relative to `31f6702`; all 14 profile totals reconcile. Native comprehension
+compilation remains a footprint gap: 69.0 MiB versus cel-java's 67.5 MiB in this full run.
+
+Avoiding argument arrays for string predicates (`5bdd9be`) reduces native policy allocation
+from 28 to 16 bytes/op. Its [paired diagnostic](benchmarks/string-predicate-diagnostic.json)
+records 68.7 MiB policy RSS for TruffleCEL versus 67.4 MiB for cel-java. This is still an
+RSS loss. Predicate recognition runs after function-name resolution, preserving qualified
+custom functions alongside unknown/error precedence and evaluation budgets. The native JIT,
+blocklist, and comparison checks pass for this change.
+
+Reusing immutable compiler declarations (`385d755`) copies the declaration map only when
+inference adds a name. A [paired native compilation diagnostic](benchmarks/declaration-reuse-diagnostic.json)
+records lower time, allocation, and fixed-work RSS for all three fixtures:
+
+| Compilation | TruffleCEL bytes/op | cel-java bytes/op | TruffleCEL peak RSS | cel-java peak RSS |
+| --- | ---: | ---: | ---: | ---: |
+| Scalar | 1,968 | 230,184 | 36.9 MiB | 66.2 MiB |
+| Policy | 3,096 | 237,856 | 46.1 MiB | 66.2 MiB |
+| Comprehension | 5,320 | 285,384 | 63.5 MiB | 66.8 MiB |
+
+This closes the comprehension compile-RSS gap in the diagnostic. Native JIT/blocklist and
+comparison checks pass; the final full-suite snapshot must verify it across execution modes.
+The measured revision includes the string-predicate change and excludes frame-storage experiments.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
