@@ -49,6 +49,7 @@ public final class Program {
     this.environment = environment;
     // Tooling receives the complete source tree, including every literal and operator event.
     if (truffleSource == null) body = body.lowerUninstrumented();
+    body.resolveBlocks(null);
     boolean hasBindings = body.hasBindings();
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
     FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;

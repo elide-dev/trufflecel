@@ -50,6 +50,21 @@ public class ConformanceTest {
 
   @Test
   public void conforms() {
+    conforms(false);
+  }
+
+  @Test
+  public void canonicalConforms() {
+    conforms(true);
+  }
+
+  private Program plan(Environment env, String source, boolean check, boolean canonical) {
+    if (!canonical) return check ? env.compile(source) : env.parse(source);
+    var parsed = CanonicalAst.parse(env, source);
+    return CanonicalAst.program(env, check ? CanonicalAst.check(env, parsed) : parsed);
+  }
+
+  private void conforms(boolean canonical) {
     Environment.Builder builder = Cel.newBuilder();
     TestObjects.register(builder);
     if (test.has("container")) builder.container(test.get("container").getAsString());
@@ -89,15 +104,12 @@ public class ConformanceTest {
     Environment env = builder.build();
     Program program;
     try {
-      program =
-          flag("disable_check")
-              ? env.parse(test.get("expr").getAsString())
-              : env.compile(test.get("expr").getAsString());
+      program = plan(env, test.get("expr").getAsString(), !flag("disable_check"), canonical);
     } catch (CelException e) {
       // Some upstream eval_error cases describe a statically invalid overload. Keep the
       // checker rejection and also execute unchecked to verify the required runtime error.
       if (error && e.code() == CelException.Code.TYPE)
-        program = env.parse(test.get("expr").getAsString());
+        program = plan(env, test.get("expr").getAsString(), false, canonical);
       else
         throw new AssertionError(
             name + " failed compilation: " + test.get("expr") + ": " + e.getMessage(), e);
