@@ -131,8 +131,8 @@ final class Values {
     if (a instanceof UInt x && b instanceof UInt y) return x.bits() == y.bits();
     if (a instanceof Double x && b instanceof Double y) return x.doubleValue() == y.doubleValue();
     if (numeric(a) && numeric(b)) {
-      if (a instanceof Double d && !Double.isFinite(d))
-        return b instanceof Double e && d.doubleValue() == e.doubleValue();
+      // Double/double equality was handled above; an integer cannot equal a non-finite double.
+      if (a instanceof Double d && !Double.isFinite(d)) return false;
       if (b instanceof Double d && !Double.isFinite(d)) return false;
       return decimal(a).compareTo(decimal(b)) == 0;
     }

@@ -230,10 +230,11 @@ suites**, with no per-case skips, pinned to cel-spec revision
 It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
 
-CI requires **98% production line coverage and 90% branch coverage**, including optional
+CI requires **99.8% production line coverage and 99.8% branch coverage**, including optional
 adapters. Additional tests cover resource limits, concurrency, interop, published TruffleData
 artifacts and Maven consumption. The core corpus uses an independent test-only protobuf
 fixture; adapter tests separately exercise the published protobuf implementation.
+See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
 Optional values, two-variable macros, and extended string/list/math/network libraries are
 covered by all cases in their pinned upstream suites. See [extension support](docs/EXTENSIONS.md)

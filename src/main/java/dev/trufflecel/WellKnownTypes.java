@@ -105,12 +105,9 @@ final class WellKnownTypes {
     CelType expected = mapped("google.protobuf." + name);
     if (!expected.equals(Values.type(value))) throw Values.overload(name);
     if (name.equals("Int32Value")
-        && value instanceof Long l
-        && (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE))
+        && ((Long) value < Integer.MIN_VALUE || (Long) value > Integer.MAX_VALUE))
       throw Values.error(CelException.Code.OVERFLOW, "int32 overflow");
-    if (name.equals("UInt32Value")
-        && value instanceof UInt u
-        && Long.compareUnsigned(u.bits(), 0xffffffffL) > 0)
+    if (name.equals("UInt32Value") && Long.compareUnsigned(((UInt) value).bits(), 0xffffffffL) > 0)
       throw Values.error(CelException.Code.OVERFLOW, "uint32 overflow");
     if (name.equals("FloatValue")) return (double) ((Double) value).floatValue();
     return value;

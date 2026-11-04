@@ -901,4 +901,66 @@ public class RuntimeTest {
     assertEquals(Set.of("x"), first.variables());
     assertThrows(CelException.class, () -> env.prepare("x + true"));
   }
+
+  @Test
+  public void unknownsMergeAcrossGenericCallsAndOptionalEntries() {
+    var x = Unknown.of("x");
+    var y = Unknown.of("y");
+    var both = new Unknown(Set.of("x", "y"));
+    for (String source :
+        List.of(
+            "'%s%s'.format([x,y])",
+            "[x,y]", "{x:1,y:2}", "{'a':x,'b':y}", "[1,2].all(i, i == 1 ? x : y)"))
+      assertEquals(source, both, Cel.compile(source).evaluate(Map.of("x", x, "y", y)));
+    for (String source :
+        List.of(
+            "optional.none().or(x)",
+            "[?x]",
+            "{?'a':x}",
+            "google.protobuf.Int64Value{?value:x}",
+            "google.protobuf.Int64Value{value:x}"))
+      assertEquals(source, x, Cel.compile(source).evaluate(Map.of("x", x)));
+    for (String source : List.of("1 != 2", "1 != 1", "1 == 1", "1 == 2"))
+      assertEquals(source.contains("!=") != source.endsWith("1"), Cel.compile(source).evaluate());
+    assertEquals(
+        CelException.Code.OVERFLOW,
+        assertThrows(
+                CelException.class,
+                () -> Cel.compile("x / y").evaluate(Map.of("x", Long.MIN_VALUE, "y", -1L)))
+            .code());
+    assertEquals(
+        1L, Cel.compile("x / y").evaluate(Map.of("x", Long.MIN_VALUE, "y", Long.MIN_VALUE)));
+    assertThrows(CelException.class, () -> Cel.compile("[1].filter(i, dyn(1))").evaluate());
+    assertThrows(
+        CelException.class,
+        () -> Cel.compile("[1].transformMapEntry(i,v,{dyn(1.0):v})").evaluate());
+    assertEquals(
+        OptionalValue.of(1L), Cel.compile("optional.none().or(optional.of(1))").evaluate());
+  }
+
+  @Test
+  public void unknownsInMultiArgumentCallsAndFilteredMappers() {
+    var x = Unknown.of("x");
+    var y = Unknown.of("y");
+    var both = new Unknown(Set.of("x", "y"));
+    for (String source :
+        List.of("x.matches(y)", "x && y", "x || y", "[1,2].map(i,true,i == 1 ? x : y)"))
+      assertEquals(source, both, Cel.compile(source).evaluate(Map.of("x", x, "y", y)));
+    assertThrows(CelException.class, () -> Cel.compile("[1].map(i,dyn(1),i)").evaluate());
+    assertEquals(List.of(1L), Cel.compile("[1].map(int,int)").evaluate());
+    assertEquals(1L, Cel.compile("size([1].transformList(i,v,v))").evaluate());
+    assertEquals(0L, Cel.compile("size([1].filter(i,false))").evaluate());
+    assertEquals(2L, Cel.compile("size([1,2].sortBy(i,-i))").evaluate());
+    var unchecked = Cel.newBuilder().build();
+    assertThrows(CelException.class, () -> unchecked.parse("size()").evaluate());
+    assertThrows(CelException.class, () -> unchecked.parse("optional.none().or()").evaluate());
+  }
+
+  @Test
+  public void extensionCallsInsideLocalsAndInvalidUncheckedDispatch() {
+    assertEquals(List.of(1L), Cel.compile("[-1].map(x, math.abs(x))").evaluate());
+    assertThrows(CelException.class, () -> Cel.compile("optional.missing()").evaluate());
+    assertThrows(
+        CelException.class, () -> Cel.newBuilder().build().parse("contains('x')").evaluate());
+  }
 }

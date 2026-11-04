@@ -152,3 +152,15 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_runtime",
     ],
 )
+
+java_test(
+    name = "boundary",
+    srcs = ["BoundaryTest.java"],
+    test_class = "dev.trufflecel.BoundaryTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)

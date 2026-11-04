@@ -2,6 +2,7 @@ package dev.trufflecel;
 
 import org.junit.Test;
 import java.util.*;
+import java.time.Instant;
 import static org.junit.Assert.*;
 
 public class ParserTest {
@@ -106,5 +107,53 @@ public class ParserTest {
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().evaluationBudget(0));
     assertTrue(Cel.compile(String.join(" && ", Collections.nCopies(32, "true"))).test());
     assertEquals(25L, Cel.compile(String.join(" + ", Collections.nCopies(25, "1"))).evaluate());
+  }
+
+  @Test
+  public void lexicalBoundariesAndTrailingSeparators() {
+    for (String source : List.of("0Xf", "0XF", "0xA", "0xa"))
+      assertEquals(source.toLowerCase().endsWith("f") ? 15L : 10L, Cel.compile(source).evaluate());
+    assertEquals(100.0, Cel.compile("1E+2").evaluate());
+    assertEquals(0.01, Cel.compile("1e-2").evaluate());
+    assertEquals(1L, Cel.compile("\r\t\n 1").evaluate());
+    assertEquals(Map.of("x", 1L), Cel.compile("{'x':1,}").evaluate());
+    assertEquals(Instant.EPOCH, Cel.compile("google.protobuf.Timestamp{seconds:0,}").evaluate());
+    assertEquals("Aaf", Cel.compile("'\\x41\\x61\\x66'").evaluate());
+    assertEquals("ABC", Cel.compile("'\\x41\\x42\\x43'").evaluate());
+    assertEquals("x", Cel.compile("_x").evaluate(Map.of("_x", "x")));
+    for (String source :
+        List.of(
+            ".",
+            "0X",
+            "1E",
+            "1E+",
+            "1.",
+            "'\\4'",
+            "'\\/'",
+            "'\\:'",
+            "'\\u'",
+            "'\\x'",
+            "'\\xG0'",
+            "'\\xg0'",
+            "'\\x/0'",
+            "'\\x:0'",
+            "'\\078'",
+            "'a\rb'",
+            "r'abc\\",
+            "(1){a:1}",
+            "[1].map(.x,x)",
+            "has()",
+            "has(1,2)",
+            "{1:2,,}",
+            "google.protobuf.Timestamp{seconds:0,,}"))
+      assertThrows(source, CelException.class, () -> Cel.compile(source));
+  }
+
+  @Test
+  public void escapeAndIdentifierEdges() {
+    assertEquals(List.of(1L), Cel.compile("[1,]").evaluate());
+    for (String source : List.of(".as", "x.`a\rb`", "'\\u", "'\\x", "'\\0aa'", "'\\0AA'"))
+      assertThrows(source, CelException.class, () -> Cel.compile(source));
+    assertThrows(CelException.class, () -> Cel.newBuilder().build().compile("{'x':1}.has('x')"));
   }
 }

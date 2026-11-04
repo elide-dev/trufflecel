@@ -179,4 +179,13 @@ public class DataIntegrationTest {
                 "r.u32 == 4294967295u && r.u64 == 18446744073709551615u && r.signed == -7 && r.record.id == 7 && r.array == [1] && r.decimal == 4")
             .test(Map.of("r", row)));
   }
+
+  @Test
+  public void unsignedValuesAreRejectedBySignedColumns() {
+    var type = new DataType("Signed", Schema.of(Field.requiredLong("value")));
+    assertEquals(
+        CelException.Code.INVALID_ARGUMENT,
+        assertThrows(CelException.class, () -> type.construct(Map.of("value", new UInt(1))))
+            .code());
+  }
 }

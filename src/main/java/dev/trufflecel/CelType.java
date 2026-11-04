@@ -64,7 +64,7 @@ public record CelType(String name, List<CelType> parameters) {
   }
 
   boolean accepts(CelType other) {
-    if (isDyn() || other.isDyn() || name.startsWith("$") || other.name.startsWith("$")) return true;
+    if (isDyn() || other.isDyn()) return true;
     if (name.equals("wrapper")) return other.equals(NULL) || unwrapped().accepts(other.unwrapped());
     if (other.name.equals("wrapper")) return accepts(other.unwrapped());
     if (!name.equals(other.name)) return false;

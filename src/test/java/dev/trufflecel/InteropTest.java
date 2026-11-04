@@ -154,4 +154,90 @@ public class InteropTest {
       else assertThrows(UnsupportedMessageException.class, () -> lib.asDouble(guest));
     }
   }
+
+  @Test
+  public void aggregateInteropRejectsNumericAndMissingElementReads() throws Exception {
+    var empty = (GuestValue) GuestValue.wrap(List.of());
+    assertFalse(empty.fitsInByte());
+    assertFalse(empty.fitsInShort());
+    assertFalse(empty.fitsInInt());
+    assertFalse(empty.fitsInLong());
+    assertFalse(empty.fitsInFloat());
+    assertFalse(empty.fitsInDouble());
+    assertThrows(UnsupportedMessageException.class, empty::asBigInteger);
+    assertFalse(empty.isMemberReadable("x"));
+    assertFalse(empty.isHashEntryReadable("x"));
+    assertThrows(UnknownKeyException.class, () -> empty.readHashValue("x"));
+    assertFalse(empty.isArrayElementReadable(0));
+    var bytes = (GuestValue) GuestValue.wrap(new Bytes(new byte[] {1}));
+    assertEquals(1, bytes.getArraySize());
+    assertFalse(bytes.isArrayElementReadable(1));
+    assertFalse(bytes.isArrayElementReadable(-1));
+    var number = (GuestValue) GuestValue.wrap(new UInt(1));
+    assertThrows(UnsupportedMessageException.class, number::getArraySize);
+    assertFalse(number.isArrayElementReadable(0));
+    var map = (GuestValue) GuestValue.wrap(Map.of(new UInt(1), "one"));
+    assertTrue(map.isHashEntryReadable(number));
+    assertEquals("one", map.readHashValue(number));
+    assertFalse(map.isHashEntryReadable(GuestValue.wrap(new UInt(2))));
+    assertThrows(UnknownKeyException.class, () -> map.readHashValue(GuestValue.wrap(new UInt(2))));
+    assertEquals(1.25, GuestValue.unwrap(1.25f, 0));
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.getBindings("cel").putMember("fraction", BigInteger.ONE.shiftLeft(64));
+      assertEquals(0x1p64, context.eval("cel", "fraction").asDouble(), 0.0);
+    }
+  }
+
+  @Test
+  public void hostInputLimitsRejectWideAndCumulativelyLargeObjects() {
+    try (Context context = Context.newBuilder("cel").build()) {
+      var bindings = context.getBindings("cel");
+      ProxyArray million =
+          new ProxyArray() {
+            public long getSize() {
+              return 1_000_000;
+            }
+
+            public Object get(long index) {
+              return 1L;
+            }
+
+            public void set(long index, Value value) {
+              throw new UnsupportedOperationException();
+            }
+          };
+      assertThrows(IllegalArgumentException.class, () -> bindings.putMember("large", million));
+      ProxyObject tooManyKeys =
+          new ProxyObject() {
+            public Object getMember(String name) {
+              throw new AssertionError("must reject key count before values");
+            }
+
+            public Object getMemberKeys() {
+              return new ProxyArray() {
+                public long getSize() {
+                  return 1_000_001;
+                }
+
+                public Object get(long index) {
+                  return "key";
+                }
+
+                public void set(long index, Value value) {
+                  throw new UnsupportedOperationException();
+                }
+              };
+            }
+
+            public boolean hasMember(String name) {
+              return true;
+            }
+
+            public void putMember(String name, Value value) {
+              throw new UnsupportedOperationException();
+            }
+          };
+      assertThrows(IllegalArgumentException.class, () -> bindings.putMember("wide", tooManyKeys));
+    }
+  }
 }
