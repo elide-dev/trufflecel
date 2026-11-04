@@ -19,7 +19,13 @@ The importer checks the source revision and fails on unknown textproto fields/ty
 allowlist, per-case skips, or expected-failure mechanism. `unknowns` is an empty upstream
 file; it contributes no cases. This includes bindings, block, encoders, sets, proto2
 extensions, and plumbing in addition to the previously enabled core and extension suites.
-The plumbing cases execute through the JVM harness; they do not imply a CEL RPC server.
+The plumbing cases execute through the JVM harness. A separate gRPC service is available at
+`//tools/conformance:server`; see `docs/INTERCHANGE.md`. Each corpus case also executes
+through canonical protobuf AST export/import, without replacing the direct frontend check.
+
+`proto/` contains unmodified syntax, checked-AST, value, evaluation and conformance-service
+schemas from the same pinned revision and license. Bazel compiles their descriptors and embeds
+them in the optional protobuf artifact. Runtime code does not load schema resources.
 
 An upstream case encoded as `eval_error` may be rejected earlier by the checker; in that
 situation the harness also parses and executes unchecked to verify the required runtime

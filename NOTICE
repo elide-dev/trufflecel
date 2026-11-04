@@ -4,9 +4,11 @@ https://github.com/elide-dev/trufflecel
 
 Available under MIT OR Apache-2.0, at your option; see LICENSE.
 
-The source repository includes CEL specification conformance data from
+The source repository includes CEL specification conformance data and protobuf schemas from
 https://github.com/cel-expr/cel-spec under Apache-2.0. Its license and provenance
 are retained in third_party/cel-spec/LICENSE and third_party/cel-spec/README.md.
-These fixtures are not included in the runtime JARs.
+The conformance fixtures are not included in runtime JARs. The optional protobuf
+JAR embeds descriptors generated from the pinned CEL schemas (Copyright Google LLC),
+under Apache-2.0. The Apache-2.0 license is included as META-INF/LICENSE-APACHE.
 
 Dependencies are distributed separately and retain their own licenses.

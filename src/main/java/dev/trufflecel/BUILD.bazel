@@ -29,8 +29,10 @@ java_library(
         "CelNull.java",
         "CelType.java",
         "Checker.java",
+        "ComprehensionNode.java",
         "DataType.java",
         "DataValues.java",
+        "EncoderFunctions.java",
         "Environment.java",
         "EvalContext.java",
         "ExprNode.java",
@@ -58,10 +60,12 @@ java_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_re2j_re2j",
         "@maven//:dev_elide_truffledata_core",
         "@maven//:org_graalvm_polyglot_polyglot",
         "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_snakeyaml_snakeyaml_engine",
     ],
 )
 
@@ -77,12 +81,17 @@ java_library(
 
 java_library(
     name = "protobuf",
-    srcs = ["ProtobufType.java"],
+    srcs = [
+        "CanonicalAst.java",
+        "ProtobufType.java",
+        "//third_party/cel-spec/proto:schema_java",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":trufflecel",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:dev_elide_truffledata_core",
         "@maven//:dev_elide_truffledata_protobuf",
+        "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )

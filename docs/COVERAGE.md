@@ -1,7 +1,7 @@
 # Coverage audit
 
 The [Codecov report](https://app.codecov.io/github/elide-dev/trufflecel) and Bazel's LCOV
-report guide tests for missed lines and partially covered conditions. All 31 owned
+report guide tests for missed lines and partially covered conditions. All 34 owned
 production sources remain measured, including the optional protobuf and JSON adapters.
 No coverage exclusions were added.
 
@@ -43,15 +43,34 @@ extension construction, defaults, presence, wire round-trips, and registration v
 | Branch hits | 3,665 / 3,669 (99.89%) |
 | CI minimum, each metric | 99.8% |
 
-All new production lines and branches are covered. The same four defensive lines and four
+At that checkpoint, all new production lines and branches were covered. The same four defensive lines and four
 invariant branch outcomes listed below remain. JVM guest-compilation checks add bindings,
 blocks, and sets, with allocation ceilings of 64, 768, and 1,536 bytes per evaluation for the
 representative expressions in `benchmarks/CompiledTest.java`. Existing ceilings are unchanged.
 Native JIT checks exercise the same operations.
 
+## Canonical interchange and remaining capability gaps
+
+The follow-up adds canonical AST import/export, arbitrary accumulator comprehensions,
+JSON/YAML and URL-safe Base64 encoders, Editions 2023/2024 and MessageSet support, and compiled
+block slots. Every pinned case now runs twice: through the direct frontend and through
+canonical AST interchange (5,542 corpus assertions). Separate tests cover untrusted AST
+validation, typed encoders, malformed wire data, limits, concurrency, cross-engine AST wire
+compatibility, real gRPC transport and publication consumers. No source exclusions were added.
+
+| Metric | Measured after capability completion |
+| --- | ---: |
+| Line hits | 4,224 / 4,231 (99.83%) |
+| Branch hits | 4,328 / 4,333 (99.88%) |
+| CI minimum, each metric | 99.8% |
+
+The gRPC host tool is tested separately from library coverage. JVM compilation/allocation
+checks include structured parsing; the Linux native JIT/blocklist gate includes those paths
+as well. The native gate cannot execute on a macOS ARM host and still requires Linux CI.
+
 ## Remaining paths
 
-Four missed lines are retained in defensive exception handlers:
+Seven missed lines remain in defensive paths:
 
 - `DataValues.from`: the checked interop exception handler for native arrays/nulls.
   TruffleData validates their representations before this conversion; arbitrary objects
@@ -59,7 +78,12 @@ Four missed lines are retained in defensive exception handlers:
 - `ProtobufType.Value.message`: the checked protobuf parse exception handler during host
   export. The wire bytes come from the validated native plan's encoder.
 
-Four uncovered branch outcomes follow existing invariants:
+- `EncoderFunctions`: the checked I/O exception handler for a JSON writer backed only by
+  an in-memory StringWriter and budget writer.
+- `CanonicalAst`: the defensive unsupported-macro rejection after handling every macro
+  produced by the parser.
+
+Five uncovered branch outcomes follow existing invariants:
 
 - `Environment.prepare`: built-in type names have already been removed from the free
   variable set before its additional built-in-name check.
@@ -67,6 +91,8 @@ Four uncovered branch outcomes follow existing invariants:
   extension exclusion cannot reject a currently supported extension.
 - `ExprNode.call`: scalar operators and string predicates are disjoint from the extension
   dispatch set; their extension exclusion remains defensive.
+- `CanonicalAst`: the unsupported-macro branch follows exhaustive handling of the parser
+  macro set.
 - `Parser.string`: `codePointAt` and the checked escape decoder already bound code points
   to the Unicode range. The surrogate rejection is exercised; the additional invalid-range
   check cannot fail for those inputs.
