@@ -606,22 +606,6 @@ public class ProtobufIntegrationTest {
           }
         };
     assertTrue(ordinary.extensions().isEmpty());
-    for (boolean editions : List.of(false, true)) {
-      var unsupported =
-          FileDescriptorProto.newBuilder()
-              .setName("unsupported.proto")
-              .setSyntax(editions ? "editions" : "proto2")
-              .addMessageType(
-                  DescriptorProto.newBuilder()
-                      .setName("Unsupported")
-                      .setOptions(MessageOptions.newBuilder().setMessageSetWireFormat(!editions)));
-      if (editions) unsupported.setEdition(Edition.EDITION_2023);
-      Descriptor root =
-          FileDescriptor.buildFrom(unsupported.build(), new FileDescriptor[] {})
-              .getMessageTypes()
-              .get(0);
-      assertThrows(IllegalArgumentException.class, () -> new ProtobufType(root, extensions, base));
-    }
     var many = FileDescriptorProto.newBuilder().setName("many.proto");
     for (int i = 0; i < 256; i++)
       many.addMessageType(DescriptorProto.newBuilder().setName("Message" + i));
@@ -630,5 +614,249 @@ public class ProtobufIntegrationTest {
             .getMessageTypes()
             .toArray(Descriptor[]::new);
     assertThrows(ContractViolation.class, () -> new ProtobufType(base, extensions, roots));
+  }
+
+  @Test
+  public void editionsPresenceAndWireRoundTrip() throws Exception {
+    var file =
+        FileDescriptor.buildFrom(
+            FileDescriptorProto.newBuilder()
+                .setName("edition.proto")
+                .setPackage("edition")
+                .setSyntax("editions")
+                .setEdition(Edition.EDITION_2023)
+                .addMessageType(
+                    DescriptorProto.newBuilder()
+                        .setName("Record")
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("explicit_value")
+                                .setNumber(1)
+                                .setType(FieldDescriptorProto.Type.TYPE_INT64))
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("implicit_value")
+                                .setNumber(2)
+                                .setType(FieldDescriptorProto.Type.TYPE_INT64)
+                                .setOptions(
+                                    FieldOptions.newBuilder()
+                                        .setFeatures(
+                                            FeatureSet.newBuilder()
+                                                .setFieldPresence(
+                                                    FeatureSet.FieldPresence.IMPLICIT)))))
+                .build(),
+            new FileDescriptor[] {});
+    var d = file.getMessageTypes().get(0);
+    var type = new ProtobufType(d);
+    var env = type.register(Cel.newBuilder()).variable("m", CelType.of(type.name())).build();
+    var message = DynamicMessage.newBuilder(d).setField(d.findFieldByNumber(1), 0L).build();
+    var input = type.snapshot(message);
+    assertEquals(message, input.message());
+    assertEquals(message, ((ProtobufType.Value) type.decode(input.toBytes())).message());
+    assertTrue(
+        env.compile("has(m.explicit_value) && !has(m.implicit_value)").test(Map.of("m", input)));
+    assertEquals(
+        message,
+        ((ProtobufType.Value) env.compile("edition.Record{explicit_value: 0}").evaluate())
+            .message());
+  }
+
+  @Test
+  public void messageSetExtensionsUseNativeStorage() throws Exception {
+    var file =
+        FileDescriptor.buildFrom(
+            FileDescriptorProto.newBuilder()
+                .setName("messageset.proto")
+                .setPackage("ms")
+                .setSyntax("proto2")
+                .addMessageType(
+                    DescriptorProto.newBuilder()
+                        .setName("Set")
+                        .setOptions(MessageOptions.newBuilder().setMessageSetWireFormat(true))
+                        .addExtensionRange(
+                            DescriptorProto.ExtensionRange.newBuilder()
+                                .setStart(4)
+                                .setEnd(536870912)))
+                .addMessageType(
+                    DescriptorProto.newBuilder()
+                        .setName("Payload")
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("name")
+                                .setNumber(1)
+                                .setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL)
+                                .setType(FieldDescriptorProto.Type.TYPE_STRING)))
+                .addExtension(
+                    FieldDescriptorProto.newBuilder()
+                        .setName("payload")
+                        .setNumber(100)
+                        .setExtendee(".ms.Set")
+                        .setTypeName(".ms.Payload")
+                        .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                        .setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL))
+                .build(),
+            new FileDescriptor[] {});
+    var root = file.getMessageTypes().get(0);
+    var payload = file.getMessageTypes().get(1);
+    var extension = file.getExtensions().get(0);
+    var type = new ProtobufType(root, List.of(extension));
+    var message =
+        DynamicMessage.newBuilder(root)
+            .setField(
+                extension,
+                DynamicMessage.newBuilder(payload)
+                    .setField(payload.getFields().get(0), "native")
+                    .build())
+            .build();
+    var value = type.snapshot(message);
+    assertEquals(message, value.message());
+    assertEquals(
+        message, ((ProtobufType.Value) type.decode(new Bytes(message.toByteArray()))).message());
+    var env = type.register(Cel.newBuilder()).variable("m", CelType.of(type.name())).build();
+    assertTrue(
+        env.compile("proto.hasExt(m, ms.payload) && proto.getExt(m, ms.payload).name == 'native'")
+            .test(Map.of("m", value)));
+    for (byte[] invalid :
+        List.of(
+            new byte[] {11, 16, 100, 26, 0},
+            new byte[] {11, 20},
+            new byte[] {11, 26, 0, 12},
+            new byte[] {11, 16, -1, -1, -1, -1, 7, 12},
+            new byte[] {11, 16, -1, -1, -1, -1, 15, 12},
+            new byte[] {12}))
+      assertThrows(CelException.class, () -> type.decode(new Bytes(invalid)));
+    assertTrue(
+        type.decode(new Bytes(new byte[] {11, 16, 100, 32, 1, 26, 0, 12}))
+            instanceof ProtobufType.Value);
+    assertTrue(
+        type.decode(new Bytes(new byte[] {11, 26, 0, 16, 100, 12})) instanceof ProtobufType.Value);
+    assertTrue(type.decode(new Bytes(new byte[] {-94, 6, 0})) instanceof ProtobufType.Value);
+    Object nativeUnknownGroup = type.input(type.plan().decode(new byte[] {11, 12}));
+    assertTrue(((ProtobufType.Value) nativeUnknownGroup).toBytes().size() > 0);
+    assertThrows(CelException.class, () -> type.decode(new Bytes(new byte[8 * 1024 * 1024 + 1])));
+    var plain = new ProtobufType(root);
+    assertEquals(
+        DynamicMessage.parseFrom(root, message.toByteArray()), plain.snapshot(message).message());
+    assertArrayEquals(message.toByteArray(), plain.snapshot(message).toBytes().toByteArray());
+  }
+
+  @Test
+  public void groupsWithScalarFieldNumbersRemainUnknown() {
+    var type = new ProtobufType(StringValue.getDescriptor());
+    var value = (ProtobufType.Value) type.decode(new Bytes(new byte[] {11, 12}));
+    assertArrayEquals(new byte[] {11, 12}, value.toBytes().toByteArray());
+    assertEquals("", type.get(value, "value"));
+  }
+
+  @Test
+  public void nativeWireRecursionRemainsBounded() throws Exception {
+    var node =
+        FileDescriptor.buildFrom(
+                FileDescriptorProto.newBuilder()
+                    .setName("recursive.proto")
+                    .addMessageType(
+                        DescriptorProto.newBuilder()
+                            .setName("Node")
+                            .addField(
+                                FieldDescriptorProto.newBuilder()
+                                    .setName("child")
+                                    .setNumber(1)
+                                    .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                    .setTypeName(".Node")))
+                    .build(),
+                new FileDescriptor[] {})
+            .getMessageTypes()
+            .get(0);
+    var type = new ProtobufType(node);
+    byte[] wire = new byte[0];
+    for (int depth = 0; depth < 102; depth++) {
+      var buffer = new java.io.ByteArrayOutputStream();
+      var output = CodedOutputStream.newInstance(buffer);
+      output.writeByteArray(1, wire);
+      output.flush();
+      wire = buffer.toByteArray();
+    }
+    Bytes bytes = new Bytes(wire);
+    assertThrows(CelException.class, () -> type.decode(bytes));
+  }
+
+  @Test
+  public void editionsPackedFieldsClosedEnumsAndDelimitedMessages() throws Exception {
+    for (Edition edition : List.of(Edition.EDITION_2023, Edition.EDITION_2024)) {
+      var file =
+          FileDescriptor.buildFrom(
+              FileDescriptorProto.newBuilder()
+                  .setName("features.proto")
+                  .setSyntax("editions")
+                  .setEdition(edition)
+                  .setPackage("features")
+                  .addEnumType(
+                      EnumDescriptorProto.newBuilder()
+                          .setName("Enum")
+                          .setOptions(
+                              EnumOptions.newBuilder()
+                                  .setFeatures(
+                                      FeatureSet.newBuilder()
+                                          .setEnumType(FeatureSet.EnumType.CLOSED)))
+                          .addValue(
+                              EnumValueDescriptorProto.newBuilder().setName("ZERO").setNumber(0)))
+                  .addMessageType(
+                      DescriptorProto.newBuilder()
+                          .setName("Inner")
+                          .addField(
+                              FieldDescriptorProto.newBuilder()
+                                  .setName("name")
+                                  .setNumber(1)
+                                  .setType(FieldDescriptorProto.Type.TYPE_STRING)))
+                  .addMessageType(
+                      DescriptorProto.newBuilder()
+                          .setName("Outer")
+                          .addField(
+                              FieldDescriptorProto.newBuilder()
+                                  .setName("inner")
+                                  .setNumber(1)
+                                  .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                  .setTypeName(".features.Inner")
+                                  .setOptions(
+                                      FieldOptions.newBuilder()
+                                          .setFeatures(
+                                              FeatureSet.newBuilder()
+                                                  .setMessageEncoding(
+                                                      FeatureSet.MessageEncoding.DELIMITED))))
+                          .addField(
+                              FieldDescriptorProto.newBuilder()
+                                  .setName("numbers")
+                                  .setNumber(2)
+                                  .setType(FieldDescriptorProto.Type.TYPE_INT64)
+                                  .setLabel(FieldDescriptorProto.Label.LABEL_REPEATED))
+                          .addField(
+                              FieldDescriptorProto.newBuilder()
+                                  .setName("enumeration")
+                                  .setNumber(3)
+                                  .setType(FieldDescriptorProto.Type.TYPE_ENUM)
+                                  .setTypeName(".features.Enum")))
+                  .build(),
+              new FileDescriptor[] {});
+      var inner = file.getMessageTypes().get(0);
+      var outer = file.getMessageTypes().get(1);
+      var type = new ProtobufType(outer);
+      Message message =
+          DynamicMessage.newBuilder(outer)
+              .setField(
+                  outer.findFieldByNumber(1),
+                  DynamicMessage.newBuilder(inner)
+                      .setField(inner.getFields().get(0), "value")
+                      .build())
+              .setField(outer.findFieldByNumber(2), List.of(1L, 2L, 3L))
+              .build();
+      ProtobufType.Value value = type.snapshot(message);
+      assertEquals(message, value.message());
+      assertEquals(
+          message, ((ProtobufType.Value) type.decode(new Bytes(message.toByteArray()))).message());
+      var env = type.register(Cel.newBuilder()).variable("m", CelType.of(type.name())).build();
+      assertTrue(
+          env.compile("m.inner.name == 'value' && m.numbers == [1,2,3] && m.enumeration == 0")
+              .test(Map.of("m", value)));
+    }
   }
 }
