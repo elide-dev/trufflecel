@@ -460,6 +460,14 @@ retains **24/24 timing and allocation wins and 9/24 RSS wins**. Native guest-JIT
 comprehensions. This run uses an AMD EPYC 7763; comparison with earlier commits on different
 runner hardware is not a controlled before/after measurement.
 
+The lexer and binding-lookup snapshot (`31f6702`,
+[run 41741898254](https://github.com/elide-dev/trufflecel/actions/runs/41741898254))
+retains **24/24 timing and allocation wins**, with **14/24 RSS wins**. Native scalar
+guest-JIT RSS is approximately 62.2 MiB versus cel-java's 68.4 MiB; image-prepared scalar
+evaluation also wins. The other additional RSS wins are JVM comprehension interpretation
+and both native scalar interpreter modes. Some differences are small: these are measured
+medians from three processes, not guarantees across machines. The runner is an AMD EPYC 7763.
+
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:
 
