@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.2.0](https://github.com/elide-dev/trufflecel/compare/v0.1.0...v0.2.0) (2026-11-04)
+
+
+### Features
+
+* **benchmarks:** compare allocation costs and fixed-work peak RSS ([a44e273](https://github.com/elide-dev/trufflecel/commit/a44e273857efd3c4437ea04389650dfa28e483a5))
+* **benchmarks:** measure interpreter execution and per-process peak RSS ([ad3fdcb](https://github.com/elide-dev/trufflecel/commit/ad3fdcbe6366425ff61dfe070754bf65340654dd))
+* compare CEL compilation and evaluation on JVM and Native Image ([c4f0f20](https://github.com/elide-dev/trufflecel/commit/c4f0f203d295ba2975b61a14df89decef3810cfa))
+* expose Truffle instrumentation and publish memory benchmarks ([76f2851](https://github.com/elide-dev/trufflecel/commit/76f28514d87494cedd10d95fa73f6fe8eed2418d))
+
+
+### Bug Fixes
+
+* **benchmarks:** exclude environment setup from image frontend timings ([f243780](https://github.com/elide-dev/trufflecel/commit/f2437800a29dd618d8b9cc597c8305d8989dd8ba))
+* **benchmarks:** initialize upstream constants for image-build ASTs ([e3df286](https://github.com/elide-dev/trufflecel/commit/e3df286ada04fe052f5ab2d6e732b0ee893bd732))
+* **benchmarks:** materialize runfiles for local timing after RBE builds ([64abff6](https://github.com/elide-dev/trufflecel/commit/64abff68e40a56993266af1c555c0a2e6e3e6f19))
+* **release:** keep Bazel module version synchronized ([d3a0c42](https://github.com/elide-dev/trufflecel/commit/d3a0c42bbb5954b32ab74905e89cddd47c92fd8e))
+* **release:** keep Maven versions out of Bazel dependency resolution ([aa7eab5](https://github.com/elide-dev/trufflecel/commit/aa7eab5801616515d79d3ec57a11c333728c11f2))
+
+
+### Performance Improvements
+
+* allocate only the collections each comprehension needs ([456e1bc](https://github.com/elide-dev/trufflecel/commit/456e1bcd67d821a192c6e4db9857672f562cd0dc))
+* avoid argument arrays for string predicates ([5bdd9be](https://github.com/elide-dev/trufflecel/commit/5bdd9be291d45cc606b94e8b353cd52c6a55139d))
+* bound compilation work for scoped evaluations ([325e7cb](https://github.com/elide-dev/trufflecel/commit/325e7cbf6fb8f76c36228088b2b46907c820adfe))
+* count comprehension results without retaining lists ([63e1139](https://github.com/elide-dev/trufflecel/commit/63e1139173f3a8d52f20c770b6f43f165e17b772))
+* eliminate eligible comprehension scope allocations ([83d8ffc](https://github.com/elide-dev/trufflecel/commit/83d8ffc85a5a49261d884c05202def0408c8e109))
+* let guest compilation eliminate evaluation contexts ([78a4c2c](https://github.com/elide-dev/trufflecel/commit/78a4c2c7bcc08e7031dcfd8f3679dffc1036afda))
+* lower constant-right integer arithmetic chains ([a44e445](https://github.com/elide-dev/trufflecel/commit/a44e445372367a8d701196dc083294f099e2521b))
+* reduce integer operator and input normalization allocations ([300a638](https://github.com/elide-dev/trufflecel/commit/300a63870744e4b4022d5afaf93e33af2577cddb))
+* reduce scalar interpreter dispatch and activation allocations ([94f39d7](https://github.com/elide-dev/trufflecel/commit/94f39d7ab00b9972a899085bf234e2c8b369a367))
+* resolve local reads to lexical scope slots ([252466e](https://github.com/elide-dev/trufflecel/commit/252466ee59d82ae0a8eb445240ad474ebd94a9a3))
+* reuse immutable compiler declarations ([385d755](https://github.com/elide-dev/trufflecel/commit/385d755a5b8c96b85d2378145aeb49d185422fe4))
+* reuse immutable scalar binding snapshots ([d415645](https://github.com/elide-dev/trufflecel/commit/d415645e4e4b699dc8650f45db2bde9bbd144eb8))
+* reuse lexer operator spellings ([ede695a](https://github.com/elide-dev/trufflecel/commit/ede695a90b28fa454cf76450f0e60a3b6119f8b4))
+* reuse owned snapshots for comprehension iteration ([75d0941](https://github.com/elide-dev/trufflecel/commit/75d09415ba2bc3c9b17cf133747cafba437ebe77))
+* **runtime:** avoid map iteration during object type dispatch ([4e9d35a](https://github.com/elide-dev/trufflecel/commit/4e9d35ae1bcf5d6185e582979d734a94ff19dfb7))
+* **runtime:** compact small activations and reuse default compiler environment ([c7b6b6a](https://github.com/elide-dev/trufflecel/commit/c7b6b6a814aa4ae6ab5643f4c59c4422287836af))
+* **runtime:** reduce field dispatch and numeric equality overhead ([cd3befb](https://github.com/elide-dev/trufflecel/commit/cd3befb985e6ebef4d9b1081cd0f7751d4f395cd))
+* **runtime:** reuse local binding slots and defer scope allocation ([b489810](https://github.com/elide-dev/trufflecel/commit/b489810b0f17cbf79688674a87a3b91761e4b474))
+* skip constructor-only adapters during runtime dispatch ([b4a0150](https://github.com/elide-dev/trufflecel/commit/b4a0150eb79126fd211c6a97ce33870093ea2389))
+* use checked identifiers for single-binding lookup ([65c9089](https://github.com/elide-dev/trufflecel/commit/65c9089d0667b032c19443e03f90327bbac11b3e))
+* validate small scalar activations without iterators ([04d83d6](https://github.com/elide-dev/trufflecel/commit/04d83d6c7f5e1a75636d5ad30e5d98e240c35568))
+
 ## [0.1.0](https://github.com/elide-dev/trufflecel/compare/v0.1.0-alpha.2...v0.1.0) (2026-11-03)
 
 
