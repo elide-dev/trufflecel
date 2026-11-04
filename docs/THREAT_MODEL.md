@@ -13,6 +13,8 @@ access. This library is not an operating-system sandbox.
 | --- | --- |
 | Malicious expressions exhaust CPU, memory or nesting | Configure source/AST/evaluation limits; preserve operation charging and depth checks. Host callbacks must enforce their own deadlines and resource limits. Use process isolation where stronger guarantees are required. |
 | Policies produce incorrect authorization results | Independent type checking, upstream conformance, regression tests and explicit error/unknown handling. Embedders must decide how errors and unknowns affect authorization. |
+| Malformed serialized ASTs or structured text bypass frontend guarantees | Canonical AST import validates ids, size and depth and rechecks checked trees against the receiving environment. JSON/YAML decoding uses data-only parsers, bounded traversal and operation charging; YAML Java object tags are rejected. |
+| Conformance RPC exposes host capabilities | The host tool binds loopback, bounds request size and executor queues, and accepts descriptor sets only through explicit host configuration. Its transport is outside the publication dependency closure. |
 | Mutable inputs or concurrent evaluations leak state | Input snapshots, per-evaluation bindings/budgets and concurrency tests; review new adapters and lazy caches for retained host objects. |
 | Native compilation changes runtime behavior | Native JIT/blocklist, allocation and compilation checks; instrumentation and boundary review. These are not substitutes for a security audit. |
 | Dependency, CI or release compromise | Pinned dependencies/actions/download digests, review, scanning, least-privilege workflows, immutable Maven versions and checksum verification. Custom dependencies still require manual advisory review. |

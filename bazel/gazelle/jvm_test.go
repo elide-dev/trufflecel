@@ -42,6 +42,7 @@ func TestOptionalAdapterBoundaries(t *testing.T) {
 	files := map[string]string{
 		"Cel.java":          "package dev.trufflecel;\nimport dev.elide.truffledata.DataLibrary;",
 		"ProtobufType.java": "package dev.trufflecel;\nimport dev.elide.truffledata.protobuf.ProtobufAdapter;",
+		"CanonicalAst.java": "package dev.trufflecel;\nimport com.google.protobuf.Message;",
 		"JsonValues.java":   "package dev.trufflecel;\nimport org.graalvm.shadowed.org.json.JSONObject;",
 	}
 	var names []string
@@ -56,6 +57,12 @@ func TestOptionalAdapterBoundaries(t *testing.T) {
 		t.Fatal("expected core and two optional adapters")
 	}
 	for _, target := range generated.Gen {
+		if target.Name() == "protobuf" {
+			want := []string{"//third_party/cel-spec/proto:schema_java", "CanonicalAst.java", "ProtobufType.java"}
+			if !reflect.DeepEqual(target.AttrStrings("srcs"), want) {
+				t.Fatalf("canonical interchange must remain in the optional protobuf artifact: %v", target.AttrStrings("srcs"))
+			}
+		}
 		if target.Name() == "trufflecel" {
 			if !reflect.DeepEqual(target.AttrStrings("srcs"), []string{"Cel.java"}) {
 				t.Fatal("optional source leaked into core")

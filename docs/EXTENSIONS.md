@@ -4,7 +4,7 @@ TruffleCEL implements the pinned upstream optional-value, two-variable comprehen
 string, list, math, network, bindings, block, set, encoder, and proto2 extension suites.
 All 2,771 cases in the pinned corpus execute, including plumbing tests. The
 independent parser, checker and Truffle evaluator handle these features directly; no CEL Java
-frontend or interpreter is used. Language extensions are available in the core JAR with no new dependencies; descriptor
+frontend or interpreter is used. Language extensions are available in the core JAR. Structured encoders use Gson streaming and SnakeYAML Engine data-only APIs; descriptor
 registration for protobuf extensions uses the optional protobuf adapter.
 
 ## Bindings and blocks
@@ -22,8 +22,9 @@ slot scopes. `cel.iterVar(depth, index)` provides synthetic local identifiers fo
 comprehensions. Both indices must be nonnegative integer literals.
 
 Block slots preserve lexical bindings even when first read inside another comprehension.
-Slot count and dependency depth are bounded by evaluation limits. The current block evaluator
-runs behind a Truffle boundary; passing conformance is not a claim of optimized block throughput.
+Slot count and dependency depth are bounded by evaluation limits. Uninstrumented slot reads resolve directly to their initializer nodes and participate in guest compilation.
+The JVM gate checks representative compilation and allocation budgets; source-backed tooling uses
+boundaries to preserve debugger frames. These gates do not claim a particular production throughput.
 
 ## Sets and encoders
 
@@ -36,7 +37,21 @@ numeric types. Comparisons consume the evaluation budget.
 `base64.encode(bytes)` produces standard padded Base64. `base64.decode(string)` accepts
 standard Base64 with or without padding, ignores CR/LF line breaks, and rejects other
 invalid characters or padding. These are
-not the URL-safe alphabet. Encoding output size is charged before allocation.
+not the URL-safe alphabet. `base64.encodeUrl` and `base64.decodeUrl` use the URL-safe
+alphabet with the same padding and CR/LF rules. Encoding output size is charged before allocation.
+
+`json.encode(value)` and `yaml.encode(value)` serialize CEL scalars, lists, maps and explicitly
+registered object fields. Bytes become standard Base64 strings; timestamps and durations become
+strings. Integers outside the exact JSON double range become decimal strings. Non-finite numbers,
+unsupported values and map keys that collide after string conversion fail explicitly.
+
+`json.parse(text[, type])` and `yaml.parse(text[, type])` return optionals. Invalid syntax or type
+mismatches produce none; resource exhaustion remains an error. Dynamic parsing preserves signed
+and unsigned integer identity before falling back to doubles. Typed parsing supports scalar types,
+bytes, timestamps, durations, typed collections and registered object fields. YAML accepts a single
+data document, rejects custom Java tags and recursive/non-scalar keys, and bounds alias use.
+Input is capped at 10 MiB, traversal uses the environment depth limit, and parsing/serialization
+consume the evaluation budget. Object field conversion uses the registered CEL field names.
 
 ## Protobuf extensions
 
@@ -108,4 +123,5 @@ by boolean macros or optional fallbacks. These limits intentionally reject resou
 expressions even when their mathematical result would otherwise be valid.
 
 The baseline is the revision in `third_party/cel-spec/REVISION`, not a claim of every CEL
-extension/version. Canonical protobuf AST interchange remains outside this implementation scope.
+extension/version. Canonical protobuf AST interchange and the standalone conformance service are described in
+[interchange and RPC](INTERCHANGE.md).
