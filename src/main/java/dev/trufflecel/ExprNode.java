@@ -2,6 +2,7 @@ package dev.trufflecel;
 
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.instrumentation.*;
 import java.util.*;
 
@@ -11,6 +12,7 @@ class ExprNode extends CelNode {
   boolean rootBody, statement;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private int localSlot = -1;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean frameLocalReads;
   @Children WriteNode[] bindings;
 
   ExprNode() {
@@ -130,17 +132,38 @@ class ExprNode extends CelNode {
     return false;
   }
 
-  void resolveLocals(ArrayList<String> locals) {
+  boolean escapesContext() {
+    if (kind == Kind.CONSTANT) return false;
+    if (kind == Kind.IDENT) return name.startsWith(".");
+    if (extensionCall || kind == Kind.SELECT || kind == Kind.OBJECT || name.equals("sortBy"))
+      return true;
+    for (ExprNode child : children) if (child.escapesContext()) return true;
+    return false;
+  }
+
+  void resolveLocals(ArrayList<String> locals, FrameDescriptor frameDescriptor) {
     if (kind == Kind.CONSTANT) return;
     if (kind == Kind.IDENT) {
       localSlot = locals.lastIndexOf(name);
+      frameLocalReads = frameDescriptor != null;
       return;
     }
     int outerSize = locals.size();
     for (int i = 0; i < children.length; i++) {
       // A comprehension's range is evaluated before its iteration variables are bound.
-      if (i == 1 && bindings != null) Collections.addAll(locals, (String[]) value);
-      children[i].resolveLocals(locals);
+      if (i == 1 && bindings != null) {
+        String[] names = (String[]) value;
+        for (int binding = 0; binding < bindings.length; binding++) {
+          int slot = locals.size();
+          if (frameDescriptor != null) {
+            if (slot == frameDescriptor.getNumberOfAuxiliarySlots())
+              frameDescriptor.findOrAddAuxiliarySlot(new Object());
+            bindings[binding].frameSlot = slot;
+          }
+          locals.add(names[binding]);
+        }
+      }
+      children[i].resolveLocals(locals, frameDescriptor);
     }
     while (locals.size() > outerSize) locals.remove(locals.size() - 1);
   }
@@ -291,7 +314,7 @@ class ExprNode extends CelNode {
       case CONSTANT -> value;
       case IDENT ->
           localSlot >= 0
-              ? ctx.getLocal(localSlot)
+              ? (frameLocalReads ? frame.getAuxiliarySlot(localSlot) : ctx.getLocal(localSlot))
               : boundaryReads ? ctx.getBoundary(name) : ctx.get(name);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
@@ -491,7 +514,7 @@ class ExprNode extends CelNode {
         if (mapped instanceof Unknown) return mapped;
         return name.equals("optMap") ? OptionalValue.of(mapped) : optional(mapped);
       } finally {
-        ctx.pop();
+        bindings[0].clear(frame, ctx);
       }
     }
     Object[] values = HostCollections.range(range);
@@ -554,7 +577,7 @@ class ExprNode extends CelNode {
         if (!name.equals("all") && !name.equals("exists")) throw e;
         error = e;
       } finally {
-        for (String ignored : variables) ctx.pop();
+        clearBindings(frame, ctx);
       }
     }
     if (unknown != null) return unknown;
@@ -567,6 +590,12 @@ class ExprNode extends CelNode {
       case "sortBy" -> ExtensionFunctions.sortBy(result, sortKeys, ctx);
       default -> HostCollections.freezeList(result);
     };
+  }
+
+  @com.oracle.truffle.api.nodes.ExplodeLoop
+  private void clearBindings(VirtualFrame frame, EvalContext ctx) {
+    for (int binding = bindings.length - 1; binding >= 0; binding--)
+      bindings[binding].clear(frame, ctx);
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop

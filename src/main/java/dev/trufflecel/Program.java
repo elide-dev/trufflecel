@@ -2,6 +2,7 @@ package dev.trufflecel;
 
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
@@ -49,8 +50,10 @@ public final class Program {
     // Tooling receives the complete source tree, including every literal and operator event.
     if (truffleSource == null) body = body.lowerArithmetic();
     boolean hasBindings = body.hasBindings();
-    if (hasBindings) body.resolveLocals(new ArrayList<>());
-    contextInArguments = truffleSource != null || hasBindings;
+    boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
+    FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;
+    if (hasBindings) body.resolveLocals(new ArrayList<>(), frameDescriptor);
+    contextInArguments = truffleSource != null || hasBindings && !frameLocals;
     if (contextInArguments)
       body.accept(
           node -> {
@@ -59,7 +62,8 @@ public final class Program {
           });
     body.rootBody = true;
     target =
-        new ExpressionRoot(body, environment, contextInArguments, language, truffleSource)
+        new ExpressionRoot(
+                body, environment, contextInArguments, language, truffleSource, frameDescriptor)
             .getCallTarget();
   }
 
@@ -114,7 +118,7 @@ public final class Program {
   }
 
   private Object[] arguments(Object binding, Object value) {
-    // Locals make the context escape; keep its construction out of guest compilation.
+    // Keep observable or escaping state outside guest compilation.
     // Source-backed programs also retain it in the frame for late-attached tooling.
     return contextInArguments
         ? new Object[] {context(environment, binding, value)}
@@ -182,8 +186,9 @@ public final class Program {
         Environment environment,
         boolean contextInArguments,
         CelLanguage language,
-        Source source) {
-      super(language);
+        Source source,
+        FrameDescriptor frameDescriptor) {
+      super(language, frameDescriptor);
       this.body = body;
       this.environment = environment;
       this.contextInArguments = contextInArguments;

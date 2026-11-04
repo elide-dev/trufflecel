@@ -55,8 +55,10 @@ operator and literal, including when instantiating a template that has already p
 optimized program, so tools continue to receive the complete sequence of source events.
 
 Expressions without local bindings or source instrumentation create evaluation state inside
-the call target, allowing guest compilation to eliminate it on eligible paths. Comprehensions
-keep their escaping state outside guest compilation to limit compilation cost. Source-backed
+the call target, allowing guest compilation to eliminate it on eligible paths. Uninstrumented
+comprehensions whose state stays in guest code reserve auxiliary frame slots for local values,
+allowing the compiler to eliminate their storage and evaluation context as well. Other
+comprehensions keep their escaping state outside guest compilation to limit compilation cost. Source-backed
 programs also keep that state in their frame arguments and retain the binding-read boundary
 used by instrumented compilation.
 Each evaluation still has independent bindings, local scopes, and a resource budget,
@@ -64,9 +66,11 @@ including reentrant evaluations from host functions.
 
 Local reads use lexical slot numbers resolved when the program is created. Range expressions
 are resolved in the enclosing scope before iteration variables are introduced; nested bindings
-and absolute global names retain their usual semantics. Runtime scopes still retain names and
-values for debugger snapshots, and local reads retain a Truffle boundary for instrumented
-frame access.
+and absolute global names retain their usual semantics. Named runtime scopes still serve
+debugger snapshots, and instrumented local reads retain a Truffle boundary for frame access.
+Auxiliary slots use one object array in the interpreter, sized for the maximum simultaneous
+bindings; they do not require primitive or tag arrays. An exploded cleanup loop lets the guest
+compiler resolve each binding node and remove unused context operations.
 
 Instrumentation wrappers and interop exports are generated at build time. Source sections,
 node metadata, and scope snapshots are created when tools request them. No runtime classpath
