@@ -126,4 +126,92 @@ public class CheckerTest {
         new CelType("tuple", List.of(CelType.INT))
             .accepts(new CelType("tuple", List.of(CelType.INT, CelType.INT))));
   }
+
+  @Test
+  public void builtinArityAndOperandBoundaries() {
+    var env = Cel.newBuilder().variable("x", CelType.DYN).build();
+    for (String source :
+        List.of(
+            "UnknownMessage{}",
+            "1.optMap(v,v)",
+            "{'x':1}.sortBy(v,v)",
+            "optional.none().value(1)",
+            "optional.none().or()",
+            "optional.none().orValue()",
+            "contains('x')",
+            "contains(1,'x')",
+            "matches('x',1)",
+            "getHours()",
+            "getHours(timestamp(0),1)",
+            "getHours(timestamp(0),'UTC',1)",
+            "timestamp(0) - 1",
+            "[1] + 1",
+            "null < 1",
+            "1 == '1'",
+            "1.reverse()",
+            "1.flatten()",
+            "[1].flatten('x')",
+            "1.distinct()",
+            "[{}].sort()",
+            "cidr('10.0.0.0/8').containsIP(1)",
+            "cidr('10.0.0.0/8').containsCIDR(1)",
+            "math.greatest(true)",
+            "math.bitNot(1,2)",
+            "math.bitAnd(1)")) {
+      assertThrows(source, CelException.class, () -> env.compile(source));
+    }
+    assertEquals(CelType.list(CelType.DYN), env.compile("[1] + ['x']").resultType());
+
+    for (String source :
+        List.of(
+            "x.optMap(v,v)",
+            "x.sortBy(v,v)",
+            "size(x)",
+            "int(x)",
+            "x == null",
+            "null == x",
+            "x < 1",
+            "1 < x",
+            "x.getHours()",
+            "duration('1s').getHours()",
+            "x.reverse()",
+            "x.flatten()",
+            "x.sort()",
+            "math.greatest(x)",
+            "math.bitNot(x)",
+            "cidr('10.0.0.0/8').containsIP(ip('10.0.0.1'))",
+            "cidr('10.0.0.0/8').containsCIDR(cidr('10.0.0.0/16'))")) {
+      assertNotNull(source, env.compile(source).resultType());
+    }
+    assertEquals(CelType.BOOL, env.compile("type(1) == int").resultType());
+    assertEquals(CelType.BOOL, env.compile("int == type(1)").resultType());
+  }
+
+  @Test
+  public void astValidationRejectsMalformedOperatorArities() {
+    var checker = new Checker(Cel.newBuilder().build(), Map.of(), true);
+    var one = new ExprNode(ExprNode.Kind.CONSTANT, "", 1L, 0);
+    var truth = new ExprNode(ExprNode.Kind.CONSTANT, "", true, 0);
+    for (String operator :
+        List.of("&&", "||", "==", "!=", "<", "<=", ">", ">=", "in", "+", "-", "*", "/", "%"))
+      assertThrows(
+          operator,
+          CelException.class,
+          () -> checker.check(new ExprNode(ExprNode.Kind.CALL, operator, false, 0, one), Map.of()));
+    assertThrows(
+        CelException.class,
+        () ->
+            checker.check(new ExprNode(ExprNode.Kind.CALL, "!", false, 0, truth, truth), Map.of()));
+    assertThrows(
+        CelException.class,
+        () -> checker.check(new ExprNode(ExprNode.Kind.CALL, "neg", false, 0), Map.of()));
+    assertEquals(
+        CelType.type(CelType.INT),
+        checker.check(new ExprNode(ExprNode.Kind.CONSTANT, "", CelType.INT, 0), Map.of()));
+    var custom =
+        Cel.newBuilder()
+            .function("f", List.of(CelType.INT), CelType.INT, args -> args.get(0))
+            .build();
+    assertEquals(CelType.INT, custom.parse("f()").resultType());
+  }
 }

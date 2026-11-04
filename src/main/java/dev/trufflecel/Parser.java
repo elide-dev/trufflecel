@@ -517,7 +517,7 @@ final class Parser {
                 yield (escape - '0') * 64 + digits(2, 8);
               }
             };
-      } else if (cp == '\\' && raw && cursor < source.length()) {
+      } else if (cp == '\\' && cursor < source.length()) {
         // A raw backslash preserves (and protects) the next character, including a quote.
         text.append('\\');
         binary.write('\\');

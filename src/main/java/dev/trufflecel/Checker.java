@@ -40,153 +40,141 @@ final class Checker {
         return CelType.type(type);
       }
     }
-    switch (n.kind) {
-      case CONSTANT:
-        return n.value instanceof CelType t ? CelType.type(t) : Values.type(n.value);
-      case IDENT:
-        if (locals.containsKey(n.name)) return locals.get(n.name);
+    return switch (n.kind) {
+      case CONSTANT -> n.value instanceof CelType t ? CelType.type(t) : Values.type(n.value);
+      case IDENT -> {
+        if (locals.containsKey(n.name)) yield locals.get(n.name);
         if (strict) throw failure(n, "undeclared reference: " + n.name);
-        return CelType.DYN;
-      case SELECT:
-      case INDEX:
-        {
-          CelType operand = check(n.children[0], locals);
-          boolean optional = Boolean.TRUE.equals(n.value) || operand.name().equals("optional_type");
-          if (operand.name().equals("optional_type")) operand = parameter(operand, 0);
-          CelType result = CelType.DYN;
-          if (n.kind == ExprNode.Kind.SELECT) {
-            if (operand.name().equals("map")) result = parameter(operand, 1);
-            else if (!operand.isDyn()) {
-              ObjectType type = env.objectTypes.get(operand.name());
-              require(
-                  n,
-                  type != null && type.fields().containsKey(n.name),
-                  "undefined field: " + n.name);
-              if (type != null) result = type.fields().getOrDefault(n.name, CelType.DYN);
-            }
-          } else {
-            CelType index = check(n.children[1], locals);
-            if (operand.name().equals("list")) {
-              require(n, CelType.INT.accepts(index), "list index must be int");
-              result = parameter(operand, 0);
-            } else if (operand.name().equals("map")) {
-              require(n, parameter(operand, 0).accepts(index), "map key type mismatch");
-              result = parameter(operand, 1);
-            } else require(n, operand.isDyn(), "cannot index " + operand);
-          }
-          return optional ? optional(result) : result;
-        }
-      case LIST:
-        {
-          CelType element = null;
-          for (ExprNode child : n.children) {
-            CelType t = entryType(child, locals);
-            element = element == null ? t : CelType.join(element, t);
-          }
-          return CelType.list(element == null ? CelType.UNBOUND : element);
-        }
-      case MAP:
-        {
-          CelType key = null, value = null;
-          for (int i = 0; i < n.children.length; i += 2) {
-            CelType k = check(n.children[i], locals), v = entryType(n.children[i + 1], locals);
+        yield CelType.DYN;
+      }
+      case SELECT, INDEX -> {
+        CelType operand = check(n.children[0], locals);
+        boolean optional = Boolean.TRUE.equals(n.value) || operand.name().equals("optional_type");
+        if (operand.name().equals("optional_type")) operand = parameter(operand, 0);
+        CelType result = CelType.DYN;
+        if (n.kind == ExprNode.Kind.SELECT) {
+          if (operand.name().equals("map")) result = parameter(operand, 1);
+          else if (!operand.isDyn()) {
+            ObjectType type = env.objectTypes.get(operand.name());
             require(
-                n,
-                k.isDyn()
-                    || Set.of(CelType.INT, CelType.UINT, CelType.BOOL, CelType.STRING).contains(k),
-                "invalid map key type: " + k);
-            key = key == null ? k : CelType.join(key, k);
-            value = value == null ? v : CelType.join(value, v);
+                n, type != null && type.fields().containsKey(n.name), "undefined field: " + n.name);
+            if (type != null) result = type.fields().getOrDefault(n.name, CelType.DYN);
           }
-          return CelType.map(
-              key == null ? CelType.UNBOUND : key, value == null ? CelType.UNBOUND : value);
+        } else {
+          CelType index = check(n.children[1], locals);
+          if (operand.name().equals("list")) {
+            require(n, CelType.INT.accepts(index), "list index must be int");
+            result = parameter(operand, 0);
+          } else if (operand.name().equals("map")) {
+            require(n, parameter(operand, 0).accepts(index), "map key type mismatch");
+            result = parameter(operand, 1);
+          } else require(n, operand.isDyn(), "cannot index " + operand);
         }
-      case OBJECT:
-        {
-          String name = env.resolve(n.name, env.objectTypes.keySet());
-          if (name == null) throw failure(n, "unknown object type: " + n.name);
-          n.name = name;
-          ObjectType type = env.objectTypes.get(name);
-          String[] fields = (String[]) n.value;
-          for (int i = 0; i < n.children.length; i++) {
-            CelType actual = entryType(n.children[i], locals),
-                expected = type.fields().get(fields[i]);
-            if (expected == null) throw failure(n, "undefined field: " + fields[i]);
-            require(
-                n,
-                expected.accepts(actual) || actual.equals(CelType.NULL),
-                "field type mismatch: " + fields[i]);
-          }
-          return WellKnownTypes.mapped(name);
+        yield optional ? optional(result) : result;
+      }
+      case LIST -> {
+        CelType element = null;
+        for (ExprNode child : n.children) {
+          CelType t = entryType(child, locals);
+          element = element == null ? t : CelType.join(element, t);
         }
-      case CONDITIONAL:
-        {
-          require(n, CelType.BOOL.accepts(check(n.children[0], locals)), "condition must be bool");
-          CelType yes = check(n.children[1], locals), no = check(n.children[2], locals);
-          return CelType.join(yes, no);
-        }
-      case MACRO:
-        {
-          if (n.name.equals("has")) {
-            check(n.children[0], locals);
-            return CelType.BOOL;
-          }
-          CelType range = check(n.children[0], locals);
-          String[] variables = (String[]) n.value;
-          var scope = new HashMap<>(locals);
-          if (n.name.equals("optMap") || n.name.equals("optFlatMap")) {
-            require(
-                n,
-                range.isDyn() || range.name().equals("optional_type"),
-                "optional receiver required");
-            scope.put(variables[0], parameter(range, 0));
-            CelType body = check(n.children[1], scope);
-            if (n.name.equals("optMap")) return optional(body);
-            require(
-                n, body.isDyn() || body.name().equals("optional_type"), "optional result required");
-            return body;
-          }
+        yield CelType.list(element == null ? CelType.UNBOUND : element);
+      }
+      case MAP -> {
+        CelType key = null, value = null;
+        for (int i = 0; i < n.children.length; i += 2) {
+          CelType k = check(n.children[i], locals), v = entryType(n.children[i + 1], locals);
           require(
               n,
-              range.isDyn() || range.name().equals("list") || range.name().equals("map"),
-              "macro range must be list or map");
-          scope.put(
-              variables[0],
-              variables.length == 2 && range.name().equals("list")
-                  ? CelType.INT
-                  : parameter(range, 0));
-          if (variables.length == 2)
-            scope.put(variables[1], parameter(range, range.name().equals("map") ? 1 : 0));
-          CelType body = check(n.children[1], scope);
-          if (n.name.equals("sortBy")) {
-            require(n, range.isDyn() || range.name().equals("list"), "sortBy requires list");
-            require(n, ExtensionFunctions.comparable(body), "sortBy key must be comparable");
-            return range;
-          }
-          if (n.name.equals("map") || n.name.startsWith("transform")) {
-            if (n.children.length == 3) {
-              require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
-              body = check(n.children[2], scope);
-            }
-            if (n.name.equals("transformMap")) return CelType.map(scope.get(variables[0]), body);
-            if (n.name.equals("transformMapEntry")) {
-              require(
-                  n,
-                  body.isDyn() || body.name().equals("map"),
-                  "transformMapEntry requires map result");
-              return body;
-            }
-            return CelType.list(body);
-          }
-          require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
-          if (n.name.equals("filter")) return CelType.list(parameter(range, 0));
-          return CelType.BOOL;
+              k.isDyn()
+                  || Set.of(CelType.INT, CelType.UINT, CelType.BOOL, CelType.STRING).contains(k),
+              "invalid map key type: " + k);
+          key = key == null ? k : CelType.join(key, k);
+          value = value == null ? v : CelType.join(value, v);
         }
-      case CALL:
-        return call(n, locals);
-      default:
-        throw new AssertionError(n.kind);
-    }
+        yield CelType.map(
+            key == null ? CelType.UNBOUND : key, value == null ? CelType.UNBOUND : value);
+      }
+      case OBJECT -> {
+        String name = env.resolve(n.name, env.objectTypes.keySet());
+        if (name == null) throw failure(n, "unknown object type: " + n.name);
+        n.name = name;
+        ObjectType type = env.objectTypes.get(name);
+        String[] fields = (String[]) n.value;
+        for (int i = 0; i < n.children.length; i++) {
+          CelType actual = entryType(n.children[i], locals),
+              expected = type.fields().get(fields[i]);
+          if (expected == null) throw failure(n, "undefined field: " + fields[i]);
+          require(
+              n,
+              expected.accepts(actual) || actual.equals(CelType.NULL),
+              "field type mismatch: " + fields[i]);
+        }
+        yield WellKnownTypes.mapped(name);
+      }
+      case CONDITIONAL -> {
+        require(n, CelType.BOOL.accepts(check(n.children[0], locals)), "condition must be bool");
+        CelType yes = check(n.children[1], locals), no = check(n.children[2], locals);
+        yield CelType.join(yes, no);
+      }
+      case MACRO -> {
+        if (n.name.equals("has")) {
+          check(n.children[0], locals);
+          yield CelType.BOOL;
+        }
+        CelType range = check(n.children[0], locals);
+        String[] variables = (String[]) n.value;
+        var scope = new HashMap<>(locals);
+        if (n.name.equals("optMap") || n.name.equals("optFlatMap")) {
+          require(
+              n,
+              range.isDyn() || range.name().equals("optional_type"),
+              "optional receiver required");
+          scope.put(variables[0], parameter(range, 0));
+          CelType body = check(n.children[1], scope);
+          if (n.name.equals("optMap")) yield optional(body);
+          require(
+              n, body.isDyn() || body.name().equals("optional_type"), "optional result required");
+          yield body;
+        }
+        require(
+            n,
+            range.isDyn() || range.name().equals("list") || range.name().equals("map"),
+            "macro range must be list or map");
+        scope.put(
+            variables[0],
+            variables.length == 2 && range.name().equals("list")
+                ? CelType.INT
+                : parameter(range, 0));
+        if (variables.length == 2)
+          scope.put(variables[1], parameter(range, range.name().equals("map") ? 1 : 0));
+        CelType body = check(n.children[1], scope);
+        if (n.name.equals("sortBy")) {
+          require(n, range.isDyn() || range.name().equals("list"), "sortBy requires list");
+          require(n, ExtensionFunctions.comparable(body), "sortBy key must be comparable");
+          yield range;
+        }
+        if (n.name.equals("map") || n.name.startsWith("transform")) {
+          if (n.children.length == 3) {
+            require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
+            body = check(n.children[2], scope);
+          }
+          if (n.name.equals("transformMap")) yield CelType.map(scope.get(variables[0]), body);
+          if (n.name.equals("transformMapEntry")) {
+            require(
+                n,
+                body.isDyn() || body.name().equals("map"),
+                "transformMapEntry requires map result");
+            yield body;
+          }
+          yield CelType.list(body);
+        }
+        require(n, CelType.BOOL.accepts(body), "macro predicate must be bool");
+        if (n.name.equals("filter")) yield CelType.list(parameter(range, 0));
+        yield CelType.BOOL;
+      }
+      case CALL -> call(n, locals);
+    };
   }
 
   private CelType call(ExprNode n, Map<String, CelType> locals) {
@@ -312,10 +300,7 @@ final class Checker {
           boolean valid =
               a.equals(b)
                   && (a.isNumeric() && (!n.name.equals("%") || !a.equals(CelType.DOUBLE))
-                      || n.name.equals("+")
-                          && (a.equals(CelType.STRING)
-                              || a.equals(CelType.BYTES)
-                              || a.name().equals("list"))
+                      || n.name.equals("+") && (a.equals(CelType.STRING) || a.equals(CelType.BYTES))
                       || (n.name.equals("+") || n.name.equals("-")) && a.equals(CelType.DURATION));
           require(n, valid, "no matching overload: " + n.name);
           return a;

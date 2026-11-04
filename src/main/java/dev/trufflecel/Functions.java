@@ -82,10 +82,10 @@ final class Functions {
   private static Object unary(String name, Object v, Environment env) {
     switch (name) {
       case "!":
-        if (v instanceof Boolean b) return !b;
+        // Boolean negation was handled by apply before crossing this boundary.
         break;
       case "neg":
-        if (v instanceof Long l) return Math.negateExact(l);
+        // Integer negation was handled by apply before crossing this boundary.
         if (v instanceof Double d) return -d;
         break;
       case "hasValue":

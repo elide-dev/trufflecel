@@ -42,7 +42,7 @@ bazel coverage //src/test/...
 bazel run //tools:coverage --config=local
 ```
 
-The coverage checker validates the LCOV source inventory and enforces 98% lines / 90%
+The coverage checker validates the LCOV source inventory and enforces 99.8% lines / 99.8%
 branches. Run it after coverage, before cleaning or rebuilding with coverage disabled.
 Its report path defaults to `bazel-out/_coverage/_coverage_report.dat`.
 

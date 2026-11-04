@@ -231,6 +231,8 @@ public class ProtobufIntegrationTest {
     var values = new LinkedHashMap<String, Object>();
     values.put("f0", java.time.Instant.ofEpochSecond(2, 3));
     values.put("f1", java.time.Duration.ofNanos(-1));
+    for (var duration : List.of(java.time.Duration.ofSeconds(-1), java.time.Duration.ofSeconds(1)))
+      assertEquals(duration, type.get(type.construct(Map.of("f1", duration)), "f1"));
     values.put("f2", Map.of("null", CelNull.INSTANCE, "n", 3L));
     values.put("f3", List.of(true, "x", new UInt(2), List.of(4L), Map.of("a", false)));
     values.put("f4", 3.5);
@@ -389,5 +391,55 @@ public class ProtobufIntegrationTest {
       assertEquals(
           CelException.Code.INVALID_ARGUMENT,
           assertThrows(CelException.class, () -> type.decode(new Bytes(wire))).code());
+  }
+
+  @Test
+  public void nullEnumsRepeatedValuesAndWrongMessageInputs() throws Exception {
+    var valueType = new ProtobufType(com.google.protobuf.Value.getDescriptor());
+    var nullValue =
+        (ProtobufType.Value) valueType.construct(Map.of("null_value", CelNull.INSTANCE));
+    assertEquals(
+        com.google.protobuf.Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build(),
+        nullValue.message());
+    var lists = new ProtobufType(ListValue.getDescriptor());
+    var list = (ProtobufType.Value) lists.construct(Map.of("values", List.of(CelNull.INSTANCE)));
+    assertEquals(
+        ListValue.newBuilder()
+            .addValues(com.google.protobuf.Value.newBuilder().setNullValue(NullValue.NULL_VALUE))
+            .build(),
+        list.message());
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor, descriptor);
+    assertEquals(
+        CelException.Code.INVALID_ARGUMENT,
+        assertThrows(CelException.class, () -> type.construct(Map.of("message", 1L))).code());
+  }
+
+  @Test
+  public void customValueSuffixIsNotAWellKnownType() throws Exception {
+    var descriptor =
+        FileDescriptor.buildFrom(
+                FileDescriptorProto.newBuilder()
+                    .setName("value.proto")
+                    .setPackage("test")
+                    .setSyntax("proto3")
+                    .addMessageType(
+                        DescriptorProto.newBuilder()
+                            .setName("CustomValue")
+                            .addField(
+                                FieldDescriptorProto.newBuilder()
+                                    .setName("child")
+                                    .setNumber(1)
+                                    .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                    .setTypeName(".test.CustomValue")))
+                    .build(),
+                new FileDescriptor[] {})
+            .findMessageTypeByName("CustomValue");
+    var type = new ProtobufType(descriptor);
+    Object empty = type.construct(Map.of());
+    assertTrue(type.accepts(type.get(empty, "child")));
+    var ordinaryEnum = new ProtobufType(descriptor());
+    assertThrows(
+        CelException.class, () -> ordinaryEnum.construct(Map.of("enum", CelNull.INSTANCE)));
   }
 }

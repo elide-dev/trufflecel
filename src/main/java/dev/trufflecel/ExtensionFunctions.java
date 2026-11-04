@@ -7,6 +7,8 @@ import java.util.*;
 
 /** CEL extension overloads; no class discovery or host method access. */
 final class ExtensionFunctions {
+  private ExtensionFunctions() {}
+
   private static final Set<String> NAMES =
       Set.of(
           "charAt",

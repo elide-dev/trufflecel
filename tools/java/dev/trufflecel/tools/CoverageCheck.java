@@ -46,7 +46,7 @@ public final class CoverageCheck {
         branchPercent,
         coveredBranches,
         branches);
-    if (linePercent < 98.0 || branchPercent < 90.0)
-      throw new IllegalStateException("Required coverage: 98% lines and 90% branches");
+    if (linePercent < 99.8 || branchPercent < 99.8)
+      throw new IllegalStateException("Required coverage: 99.8% lines and 99.8% branches");
   }
 }
