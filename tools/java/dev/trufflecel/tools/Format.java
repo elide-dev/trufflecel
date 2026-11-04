@@ -12,7 +12,13 @@ public final class Format {
     var formatter = new Formatter();
     int changed = 0;
     for (String directory :
-        List.of("src/main/java", "src/test/java", "tools/java", "tools/release", "benchmarks")) {
+        List.of(
+            "src/main/java",
+            "src/test/java",
+            "tools/java",
+            "tools/release",
+            "tools/conformance",
+            "benchmarks")) {
       try (var paths = Files.walk(root.resolve(directory))) {
         for (Path path : paths.filter(p -> p.toString().endsWith(".java")).sorted().toList()) {
           String before = Files.readString(path), after = formatter.formatSource(before);

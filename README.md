@@ -83,7 +83,7 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 | Maven coordinate | Purpose |
 | --- | --- |
 | `dev.elide:trufflecel-core` | Compiler, evaluator, Polyglot language and native TruffleData rows |
-| `dev.elide:trufflecel-protobuf` | Optional protobuf construction, ingestion and wire decoding |
+| `dev.elide:trufflecel-protobuf` | Optional protobuf construction, ingestion, wire decoding and canonical CEL AST interchange |
 | `dev.elide:trufflecel-json` | Optional Oracle Truffle JSON input conversion |
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
@@ -239,8 +239,8 @@ fixture; adapter tests separately exercise the published protobuf implementation
 See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
 The table describes the current `main` branch against the pinned corpus, not every CEL
-extension or future specification revision. ✅ means implemented; 🚧 marks a limitation or
-an unsupported capability, distinguished explicitly below.
+extension or future specification revision. ✅ means implemented; the scope column identifies
+validation evidence and execution limits.
 
 | Capability | Status | Scope and limitations |
 | --- | --- | --- |
@@ -250,18 +250,17 @@ an unsupported capability, distinguished explicitly below.
 | String, list, math, and network extensions | ✅ Implemented | All cases in their pinned suites; see [supported APIs and limits](docs/EXTENSIONS.md). |
 | Local bindings and set operations | ✅ Implemented | `cel.bind`, `sets.contains`, `sets.equivalent`, and `sets.intersects`. |
 | Lazy blocks | ✅ Implemented | `cel.block`, `cel.index`, and `cel.iterVar`; cached values/errors and isolated lexical scopes. |
-| Block optimization | 🚧 Limited | Block evaluation currently runs behind a Truffle boundary; optimized block throughput is not yet qualified. |
+| Block optimization | ✅ Implemented | Slot reads resolve to their initializer nodes; JVM guest-compilation and allocation gates cover the compiled path. Source-backed tooling retains observable boundary evaluation. |
 | Base64 encoding/decoding | ✅ Implemented | Standard alphabet, padded or unpadded decoding, and CR/LF handling. |
-| URL-safe Base64 and other encoder APIs | 🚧 Unsupported | APIs beyond the pinned encoder suite are not implemented. |
+| URL-safe Base64 and structured encoders | ✅ Implemented | `base64.encodeUrl`/`decodeUrl`, `json.encode`/`parse`, and `yaml.encode`/`parse`, including typed optional parsing and bounded data traversal. |
 | Protobuf messages and well-known types | ✅ Implemented | Proto2/proto3 fields, construction, presence, native wire decoding, and registered `Any` payloads through [TruffleData](docs/INTEGRATION.md). |
 | Proto2 extensions | ✅ Implemented | `proto.hasExt` and `proto.getExt`; descriptors must be registered explicitly. |
-| Protobuf Editions and MessageSet | 🚧 Unsupported | Not supported by the protobuf bridge. |
-| Unknown values | 🚧 Limited | Unknown propagation is implemented and unit-tested; upstream's `unknowns` file contains zero cases and provides no conformance evidence. |
-| Canonical protobuf AST interchange | 🚧 Unsupported | No serialization/import of CEL's canonical protobuf AST. |
-| CEL conformance RPC service | 🚧 Unsupported | Plumbing cases run through the JVM harness; no standalone conformance server is provided. |
+| Protobuf Editions and MessageSet | ✅ Implemented | Resolved edition presence, packing and enum features feed native plans; explicitly registered MessageSet payloads and unknown payloads round-trip through native storage. |
+| Unknown values | ✅ Implemented | Propagation, error precedence and short-circuiting have regression coverage, including AST and RPC paths. Upstream's empty `unknowns` file provides no additional conformance evidence. |
+| Canonical protobuf AST interchange | ✅ Implemented | `CanonicalAst` exports/imports `ParsedExpr` and `CheckedExpr`; all pinned cases also run through interchange, with cross-engine wire tests. |
+| CEL conformance RPC service | ✅ Implemented | Standalone gRPC Parse/Check/Eval service, with explicit descriptor registration, bounded requests and loopback transport tests; see [interchange and RPC](docs/INTERCHANGE.md). |
 | JVM embedding and Truffle tooling | ✅ Implemented | Thin JARs, Polyglot integration, node instrumentation, profiling/coverage tags, and debugger scopes. |
 | Native Image guest compilation | ✅ Tested | Native JIT/blocklist checks and representative compiled-operation tests run in CI. |
-| Production Elide embedding | 🚧 Limited | End-to-end integration and production size, allocation, and JIT performance qualification remain. |
 
 Resource limits intentionally bound expression size/depth, evaluation work, and collection or
 string expansion. See [extension support](docs/EXTENSIONS.md), [integration](docs/INTEGRATION.md),

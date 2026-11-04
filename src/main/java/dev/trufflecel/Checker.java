@@ -15,6 +15,12 @@ final class Checker {
   }
 
   CelType check(ExprNode n, Map<String, CelType> locals) {
+    CelType result = checkNode(n, locals);
+    n.checkedType = result;
+    return result;
+  }
+
+  private CelType checkNode(ExprNode n, Map<String, CelType> locals) {
     String qualified = n.qualifiedName();
     if (qualified != null && !locals.containsKey(qualified.split("\\.")[0])) {
       String name = env.resolve(qualified, declarations.keySet());
@@ -42,6 +48,31 @@ final class Checker {
       }
     }
     return switch (n.kind) {
+      case COMPREHENSION -> {
+        String[] names = (String[]) n.value;
+        CelType range = check(n.children[0], locals);
+        require(
+            n,
+            range.isDyn() || range.name().equals("list") || range.name().equals("map"),
+            "invalid comprehension range");
+        CelType init = check(n.children[1], locals);
+        var scope = new HashMap<>(locals);
+        scope.put(names[0], init);
+        scope.put(
+            names[1],
+            !names[2].isEmpty() && range.name().equals("list") ? CelType.INT : parameter(range, 0));
+        if (!names[2].isEmpty())
+          scope.put(names[2], parameter(range, range.name().equals("map") ? 1 : 0));
+        require(
+            n,
+            CelType.BOOL.accepts(check(n.children[2], scope)),
+            "comprehension condition must be bool");
+        CelType step = check(n.children[3], scope);
+        require(n, init.accepts(step), "comprehension accumulator type mismatch");
+        var resultScope = new HashMap<>(locals);
+        resultScope.put(names[0], CelType.join(init, step));
+        yield check(n.children[4], resultScope);
+      }
       case BLOCK_INDEX -> {
         int index = Math.toIntExact((Long) n.value);
         if (blockTypes == null || index >= blockTypes.size())
@@ -266,6 +297,9 @@ final class Checker {
           return CelType.join(parameter(a, 0), b);
         }
         return parameter(a, 0);
+      case "@not_strictly_false":
+        require(n, count == 1, "invalid condition helper");
+        return CelType.BOOL;
       case "&&", "||":
         require(
             n,
