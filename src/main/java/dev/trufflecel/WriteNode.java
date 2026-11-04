@@ -8,6 +8,7 @@ import java.util.Map;
 @GenerateWrapper
 class WriteNode extends CelNode {
   private final String name;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal int frameSlot = -1;
 
   WriteNode() {
     this("", 0, 0);
@@ -20,8 +21,14 @@ class WriteNode extends CelNode {
   }
 
   Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
-    ctx.push(name, value);
+    if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, value);
+    else ctx.push(name, value);
     return value;
+  }
+
+  void clear(VirtualFrame frame, EvalContext ctx) {
+    if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, null);
+    else ctx.pop();
   }
 
   @GenerateWrapper.OutgoingConverter

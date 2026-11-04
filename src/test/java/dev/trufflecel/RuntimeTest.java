@@ -117,6 +117,31 @@ public class RuntimeTest {
   }
 
   @Test
+  public void frameLocalsSurviveReentrantEvaluationAndNestedRanges() {
+    Program[] current = new Program[1];
+    var environment =
+        Cel.newBuilder()
+            .variable("n", CelType.INT)
+            .evaluationBudget(20)
+            .function(
+                "recur",
+                List.of(CelType.INT),
+                CelType.INT,
+                args -> current[0].evaluate(Map.of("n", args.get(0))))
+            .build();
+    var prepared = environment.prepare("n == 0 ? 0 : [n].map(x, recur(x - 1) + x)[0]");
+    current[0] = prepared.instantiate();
+    assertEquals(55L, current[0].evaluate(Map.of("n", 10L)));
+    assertEquals(6L, current[0].evaluate(Map.of("n", 3L)));
+    assertEquals(
+        List.of(List.of(2L, 3L), List.of(4L, 5L)),
+        Cel.compile("[1,2].map(x, [x,x+1].map(y,y+x))").evaluate());
+    assertEquals(
+        List.of(List.of(10L, 20L), List.of(10L, 20L)),
+        Cel.compile("[1,2].map(x, [10,20].map(x,x))").evaluate());
+  }
+
+  @Test
   public void deepScopesRestoreShadowedAndAbsoluteBindings() {
     String nested = "x == 6 && .x == 99";
     for (int i = 6; i >= 1; i--) nested = "[" + i + "].all(x, " + nested + ") && x == " + (i - 1);
