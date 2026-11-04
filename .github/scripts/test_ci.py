@@ -41,6 +41,9 @@ class ReleaseTest(unittest.TestCase):
         config = json.loads((ROOT / 'release-please-config.json').read_text())['packages']['.']
         self.assertEqual(config['release-type'], 'simple')
         self.assertFalse(config['include-component-in-tag'])
+        self.assertIn('MODULE.bazel', config['extra-files'])
+        module_version = re.search(r'module\(name = "trufflecel", version = "([^"]+)"', (ROOT / 'MODULE.bazel').read_text()).group(1)
+        self.assertEqual((ROOT / 'VERSION').read_text().strip(), module_version)
 
     def test_workflow_pins_and_credentials(self):
         for path in (ROOT / '.github/workflows').glob('*.yml'):
