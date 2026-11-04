@@ -251,6 +251,13 @@ instructions relative to `717f203`; the remaining cases change by at most 1.0%. 
 reconcile. These existing cases do not isolate the string-predicate path, so the paired policy
 measurements remain the direct evidence for its allocation reduction.
 
+The completed paired suite for `5bdd9be` retains 24/24 timing and allocation wins and
+records 17/24 fixed-work RSS wins on an AMD EPYC 9V45 runner. The README charts use this
+full snapshot. Remaining RSS losses are native comprehension compilation, JVM and native
+guest-JIT comprehension evaluation, native comprehension interpretation, and image-build
+policy evaluation. Runner hardware differs from the earlier full runs, so the win counts
+describe paired comparisons within each run, not a controlled measurement of revision gains.
+
 Reusing immutable compiler declarations (`385d755`) copies the declaration map only when
 inference adds a name. A [paired native compilation diagnostic](benchmarks/declaration-reuse-diagnostic.json)
 records lower time, allocation, and fixed-work RSS for all three fixtures:
@@ -264,6 +271,9 @@ records lower time, allocation, and fixed-work RSS for all three fixtures:
 This closes the comprehension compile-RSS gap in the diagnostic. Native JIT/blocklist and
 comparison checks pass; the final full-suite snapshot must verify it across execution modes.
 The measured revision includes the string-predicate change and excludes frame-storage experiments.
+Its [CodSpeed run](https://github.com/elide-dev/trufflecel/actions/runs/41747068746)
+records 0.9% fewer compile/evaluate instructions relative to `5bdd9be`; all 14 totals
+reconcile and the other cases change by less than 0.9%.
 
 Auxiliary frame locals and exploded binding cleanup (`83d8ffc`) let guest compilation
 eliminate scope storage for eligible comprehensions. Source-backed programs retain named
