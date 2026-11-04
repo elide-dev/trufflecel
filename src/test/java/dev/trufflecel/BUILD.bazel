@@ -11,6 +11,7 @@ java_test(
     deps = [
         ":test_support",
         "//:trufflecel",
+        "//:trufflecel-protobuf",
         "@maven//:com_google_code_gson_gson",
         "@maven//:junit_junit",
     ],
@@ -162,5 +163,29 @@ java_test(
         "//:trufflecel",
         "@maven//:junit_junit",
         "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "canonicalAst",
+    srcs = ["CanonicalAstTest.java"],
+    test_class = "dev.trufflecel.CanonicalAstTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "encoder",
+    srcs = ["EncoderTest.java"],
+    test_class = "dev.trufflecel.EncoderTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
     ],
 )
