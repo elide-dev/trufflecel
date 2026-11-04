@@ -10,8 +10,8 @@ and `//benchmarks:jit_smoke`, which builds with Truffle blocklist checks enabled
 actual native guest compilation.
 
 Jobs use Ubuntu 24.04, commit-pinned actions, StepSecurity harden-runner in audit mode,
-explicit permissions, timeouts and non-persistent checkout credentials. Only CodSpeed
-measurement gets OIDC permission; only Release Please gets repository/PR write permission and permission to dispatch checks.
+explicit permissions, timeouts and non-persistent checkout credentials. Codecov reporting and CodSpeed
+measurement get OIDC permission; only Release Please gets repository/PR write permission and permission to dispatch checks.
 The publisher has read-only GitHub access and scoped R2 credentials in its upload step.
 
 ## Repository provisioning
@@ -22,6 +22,7 @@ Provide these existing organization conventions to `elide-dev/trufflecel`:
 | --- | --- |
 | `BUILDBUDDY_API_KEY` or `BUILDBUDDY_APIKEY` | RBE and cache; without it CI explicitly builds on the hosted Linux runner |
 | `CLOUDFLARE_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Publishing to the `elide-maven` R2 bucket |
+| `CODECOV_TOKEN` (optional) / Codecov GitHub integration | JVM LCOV and JVM/native JIT test reporting; uses OIDC when no token is provided |
 | CodSpeed GitHub integration | Enable `elide-dev/trufflecel`; uploads use GitHub OIDC, without a stored CodSpeed token |
 
 Release Please uses the built-in `GITHUB_TOKEN`, with Contents, Pull requests and Actions
@@ -60,3 +61,17 @@ Release Please may have created a GitHub release before a Maven upload failure; 
 status and preserved staging artifacts are the evidence of publication success.
 
 See [Publishing](PUBLISHING.md) for local staging and the uploader's integrity checks.
+
+## Codecov reporting
+
+The Bazel jobs upload production JVM LCOV coverage and JUnit test results to Codecov,
+using the same pinned action and token/OIDC authentication as TruffleData. Reports use
+`jvm` and `native-jit` flags. JVM test results are preserved before the coverage invocation
+changes Bazel's test-log symlinks; failure details are retained and uploaded even when tests
+fail. LCOV source paths are validated against the checkout before upload.
+
+Uploads run on main, manual runs, and same-repository PRs; fork PRs retain reports as
+GitHub artifacts without uploading to Codecov. Upload errors fail CI. The existing local
+coverage threshold remains enforced independently. Enable this repository in Codecov and
+allow its GitHub OIDC identity, or provide `CODECOV_TOKEN` through repository/organization
+secrets. Reports are also retained under `build/reports/` in the existing CI artifacts.
