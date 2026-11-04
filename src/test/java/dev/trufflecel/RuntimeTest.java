@@ -208,6 +208,23 @@ public class RuntimeTest {
   }
 
   @Test
+  public void inferredDeclarationsDoNotMutateSharedCompilerConfiguration() {
+    var builder = Cel.newBuilder().variable("base", CelType.INT).inferVariables(true);
+    var environment = builder.build();
+    builder.variable("later", CelType.STRING);
+    var declared = environment.prepare("base + 1").instantiate();
+    var first = environment.compile("base + first");
+    var second = environment.prepare("base + second").instantiate();
+    assertEquals(Set.of("base"), declared.variables());
+    assertEquals(Set.of("base", "first"), first.variables());
+    assertEquals(Set.of("base", "second"), second.variables());
+    assertEquals(Set.of("base"), environment.compile("base").variables());
+    assertEquals(3L, first.evaluate(Map.of("base", 1L, "first", 2L)));
+    assertEquals(4L, second.evaluate(Map.of("base", 1L, "second", 3L)));
+    assertThrows(UnsupportedOperationException.class, () -> declared.variables().add("extra"));
+  }
+
+  @Test
   public void singleEntryInputsWorkWithLargerDeclarationEnvironments() {
     var environment =
         Cel.newBuilder()
