@@ -189,8 +189,9 @@ retains 14.1% fewer comprehension instructions and 12.6% fewer two-variable-tran
 instructions relative to `d415645`. Scalar instructions increase 4.5%, short-circuit
 instructions increase 2.6%, and compile/evaluate increases 1.0%; these are tradeoffs, not
 universal improvements. All 14 profile totals reconcile for both runs. Separate native
-diagnostics place comprehension peak RSS near 120 MiB after the change; a full paired
-suite is needed to qualify the resulting footprint across execution modes.
+diagnostics place comprehension peak RSS near 120 MiB after the change. The complete paired
+suite confirms approximately 119.8 MiB and retains 24/24 timing and allocation wins, with
+9/24 RSS wins, on an AMD EPYC 7763 runner.
 
 Using a checked identifier as a single-binding lookup hint (`65c9089`) avoids allocating
 map-entry iterators when an environment declares more variables than the activation supplies.
@@ -430,6 +431,13 @@ snapshots closes the two JVM policy allocation gaps, with mutable host inputs st
 before evaluation. Fixed-work RSS is lower in **9/24** comparisons; native guest-JIT process
 memory remains higher. This run uses an Intel Xeon Platinum 8370C. The engine comparisons
 are paired within this run; absolute timings across different runner CPUs are not controlled.
+
+The context-placement snapshot (`325e7cb`,
+[run 41740534860](https://github.com/elide-dev/trufflecel/actions/runs/41740534860))
+retains **24/24 timing and allocation wins and 9/24 RSS wins**. Native guest-JIT RSS is
+87.2 MiB for scalar evaluation, 108.7 MiB for policy evaluation, and 119.8 MiB for
+comprehensions. This run uses an AMD EPYC 7763; comparison with earlier commits on different
+runner hardware is not a controlled before/after measurement.
 
 The README snapshot is checked in as [raw JSON](benchmarks/comparison.json) and a
 [standalone SVG](images/cel-comparison.svg). To regenerate that chart from its saved samples:

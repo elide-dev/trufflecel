@@ -190,7 +190,7 @@ checked ASTs embedded at image build time.
 
 </details>
 
-Captured November 3, 2026 on a shared Intel Xeon Platinum 8370C CI runner. Lower is better; bars show
+Captured November 3, 2026 on a shared AMD EPYC 7763 CI runner. Lower is better; bars show
 medians across three fresh processes, with minimum/maximum whiskers. TruffleCEL has lower
 median time in **all 24 comparisons**, lower allocation in **all 24**, and lower
 fixed-work peak RSS in **9 of 24**. Native guest JIT retains a substantial process-memory
@@ -204,7 +204,7 @@ including calibration, warmup, and guest compilation. Timing excludes setup and 
 compilation. Both native engines share one benchmark binary, so RSS does not represent
 standalone deployment footprints. Image-build preparation embeds checked ASTs, not guest
 machine code. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41733144626), and
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41740534860), and
 [methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
 
 The [first allocation snapshot](docs/benchmarks/comparison-allocation-baseline-v3.json) is
