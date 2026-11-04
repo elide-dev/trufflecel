@@ -34,7 +34,7 @@ and hash entries are copied into CEL values. No Java methods are exposed to expr
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.3.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.4.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.24` Elide GraalVM artifacts.
 No sibling checkout or local Maven cache is required.
 
@@ -119,7 +119,11 @@ extension wire numbers and fully qualified names. Binary ingestion, construction
 presence, repeated extensions, and nested message extensions use native rows. Host message
 snapshots with extensions enter through the native binary parser; host export uses an
 explicit protobuf extension registry. No classpath scanning or reflection is added.
-Editions and MessageSet remain unsupported. Custom adapters can expose registered extensions
+Resolved Protobuf Editions features (including presence, required fields, packing and enum
+openness) are compiled into native field plans. MessageSet wire items are normalized to native
+extension fields on ingestion and restored on export, including unregistered payloads. The
+bridge applies this normalization through nested messages; direct `plan()` access exposes
+the normalized native wire format for MessageSet types. Custom adapters can expose registered extensions
 through `ObjectType.extensions()`, with access implemented by their existing `get`/`has` methods.
 
 The 2,771-case complete conformance suite retains its independent test-only `ProtoSchema` oracle. Separate
