@@ -290,6 +290,20 @@ and tightened allocation gates. Production coverage is 98.63% of lines and 92.87
 branches. Reentrant evaluation, nested ranges, shadowed bindings, and instrumented scopes
 remain covered.
 
+Counting the final comprehension result (`63e1139`) avoids retaining a list consumed only
+by `size()`. The [native diagnostic](benchmarks/comprehension-count-diagnostic.json) records
+196 bytes/op for guest-JIT comprehension evaluation versus cel-java's 648, and 284 bytes/op
+for interpretation versus 648. Paired median times are lower in all nine native comparisons.
+Comprehension RSS remains higher: 117.4 MiB versus 66.3 MiB under guest JIT, and 69.4 MiB
+versus 66.2 MiB under interpretation. Compilation retains lower paired RSS for all fixtures.
+The 108-process report predates the subsequent reuse of owned input snapshots during iteration.
+
+Internal iteration can also reuse normalized list storage instead of cloning it. Public array
+conversion still returns a copy, and host mutation cannot alter the evaluation snapshot.
+With both changes, the JVM allocation gate records 104 bytes/evaluation for `all` and
+256 for filter/map/size, with limits of 160 and 320 respectively. All 21 JVM targets pass;
+production coverage is 98.64% of lines and 93.04% of branches.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
@@ -310,8 +324,8 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
 fails rather than skips. Scalar, logical, conditional, and addition fixtures are capped at
-64 bytes/op; optional evaluation and `all` at 192; list construction at 320; filter/map and
-maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
+64 bytes/op; `all` at 160; optional evaluation at 192; list construction and filter/map at
+320; maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
 at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
 
