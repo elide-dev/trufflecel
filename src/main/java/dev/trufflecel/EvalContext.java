@@ -65,6 +65,11 @@ final class EvalContext {
     return rootBinding(name);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  Object getLocal(int slot) {
+    return scopes[slot * 2 + 1];
+  }
+
   private Object rootBinding(String name) {
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value =
