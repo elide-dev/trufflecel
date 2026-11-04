@@ -537,6 +537,50 @@ public class RuntimeTest {
   }
 
   @Test
+  public void stringPredicatesPreserveUnknownsErrorsAndBudgets() {
+    for (String name : List.of("contains", "startsWith", "endsWith")) {
+      var environment =
+          Cel.newBuilder().variable("x", CelType.DYN).variable("y", CelType.DYN).build();
+      String expression = "x." + name + "(y)";
+      Program program = environment.compile(expression);
+      assertTrue(program.test(Map.of("x", "λ🙂", "y", "")));
+      assertFalse(program.test(Map.of("x", "λ🙂", "y", "missing")));
+      assertEquals(
+          new Unknown(Set.of("x", "y")),
+          program.evaluate(Map.of("x", Unknown.of("x"), "y", Unknown.of("y"))));
+      assertEquals(
+          Unknown.of("x"),
+          environment.compile("x." + name + "(dyn(1 / 0))").evaluate(Map.of("x", Unknown.of("x"))));
+      assertEquals(
+          Unknown.of("y"),
+          environment.compile("dyn(1 / 0)." + name + "(y)").evaluate(Map.of("y", Unknown.of("y"))));
+      assertEquals(
+          CelException.Code.NO_OVERLOAD,
+          assertThrows(CelException.class, () -> program.evaluate(Map.of("x", 1L, "y", 2L)))
+              .code());
+      var custom =
+          Cel.newBuilder()
+              .container("custom")
+              .function(
+                  "custom." + name,
+                  List.of(CelType.INT, CelType.INT),
+                  CelType.INT,
+                  args -> (Long) args.get(0) + (Long) args.get(1))
+              .build();
+      assertEquals(3L, custom.compile(name + "(1,2)").evaluate());
+      assertEquals(3L, custom.compile("custom." + name + "(1,2)").evaluate());
+      var limited =
+          Cel.newBuilder().inferVariables(true).evaluationBudget(2).build().compile(expression);
+      assertEquals(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(
+                  CelException.class,
+                  () -> limited.evaluate(Map.of("x", Unknown.of("x"), "y", Unknown.of("y"))))
+              .code());
+    }
+  }
+
+  @Test
   public void errorAndUnknownTruthTables() {
     assertEquals(Unknown.of("x"), Cel.compile("(1/0) + x").evaluate(Map.of("x", Unknown.of("x"))));
     for (int budget : new int[] {1, 2}) {
