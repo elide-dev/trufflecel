@@ -4,7 +4,7 @@ module(name = "trufflecel")
 bazel_dep(name = "rules_java", version = "9.9.0")
 bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_shell", version = "0.8.0")
-bazel_dep(name = "rules_jvm_external", version = "7.1")
+bazel_dep(name = "rules_jvm_external", version = "7.2")
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
@@ -47,14 +47,14 @@ maven.install(
 )
 use_repo(maven, "cel_java")
 
-bazel_dep(name = "gazelle", version = "0.47.0", dev_dependency = True)
-bazel_dep(name = "rules_go", version = "0.59.0", dev_dependency = True)
-bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "gazelle", version = "0.54.0", dev_dependency = True)
+bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
+bazel_dep(name = "platforms", version = "1.1.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
-go_sdk.download(version = "1.25.3")
+go_sdk.download(version = "1.26.7")
 
-bazel_dep(name = "rules_cc", version = "0.2.26")
+bazel_dep(name = "rules_cc", version = "0.2.27")
 register_toolchains("//bazel/platforms:cc_toolchain")
 
 # Pinned GraalVM JVM/Native Image toolchains for compilation gates and benchmarks.
