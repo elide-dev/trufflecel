@@ -11,11 +11,19 @@ final class ExtensionFunctions {
 
   private static final Set<String> NAMES =
       Set.of(
+          "@sortByAssociatedKeys",
+          "cel.@mapInsert",
           "sets.contains",
           "sets.equivalent",
           "sets.intersects",
           "base64.encode",
           "base64.decode",
+          "base64.encodeUrl",
+          "base64.decodeUrl",
+          "json.encode",
+          "json.parse",
+          "yaml.encode",
+          "yaml.parse",
           "charAt",
           "indexOf",
           "lastIndexOf",
@@ -102,15 +110,34 @@ final class ExtensionFunctions {
         cidr = CelType.of("net.CIDR");
     boolean ok;
     switch (name) {
+      case "@sortByAssociatedKeys":
+        ok = matches(t, list, list) && comparable(p(t.get(1), 0));
+        result = a;
+        break;
+      case "cel.@mapInsert":
+        ok =
+            matches(t, CelType.map(CelType.DYN, CelType.DYN), CelType.map(CelType.DYN, CelType.DYN))
+                || t.size() == 3 && CelType.map(CelType.DYN, CelType.DYN).accepts(a);
+        result = a;
+        break;
       case "sets.contains", "sets.equivalent", "sets.intersects":
         ok = matches(t, list, list);
         result = CelType.BOOL;
         break;
-      case "base64.encode":
+      case "json.encode", "yaml.encode":
+        ok = t.size() == 1;
+        result = str;
+        break;
+      case "json.parse", "yaml.parse":
+        ok = matches(t, str) || matches(t, str, CelType.TYPE);
+        result =
+            new CelType("optional_type", List.of(t.size() == 2 ? p(t.get(1), 0) : CelType.DYN));
+        break;
+      case "base64.encode", "base64.encodeUrl":
         ok = matches(t, CelType.BYTES);
         result = str;
         break;
-      case "base64.decode":
+      case "base64.decode", "base64.decodeUrl":
         ok = matches(t, str);
         result = CelType.BYTES;
         break;
@@ -253,8 +280,20 @@ final class ExtensionFunctions {
       check(name, Arrays.stream(args).map(Values::type).toList(), true, -1);
       if (name.startsWith("math.")) return math(name.substring(5), args, ctx);
       if (NetworkValue.supports(name)) return NetworkValue.apply(name, args);
+      if (name.startsWith("json.") || name.startsWith("yaml."))
+        return EncoderFunctions.apply(name, args, ctx);
       Object a = args[0];
       switch (name) {
+        case "@sortByAssociatedKeys":
+          if (((List<?>) a).size() != ((List<?>) args[1]).size())
+            throw new IllegalArgumentException("Sort key count differs from list size");
+          return sortBy(new ArrayList<>((List<?>) a), new ArrayList<>((List<?>) args[1]), ctx);
+        case "cel.@mapInsert":
+          var merged = HostCollections.<Object>map();
+          HostCollections.mergeEntries(merged, (Map<?, ?>) a);
+          HostCollections.mergeEntries(
+              merged, args.length == 2 ? (Map<?, ?>) args[1] : Map.of(args[1], args[2]));
+          return HostCollections.freezeMap(merged);
         case "sets.contains":
           return containsAll((List<?>) a, (List<?>) args[1], ctx);
         case "sets.equivalent":
@@ -264,13 +303,15 @@ final class ExtensionFunctions {
           for (Object item : (List<?>) args[1])
             if (setContains((List<?>) a, item, ctx)) return true;
           return false;
-        case "base64.encode":
+        case "base64.encode", "base64.encodeUrl":
           Bytes bytes = (Bytes) a;
           ctx.charge(4L * ((bytes.size() + 2L) / 3));
-          return Base64.getEncoder().encodeToString(bytes.toByteArray());
-        case "base64.decode":
+          return (name.equals("base64.encodeUrl") ? Base64.getUrlEncoder() : Base64.getEncoder())
+              .encodeToString(bytes.toByteArray());
+        case "base64.decode", "base64.decodeUrl":
           return new Bytes(
-              Base64.getDecoder().decode(((String) a).replace("\r", "").replace("\n", "")));
+              (name.equals("base64.decodeUrl") ? Base64.getUrlDecoder() : Base64.getDecoder())
+                  .decode(((String) a).replace("\r", "").replace("\n", "")));
         case "lists.range":
           {
             long count = (Long) a;
