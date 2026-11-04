@@ -8,8 +8,7 @@
       "prerelease": false,
       "versioning": "default",
       "bump-minor-pre-major": true,
-      "changelog-path": "CHANGELOG.md",
-      "extra-files": ["MODULE.bazel"]
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }

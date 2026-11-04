@@ -1,4 +1,5 @@
-module(name = "trufflecel", version = "0.2.0")  # x-release-please-version
+# Maven release versions come from VERSION; this root module is not published to a Bazel registry.
+module(name = "trufflecel")
 
 bazel_dep(name = "rules_java", version = "9.9.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")

@@ -40,10 +40,12 @@ branch protection. Those administrative settings must be provisioned on GitHub/C
 ## Version and publishing contract
 
 `VERSION` and `.release-please-manifest.json` record the latest release. Conventional
-commits produce stable release PRs, updating VERSION, the manifest, CHANGELOG and Bazel
-module version together. Before 1.0, feature commits advance the minor version. All three Maven
+commits produce stable release PRs, updating VERSION, the manifest and CHANGELOG together.
+Before 1.0, feature commits advance the minor version. All three Maven
 artifacts share the resulting version. Bazel's default publication version is a development
 snapshot; the release workflow always supplies the exact version explicitly.
+The Bazel root module is unversioned because it is not published to a Bazel registry;
+Maven release bumps therefore leave the dependency lockfile unchanged.
 
 The publisher checks out `v<version>`, verifies both version files, verifies that HEAD is
 that tag's commit, and verifies that the commit belongs to main before using R2 credentials.
