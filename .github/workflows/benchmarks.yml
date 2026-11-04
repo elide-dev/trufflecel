@@ -37,7 +37,7 @@ jobs:
       - name: Native correctness smoke
         run: python3 tools/bench/bench.py smoke
       - name: Measure all 14 cases
-        uses: CodSpeedHQ/action@373d6868929f444bc08d901fd0eb0ad52a8875ea # v5.2.1; shared with Komodo
+        uses: CodSpeedHQ/action@61efe07e57e55bedeab750c434504de272a56e8c # v5.2.1; shared with Komodo
         with:
           mode: simulation
           runner-version: '5.2.1'
