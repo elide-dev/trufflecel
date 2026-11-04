@@ -10,194 +10,194 @@
 <rect x="32" y="128" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="155" class="panel">JVM · Compile + create program</text>
 <text x="48" y="180" class="label">scalar</text>
-<rect x="177" y="169" width="98.06" height="14" fill="#ef8d40"/>
-<path d="M275.02,176 H278.08" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="181" class="small">174.5 MiB</text>
-<rect x="177" y="191" width="237.86" height="14" fill="#28618b"/>
-<path d="M405.11,198 H415.97" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="203" class="small">423.3 MiB</text>
+<rect x="177" y="169" width="112.92" height="14" fill="#ef8d40"/>
+<path d="M289.54,176 H290.42" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="181" class="small">174.8 MiB</text>
+<rect x="177" y="191" width="265.31" height="14" fill="#28618b"/>
+<path d="M437.01,198 H444.94" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="203" class="small">410.7 MiB</text>
 <text x="48" y="241" class="label">policy</text>
-<rect x="177" y="230" width="99.54" height="14" fill="#ef8d40"/>
-<path d="M275.75,237 H276.56" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="242" class="small">177.1 MiB</text>
-<rect x="177" y="252" width="232.79" height="14" fill="#28618b"/>
-<path d="M405.92,259 H414.05" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="264" class="small">414.3 MiB</text>
+<rect x="177" y="230" width="113.07" height="14" fill="#ef8d40"/>
+<path d="M289.33,237 H290.91" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="242" class="small">175.0 MiB</text>
+<rect x="177" y="252" width="264.79" height="14" fill="#28618b"/>
+<path d="M439.64,259 H442.44" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="264" class="small">409.9 MiB</text>
 <text x="48" y="302" class="label">comprehension</text>
-<rect x="177" y="291" width="122.42" height="14" fill="#ef8d40"/>
-<path d="M299.20,298 H299.77" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="303" class="small">217.9 MiB</text>
-<rect x="177" y="313" width="232.76" height="14" fill="#28618b"/>
-<path d="M408.64,320 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="325" class="small">414.2 MiB</text>
+<rect x="177" y="291" width="141.71" height="14" fill="#ef8d40"/>
+<path d="M317.73,298 H319.94" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="303" class="small">219.3 MiB</text>
+<rect x="177" y="313" width="266.71" height="14" fill="#28618b"/>
+<path d="M443.40,320 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="325" class="small">412.8 MiB</text>
 <rect x="616" y="128" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="155" class="panel">SVM · Compile + create program</text>
 <text x="632" y="180" class="label">scalar</text>
-<rect x="761" y="169" width="169.80" height="14" fill="#ef8d40"/>
-<path d="M930.69,176 H931.18" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="181" class="small">43.5 MiB</text>
-<rect x="761" y="191" width="260.75" height="14" fill="#28618b"/>
-<path d="M1021.75,198 H1021.75" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="203" class="small">66.8 MiB</text>
+<rect x="761" y="169" width="170.92" height="14" fill="#ef8d40"/>
+<path d="M931.56,176 H932.30" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="181" class="small">43.7 MiB</text>
+<rect x="761" y="191" width="260.78" height="14" fill="#28618b"/>
+<path d="M1021.78,198 H1021.78" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="203" class="small">66.7 MiB</text>
 <text x="632" y="241" class="label">policy</text>
-<rect x="761" y="230" width="214.24" height="14" fill="#ef8d40"/>
-<path d="M975.12,237 H975.73" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="242" class="small">54.9 MiB</text>
-<rect x="761" y="252" width="261.69" height="14" fill="#28618b"/>
-<path d="M1022.23,259 H1022.73" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="264" class="small">67.0 MiB</text>
+<rect x="761" y="230" width="216.19" height="14" fill="#ef8d40"/>
+<path d="M977.00,237 H978.01" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="242" class="small">55.3 MiB</text>
+<rect x="761" y="252" width="262.39" height="14" fill="#28618b"/>
+<path d="M1023.24,259 H1023.74" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="264" class="small">67.1 MiB</text>
 <text x="632" y="302" class="label">comprehension</text>
-<rect x="761" y="291" width="269.76" height="14" fill="#ef8d40"/>
-<path d="M1030.51,298 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="303" class="small">69.1 MiB</text>
-<rect x="761" y="313" width="263.20" height="14" fill="#28618b"/>
-<path d="M1023.60,320 H1024.47" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="325" class="small">67.4 MiB</text>
+<rect x="761" y="291" width="269.98" height="14" fill="#ef8d40"/>
+<path d="M1030.95,298 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="303" class="small">69.0 MiB</text>
+<rect x="761" y="313" width="263.23" height="14" fill="#28618b"/>
+<path d="M1023.65,320 H1024.24" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="325" class="small">67.3 MiB</text>
 <rect x="32" y="386" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="413" class="panel">JVM · Evaluate · runtime-compiled AST</text>
 <text x="48" y="438" class="label">scalar</text>
-<rect x="177" y="427" width="161.49" height="14" fill="#ef8d40"/>
-<path d="M333.97,434 H340.02" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="439" class="small">200.9 MiB</text>
-<rect x="177" y="449" width="188.47" height="14" fill="#28618b"/>
-<path d="M364.26,456 H367.74" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="461" class="small">234.5 MiB</text>
+<rect x="177" y="427" width="148.66" height="14" fill="#ef8d40"/>
+<path d="M324.93,434 H325.73" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="439" class="small">184.5 MiB</text>
+<rect x="177" y="449" width="187.34" height="14" fill="#28618b"/>
+<path d="M363.48,456 H364.70" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="461" class="small">232.5 MiB</text>
 <text x="48" y="499" class="label">policy</text>
-<rect x="177" y="488" width="172.13" height="14" fill="#ef8d40"/>
-<path d="M348.27,495 H350.38" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="500" class="small">214.2 MiB</text>
-<rect x="177" y="510" width="196.44" height="14" fill="#28618b"/>
-<path d="M372.76,517 H375.99" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="522" class="small">244.4 MiB</text>
+<rect x="177" y="488" width="162.81" height="14" fill="#ef8d40"/>
+<path d="M336.64,495 H340.58" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="500" class="small">202.0 MiB</text>
+<rect x="177" y="510" width="196.12" height="14" fill="#28618b"/>
+<path d="M372.80,517 H373.48" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="522" class="small">243.4 MiB</text>
 <text x="48" y="560" class="label">comprehension</text>
-<rect x="177" y="549" width="268.57" height="14" fill="#ef8d40"/>
-<path d="M443.97,556 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="561" class="small">334.2 MiB</text>
-<rect x="177" y="571" width="224.85" height="14" fill="#28618b"/>
-<path d="M401.57,578 H401.94" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="583" class="small">279.8 MiB</text>
+<rect x="177" y="549" width="269.70" height="14" fill="#ef8d40"/>
+<path d="M446.69,556 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="561" class="small">334.7 MiB</text>
+<rect x="177" y="571" width="225.40" height="14" fill="#28618b"/>
+<path d="M402.25,578 H405.68" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="583" class="small">279.7 MiB</text>
 <rect x="616" y="386" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="413" class="panel">SVM · Evaluate · runtime-compiled AST</text>
 <text x="632" y="438" class="label">scalar</text>
-<rect x="761" y="427" width="227.20" height="14" fill="#ef8d40"/>
-<path d="M988.01,434 H988.29" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="439" class="small">100.2 MiB</text>
-<rect x="761" y="449" width="156.19" height="14" fill="#28618b"/>
-<path d="M916.90,456 H917.19" stroke="#243746" stroke-width="2"/>
+<rect x="761" y="427" width="196.26" height="14" fill="#ef8d40"/>
+<path d="M957.26,434 H957.26" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="439" class="small">87.2 MiB</text>
+<rect x="761" y="449" width="155.04" height="14" fill="#28618b"/>
+<path d="M915.76,456 H916.07" stroke="#243746" stroke-width="2"/>
 <text x="1039.00" y="461" class="small">68.9 MiB</text>
 <text x="632" y="499" class="label">policy</text>
-<rect x="761" y="488" width="236.22" height="14" fill="#ef8d40"/>
-<path d="M997.17,495 H997.25" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="500" class="small">104.2 MiB</text>
-<rect x="761" y="510" width="152.28" height="14" fill="#28618b"/>
-<path d="M912.98,517 H913.28" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="522" class="small">67.2 MiB</text>
+<rect x="761" y="488" width="244.60" height="14" fill="#ef8d40"/>
+<path d="M1005.18,495 H1005.68" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="500" class="small">108.7 MiB</text>
+<rect x="761" y="510" width="150.57" height="14" fill="#28618b"/>
+<path d="M911.31,517 H911.83" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="522" class="small">66.9 MiB</text>
 <text x="632" y="560" class="label">comprehension</text>
-<rect x="761" y="549" width="269.38" height="14" fill="#ef8d40"/>
-<path d="M1030.18,556 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="561" class="small">118.8 MiB</text>
-<rect x="761" y="571" width="152.18" height="14" fill="#28618b"/>
-<path d="M913.14,578 H913.20" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="583" class="small">67.1 MiB</text>
+<rect x="761" y="549" width="269.70" height="14" fill="#ef8d40"/>
+<path d="M1030.60,556 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="561" class="small">119.8 MiB</text>
+<rect x="761" y="571" width="150.68" height="14" fill="#28618b"/>
+<path d="M911.56,578 H911.90" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="583" class="small">66.9 MiB</text>
 <rect x="32" y="644" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="671" class="panel">SVM · Evaluate · image-build checked AST</text>
 <text x="48" y="696" class="label">scalar</text>
-<rect x="177" y="685" width="227.17" height="14" fill="#ef8d40"/>
-<path d="M404.16,692 H404.18" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="697" class="small">100.1 MiB</text>
-<rect x="177" y="707" width="149.73" height="14" fill="#28618b"/>
-<path d="M326.48,714 H326.77" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="719" class="small">66.0 MiB</text>
+<rect x="177" y="685" width="196.34" height="14" fill="#ef8d40"/>
+<path d="M373.27,692 H373.53" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="697" class="small">87.1 MiB</text>
+<rect x="177" y="707" width="148.23" height="14" fill="#28618b"/>
+<path d="M325.19,714 H325.45" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="719" class="small">65.7 MiB</text>
 <text x="48" y="757" class="label">policy</text>
-<rect x="177" y="746" width="236.18" height="14" fill="#ef8d40"/>
-<path d="M412.93,753 H413.31" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="758" class="small">104.1 MiB</text>
-<rect x="177" y="768" width="145.06" height="14" fill="#28618b"/>
-<path d="M321.97,775 H322.36" stroke="#243746" stroke-width="2"/>
+<rect x="177" y="746" width="244.58" height="14" fill="#ef8d40"/>
+<path d="M421.54,753 H421.72" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="758" class="small">108.5 MiB</text>
+<rect x="177" y="768" width="144.00" height="14" fill="#28618b"/>
+<path d="M320.99,775 H321.09" stroke="#243746" stroke-width="2"/>
 <text x="455.00" y="780" class="small">63.9 MiB</text>
 <text x="48" y="818" class="label">comprehension</text>
-<rect x="177" y="807" width="269.93" height="14" fill="#ef8d40"/>
-<path d="M446.63,814 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="819" class="small">119.0 MiB</text>
-<rect x="177" y="829" width="144.56" height="14" fill="#28618b"/>
-<path d="M321.34,836 H321.64" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="841" class="small">63.7 MiB</text>
+<rect x="177" y="807" width="269.95" height="14" fill="#ef8d40"/>
+<path d="M446.28,814 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="819" class="small">119.7 MiB</text>
+<rect x="177" y="829" width="143.11" height="14" fill="#28618b"/>
+<path d="M319.42,836 H320.20" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="841" class="small">63.5 MiB</text>
 <rect x="616" y="644" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="671" class="panel">JVM · Interpret · runtime-compiled AST</text>
 <text x="632" y="696" class="label">scalar</text>
-<rect x="761" y="685" width="163.61" height="14" fill="#ef8d40"/>
-<path d="M923.70,692 H925.01" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="697" class="small">173.6 MiB</text>
-<rect x="761" y="707" width="218.39" height="14" fill="#28618b"/>
-<path d="M978.90,714 H980.22" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="719" class="small">231.7 MiB</text>
+<rect x="761" y="685" width="149.58" height="14" fill="#ef8d40"/>
+<path d="M910.31,692 H911.33" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="697" class="small">157.9 MiB</text>
+<rect x="761" y="707" width="218.23" height="14" fill="#28618b"/>
+<path d="M977.94,714 H979.88" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="719" class="small">230.4 MiB</text>
 <text x="632" y="757" class="label">policy</text>
-<rect x="761" y="746" width="183.64" height="14" fill="#ef8d40"/>
-<path d="M943.44,753 H945.76" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="758" class="small">194.8 MiB</text>
-<rect x="761" y="768" width="230.93" height="14" fill="#28618b"/>
-<path d="M991.47,775 H993.71" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="780" class="small">245.0 MiB</text>
+<rect x="761" y="746" width="184.33" height="14" fill="#ef8d40"/>
+<path d="M944.89,753 H946.23" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="758" class="small">194.6 MiB</text>
+<rect x="761" y="768" width="232.20" height="14" fill="#28618b"/>
+<path d="M991.66,775 H996.15" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="780" class="small">245.2 MiB</text>
 <text x="632" y="818" class="label">comprehension</text>
-<rect x="761" y="807" width="269.37" height="14" fill="#ef8d40"/>
-<path d="M1028.97,814 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="819" class="small">285.8 MiB</text>
-<rect x="761" y="829" width="264.30" height="14" fill="#28618b"/>
-<path d="M1025.11,836 H1025.98" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="841" class="small">280.4 MiB</text>
+<rect x="761" y="807" width="269.66" height="14" fill="#ef8d40"/>
+<path d="M1029.74,814 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="819" class="small">284.7 MiB</text>
+<rect x="761" y="829" width="265.63" height="14" fill="#28618b"/>
+<path d="M1025.65,836 H1028.76" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="841" class="small">280.5 MiB</text>
 <rect x="32" y="902" width="552" height="242" rx="10" fill="white"/>
 <text x="48" y="929" class="panel">SVM · Interpret · runtime-compiled AST</text>
 <text x="48" y="954" class="label">scalar</text>
-<rect x="177" y="943" width="265.74" height="14" fill="#ef8d40"/>
-<path d="M442.66,950 H443.33" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="955" class="small">68.9 MiB</text>
-<rect x="177" y="965" width="265.63" height="14" fill="#28618b"/>
-<path d="M442.62,972 H442.72" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="977" class="small">68.9 MiB</text>
+<rect x="177" y="943" width="266.31" height="14" fill="#ef8d40"/>
+<path d="M443.07,950 H443.36" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="955" class="small">69.1 MiB</text>
+<rect x="177" y="965" width="264.70" height="14" fill="#28618b"/>
+<path d="M441.30,972 H441.87" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="977" class="small">68.7 MiB</text>
 <text x="48" y="1015" class="label">policy</text>
 <rect x="177" y="1004" width="269.97" height="14" fill="#ef8d40"/>
-<path d="M446.56,1011 H447.00" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="1016" class="small">70.0 MiB</text>
-<rect x="177" y="1026" width="258.72" height="14" fill="#28618b"/>
-<path d="M435.71,1033 H435.93" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="1038" class="small">67.1 MiB</text>
+<path d="M446.70,1011 H447.00" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1016" class="small">70.1 MiB</text>
+<rect x="177" y="1026" width="257.27" height="14" fill="#28618b"/>
+<path d="M433.86,1033 H434.65" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1038" class="small">66.8 MiB</text>
 <text x="48" y="1076" class="label">comprehension</text>
-<rect x="177" y="1065" width="262.71" height="14" fill="#ef8d40"/>
-<path d="M439.25,1072 H439.73" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="1077" class="small">68.2 MiB</text>
-<rect x="177" y="1087" width="257.96" height="14" fill="#28618b"/>
-<path d="M434.82,1094 H435.30" stroke="#243746" stroke-width="2"/>
-<text x="455.00" y="1099" class="small">66.9 MiB</text>
+<rect x="177" y="1065" width="263.44" height="14" fill="#ef8d40"/>
+<path d="M440.12,1072 H440.45" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1077" class="small">68.4 MiB</text>
+<rect x="177" y="1087" width="258.20" height="14" fill="#28618b"/>
+<path d="M435.02,1094 H435.22" stroke="#243746" stroke-width="2"/>
+<text x="455.00" y="1099" class="small">67.0 MiB</text>
 <rect x="616" y="902" width="552" height="242" rx="10" fill="white"/>
 <text x="632" y="929" class="panel">SVM · Interpret · image-build checked AST</text>
 <text x="632" y="954" class="label">scalar</text>
-<rect x="761" y="943" width="266.25" height="14" fill="#ef8d40"/>
-<path d="M1027.23,950 H1028.03" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="955" class="small">68.8 MiB</text>
-<rect x="761" y="965" width="256.11" height="14" fill="#28618b"/>
-<path d="M1016.51,972 H1017.11" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="977" class="small">66.1 MiB</text>
+<rect x="761" y="943" width="265.84" height="14" fill="#ef8d40"/>
+<path d="M1026.84,950 H1027.32" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="955" class="small">68.9 MiB</text>
+<rect x="761" y="965" width="254.34" height="14" fill="#28618b"/>
+<path d="M1015.08,972 H1015.35" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="977" class="small">66.0 MiB</text>
 <text x="632" y="1015" class="label">policy</text>
-<rect x="761" y="1004" width="269.61" height="14" fill="#ef8d40"/>
-<path d="M1030.56,1011 H1031.00" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="1016" class="small">69.6 MiB</text>
-<rect x="761" y="1026" width="247.57" height="14" fill="#28618b"/>
-<path d="M1008.47,1033 H1009.02" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="1038" class="small">63.9 MiB</text>
+<rect x="761" y="1004" width="269.98" height="14" fill="#ef8d40"/>
+<path d="M1030.92,1011 H1031.00" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1016" class="small">70.0 MiB</text>
+<rect x="761" y="1026" width="246.70" height="14" fill="#28618b"/>
+<path d="M1007.64,1033 H1007.73" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1038" class="small">64.0 MiB</text>
 <text x="632" y="1076" class="label">comprehension</text>
-<rect x="761" y="1065" width="262.77" height="14" fill="#ef8d40"/>
-<path d="M1023.75,1072 H1024.25" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="1077" class="small">67.9 MiB</text>
-<rect x="761" y="1087" width="245.21" height="14" fill="#28618b"/>
-<path d="M1006.19,1094 H1006.39" stroke="#243746" stroke-width="2"/>
-<text x="1039.00" y="1099" class="small">63.3 MiB</text>
+<rect x="761" y="1065" width="261.34" height="14" fill="#ef8d40"/>
+<path d="M1021.90,1072 H1022.38" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1077" class="small">67.8 MiB</text>
+<rect x="761" y="1087" width="243.76" height="14" fill="#28618b"/>
+<path d="M1004.76,1094 H1005.24" stroke="#243746" stroke-width="2"/>
+<text x="1039.00" y="1099" class="small">63.2 MiB</text>
 <text x="32" y="1184" class="label">3 fresh processes per cell; min/max process whiskers.</text>
 <text x="616" y="1184" class="label">Linear scale within each panel; not confidence intervals.</text>
 <text x="32" y="1207" class="label">Interpret: guest JIT disabled; host JVM JIT / native AOT allowed.</text>
 <text x="616" y="1207" class="label">SVM embeds checked ASTs, not guest machine code.</text>
 <text x="32" y="1230" class="label">Memory: 8,192 compiles or 524,288 evaluations, plus setup.</text>
 <text x="616" y="1230" class="label">One engine executes per process; common native image.</text>
-<text x="32" y="1284" class="small">Captured 2026-11-03T22:58:22.815917+00:00 · source d415645e4e4b · GraalVM 25.5.5-elide.23</text>
-<text x="32" y="1306" class="small">Linux x86_64 · Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz</text>
+<text x="32" y="1284" class="small">Captured 2026-11-03T23:45:36.656467+00:00 · source 325e7cbf6fb8 · GraalVM 25.5.5-elide.23</text>
+<text x="32" y="1306" class="small">Linux x86_64 · AMD EPYC 7763 64-Core Processor</text>
 <text x="32" y="1328" class="small">Shared CI hardware: diagnostic results for these fixtures, not a performance guarantee. Raw samples accompany this SVG.</text>
 </svg>
