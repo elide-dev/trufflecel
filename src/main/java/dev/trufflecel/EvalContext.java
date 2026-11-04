@@ -10,6 +10,20 @@ final class EvalContext {
   private Object[] scopes;
   private int scopeSize;
   private long remaining;
+  private EvalContext budgetParent;
+  ExprNode.BlockScope block;
+
+  EvalContext fork() {
+    EvalContext copy =
+        singleName == null
+            ? new EvalContext(environment, activationMap())
+            : new EvalContext(environment, singleName, activation);
+    copy.scopes = scopes == null ? null : scopes.clone();
+    copy.scopeSize = scopeSize;
+    copy.budgetParent = budgetParent == null ? this : budgetParent;
+    copy.block = block;
+    return copy;
+  }
 
   EvalContext(Environment environment, Map<String, Object> activation) {
     this.environment = environment;
@@ -44,9 +58,10 @@ final class EvalContext {
   }
 
   void charge(long cost) {
-    if (cost < 0 || cost > remaining)
+    EvalContext owner = budgetParent == null ? this : budgetParent;
+    if (cost < 0 || cost > owner.remaining)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "evaluation budget exceeded");
-    remaining -= cost;
+    owner.remaining -= cost;
   }
 
   // Scoped reads remain opaque to avoid expanding dynamic scope walks in each compiled loop.

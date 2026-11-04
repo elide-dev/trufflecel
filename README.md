@@ -86,11 +86,12 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 | `dev.elide:trufflecel-json` | Optional Oracle Truffle JSON input conversion |
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
-does not pull in protobuf, JSON, JDBC drivers or test libraries. The runtime baseline is
-**Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.3.0`**.
+does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
+**Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.4.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
-for available versions:
+for available versions. The example below uses released TruffleCEL `0.3.0`, whose POM pins
+TruffleData `0.3.0`; the `0.4.0` dependency upgrade and newly added conformance suites are on `main`:
 
 ```kotlin
 repositories {
@@ -224,8 +225,8 @@ described in [CI setup](docs/CI.md). Existing versions are immutable.
 
 ## Compatibility and scope
 
-The conformance suite runs **2,587 cases across 20 upstream core CEL suites and six extension
-suites**, with no per-case skips, pinned to cel-spec revision
+The conformance suite runs **all 2,771 cases across the 32 files in the upstream CEL corpus**, with no
+suite exclusions or per-case skips, pinned to cel-spec revision
 [`21ec6f4`](https://github.com/cel-expr/cel-spec/tree/21ec6f4e52e8d694687ff9ed7408d3eccbb955d7).
 It checks values, errors, namespaces, declarations, macros and inferred types.
 [Corpus provenance](third_party/cel-spec/README.md).
@@ -239,8 +240,7 @@ See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining def
 Optional values, two-variable macros, and extended string/list/math/network libraries are
 covered by all cases in their pinned upstream suites. See [extension support](docs/EXTENSIONS.md)
 for APIs, semantics and limits. This does not certify every CEL extension or future revision:
-binding/block/set/encoder extensions, canonical protobuf AST serialization, and a proto2
-extension registry are not yet provided. Elide Native Image embedding and production size,
+canonical protobuf AST serialization is not yet provided. Elide Native Image embedding and production size,
 allocation, and JIT performance budgets still need qualification.
 
 ## Reference shelf
@@ -249,7 +249,7 @@ allocation, and JIT performance budgets still need qualification.
 | --- | --- |
 | [CEL specification](https://github.com/cel-expr/cel-spec) | Upstream language specification, schemas, and conformance tests |
 | [CEL language definition](https://github.com/cel-expr/cel-spec/blob/master/doc/langdef.md) | Syntax, types, evaluation, and standard functions |
-| [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, selected suites, and reproducible import |
+| [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, complete corpus, and reproducible import |
 | [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
 | [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
 | [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |

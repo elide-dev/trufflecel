@@ -1,9 +1,51 @@
 # CEL extension support
 
 TruffleCEL implements the pinned upstream optional-value, two-variable comprehension,
-string, list, math and network suites. These add 682 cases to the 1,905 core cases. The
+string, list, math, network, bindings, block, set, encoder, and proto2 extension suites.
+All 2,771 cases in the pinned corpus execute, including plumbing tests. The
 independent parser, checker and Truffle evaluator handle these features directly; no CEL Java
-frontend or interpreter is used. They are available in the core JAR with no new dependencies.
+frontend or interpreter is used. Language extensions are available in the core JAR with no new dependencies; descriptor
+registration for protobuf extensions uses the optional protobuf adapter.
+
+## Bindings and blocks
+
+`cel.bind(name, initializer, result)` binds a local variable within the result expression.
+Bindings may nest and shadow outer variables; the initializer sees the outer scope.
+TruffleCEL evaluates the initializer once before the result. Local writes and reads remain
+visible to Truffle instrumentation.
+
+`cel.block([slot0, slot1, ...], result)` memoizes lazily evaluated slots for one evaluation.
+`cel.index(n)` reads a slot; a slot initializer may only reference earlier slots, and the
+result may reference any slot. Unused slots are not evaluated. Values and errors are cached
+per invocation, without leaking between evaluations or threads. Nested blocks have separate
+slot scopes. `cel.iterVar(depth, index)` provides synthetic local identifiers for optimized
+comprehensions. Both indices must be nonnegative integer literals.
+
+Block slots preserve lexical bindings even when first read inside another comprehension.
+Slot count and dependency depth are bounded by evaluation limits. The current block evaluator
+runs behind a Truffle boundary; passing conformance is not a claim of optimized block throughput.
+
+## Sets and encoders
+
+`sets.contains(a, b)` tests whether every element of `b` occurs in `a`;
+`sets.equivalent(a, b)` checks containment in both directions;
+`sets.intersects(a, b)` checks for any common element. Arguments are lists. Ordering and
+duplicates do not affect the answer, and comparisons use CEL equality, including mixed
+numeric types. Comparisons consume the evaluation budget.
+
+`base64.encode(bytes)` produces standard padded Base64. `base64.decode(string)` accepts
+standard Base64 with or without padding, ignores CR/LF line breaks, and rejects other
+invalid characters or padding. These are
+not the URL-safe alphabet. Encoding output size is charged before allocation.
+
+## Protobuf extensions
+
+`proto.hasExt(message, extension.name)` tests presence and
+`proto.getExt(message, extension.name)` reads a registered extension, including its protobuf
+default when absent. The second argument is an identifier, not a string or computed value.
+Names resolve using the environment container; a leading dot selects an absolute name.
+Extensions must be explicitly registered for the receiving message type. See
+[protobuf integration](INTEGRATION.md) for the native TruffleData adapter.
 
 ## Optional values
 
@@ -66,5 +108,4 @@ by boolean macros or optional fallbacks. These limits intentionally reject resou
 expressions even when their mathematical result would otherwise be valid.
 
 The baseline is the revision in `third_party/cel-spec/REVISION`, not a claim of every CEL
-extension/version. Bindings, block, set and encoder suites, canonical protobuf AST interchange,
-and proto2 extension registration remain outside this implementation scope.
+extension/version. Canonical protobuf AST interchange remains outside this implementation scope.

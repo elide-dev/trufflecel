@@ -11,6 +11,11 @@ public interface ObjectType {
 
   Map<String, CelType> fields();
 
+  /** Explicitly registered protobuf extensions, keyed by their full names. */
+  default Map<String, CelType> extensions() {
+    return Map.of();
+  }
+
   Object construct(Map<String, Object> fields);
 
   Object get(Object value, String field);

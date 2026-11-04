@@ -209,6 +209,16 @@ public final class ProtoSchema {
     }
 
     @Override
+    public Map<String, CelType> extensions() {
+      var result = new LinkedHashMap<String, CelType>();
+      fields.forEach(
+          (name, type) -> {
+            if (name.contains(".")) result.put(name, type);
+          });
+      return Map.copyOf(result);
+    }
+
+    @Override
     public Object construct(Map<String, Object> fields) {
       var normalized = new LinkedHashMap<String, Object>();
       for (var e : fields.entrySet()) {

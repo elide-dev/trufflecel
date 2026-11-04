@@ -199,4 +199,159 @@ public class ExtensionsTest {
     invalid("cidr('1.2.3.0/24').containsCIDR('example.com')");
     yes("!isIP('123456789012345678901234567890123456789012345678901234567890')");
   }
+
+  @Test
+  public void setsAndBase64ValidationAndBudgets() {
+    yes("sets.equivalent([1,1,2u], [2.0,1])");
+    yes("sets.contains([[1], {'a': 2}], [{'a': 2u}, [1.0]])");
+    yes("!sets.intersects([1], [])");
+    yes("base64.encode(b'') == '' && base64.decode('') == b''");
+    yes("base64.decode('aG\\r\\nVsbG8=') == b'hello'");
+    for (String expr :
+        List.of(
+            "sets.contains(1, [])",
+            "sets.equivalent([], 1)",
+            "sets.intersects([], [], [])",
+            "base64.encode('x')",
+            "base64.decode(b'x')")) {
+      assertThrows(CelException.class, () -> Cel.compile(expr));
+      invalid(expr);
+    }
+    for (String text : List.of("!", "a", "aGVsbG8===", "aG Vs", "_-=="))
+      invalid("base64.decode('" + text + "')");
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    Cel.newBuilder()
+                        .evaluationBudget(8)
+                        .build()
+                        .compile("base64.encode(b'1234567')")
+                        .evaluate())
+            .code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    Cel.newBuilder()
+                        .evaluationBudget(40)
+                        .build()
+                        .compile("sets.contains([1,2,3,4,5], [5,5,5,5,5,5,5,5])")
+                        .evaluate())
+            .code());
+  }
+
+  @Test
+  public void blockLazinessCachingAndLexicalScopes() {
+    yes("cel.block([1/0], true)");
+    yes("cel.block([1/0], true || cel.index(0) == 1)");
+    yes("cel.block([1/0], (cel.index(0) == 1 || true) && (cel.index(0) == 1 || true))");
+    yes("cel.block([], 3) == 3");
+    yes(".cel.bind(x, 3, .cel.block([x + 1], cel.index(0))) == 4");
+    yes("cel.block([2], cel.block([3], cel.index(0)) + cel.index(0)) == 5");
+    yes("cel.bind(x, 5, cel.block([x], [1,2].map(x, cel.index(0) + x))) == [6,7]");
+    yes("cel.block([[1,2].map(x,x+1)], [3,4].map(x, cel.index(0)[0]+x)) == [5,6]");
+    yes("cel.block([[1,2].map(x,x+1), [3,4].map(x,cel.index(0)[0]+x)], cel.index(1)) == [5,6]");
+    yes("cel.bind(x, 2, cel.bind(x, x+1, x)) == 3");
+    assertEquals(
+        Set.of("external"),
+        Cel.compile("cel.bind(x, external, cel.block([x], cel.index(0)))").variables());
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    Environment env =
+        Cel.newBuilder()
+            .function("count", List.of(), CelType.INT, args -> (long) calls.incrementAndGet())
+            .build();
+    var program = env.compile("cel.block([count()], cel.index(0) + cel.index(0))");
+    assertEquals(2L, program.evaluate());
+    assertEquals(4L, program.evaluate());
+    assertEquals(2, calls.get());
+    assertEquals(CelType.INT, program.resultType());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    Cel.newBuilder()
+                        .evaluationBudget(5)
+                        .build()
+                        .compile("cel.block([1,2,3,4,5], true)")
+                        .evaluate())
+            .code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    Cel.newBuilder()
+                        .maxDepth(5)
+                        .build()
+                        .compile(
+                            "cel.block([1,cel.index(0),cel.index(1),cel.index(2),cel.index(3),cel.index(4),cel.index(5)], cel.index(6))")
+                        .evaluate())
+            .code());
+  }
+
+  @Test
+  public void malformedBindingAndBlockSyntax() {
+    for (String expr :
+        List.of(
+            "cel.other()",
+            "proto.other()",
+            ".proto.getExt(1, foo)",
+            "cel.bind(.x, 1, 2)",
+            "cel.bind()",
+            "cel.bind(1, 2, 3)",
+            "cel.bind(x.y, 2, 3)",
+            "cel.block(1, 2)",
+            "cel.block([])",
+            "cel.block([?optional.of(1)], 1)",
+            "cel.index()",
+            "cel.index(-1)",
+            "cel.index(1u)",
+            "cel.index(2147483648)",
+            "cel.index(0)",
+            "cel.block([], cel.index(0))",
+            "cel.block([cel.index(0)], 1)",
+            "cel.block([cel.index(1), 2], cel.index(0))",
+            "cel.iterVar(0)",
+            "cel.iterVar(0, -1)",
+            "proto.getExt(1)",
+            "proto.hasExt(1, 2)"))
+      assertThrows(expr, CelException.class, () -> Cel.newBuilder().build().compile(expr));
+    invalid("cel.bind(x, 1, x/0)");
+    invalid("cel.block([1/0], cel.index(0))");
+  }
+
+  @Test
+  public void blockCachesErrorsAndKeepsConcurrentEvaluationsSeparate() throws Exception {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var env =
+        Cel.newBuilder()
+            .function(
+                "fail",
+                List.of(),
+                CelType.INT,
+                args -> {
+                  calls.incrementAndGet();
+                  throw new CelException(CelException.Code.INVALID_ARGUMENT, "failure");
+                })
+            .build();
+    assertTrue(
+        env.compile(
+                "cel.block([fail()], (cel.index(0) == 1 || true) && (cel.index(0) == 2 || true))")
+            .test());
+    assertEquals(1, calls.get());
+    var program = Cel.compile("cel.block([x + 1, cel.index(0) * 2], cel.index(1) + cel.index(0))");
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
+      var tasks = new ArrayList<java.util.concurrent.Callable<Object>>();
+      for (long i = 0; i < 100; i++) {
+        long input = i;
+        tasks.add(() -> program.evaluate(Map.of("x", input)));
+      }
+      var results = executor.invokeAll(tasks);
+      for (int i = 0; i < results.size(); i++) assertEquals(3L * (i + 1), results.get(i).get());
+    }
+  }
 }

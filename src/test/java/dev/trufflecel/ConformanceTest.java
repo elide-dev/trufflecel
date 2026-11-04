@@ -8,38 +8,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
 
-/** Every case in the selected upstream core and extension suites executes; no per-case skips. */
+/** Every case in the pinned upstream corpus executes; no per-case skips. */
 @RunWith(Parameterized.class)
 public class ConformanceTest {
-  static final Set<String> SUITES =
-      Set.of(
-          "optionals",
-          "macros2",
-          "lists_ext",
-          "math_ext",
-          "network_ext",
-          "string_ext",
-          "basic",
-          "comparisons",
-          "conversions",
-          "dynamic",
-          "enums",
-          "fields",
-          "fp_math",
-          "integer_math",
-          "lists",
-          "logic",
-          "macros",
-          "namespace",
-          "parse",
-          "proto2",
-          "proto3",
-          "string",
-          "timestamps",
-          "type_deduction",
-          "unknowns",
-          "wrappers");
-
   @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> cases() throws Exception {
     var result = new ArrayList<Object[]>();
@@ -47,7 +18,6 @@ public class ConformanceTest {
         JsonParser.parseString(Files.readString(Path.of("third_party/cel-spec/corpus.json")))
             .getAsJsonArray()) {
       var f = file.getAsJsonObject();
-      if (!SUITES.contains(f.get("file").getAsString())) continue;
       if (!f.has("section")) continue;
       for (JsonElement section : f.getAsJsonArray("section")) {
         var s = section.getAsJsonObject();
@@ -66,7 +36,7 @@ public class ConformanceTest {
         }
       }
     }
-    assertEquals("pinned core and extension corpus case count", 2587, result.size());
+    assertEquals("complete pinned corpus case count", 2771, result.size());
     return result;
   }
 

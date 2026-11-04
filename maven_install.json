@@ -10,9 +10,9 @@
     "com.google.protobuf:protobuf-java": 1938090909,
     "com.google.re2j:re2j": 1525409503,
     "com.h2database:h2": 2037113602,
-    "dev.elide:truffledata-core": -320046567,
-    "dev.elide:truffledata-jdbc": 300816501,
-    "dev.elide:truffledata-protobuf": -659368443,
+    "dev.elide:truffledata-core": -2116997926,
+    "dev.elide:truffledata-jdbc": -1496134858,
+    "dev.elide:truffledata-protobuf": 1838647494,
     "junit:junit": -744267592,
     "org.graalvm.polyglot:polyglot": -389905015,
     "org.graalvm.sdk:nativeimage": -1804478537,
@@ -35,9 +35,9 @@
     "com.google.protobuf:protobuf-java-util": 175139658,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1401264984,
-    "dev.elide:truffledata-core": -1016313830,
-    "dev.elide:truffledata-jdbc": 2091781734,
-    "dev.elide:truffledata-protobuf": -659965778,
+    "dev.elide:truffledata-core": 1379570954,
+    "dev.elide:truffledata-jdbc": 843850742,
+    "dev.elide:truffledata-protobuf": -1385560931,
     "junit:junit": 712711302,
     "org.checkerframework:checker-qual": 597850597,
     "org.graalvm.polyglot:polyglot": -747680277,
@@ -132,21 +132,21 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "e5ba5cfc375de887a0edcd4b27fa901084a2cf9f85949f2b7c68700bbcc65490"
+        "jar": "7904079e23b6d0d9a6521207d754318db94a5d35b5267441f5be80b8edce613b"
       },
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
         "jar": "b13a418c1941c73d8db72a18f6dee0c6d351106e6b5be1a6c38975579d0ef3f6"
       },
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "64b53cbbba0c327e8f86041139a46e43acda22e034312b431f2f3bf90f6905b9"
+        "jar": "80b7ac3a97402ca4f9ed00b2d53d2ee31106e23ab4ce4e7cce78e99a0de68dec"
       },
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     "junit:junit": {
       "shasums": {
