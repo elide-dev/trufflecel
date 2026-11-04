@@ -62,6 +62,12 @@ used by instrumented compilation.
 Each evaluation still has independent bindings, local scopes, and a resource budget,
 including reentrant evaluations from host functions.
 
+Local reads use lexical slot numbers resolved when the program is created. Range expressions
+are resolved in the enclosing scope before iteration variables are introduced; nested bindings
+and absolute global names retain their usual semantics. Runtime scopes still retain names and
+values for debugger snapshots, and local reads retain a Truffle boundary for instrumented
+frame access.
+
 Instrumentation wrappers and interop exports are generated at build time. Source sections,
 node metadata, and scope snapshots are created when tools request them. No runtime classpath
 scanning or reflection registration is introduced. Attached instruments can add allocation

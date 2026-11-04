@@ -50,6 +50,32 @@ public class RuntimeTest {
   }
 
   @Test
+  public void localSlotsRespectRangesShadowingAndPreparedSources() throws Exception {
+    var environment = Cel.newBuilder().variable("x", CelType.INT).build();
+    String expression =
+        "[1,2].map(x, [x,x+1].transformList(i,x, optional.of(x).optMap(y,y+i+.x).value()))";
+    var prepared = environment.prepare(expression);
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.enter();
+      try {
+        Source source = Source.newBuilder("cel", expression, "locals.cel").build();
+        for (Program program :
+            List.of(
+                prepared.instantiate(),
+                prepared.instantiate(source),
+                environment.compile(source))) {
+          assertEquals(
+              List.of(List.of(11L, 13L), List.of(12L, 14L)), program.evaluate(Map.of("x", 10L)));
+          assertEquals(
+              List.of(List.of(21L, 23L), List.of(22L, 24L)), program.evaluate(Map.of("x", 20L)));
+        }
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
   public void reentrantEvaluationsKeepIndependentBindingsAndBudgets() throws Exception {
     try (Context context = Context.newBuilder("cel").build()) {
       context.enter();

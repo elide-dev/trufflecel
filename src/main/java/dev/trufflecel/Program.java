@@ -45,7 +45,9 @@ public final class Program {
     this.environment = environment;
     // Tooling receives the complete source tree, including every literal and operator event.
     if (truffleSource == null) body = body.lowerArithmetic();
-    contextInArguments = truffleSource != null || body.hasBindings();
+    boolean hasBindings = body.hasBindings();
+    if (hasBindings) body.resolveLocals(new ArrayList<>());
+    contextInArguments = truffleSource != null || hasBindings;
     if (contextInArguments)
       body.accept(
           node -> {

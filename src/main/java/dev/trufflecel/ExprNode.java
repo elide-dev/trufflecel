@@ -10,6 +10,7 @@ import java.util.*;
 class ExprNode extends CelNode {
   boolean rootBody, statement;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private int localSlot = -1;
   @Children WriteNode[] bindings;
 
   ExprNode() {
@@ -126,6 +127,21 @@ class ExprNode extends CelNode {
     if (bindings != null) return true;
     for (ExprNode child : children) if (child.hasBindings()) return true;
     return false;
+  }
+
+  void resolveLocals(ArrayList<String> locals) {
+    if (kind == Kind.CONSTANT) return;
+    if (kind == Kind.IDENT) {
+      localSlot = locals.lastIndexOf(name);
+      return;
+    }
+    int outerSize = locals.size();
+    for (int i = 0; i < children.length; i++) {
+      // A comprehension's range is evaluated before its iteration variables are bound.
+      if (i == 1 && bindings != null) Collections.addAll(locals, (String[]) value);
+      children[i].resolveLocals(locals);
+    }
+    while (locals.size() > outerSize) locals.remove(locals.size() - 1);
   }
 
   static ExprNode constant(Object value, int offset) {
@@ -272,7 +288,10 @@ class ExprNode extends CelNode {
     ctx.tick();
     return switch (kind) {
       case CONSTANT -> value;
-      case IDENT -> boundaryReads ? ctx.getBoundary(name) : ctx.get(name);
+      case IDENT ->
+          localSlot >= 0
+              ? ctx.getLocal(localSlot)
+              : boundaryReads ? ctx.getBoundary(name) : ctx.get(name);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
         Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
