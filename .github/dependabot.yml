@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: bazel
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "build(deps)"
+    ignore:
+      # This module uses a reviewed fork commit; changing its nominal BCR version
+      # does not upgrade the override. Upgrade the commit and toolchain together.
+      - dependency-name: rules_graalvm
+    groups:
+      bazel-rules:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      github-actions:
+        update-types: [minor, patch]

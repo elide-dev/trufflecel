@@ -75,3 +75,9 @@ GitHub artifacts without uploading to Codecov. Upload errors fail CI. The existi
 coverage threshold remains enforced independently. Enable this repository in Codecov and
 allow its GitHub OIDC identity, or provide `CODECOV_TOKEN` through repository/organization
 secrets. Reports are also retained under `build/reports/` in the existing CI artifacts.
+
+## Security checks
+
+See [Maintenance](MAINTENANCE.md) for Dependabot, CodeQL, dependency review,
+Scorecard publication and dependency automation limits. Security workflows have
+job-scoped SARIF write permission; only the Scorecard job receives OIDC for publication.

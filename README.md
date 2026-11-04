@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/elide-dev/trufflecel/graph/badge.svg?token=LH1rsnWmBY)](https://codecov.io/gh/elide-dev/trufflecel)
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json%3Frepository%3Delide-dev/trufflecel)](https://codspeed.io/elide-dev/trufflecel)
 [![Release](https://img.shields.io/github/v/release/elide-dev/trufflecel?include_prereleases)](https://github.com/elide-dev/trufflecel/releases)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/elide-dev/trufflecel/badge)](https://scorecard.dev/viewer/?uri=github.com/elide-dev/trufflecel)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
 
 **CEL expressions, executed by Truffle.** TruffleCEL brings the
@@ -289,3 +290,6 @@ our [Security Policy](SECURITY.md).
 TruffleCEL is dual-licensed under [MIT](LICENSE-MIT) or
 [Apache-2.0](LICENSE-APACHE), at your option (`MIT OR Apache-2.0`).
 See [LICENSE](LICENSE) and [NOTICE](NOTICE) for scope and third-party attribution.
+
+Security automation, dependency update coverage and the OpenSSF readiness roadmap are
+documented in [Maintenance](docs/MAINTENANCE.md) and the [threat model](docs/THREAT_MODEL.md).
