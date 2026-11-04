@@ -65,3 +65,12 @@ sh_test(
     data = [":svm"], tags = ["manual"], size = "large",
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
 )
+
+java_test(
+    name = "ast_interchange",
+    srcs = ["AstInterchangeTest.java"],
+    test_class = "dev.trufflecel.AstInterchangeTest",
+    deps = [":comparison", "//:trufflecel", "//:trufflecel-protobuf",
+        "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_protobuf", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime",
+        "@maven//:junit_junit", "@maven//:com_google_protobuf_protobuf_java"],
+)

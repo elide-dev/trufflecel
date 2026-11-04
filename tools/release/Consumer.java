@@ -4,6 +4,7 @@ import dev.elide.truffledata.Field;
 import dev.elide.truffledata.Limits;
 import dev.elide.truffledata.Schema;
 import dev.trufflecel.Cel;
+import dev.trufflecel.CanonicalAst;
 import dev.trufflecel.CelType;
 import dev.trufflecel.DataType;
 import dev.trufflecel.JsonValues;
@@ -27,6 +28,13 @@ public final class Consumer {
     if (!Cel.compile("p == j.id").test(Map.of("p", proto, "j", json))) {
       throw new AssertionError("optional adapters");
     }
+    var astEnv = Cel.newBuilder().variable("x", CelType.INT).build();
+    var parsed = CanonicalAst.parse(astEnv, "x + 1");
+    var checked = CanonicalAst.check(astEnv, parsed);
+    if (!CanonicalAst.program(astEnv, checked).evaluate(Map.of("x", 41L)).equals(42L))
+      throw new AssertionError("canonical AST publication");
+    if (!Cel.compile("yaml.parse('a: 42').value().a == 42 && json.parse('[1]').value() == [1]")
+        .test()) throw new AssertionError("structured encoder publications");
     try (var context =
         Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false").build()) {
       if (!context.eval("cel", "6 * 7 == 42").asBoolean())

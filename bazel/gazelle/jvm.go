@@ -44,6 +44,7 @@ func (*java) Kinds() map[string]rule.KindInfo {
 var imports = regexp.MustCompile(`(?m)^\s*import\s+(?:static\s+)?([\w.]+)`)
 var packages = regexp.MustCompile(`(?m)^\s*package\s+([\w.]+)\s*;`)
 var external = map[string]string{
+	"org.snakeyaml.engine.":           "@maven//:org_snakeyaml_snakeyaml_engine",
 	"com.oracle.truffle.runtime.":     "@maven//:org_graalvm_truffle_truffle_runtime",
 	"dev.elide.truffledata.":          "@maven//:dev_elide_truffledata_core",
 	"dev.elide.truffledata.protobuf.": "@maven//:dev_elide_truffledata_protobuf",
@@ -105,16 +106,25 @@ func (*java) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	if strings.HasPrefix(args.Rel, "src/main/") {
 		coreSources := []string{}
 		coreText := ""
-		adapters := map[string]string{"ProtobufType.java": "protobuf", "JsonValues.java": "json"}
+		adapters := map[string]string{"ProtobufType.java": "protobuf", "CanonicalAst.java": "protobuf", "JsonValues.java": "json"}
+		adapterSources := map[string][]string{}
+		adapterText := map[string]string{}
 		for _, file := range sources {
 			if name, ok := adapters[file]; ok {
-				r := target("java_library", name, []string{file}, append(dependencies(texts[file]), ":trufflecel"))
-				r.SetAttr("visibility", []string{"//visibility:public"})
-				result.Gen = append(result.Gen, r)
+				adapterSources[name] = append(adapterSources[name], file)
+				adapterText[name] += texts[file] + "\n"
 			} else {
 				coreSources = append(coreSources, file)
 				coreText += texts[file] + "\n"
 			}
+		}
+		for name, srcs := range adapterSources {
+			if name == "protobuf" {
+				srcs = append(srcs, "//third_party/cel-spec/proto:schema_java")
+			}
+			r := target("java_library", name, srcs, append(dependencies(adapterText[name]), ":trufflecel"))
+			r.SetAttr("visibility", []string{"//visibility:public"})
+			result.Gen = append(result.Gen, r)
 		}
 		r := target("java_library", "trufflecel", coreSources, dependencies(coreText))
 		r.SetAttr("visibility", []string{"//visibility:public"})
@@ -141,7 +151,7 @@ func (*java) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 			name := strings.TrimSuffix(stem, "Test")
 			name = strings.ToLower(name[:1]) + name[1:]
 			deps := append(dependencies(texts[file]), "//:trufflecel")
-			if strings.Contains(texts[file], "ProtobufType") {
+			if strings.Contains(texts[file], "ProtobufType") || strings.Contains(texts[file], "CanonicalAst") {
 				deps = append(deps, "//:trufflecel-protobuf")
 			}
 			if strings.Contains(texts[file], "JsonValues") {

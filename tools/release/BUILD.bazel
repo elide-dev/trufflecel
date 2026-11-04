@@ -14,6 +14,8 @@ DEPENDENCIES = {
         "org.graalvm.truffle:truffle-api:25.5.5-elide.24",
         "dev.elide:truffledata-core:0.4.0",
         "com.google.re2j:re2j:1.8",
+        "com.google.code.gson:gson:2.13.2",
+        "org.snakeyaml:snakeyaml-engine:3.2",
     ],
     "protobuf": [
         "dev.elide:trufflecel-core:{version}",

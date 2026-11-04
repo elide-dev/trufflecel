@@ -75,7 +75,10 @@ public final class Environment {
     Objects.requireNonNull(source);
     if (source.length() > maxSourceLength)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
-    ExprNode node = new Parser(source, this).parse();
+    return prepare(source, new Parser(source, this).parse(), check);
+  }
+
+  PreparedProgram prepare(String source, ExprNode node, boolean check) {
     record Pending(ExprNode node, int depth) {}
     var pending = new ArrayDeque<Pending>();
     pending.push(new Pending(node, 1));
