@@ -13,6 +13,7 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private int localSlot = -1;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean frameLocalReads;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean countResult;
   @Children WriteNode[] bindings;
 
   ExprNode() {
@@ -172,7 +173,7 @@ class ExprNode extends CelNode {
     return new LiteralNode(value, offset);
   }
 
-  ExprNode lowerArithmetic() {
+  ExprNode lowerUninstrumented() {
     int count = 0;
     ExprNode leaf = this;
     while (leaf.kind == Kind.CALL
@@ -184,9 +185,35 @@ class ExprNode extends CelNode {
       count++;
       leaf = leaf.children[0];
     }
-    if (count >= 2) return new ArithmeticChain(this, count, leaf.lowerArithmetic());
-    for (int i = 0; i < children.length; i++) children[i] = children[i].lowerArithmetic();
+    if (count >= 2) return new ArithmeticChain(this, count, leaf.lowerUninstrumented());
+    for (int i = 0; i < children.length; i++) children[i] = children[i].lowerUninstrumented();
+    if (kind == Kind.CALL && name.equals("size") && !extensionCall && children.length == 1) {
+      ExprNode range = children[0];
+      if (range.kind == Kind.MACRO
+          && (range.name.equals("map")
+              || range.name.equals("filter")
+              || range.name.equals("transformList"))) {
+        range.countResult = true;
+        return new ComprehensionSize(this, range);
+      }
+    }
     return this;
+  }
+
+  /** Counts results without retaining them; mapper visits, errors and budgets are unchanged. */
+  private static final class ComprehensionSize extends ExprNode {
+    ComprehensionSize(ExprNode outer, ExprNode range) {
+      super(Kind.CALL, outer.name, outer.value, outer.offset, range);
+      sourceRange(outer.sourceStart, outer.sourceEnd);
+      optionalEntry = outer.optionalEntry;
+      statement = outer.statement;
+    }
+
+    @Override
+    Object execute(VirtualFrame frame, EvalContext ctx) {
+      ctx.tick();
+      return children[0].execute(frame, ctx);
+    }
   }
 
   /**
@@ -525,7 +552,10 @@ class ExprNode extends CelNode {
     var mapped = mapResult ? HostCollections.<Object>map() : null;
     var sortKeys = sorting ? HostCollections.list() : null;
     long index = 0;
-    var result = !mapResult && (sorting || mapping || filtering) ? HostCollections.list() : null;
+    var result =
+        !countResult && !mapResult && (sorting || mapping || filtering)
+            ? HostCollections.list()
+            : null;
     long count = 0;
     Unknown unknown = null;
     CelException error = null;
@@ -562,7 +592,8 @@ class ExprNode extends CelNode {
           else if (name.equals("transformMapEntry")) {
             if (!(predicate instanceof Map<?, ?> entries)) throw Values.overload(name);
             HostCollections.mergeEntries(mapped, entries);
-          } else HostCollections.add(result, predicate);
+          } else if (countResult) count++;
+          else HostCollections.add(result, predicate);
           continue;
         }
         if (!(predicate instanceof Boolean b)) throw Values.overload(name);
@@ -570,7 +601,7 @@ class ExprNode extends CelNode {
         if (name.equals("exists") && b) return true;
         if (b) {
           count++;
-          if (filtering) HostCollections.add(result, item);
+          if (filtering && !countResult) HostCollections.add(result, item);
         }
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
@@ -582,6 +613,7 @@ class ExprNode extends CelNode {
     }
     if (unknown != null) return unknown;
     if (error != null) throw error;
+    if (countResult) return count;
     return switch (name) {
       case "all" -> true;
       case "exists" -> false;
