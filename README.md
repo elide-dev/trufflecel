@@ -237,11 +237,34 @@ artifacts and Maven consumption. The core corpus uses an independent test-only p
 fixture; adapter tests separately exercise the published protobuf implementation.
 See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
-Optional values, two-variable macros, and extended string/list/math/network libraries are
-covered by all cases in their pinned upstream suites. See [extension support](docs/EXTENSIONS.md)
-for APIs, semantics and limits. This does not certify every CEL extension or future revision:
-canonical protobuf AST serialization is not yet provided. Elide Native Image embedding and production size,
-allocation, and JIT performance budgets still need qualification.
+The table describes the current `main` branch against the pinned corpus, not every CEL
+extension or future specification revision. ✅ means implemented; 🚧 marks a limitation or
+an unsupported capability, distinguished explicitly below.
+
+| Capability | Status | Scope and limitations |
+| --- | --- | --- |
+| Independent parser, type checker, and evaluator | ✅ Implemented | No CEL Java frontend or interpreter dependency; core syntax, types, operators, namespaces, and standard functions pass the pinned suites. |
+| Complete pinned conformance corpus | ✅ Passing | All 2,771 cases across 32 files; no suite exclusions or per-case skips. |
+| Macros and optional values | ✅ Implemented | Standard macros, two-variable comprehensions, optional selection/indexing, and optional aggregate entries. |
+| String, list, math, and network extensions | ✅ Implemented | All cases in their pinned suites; see [supported APIs and limits](docs/EXTENSIONS.md). |
+| Local bindings and set operations | ✅ Implemented | `cel.bind`, `sets.contains`, `sets.equivalent`, and `sets.intersects`. |
+| Lazy blocks | ✅ Implemented | `cel.block`, `cel.index`, and `cel.iterVar`; cached values/errors and isolated lexical scopes. |
+| Block optimization | 🚧 Limited | Block evaluation currently runs behind a Truffle boundary; optimized block throughput is not yet qualified. |
+| Base64 encoding/decoding | ✅ Implemented | Standard alphabet, padded or unpadded decoding, and CR/LF handling. |
+| URL-safe Base64 and other encoder APIs | 🚧 Unsupported | APIs beyond the pinned encoder suite are not implemented. |
+| Protobuf messages and well-known types | ✅ Implemented | Proto2/proto3 fields, construction, presence, native wire decoding, and registered `Any` payloads through [TruffleData](docs/INTEGRATION.md). |
+| Proto2 extensions | ✅ Implemented | `proto.hasExt` and `proto.getExt`; descriptors must be registered explicitly. |
+| Protobuf Editions and MessageSet | 🚧 Unsupported | Not supported by the protobuf bridge. |
+| Unknown values | 🚧 Limited | Unknown propagation is implemented and unit-tested; upstream's `unknowns` file contains zero cases and provides no conformance evidence. |
+| Canonical protobuf AST interchange | 🚧 Unsupported | No serialization/import of CEL's canonical protobuf AST. |
+| CEL conformance RPC service | 🚧 Unsupported | Plumbing cases run through the JVM harness; no standalone conformance server is provided. |
+| JVM embedding and Truffle tooling | ✅ Implemented | Thin JARs, Polyglot integration, node instrumentation, profiling/coverage tags, and debugger scopes. |
+| Native Image guest compilation | ✅ Tested | Native JIT/blocklist checks and representative compiled-operation tests run in CI. |
+| Production Elide embedding | 🚧 Limited | End-to-end integration and production size, allocation, and JIT performance qualification remain. |
+
+Resource limits intentionally bound expression size/depth, evaluation work, and collection or
+string expansion. See [extension support](docs/EXTENSIONS.md), [integration](docs/INTEGRATION.md),
+and [benchmark methodology](docs/BENCHMARKS.md) for the detailed contracts.
 
 ## Reference shelf
 
