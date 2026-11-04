@@ -256,6 +256,36 @@ public class RuntimeTest {
   }
 
   @Test
+  public void scalarBindingHintsValidateUnmatchedInputs() {
+    var environment =
+        Cel.newBuilder()
+            .variable("a", CelType.DYN)
+            .variable("b", CelType.DYN)
+            .variable("c", CelType.DYN)
+            .variable("d", CelType.DYN)
+            .build();
+    var recursive = new ArrayList<Object>();
+    recursive.add(recursive);
+    for (Program program :
+        List.of(environment.compile("a + b"), environment.prepare("a + b").instantiate())) {
+      assertEquals(3L, program.evaluate(Map.of("a", 1L, "b", 2L)));
+      assertEquals(3L, program.evaluate(Map.of("a", 1, "b", 2)));
+      assertEquals(3L, program.evaluate(Map.of("a", 1L, "b", 2L, "extra", true)));
+      for (String key : List.of("c", "extra"))
+        assertEquals(
+            CelException.Code.RESOURCE_EXHAUSTED,
+            assertThrows(
+                    CelException.class,
+                    () -> program.evaluate(Map.of("a", 1L, "b", 2L, key, recursive)))
+                .code());
+      assertEquals(
+          CelException.Code.UNDECLARED,
+          assertThrows(CelException.class, () -> program.evaluate(Map.of("a", 1L, "extra", 2L)))
+              .code());
+    }
+  }
+
+  @Test
   public void scalarActivationSnapshotsSurviveMutationDuringEvaluation() {
     var input = new HashMap<String, Object>();
     input.put("a", 1L);

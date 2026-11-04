@@ -12,6 +12,7 @@ public final class Program {
   private final String source;
   private final Set<String> variables;
   private final String bindingHint;
+  private final String[] scalarBindingHints;
   private final CelType resultType;
   private final Environment environment;
   private final boolean contextInArguments;
@@ -36,6 +37,8 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
+    scalarBindingHints =
+        variables.size() > 1 && variables.size() <= 4 ? variables.toArray(String[]::new) : null;
     String identifier = body.firstIdentifier();
     bindingHint =
         identifier != null
@@ -126,7 +129,7 @@ public final class Program {
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Object> immutableScalarBindings(Map<String, ?> variables) {
+  private Map<String, Object> immutableScalarBindings(Map<String, ?> variables) {
     Map<String, ?> snapshot;
     try {
       snapshot = Map.copyOf(variables);
@@ -134,12 +137,27 @@ public final class Program {
       // Host nulls remain supported by the normalizing path.
       return null;
     }
-    for (Object value : snapshot.values())
-      if (!(value instanceof Long
-          || value instanceof Boolean
-          || value instanceof String
-          || value instanceof Double)) return null;
+    // Map.copyOf excludes nulls. Count matches so extra, undeclared inputs still get validated.
+    if (scalarBindingHints != null) {
+      int matches = 0;
+      for (String name : scalarBindingHints) {
+        Object value = snapshot.get(name);
+        if (value != null) {
+          if (!normalizedScalar(value)) return null;
+          matches++;
+        }
+      }
+      if (matches == snapshot.size()) return (Map<String, Object>) snapshot;
+    }
+    for (Object value : snapshot.values()) if (!normalizedScalar(value)) return null;
     return (Map<String, Object>) snapshot;
+  }
+
+  private static boolean normalizedScalar(Object value) {
+    return value instanceof Long
+        || value instanceof Boolean
+        || value instanceof String
+        || value instanceof Double;
   }
 
   public boolean test() {
