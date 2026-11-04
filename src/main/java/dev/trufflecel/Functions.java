@@ -12,6 +12,17 @@ import java.util.*;
 final class Functions {
   private Functions() {}
 
+  @TruffleBoundary
+  static boolean stringPredicate(String name, Object left, Object right) {
+    if (!(left instanceof String text && right instanceof String part)) throw Values.overload(name);
+    return switch (name) {
+      case "contains" -> text.contains(part);
+      case "startsWith" -> text.startsWith(part);
+      case "endsWith" -> text.endsWith(part);
+      default -> throw Values.overload(name);
+    };
+  }
+
   static Object apply(String name, Object[] a, Environment env) {
     // Primitive scalar operations stay in the guest graph; generic libraries are host calls.
     if (a.length == 1) {
@@ -244,15 +255,8 @@ final class Functions {
           return false;
         }
         break;
-      case "contains":
-        if (a instanceof String x && b instanceof String y) return x.contains(y);
-        break;
-      case "startsWith":
-        if (a instanceof String x && b instanceof String y) return x.startsWith(y);
-        break;
-      case "endsWith":
-        if (a instanceof String x && b instanceof String y) return x.endsWith(y);
-        break;
+      case "contains", "startsWith", "endsWith":
+        return stringPredicate(name, a, b);
       case "matches":
         if (a instanceof String x && b instanceof String y) return matches(x, y);
         break;

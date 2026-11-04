@@ -71,6 +71,7 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalEntry;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean extensionCall;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalFallback;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean stringPredicate;
   final int offset;
   private final int scalarOperator;
   @Children ExprNode[] children;
@@ -365,7 +366,7 @@ class ExprNode extends CelNode {
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object call(VirtualFrame frame, EvalContext ctx) {
-    if (scalarOperator != 0 && children.length == 2 && !extensionCall)
+    if ((scalarOperator != 0 || stringPredicate) && children.length == 2 && !extensionCall)
       return scalarBinary(frame, ctx);
     if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
     if (optionalFallback && children.length == 2) {
@@ -413,6 +414,7 @@ class ExprNode extends CelNode {
     if (left instanceof Unknown u) return right instanceof Unknown v ? u.merge(v) : u;
     if (right instanceof Unknown) return right;
     if (error != null) throw error;
+    if (stringPredicate) return Functions.stringPredicate(name, left, right);
     if (left instanceof Long x && right instanceof Long y) {
       try {
         return switch (scalarOperator) {
