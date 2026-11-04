@@ -27,6 +27,11 @@ def _publication_impl(ctx):
   <groupId>dev.elide</groupId><artifactId>{artifact}</artifactId><version>{version}</version>
   <name>TruffleCEL {module}</name>
   <description>CEL on Truffle: {module}</description>
+  <url>https://github.com/elide-dev/trufflecel</url>
+  <licenses>
+    <license><name>MIT License</name><url>https://opensource.org/license/mit</url><distribution>repo</distribution><comments>MIT OR Apache-2.0; choose either license.</comments></license>
+    <license><name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url><distribution>repo</distribution><comments>MIT OR Apache-2.0; choose either license.</comments></license>
+  </licenses>
   <properties><maven.compiler.release>25</maven.compiler.release></properties>
   <repositories><repository><id>elide</id><url>https://maven.elide.dev</url></repository><repository><id>elide-graalvm</id><url>https://maven.elide.dev/gvm-elide/{graalvm_version}</url></repository></repositories>
   <dependencies>{dependencies}</dependencies>
@@ -36,7 +41,16 @@ def _publication_impl(ctx):
     outputs = [pom]
     for suffix, source in [(".jar", info.runtime_output_jars[0]), ("-sources.jar", info.source_jars[0])]:
         output = ctx.actions.declare_file(prefix + suffix)
-        ctx.actions.symlink(output = output, target_file = source)
+        args = ctx.actions.args()
+        args.add_all(["--output", output.path, "--normalize", "--sources", source.path, "--resources"])
+        args.add_all([file.path + ":META-INF/" + file.basename for file in ctx.files._legal])
+        ctx.actions.run(
+            executable = ctx.executable._singlejar,
+            arguments = [args],
+            inputs = [source] + ctx.files._legal,
+            outputs = [output],
+            mnemonic = "LicensedMavenJar",
+        )
         outputs.append(output)
     return [DefaultInfo(files = depset(outputs)), OutputGroupInfo(binary = depset([outputs[1]]))]
 
@@ -47,6 +61,8 @@ maven_publication = rule(
         "module": attr.string(mandatory = True),
         "dependencies": attr.string_list(),
         "graalvm_version": attr.string(default = "25.5.5-elide.24"),
+        "_singlejar": attr.label(default = "@bazel_tools//tools/jdk:singlejar", executable = True, cfg = "exec"),
+        "_legal": attr.label_list(default = ["//:LICENSE", "//:LICENSE-MIT", "//:LICENSE-APACHE", "//:NOTICE"], allow_files = True),
         "_version": attr.label(default = "//tools/release:version"),
     },
 )

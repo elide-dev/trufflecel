@@ -25,7 +25,11 @@ tools/release/publish.sh 0.1.0
 The second command prints a unique directory under ignored `build/release-repo.*`.
 It contains binary JARs, source JARs, POMs, Maven metadata and MD5/SHA-1/SHA-256/SHA-512
 checksums. Both JARs are taken from each library's JavaInfo, including generated Truffle
-classes in the binary. No separate source inventory is maintained.
+classes in the binary. No separate source inventory is maintained. Bazel adds
+`META-INF/LICENSE`, `LICENSE-MIT`, `LICENSE-APACHE`, and `NOTICE` to binary and
+source JARs. POMs list both licenses and explicitly identify the choice as
+`MIT OR Apache-2.0`. Publication tests verify these files against the repository
+texts for all three modules. Existing published versions remain immutable.
 
 The Bazel build setting defaults to `0.1.0-SNAPSHOT` for CI validation. The release script
 requires an explicit immutable version and rejects snapshots. The example version is

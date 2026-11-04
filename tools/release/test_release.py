@@ -24,6 +24,15 @@ class PublicationTest(unittest.TestCase):
                 directory = repo / 'dev/elide' / artifact
                 prefix = directory / version / (artifact + '-' + version)
                 root = ET.parse(str(prefix) + '.pom').getroot()
+                licenses = root.findall('m:licenses/m:license', NAMESPACE)
+                self.assertEqual({entry.findtext('m:name', namespaces=NAMESPACE) for entry in licenses},
+                                 {'MIT License', 'Apache License, Version 2.0'})
+                for entry in licenses:
+                    self.assertIn('MIT OR Apache-2.0', entry.findtext('m:comments', namespaces=NAMESPACE))
+                for suffix in ('.jar', '-sources.jar'):
+                    with zipfile.ZipFile(str(prefix) + suffix) as jar:
+                        for name in ('LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE'):
+                            self.assertEqual(jar.read('META-INF/' + name), Path(name).read_bytes())
                 expected = {
                     'core': {'org.graalvm.polyglot:polyglot', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j'},
                     'protobuf': {'dev.elide:trufflecel-core', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'dev.elide:truffledata-protobuf', 'com.google.protobuf:protobuf-java'},

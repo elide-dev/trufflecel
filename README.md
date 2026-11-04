@@ -255,3 +255,14 @@ allocation, and JIT performance budgets still need qualification.
 | [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
 | [Benchmark methodology](docs/BENCHMARKS.md) | Paired cel-java timings, SVG results, CodSpeed simulation, and guest-JIT qualification |
 | [Publishing](docs/PUBLISHING.md) | Maven consumption, release automation, and artifact verification |
+
+## Community and licensing
+
+Contributions are open to everyone; see [Contributing](CONTRIBUTING.md),
+[Governance](GOVERNANCE.md), and our [Code of Conduct](CODE_OF_CONDUCT.md).
+For help, see [Support](SUPPORT.md). Report vulnerabilities privately through
+our [Security Policy](SECURITY.md).
+
+TruffleCEL is dual-licensed under [MIT](LICENSE-MIT) or
+[Apache-2.0](LICENSE-APACHE), at your option (`MIT OR Apache-2.0`).
+See [LICENSE](LICENSE) and [NOTICE](NOTICE) for scope and third-party attribution.

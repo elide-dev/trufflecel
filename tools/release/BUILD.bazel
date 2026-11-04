@@ -43,7 +43,7 @@ filegroup(
 sh_test(
     name = "test",
     srcs = ["test.sh"],
-    data = ["maven_repo.py", "test_release.py", ":publications", "//:maven_install.json"],
+    data = ["maven_repo.py", "test_release.py", ":publications", "//:maven_install.json", "//:LICENSE", "//:LICENSE-MIT", "//:LICENSE-APACHE", "//:NOTICE"],
 )
 
 [filegroup(
