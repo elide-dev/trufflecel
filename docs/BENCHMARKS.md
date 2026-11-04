@@ -304,6 +304,13 @@ With both changes, the JVM allocation gate records 104 bytes/evaluation for `all
 256 for filter/map/size, with limits of 160 and 320 respectively. All 21 JVM targets pass;
 production coverage is 98.64% of lines and 93.04% of branches.
 
+The [0.2.0 release profile](https://github.com/elide-dev/trufflecel/actions/runs/41754803857)
+records 3.7% fewer comprehension instructions and 11.8% fewer two-variable-transform
+instructions relative to `385d755`. Sorting records 3.3% more instructions and native-row
+access 2.3% more; the remaining cases change by at most 1.7%. All 14 region totals reconcile
+with their saved profiles. These are native-AOT interpreter measurements; guest-JIT timing
+and allocation remain separate measurements in the paired suite.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of

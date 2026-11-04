@@ -98,7 +98,7 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.23")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.1.0")
+    implementation("dev.elide:trufflecel-core:0.2.0")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
 ```
@@ -190,12 +190,12 @@ checked ASTs embedded at image build time.
 
 </details>
 
-Captured November 3, 2026 on a shared AMD EPYC 9V45 CI runner. Lower is better; bars show
-medians across three fresh processes, with minimum/maximum whiskers. TruffleCEL has lower
-median time in **all 24 comparisons**, lower allocation in **all 24**, and lower
-fixed-work peak RSS in **17 of 24**. Native guest JIT retains a substantial process-memory
-cost. These are workload-specific measurements,
-not a general performance guarantee.
+Measured **TruffleCEL 0.2.0**, captured **2026-11-04 (UTC)** on a shared
+AMD EPYC 7763 64-Core Processor CI runner. Lower is better; bars show medians across
+three fresh processes, with minimum/maximum whiskers. TruffleCEL has lower median time
+in **24 of 24 comparisons**, lower allocation in **24 of 24**, and lower
+peak RSS for fixed workloads in **16 of 24**. Native guest JIT still requires
+substantial process memory. These results cover the tested workloads and runtime settings.
 
 Allocation and RSS use separate, equal-work processes: 8,192 compilations or 524,288
 evaluations, plus setup. Bytes/op measures current-thread heap allocation; it excludes
@@ -204,7 +204,7 @@ including calibration, warmup, and guest compilation. Timing excludes setup and 
 compilation. Both native engines share one benchmark binary, so RSS does not represent
 standalone deployment footprints. Image-build preparation embeds checked ASTs, not guest
 machine code. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41745899048), and
+[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41754803857), and
 [methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
 
 The [first allocation snapshot](docs/benchmarks/comparison-allocation-baseline-v3.json) is
