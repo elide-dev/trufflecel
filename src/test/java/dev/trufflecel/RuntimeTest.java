@@ -494,6 +494,78 @@ public class RuntimeTest {
   }
 
   @Test
+  public void comprehensionSizePreservesVisitsErrorsUnknownsAndBudgets() {
+    var calls = new ArrayList<Object>();
+    try (var context = Context.newBuilder("cel").build()) {
+      context.enter();
+      try {
+        for (String expression :
+            List.of(
+                "xs.map(x, observe(x)).size()",
+                "size(xs.filter(x, observe(x) > 0))",
+                "xs.map(x, observe(x) > 0, 12 / x).size()",
+                "xs.filter(x, observe(x) > 0).map(x, observe(12 / x)).size()",
+                "xs.map(x, [x,x].map(y, observe(y)).size()).size()",
+                "xs.transformList(i, x, observe(i + x)).size()",
+                "xs.transformList(i, x, observe(x) > 0, 12 / x).size()",
+                "{'a':1,'b':2}.map(k, observe(k)).size()",
+                "{'a':1,'b':2}.filter(k, observe(k) == 'a').size()",
+                "{'a':1,'b':2}.transformList(k, v, observe(v)).size()",
+                "xs.map(x, x / 0).size()",
+                "xs.filter(x, dyn(x)).size()")) {
+          for (int budget = 1; budget <= 64; budget++) {
+            var template =
+                Cel.newBuilder()
+                    .inferVariables(true)
+                    .evaluationBudget(budget)
+                    .function(
+                        "observe",
+                        List.of(CelType.DYN),
+                        CelType.DYN,
+                        args -> {
+                          calls.add(args.get(0));
+                          return args.get(0);
+                        })
+                    .build()
+                    .prepare(expression);
+            var lowered = template.instantiate();
+            var original =
+                template.instantiate(Source.newBuilder("cel", expression, "count.cel").build());
+            for (Object xs :
+                List.of(
+                    List.of(),
+                    List.of(0L, 2L, -1L),
+                    List.of(2L, 0L),
+                    List.of(Unknown.of("a"), Unknown.of("b")),
+                    List.of(Unknown.of("a"), 0L),
+                    List.of(true, false),
+                    Unknown.of("xs"),
+                    7L)) {
+              var input = Map.of("xs", xs);
+              calls.clear();
+              Object expected = evaluationOutcome(original, input);
+              var expectedCalls = List.copyOf(calls);
+              calls.clear();
+              String diagnostic = expression + " budget=" + budget + " xs=" + xs;
+              assertEquals(diagnostic, expected, evaluationOutcome(lowered, input));
+              assertEquals(diagnostic, expectedCalls, calls);
+            }
+          }
+        }
+      } finally {
+        context.leave();
+      }
+    }
+    var custom =
+        Cel.newBuilder()
+            .container("custom")
+            .function("custom.size", List.of(CelType.list(CelType.INT)), CelType.INT, args -> 99L)
+            .build();
+    assertEquals(99L, custom.compile("size([1,2].map(x, x))").evaluate());
+    assertEquals(99L, custom.compile("custom.size([1,2].map(x, x))").evaluate());
+  }
+
+  @Test
   public void arithmeticLoweringDoesNotMoveHostCallsAcrossBudgetFailures() {
     var calls = new java.util.concurrent.atomic.AtomicInteger();
     try (var context = Context.newBuilder("cel").build()) {
