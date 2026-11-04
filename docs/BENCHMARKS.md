@@ -245,6 +245,12 @@ RSS loss. Predicate recognition runs after function-name resolution, preserving 
 custom functions alongside unknown/error precedence and evaluation budgets. The native JIT,
 blocklist, and comparison checks pass for this change.
 
+Its [CodSpeed run](https://github.com/elide-dev/trufflecel/actions/runs/41745899048) records
+1.7% more compile/evaluate instructions, 2.0% more JSON instructions, and 1.5% more protobuf
+instructions relative to `717f203`; the remaining cases change by at most 1.0%. All 14 totals
+reconcile. These existing cases do not isolate the string-predicate path, so the paired policy
+measurements remain the direct evidence for its allocation reduction.
+
 Reusing immutable compiler declarations (`385d755`) copies the declaration map only when
 inference adds a name. A [paired native compilation diagnostic](benchmarks/declaration-reuse-diagnostic.json)
 records lower time, allocation, and fixed-work RSS for all three fixtures:
@@ -258,6 +264,21 @@ records lower time, allocation, and fixed-work RSS for all three fixtures:
 This closes the comprehension compile-RSS gap in the diagnostic. Native JIT/blocklist and
 comparison checks pass; the final full-suite snapshot must verify it across execution modes.
 The measured revision includes the string-predicate change and excludes frame-storage experiments.
+
+Auxiliary frame locals and exploded binding cleanup (`83d8ffc`) let guest compilation
+eliminate scope storage for eligible comprehensions. Source-backed programs retain named
+scopes for debugging. The [paired native diagnostic](benchmarks/frame-locals-diagnostic.json)
+records 304 bytes/op for comprehension evaluation versus cel-java's 648, but peak RSS
+remains 119.4 MiB versus 66.6 MiB. Policy evaluation records 16 bytes/op versus 412,
+with RSS of 68.9 MiB versus 67.2 MiB. All three compilation fixtures retain lower paired
+time, allocation, and RSS; comprehension compilation records 64.4 MiB versus 66.7 MiB.
+These measurements include declaration reuse and string predicates, with 72 fresh processes.
+They do not establish a full-matrix RSS win.
+
+The change passes 21 JVM test targets, the native JIT/blocklist and comparison checks,
+and tightened allocation gates. Production coverage is 98.63% of lines and 92.87% of
+branches. Reentrant evaluation, nested ranges, shadowed bindings, and instrumented scopes
+remain covered.
 
 ## Guest compilation and allocation gates
 
@@ -279,8 +300,8 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
 fails rather than skips. Scalar, logical, conditional, and addition fixtures are capped at
-64 bytes/op; optional evaluation at 192; list construction and `all` at 320; filter/map at
-608; maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
+64 bytes/op; optional evaluation and `all` at 192; list construction at 320; filter/map and
+maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
 at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
 
