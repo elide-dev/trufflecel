@@ -205,6 +205,13 @@ public class ExtensionsTest {
     yes("sets.equivalent([1,1,2u], [2.0,1])");
     yes("sets.contains([[1], {'a': 2}], [{'a': 2u}, [1.0]])");
     yes("!sets.intersects([1], [])");
+    yes("base64.encodeUrl(b'\\xfb\\xff') == '-_8='");
+    yes("base64.decodeUrl('-_8=') == b'\\xfb\\xff'");
+    yes("base64.decodeUrl('-_8') == b'\\xfb\\xff'");
+    yes("base64.decodeUrl('-_\\r\\n8=') == b'\\xfb\\xff'");
+    yes("base64.encodeUrl(b'') == '' && base64.decodeUrl('') == b''");
+    for (String text : List.of("+/8=", "x", "x===", "-_8==", "-_ 8="))
+      invalid("base64.decodeUrl('" + text + "')");
     yes("base64.encode(b'') == '' && base64.decode('') == b''");
     yes("base64.decode('aG\\r\\nVsbG8=') == b'hello'");
     for (String expr :

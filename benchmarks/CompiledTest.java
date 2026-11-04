@@ -46,6 +46,20 @@ public final class CompiledTest {
             Map.of("x", 0L),
             false,
             768);
+        check(
+            "json.parse(s).value().a == 1",
+            Map.of("s", "{\"a\":1}"),
+            true,
+            Map.of("s", "{\"a\":2}"),
+            false,
+            16384);
+        check(
+            "yaml.parse(s).value().a == 1",
+            Map.of("s", "a: 1"),
+            true,
+            Map.of("s", "a: 2"),
+            false,
+            65536);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
         check(
             "xs.all(x, x > 0)",

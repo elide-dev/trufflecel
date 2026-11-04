@@ -11,7 +11,6 @@ public final class ProtobufType implements ObjectType {
   private static final Map<String, ObjectType> WELL_KNOWN = Cel.newBuilder().build().objectTypes;
   private final Descriptor descriptor;
   private final ProtoPlan plan;
-  private final ProtoCompiler.Source source;
   private final Map<String, CelType> fields;
   private final Map<Descriptor, ProtobufType> graph;
   private final Map<String, FieldDescriptor> descriptors;
@@ -52,7 +51,7 @@ public final class ProtobufType implements ObjectType {
     }
 
     public Bytes toBytes() {
-      return new Bytes(type.plan.encode(row));
+      return new Bytes(type.wire(type.plan.encode(row), false, 0));
     }
 
     public ProtoRow row() {
@@ -85,13 +84,7 @@ public final class ProtobufType implements ObjectType {
     roots.add(descriptor);
     roots.addAll(Arrays.asList(additionalTypes));
     return new ProtoPlan.Model(
-        null,
-        extensions.isEmpty()
-            ? ProtoCompiler.definitions(roots)
-            : extensionDefinitions(roots, extensions),
-        Limits.DEFAULT,
-        100,
-        8 * 1024 * 1024);
+        null, extensionDefinitions(roots, extensions), Limits.DEFAULT, 100, 8 * 1024 * 1024);
   }
 
   private static List<ProtoPlan.Type> extensionDefinitions(
@@ -105,9 +98,6 @@ public final class ProtobufType implements ObjectType {
     while (!pending.isEmpty()) {
       Descriptor descriptor = pending.remove();
       if (types.containsKey(descriptor.getFullName())) continue;
-      if (descriptor.getFile().toProto().getSyntax().equals("editions")
-          || descriptor.getOptions().getMessageSetWireFormat())
-        throw new IllegalArgumentException("Editions and MessageSet are not supported");
       var fields = new ArrayList<>(descriptor.getFields());
       for (FieldDescriptor extension : extensions)
         if (extension.getContainingType() == descriptor) {
@@ -204,7 +194,6 @@ public final class ProtobufType implements ObjectType {
     }
     graph.put(descriptor, this);
     plan = model.type(descriptor.getFullName());
-    source = extensions.isEmpty() ? ProtoCompiler.bind(plan, descriptor) : null;
     var types = new LinkedHashMap<String, CelType>();
     var all = new ArrayList<>(descriptor.getFields());
     for (FieldDescriptor extension : extensions)
@@ -253,8 +242,7 @@ public final class ProtobufType implements ObjectType {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT, "Protobuf descriptor differs from adapter");
     try {
-      return new Value(
-          this, source == null ? plan.decode(message.toByteArray()) : source.snapshot(message));
+      return new Value(this, plan.decode(wire(message.toByteArray(), true, 0)));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, e.getMessage());
     }
@@ -453,7 +441,7 @@ public final class ProtobufType implements ObjectType {
     if (value instanceof Value v && v.type.descriptor == descriptor)
       return v.row().plan() == nested.plan
           ? v.row()
-          : nested.plan.decode(v.toBytes().toByteArray());
+          : nested.plan.decode(nested.wire(v.toBytes().toByteArray(), true, 0));
     Map<String, Object> fields;
     switch (name) {
       case "google.protobuf.Timestamp" -> {
@@ -520,10 +508,84 @@ public final class ProtobufType implements ObjectType {
 
   public Object decode(Bytes bytes) {
     try {
-      return new Value(this, plan.decode(bytes.toByteArray()));
+      return new Value(this, plan.decode(wire(bytes.toByteArray(), true, 0)));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
     }
+  }
+
+  // MessageSet is normalized to ordinary length-delimited extension fields for native storage.
+  // Recurse through registered messages so nested MessageSets use the same bounded codec.
+  private byte[] wire(byte[] bytes, boolean ingest, int depth) {
+    if (depth > 100 || bytes.length > 8 * 1024 * 1024)
+      throw new ContractViolation("Protobuf wire budget exceeded");
+    try {
+      var input = CodedInputStream.newInstance(bytes);
+      var buffer = new java.io.ByteArrayOutputStream();
+      var output = CodedOutputStream.newInstance(buffer);
+      boolean messageSet = descriptor.getOptions().getMessageSetWireFormat();
+      int tag;
+      while ((tag = input.readTag()) != 0) {
+        int number = tag >>> 3;
+        int kind = tag & 7;
+        if (messageSet && ingest && tag == 11) {
+          int typeId = 0;
+          ByteString payload = ByteString.EMPTY;
+          int itemTag;
+          while ((itemTag = input.readTag()) != 12) {
+            if (itemTag == 0) throw new java.io.IOException("Unterminated MessageSet item");
+            if (itemTag == 16) typeId = input.readUInt32();
+            else if (itemTag == 26) payload = input.readBytes();
+            else {
+              // The pinned reader rejects end-group tags outside readGroup.
+              boolean unused = input.skipField(itemTag);
+            }
+          }
+          if (typeId <= 0 || typeId > 536870911)
+            throw new java.io.IOException("Invalid MessageSet type id");
+          output.writeByteArray(typeId, nestedWire(typeId, payload.toByteArray(), true, depth));
+        } else if (kind == 2) {
+          byte[] payload = nestedWire(number, input.readByteArray(), ingest, depth);
+          if (messageSet && !ingest) {
+            output.writeTag(1, 3);
+            output.writeUInt32(2, number);
+            output.writeByteArray(3, payload);
+            output.writeTag(1, 4);
+          } else output.writeByteArray(number, payload);
+        } else if (kind == 3 && groupType(number) != null) {
+          var group = UnknownFieldSet.newBuilder();
+          input.readGroup(number, group, ExtensionRegistryLite.getEmptyRegistry());
+          byte[] payload = groupType(number).wire(group.build().toByteArray(), ingest, depth + 1);
+          output.writeTag(number, 3);
+          output.writeRawBytes(payload);
+          output.writeTag(number, 4);
+        } else {
+          // Preserve unknown scalars and groups, including their wire field numbers.
+          var unknown = UnknownFieldSet.newBuilder();
+          // End-group tags at this level are rejected by the pinned reader itself.
+          boolean unused = unknown.mergeFieldFrom(tag, input);
+          unknown.build().writeTo(output);
+        }
+      }
+      output.flush();
+      return buffer.toByteArray();
+    } catch (java.io.IOException e) {
+      throw new ContractViolation("Invalid protobuf wire data: " + e.getMessage());
+    }
+  }
+
+  private ProtobufType groupType(int number) {
+    for (FieldDescriptor field : descriptors.values())
+      if (field.getNumber() == number && field.getType() == FieldDescriptor.Type.GROUP)
+        return graph.get(field.getMessageType());
+    return null;
+  }
+
+  private byte[] nestedWire(int number, byte[] bytes, boolean ingest, int depth) {
+    for (FieldDescriptor field : descriptors.values())
+      if (field.getNumber() == number && field.getType() == FieldDescriptor.Type.MESSAGE)
+        return graph.get(field.getMessageType()).wire(bytes, ingest, depth + 1);
+    return bytes;
   }
 
   private static CelType type(FieldDescriptor f) {
