@@ -209,6 +209,63 @@ final class Parser {
 
   private ExprNode call(String name, boolean receiver, int offset, ArrayList<ExprNode> args) {
     if (env.macros) {
+      String prefix = receiver ? args.get(0).qualifiedName() : null;
+      if ("cel".equals(prefix) || ".cel".equals(prefix)) {
+        if (name.equals("index") || name.equals("iterVar")) {
+          int count = name.equals("index") ? 2 : 3;
+          if (args.size() != count) throw error("invalid cel." + name + " arguments");
+          String id = "$iter";
+          for (int i = 1; i < count; i++) {
+            ExprNode arg = args.get(i);
+            if (!(arg.value instanceof Long number) || number < 0 || number > Integer.MAX_VALUE)
+              throw error("cel." + name + " requires nonnegative integer literals");
+            id += ":" + number;
+          }
+          return name.equals("index")
+              ? new ExprNode(ExprNode.Kind.BLOCK_INDEX, "cel.index", args.get(1).value, offset)
+              : new ExprNode(ExprNode.Kind.IDENT, id, null, offset);
+        }
+        if (name.equals("block")) {
+          if (args.size() != 3 || args.get(1).kind != ExprNode.Kind.LIST)
+            throw error("cel.block requires a literal list and a result expression");
+          var slots = args.get(1).children;
+          for (ExprNode slot : slots) if (slot.optionalEntry) throw error("optional block slot");
+          ExprNode[] children = Arrays.copyOf(slots, slots.length + 1);
+          children[slots.length] = args.get(2);
+          return new ExprNode(ExprNode.Kind.BLOCK, "cel.block", null, offset, children);
+        }
+        if (name.equals("bind")) {
+          if (args.size() != 4
+              || args.get(1).kind != ExprNode.Kind.IDENT
+              || args.get(1).name.contains(".")) throw error("invalid cel.bind arguments");
+          ExprNode variable = args.get(1);
+          ExprNode node =
+              new ExprNode(
+                  ExprNode.Kind.MACRO,
+                  "bind",
+                  new String[] {variable.name},
+                  offset,
+                  args.get(2),
+                  args.get(3));
+          node.bindings =
+              new WriteNode[] {
+                new WriteNode(variable.name, variable.sourceStart, variable.sourceEnd)
+              };
+          node.children[1].statement = true;
+          return node;
+        }
+      }
+      if (("proto".equals(prefix) || ".proto".equals(prefix))
+          && (name.equals("getExt") || name.equals("hasExt"))) {
+        if (args.size() != 3 || args.get(2).qualifiedName() == null)
+          throw error("protobuf extension requires a qualified name");
+        String field = args.get(2).qualifiedName();
+        ExprNode select = new ExprNode(ExprNode.Kind.SELECT, field, false, offset, args.get(1));
+        select.extensionSelect = true;
+        return name.equals("getExt")
+            ? select
+            : new ExprNode(ExprNode.Kind.MACRO, "has", null, offset, select);
+      }
       if (name.equals("has") && !receiver && args.size() == 1) {
         if (args.get(0).kind != ExprNode.Kind.SELECT) throw error("has requires a field selection");
         return new ExprNode(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));

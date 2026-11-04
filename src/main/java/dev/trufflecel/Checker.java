@@ -6,6 +6,7 @@ final class Checker {
   private final Environment env;
   private final Map<String, CelType> declarations;
   private final boolean strict;
+  private List<CelType> blockTypes;
 
   Checker(Environment env, Map<String, CelType> declarations, boolean strict) {
     this.env = env;
@@ -41,6 +42,23 @@ final class Checker {
       }
     }
     return switch (n.kind) {
+      case BLOCK_INDEX -> {
+        int index = Math.toIntExact((Long) n.value);
+        if (blockTypes == null || index >= blockTypes.size())
+          throw failure(n, "block index must reference an earlier slot in the current block");
+        yield blockTypes.get(index);
+      }
+      case BLOCK -> {
+        var outer = blockTypes;
+        blockTypes = new ArrayList<>();
+        try {
+          for (int i = 0; i < n.children.length - 1; i++)
+            blockTypes.add(check(n.children[i], locals));
+          yield check(n.children[n.children.length - 1], locals);
+        } finally {
+          blockTypes = outer;
+        }
+      }
       case CONSTANT -> n.value instanceof CelType t ? CelType.type(t) : Values.type(n.value);
       case IDENT -> {
         if (locals.containsKey(n.name)) yield locals.get(n.name);
@@ -49,6 +67,15 @@ final class Checker {
       }
       case SELECT, INDEX -> {
         CelType operand = check(n.children[0], locals);
+        if (n.extensionSelect) {
+          if (operand.isDyn()) yield CelType.DYN;
+          ObjectType type = env.objectTypes.get(operand.name());
+          String extension = type == null ? null : env.resolve(n.name, type.extensions().keySet());
+          require(n, extension != null, "unregistered protobuf extension: " + n.name);
+          if (extension == null) yield CelType.DYN;
+          n.name = "." + extension;
+          yield type.extensions().get(extension);
+        }
         boolean optional = Boolean.TRUE.equals(n.value) || operand.name().equals("optional_type");
         if (operand.name().equals("optional_type")) operand = parameter(operand, 0);
         CelType result = CelType.DYN;
@@ -125,6 +152,10 @@ final class Checker {
         CelType range = check(n.children[0], locals);
         String[] variables = (String[]) n.value;
         var scope = new HashMap<>(locals);
+        if (n.name.equals("bind")) {
+          scope.put(variables[0], range);
+          yield check(n.children[1], scope);
+        }
         if (n.name.equals("optMap") || n.name.equals("optFlatMap")) {
           require(
               n,

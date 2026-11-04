@@ -38,6 +38,15 @@ public final class CompiledTest {
             false,
             64);
         check("optional.of(x).orValue(0) > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 192);
+        check("cel.bind(v, x + 1, v > 5)", Map.of("x", 10L), true, Map.of("x", 0L), false, 64);
+        check(
+            "cel.block([x + 1], cel.index(0) > 5)",
+            Map.of("x", 10L),
+            true,
+            Map.of("x", 0L),
+            false,
+            768);
+        check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
         check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),

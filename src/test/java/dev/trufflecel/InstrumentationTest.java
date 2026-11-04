@@ -234,4 +234,19 @@ public class InstrumentationTest {
       }
     }
   }
+
+  @Test
+  public void blockAndBindingScopesRemainObservable() throws Exception {
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      String source = "cel.bind(x, 5, cel.block([x + 1], [2].map(x, cel.index(0) + x)))";
+      assertEquals(8L, context.eval("cel", source).getArrayElement(0).asLong());
+      assertTrue(events.tags.contains(StandardTags.CallTag.class));
+      assertTrue(events.tags.contains(StandardTags.ReadVariableTag.class));
+      assertTrue(events.tags.contains(StandardTags.WriteVariableTag.class));
+      assertTrue(events.localValues.contains(5L));
+      assertTrue(events.localValues.contains(2L));
+    }
+  }
 }

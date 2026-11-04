@@ -29,6 +29,26 @@ ratio above. Compare its own before/after reports rather than comparing its perc
 with Bazel's line-hit percentage. The baseline is
 [`591e706`](https://app.codecov.io/github/elide-dev/trufflecel/commit/591e7061fedfeeaa89504fe9f0349584f27729a1).
 
+## Complete conformance corpus and TruffleData 0.4.0
+
+The follow-up implementation enables every imported suite: 2,771 cases across 32 corpus
+files, with no suite allowlist. Regression tests also cover invalid extension signatures,
+Base64 padding and line breaks, set comparison budgets, lexical binding scopes, lazy block
+caching (including errors), concurrent evaluations, instrumentation, and native protobuf
+extension construction, defaults, presence, wire round-trips, and registration validation.
+
+| Metric | Measured after extension support |
+| --- | ---: |
+| Line hits | 3,320 / 3,324 (99.88%) |
+| Branch hits | 3,665 / 3,669 (99.89%) |
+| CI minimum, each metric | 99.8% |
+
+All new production lines and branches are covered. The same four defensive lines and four
+invariant branch outcomes listed below remain. JVM guest-compilation checks add bindings,
+blocks, and sets, with allocation ceilings of 64, 768, and 1,536 bytes per evaluation for the
+representative expressions in `benchmarks/CompiledTest.java`. Existing ceilings are unchanged.
+Native JIT checks exercise the same operations.
+
 ## Remaining paths
 
 Four missed lines are retained in defensive exception handlers:

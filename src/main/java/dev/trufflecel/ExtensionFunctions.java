@@ -11,6 +11,11 @@ final class ExtensionFunctions {
 
   private static final Set<String> NAMES =
       Set.of(
+          "sets.contains",
+          "sets.equivalent",
+          "sets.intersects",
+          "base64.encode",
+          "base64.decode",
           "charAt",
           "indexOf",
           "lastIndexOf",
@@ -97,6 +102,18 @@ final class ExtensionFunctions {
         cidr = CelType.of("net.CIDR");
     boolean ok;
     switch (name) {
+      case "sets.contains", "sets.equivalent", "sets.intersects":
+        ok = matches(t, list, list);
+        result = CelType.BOOL;
+        break;
+      case "base64.encode":
+        ok = matches(t, CelType.BYTES);
+        result = str;
+        break;
+      case "base64.decode":
+        ok = matches(t, str);
+        result = CelType.BYTES;
+        break;
       case "charAt":
         ok = matches(t, str, integer);
         result = str;
@@ -238,6 +255,22 @@ final class ExtensionFunctions {
       if (NetworkValue.supports(name)) return NetworkValue.apply(name, args);
       Object a = args[0];
       switch (name) {
+        case "sets.contains":
+          return containsAll((List<?>) a, (List<?>) args[1], ctx);
+        case "sets.equivalent":
+          return containsAll((List<?>) a, (List<?>) args[1], ctx)
+              && containsAll((List<?>) args[1], (List<?>) a, ctx);
+        case "sets.intersects":
+          for (Object item : (List<?>) args[1])
+            if (setContains((List<?>) a, item, ctx)) return true;
+          return false;
+        case "base64.encode":
+          Bytes bytes = (Bytes) a;
+          ctx.charge(4L * ((bytes.size() + 2L) / 3));
+          return Base64.getEncoder().encodeToString(bytes.toByteArray());
+        case "base64.decode":
+          return new Bytes(
+              Base64.getDecoder().decode(((String) a).replace("\r", "").replace("\n", "")));
         case "lists.range":
           {
             long count = (Long) a;
@@ -319,6 +352,20 @@ final class ExtensionFunctions {
 
   private static int index(Object value) {
     return Math.toIntExact((Long) value);
+  }
+
+  private static boolean containsAll(List<?> values, List<?> requested, EvalContext ctx) {
+    for (Object item : requested) if (!setContains(values, item, ctx)) return false;
+    return true;
+  }
+
+  private static boolean setContains(List<?> values, Object item, EvalContext ctx) {
+    for (Object candidate : values) {
+      ctx.tick();
+      if ((Boolean) Functions.apply("==", new Object[] {candidate, item}, ctx.environment))
+        return true;
+    }
+    return false;
   }
 
   private static void flatten(

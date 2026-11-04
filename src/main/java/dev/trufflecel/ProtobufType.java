@@ -14,6 +14,11 @@ public final class ProtobufType implements ObjectType {
   private final ProtoCompiler.Source source;
   private final Map<String, CelType> fields;
   private final Map<Descriptor, ProtobufType> graph;
+  private final Map<String, FieldDescriptor> descriptors;
+  private final Map<FieldDescriptor, Integer> ordinals;
+  private final List<FieldDescriptor> extensions;
+  private final Map<String, CelType> extensionTypes;
+  private final ExtensionRegistry registry;
 
   /** A lossless native protobuf value; no protobuf Message is retained. */
   public static final class Value {
@@ -40,7 +45,7 @@ public final class ProtobufType implements ObjectType {
     /** Explicit host export. Binary ingestion and CEL field access use the native row directly. */
     public Message message() {
       try {
-        return DynamicMessage.parseFrom(type.descriptor, toBytes().toByteArray());
+        return DynamicMessage.parseFrom(type.descriptor, toBytes().toByteArray(), type.registry);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalStateException("Invalid native protobuf row", e);
       }
@@ -56,36 +61,173 @@ public final class ProtobufType implements ObjectType {
   }
 
   public ProtobufType(Descriptor descriptor, Descriptor... additionalTypes) {
-    this(descriptor, new IdentityHashMap<>(), model(descriptor, additionalTypes));
+    this(descriptor, List.of(), additionalTypes);
+  }
+
+  /** Register extensions explicitly; native rows store their values by wire field number. */
+  public ProtobufType(
+      Descriptor descriptor, List<FieldDescriptor> extensions, Descriptor... additionalTypes) {
+    this(
+        descriptor,
+        new IdentityHashMap<>(),
+        model(descriptor, additionalTypes, extensions),
+        List.copyOf(extensions));
     for (Descriptor additional : additionalTypes)
-      if (!graph.containsKey(additional)) new ProtobufType(additional, graph, model);
+      if (!graph.containsKey(additional))
+        new ProtobufType(additional, graph, model, this.extensions);
   }
 
   private final ProtoPlan.Model model;
 
-  private static ProtoPlan.Model model(Descriptor descriptor, Descriptor[] additionalTypes) {
+  private static ProtoPlan.Model model(
+      Descriptor descriptor, Descriptor[] additionalTypes, List<FieldDescriptor> extensions) {
     var roots = new ArrayList<Descriptor>();
     roots.add(descriptor);
     roots.addAll(Arrays.asList(additionalTypes));
     return new ProtoPlan.Model(
-        null, ProtoCompiler.definitions(roots), Limits.DEFAULT, 100, 8 * 1024 * 1024);
+        null,
+        extensions.isEmpty()
+            ? ProtoCompiler.definitions(roots)
+            : extensionDefinitions(roots, extensions),
+        Limits.DEFAULT,
+        100,
+        8 * 1024 * 1024);
+  }
+
+  private static List<ProtoPlan.Type> extensionDefinitions(
+      List<Descriptor> roots, List<FieldDescriptor> extensions) {
+    for (FieldDescriptor extension : extensions)
+      if (!extension.isExtension())
+        throw new IllegalArgumentException("Not an extension: " + extension.getFullName());
+    var pending = new ArrayDeque<>(roots);
+    var types = new LinkedHashMap<String, ProtoPlan.Type>();
+    var used = new HashSet<FieldDescriptor>();
+    while (!pending.isEmpty()) {
+      Descriptor descriptor = pending.remove();
+      if (types.containsKey(descriptor.getFullName())) continue;
+      if (descriptor.getFile().toProto().getSyntax().equals("editions")
+          || descriptor.getOptions().getMessageSetWireFormat())
+        throw new IllegalArgumentException("Editions and MessageSet are not supported");
+      var fields = new ArrayList<>(descriptor.getFields());
+      for (FieldDescriptor extension : extensions)
+        if (extension.getContainingType() == descriptor) {
+          fields.add(extension);
+          used.add(extension);
+        }
+      Limits.DEFAULT.check(1, fields.size());
+      if (types.size() >= Limits.DEFAULT.maxColumns())
+        throw new ContractViolation("Protobuf descriptor graph budget exceeded");
+      var plans = new ArrayList<ProtoPlan.FieldPlan>();
+      for (FieldDescriptor field : fields) {
+        var kind = ProtoPlan.Kind.valueOf(field.getType().name());
+        ProtoPlan.EnumType enumeration = null;
+        if (field.getJavaType() == FieldDescriptor.JavaType.ENUM) {
+          var numbers = new LinkedHashMap<String, Integer>();
+          for (EnumValueDescriptor value : field.getEnumType().getValues())
+            numbers.put(value.getName(), value.getNumber());
+          enumeration =
+              new ProtoPlan.EnumType(
+                  field.getEnumType().getFullName(), !field.getEnumType().isClosed(), numbers);
+        }
+        boolean message = field.getJavaType() == FieldDescriptor.JavaType.MESSAGE;
+        if (message) pending.add(field.getMessageType());
+        Object defaultValue;
+        if (message) defaultValue = Missing.INSTANCE;
+        else {
+          Object value =
+              field.isRepeated()
+                  ? switch (field.getType()) {
+                    case INT64, UINT64, SINT64, FIXED64, SFIXED64 -> 0L;
+                    case FLOAT -> 0.0f;
+                    case DOUBLE -> 0.0;
+                    case BOOL -> false;
+                    case STRING -> "";
+                    case BYTES -> ByteString.EMPTY;
+                    case ENUM -> field.getEnumType().getValues().get(0);
+                    default -> 0;
+                  }
+                  : field.getDefaultValue();
+          defaultValue =
+              switch (field.getType()) {
+                case BYTES -> DataArray.copyOfBytes(((ByteString) value).toByteArray());
+                case ENUM -> (long) ((EnumValueDescriptor) value).getNumber();
+                case UINT32, FIXED32 -> Integer.toUnsignedLong((Integer) value);
+                case UINT64, FIXED64 ->
+                    new ExactNumber(
+                        new java.math.BigDecimal(new UInt((Long) value).toBigInteger()));
+                case INT32, SINT32, SFIXED32 -> ((Integer) value).longValue();
+                case FLOAT -> ((Float) value).doubleValue();
+                default -> value;
+              };
+        }
+        String name = field.isExtension() ? field.getFullName() : field.getName();
+        plans.add(
+            new ProtoPlan.FieldPlan(
+                name,
+                field.getNumber(),
+                kind,
+                field.isRepeated(),
+                field.isMapField(),
+                field.hasPresence(),
+                field.isRequired(),
+                field.isPacked(),
+                field.getContainingOneof() == null ? -1 : field.getContainingOneof().getIndex(),
+                message ? field.getMessageType().getFullName() : "",
+                enumeration,
+                defaultValue,
+                field.isExtension() ? "[" + name + "]" : field.getJsonName()));
+      }
+      types.put(
+          descriptor.getFullName(),
+          new ProtoPlan.Type(
+              descriptor.getFullName(), descriptor.getOptions().getMapEntry(), plans));
+    }
+    if (used.size() != extensions.size())
+      throw new IllegalArgumentException("Duplicate or unreachable extension");
+    return List.copyOf(types.values());
   }
 
   private ProtobufType(
-      Descriptor descriptor, Map<Descriptor, ProtobufType> graph, ProtoPlan.Model model) {
+      Descriptor descriptor,
+      Map<Descriptor, ProtobufType> graph,
+      ProtoPlan.Model model,
+      List<FieldDescriptor> extensions) {
     this.descriptor = descriptor;
     this.graph = graph;
     this.model = model;
+    this.extensions = extensions;
+    registry = ExtensionRegistry.newInstance();
+    for (FieldDescriptor extension : extensions) {
+      if (extension.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
+        registry.add(extension, DynamicMessage.getDefaultInstance(extension.getMessageType()));
+      else registry.add(extension);
+    }
     graph.put(descriptor, this);
     plan = model.type(descriptor.getFullName());
-    source = ProtoCompiler.bind(plan, descriptor);
+    source = extensions.isEmpty() ? ProtoCompiler.bind(plan, descriptor) : null;
     var types = new LinkedHashMap<String, CelType>();
-    for (FieldDescriptor f : descriptor.getFields()) types.put(f.getName(), type(f));
+    var all = new ArrayList<>(descriptor.getFields());
+    for (FieldDescriptor extension : extensions)
+      if (extension.getContainingType() == descriptor) all.add(extension);
+    var names = new LinkedHashMap<String, FieldDescriptor>();
+    var indices = new IdentityHashMap<FieldDescriptor, Integer>();
+    for (FieldDescriptor f : all) {
+      String name = f.isExtension() ? f.getFullName() : f.getName();
+      types.put(name, type(f));
+      names.put(name, f);
+      indices.put(f, indices.size());
+    }
+    descriptors = Map.copyOf(names);
+    ordinals = Map.copyOf(indices);
     fields = Map.copyOf(types);
-    for (FieldDescriptor f : descriptor.getFields())
+    var registered = new LinkedHashMap<String, CelType>();
+    for (FieldDescriptor field : all)
+      if (field.isExtension()) registered.put(field.getFullName(), type(field));
+    extensionTypes = Map.copyOf(registered);
+    for (FieldDescriptor f : all)
       if (f.getJavaType() == FieldDescriptor.JavaType.MESSAGE
           && !graph.containsKey(f.getMessageType()))
-        new ProtobufType(f.getMessageType(), graph, model);
+        new ProtobufType(f.getMessageType(), graph, model, extensions);
   }
 
   /** The shared native plan for direct binary decoding and row construction. */
@@ -97,7 +239,7 @@ public final class ProtobufType implements ObjectType {
     for (ProtobufType type : graph.values()) {
       if (!WELL_KNOWN.containsKey(type.name())) builder.objectType(type);
       var enums = new HashSet<>(type.descriptor.getEnumTypes());
-      for (FieldDescriptor f : type.descriptor.getFields())
+      for (FieldDescriptor f : type.descriptors.values())
         if (f.getJavaType() == FieldDescriptor.JavaType.ENUM) enums.add(f.getEnumType());
       for (EnumDescriptor e : enums)
         for (EnumValueDescriptor v : e.getValues())
@@ -111,7 +253,8 @@ public final class ProtobufType implements ObjectType {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT, "Protobuf descriptor differs from adapter");
     try {
-      return new Value(this, source.snapshot(message));
+      return new Value(
+          this, source == null ? plan.decode(message.toByteArray()) : source.snapshot(message));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, e.getMessage());
     }
@@ -147,6 +290,10 @@ public final class ProtobufType implements ObjectType {
     return fields;
   }
 
+  public Map<String, CelType> extensions() {
+    return extensionTypes;
+  }
+
   public boolean accepts(Object value) {
     return value instanceof Value v && v.type.descriptor == descriptor;
   }
@@ -161,14 +308,14 @@ public final class ProtobufType implements ObjectType {
   }
 
   private FieldDescriptor field(String name) {
-    FieldDescriptor f = descriptor.findFieldByName(name);
+    FieldDescriptor f = descriptors.get(name);
     if (f == null) throw Values.error(CelException.Code.NO_SUCH_KEY, name);
     return f;
   }
 
   public boolean has(Object value, String name) {
     FieldDescriptor f = field(name);
-    return ((Value) value).row().has(f.getIndex());
+    return ((Value) value).row().has(ordinals.get(f));
   }
 
   /** Ingest a row produced by this type's plan and apply CEL well-known mappings. */
@@ -181,7 +328,7 @@ public final class ProtobufType implements ObjectType {
   public Object get(Object value, String name) {
     Value v = (Value) value;
     FieldDescriptor f = field(name);
-    Object nativeValue = DataLibrary.factory().getUncached().read(v.row(), f.getIndex());
+    Object nativeValue = DataLibrary.factory().getUncached().read(v.row(), ordinals.get(f));
     if (nativeValue == Missing.INSTANCE) {
       String nestedName = f.getMessageType().getFullName();
       if ((nestedName.endsWith("Value") || nestedName.equals("google.protobuf.Any"))
@@ -257,12 +404,12 @@ public final class ProtobufType implements ObjectType {
                                 d.findFieldByNumber(2).getName(), item.getValue())))
                     .row());
           }
-          builder.set(f.getIndex(), new DataArray(entries.toArray()));
+          builder.set(ordinals.get(f), new DataArray(entries.toArray()));
         } else if (f.isRepeated()) {
           var entries = new ArrayList<Object>();
           for (Object item : (List<?>) value) entries.add(toProto(item, f));
-          builder.set(f.getIndex(), new DataArray(entries.toArray()));
-        } else builder.set(f.getIndex(), toProto(value, f));
+          builder.set(ordinals.get(f), new DataArray(entries.toArray()));
+        } else builder.set(ordinals.get(f), toProto(value, f));
       }
       return new Value(this, builder.build());
     } catch (IllegalArgumentException

@@ -442,4 +442,193 @@ public class ProtobufIntegrationTest {
     assertThrows(
         CelException.class, () -> ordinaryEnum.construct(Map.of("enum", CelNull.INSTANCE)));
   }
+
+  @Test
+  public void nativeRegisteredExtensionsRoundTripAndDefaults() throws Exception {
+    Descriptor record = descriptor();
+    var file =
+        FileDescriptorProto.newBuilder()
+            .setName("extensions.proto")
+            .setPackage("ext")
+            .setSyntax("proto2")
+            .addDependency(record.getFile().getName())
+            .addMessageType(
+                DescriptorProto.newBuilder()
+                    .setName("Base")
+                    .addOneofDecl(OneofDescriptorProto.newBuilder().setName("choice"))
+                    .addField(
+                        FieldDescriptorProto.newBuilder()
+                            .setName("regular")
+                            .setNumber(1)
+                            .setType(FieldDescriptorProto.Type.TYPE_INT32)
+                            .setOneofIndex(0))
+                    .addEnumType(
+                        EnumDescriptorProto.newBuilder()
+                            .setName("Closed")
+                            .addValue(
+                                EnumValueDescriptorProto.newBuilder().setName("ZERO").setNumber(0))
+                            .addValue(
+                                EnumValueDescriptorProto.newBuilder().setName("ONE").setNumber(1)))
+                    .addExtensionRange(
+                        DescriptorProto.ExtensionRange.newBuilder().setStart(100).setEnd(1000)));
+    int number = 100;
+    for (FieldDescriptor original : record.getFields()) {
+      if (original.isMapField()) continue;
+      for (boolean repeated : List.of(false, true)) {
+        var field =
+            original.toProto().toBuilder()
+                .setName(original.getName() + (repeated ? "_many" : "_one"))
+                .setNumber(number++)
+                .setExtendee(".ext.Base")
+                .setLabel(
+                    repeated
+                        ? FieldDescriptorProto.Label.LABEL_REPEATED
+                        : FieldDescriptorProto.Label.LABEL_OPTIONAL);
+        if (original.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
+          field.setTypeName(".test.Record");
+        if (original.getJavaType() == FieldDescriptor.JavaType.ENUM)
+          field.setTypeName(".test.Record.State");
+        if (!repeated && original.getJavaType() == FieldDescriptor.JavaType.STRING)
+          field.setDefaultValue("fallback");
+        file.addExtension(field);
+      }
+    }
+    file.addExtension(
+        FieldDescriptorProto.newBuilder()
+            .setName("closed")
+            .setNumber(number)
+            .setExtendee(".ext.Base")
+            .setType(FieldDescriptorProto.Type.TYPE_ENUM)
+            .setTypeName(".ext.Base.Closed"));
+    FileDescriptor descriptor =
+        FileDescriptor.buildFrom(file.build(), new FileDescriptor[] {record.getFile()});
+    Descriptor base = descriptor.findMessageTypeByName("Base");
+    List<FieldDescriptor> extensions = descriptor.getExtensions();
+    ProtobufType type = new ProtobufType(base, extensions);
+    var env =
+        type.register(Cel.newBuilder().container("ext"))
+            .variable("m", CelType.of(type.name()))
+            .build();
+    var message = DynamicMessage.newBuilder(base);
+    for (FieldDescriptor field : extensions) {
+      Object scalar =
+          switch (field.getJavaType()) {
+            case INT -> 7;
+            case LONG -> 9L;
+            case FLOAT -> 1.5f;
+            case DOUBLE -> 2.5;
+            case BOOLEAN -> true;
+            case STRING -> "present";
+            case BYTE_STRING -> ByteString.copyFromUtf8("hello");
+            case ENUM -> field.getEnumType().findValueByNumber(1);
+            case MESSAGE ->
+                DynamicMessage.newBuilder(record)
+                    .setField(record.findFieldByName("int64"), 12L)
+                    .build();
+          };
+      message.setField(field, field.isRepeated() ? List.of(scalar) : scalar);
+    }
+    ProtobufType.Value value = type.snapshot(message.build());
+    assertEquals(message.build(), value.message());
+    var decoded = (ProtobufType.Value) type.decode(value.toBytes());
+    assertEquals(value, decoded);
+    var constructed = new LinkedHashMap<String, Object>();
+    for (FieldDescriptor field : extensions) {
+      String name = field.getFullName();
+      assertTrue(type.has(decoded, name));
+      constructed.put(name, type.get(decoded, name));
+      assertTrue(env.compile("proto.hasExt(m, " + field.getName() + ")").test(Map.of("m", value)));
+      assertEquals(
+          type.get(value, name),
+          env.compile("proto.getExt(m, ." + name + ")").evaluateInternal(Map.of("m", value)));
+    }
+    assertEquals(value, type.construct(constructed));
+    assertThrows(
+        CelException.class,
+        () ->
+            env.compile("proto.getExt(dyn(optional.of(m)), ext.string_one)")
+                .evaluate(Map.of("m", value)));
+    assertEquals(
+        "[ext.string_one]",
+        type.plan()
+            .field(type.plan().ordinal(descriptor.findExtensionByName("string_one").getNumber()))
+            .jsonName());
+    var empty = type.construct(Map.of());
+    assertFalse(env.compile("proto.hasExt(m, string_one)").test(Map.of("m", empty)));
+    assertEquals(
+        "fallback", env.compile("proto.getExt(m, string_one)").evaluate(Map.of("m", empty)));
+    assertEquals(List.of(), type.get(empty, "ext.int32_many"));
+    assertTrue(type.get(empty, "ext.message_one") instanceof ProtobufType.Value);
+    assertFalse(env.compile("proto.hasExt(dyn(m), ext.string_one)").test(Map.of("m", empty)));
+    assertThrows(CelException.class, () -> env.compile("proto.getExt(m, ext.nope)"));
+    assertThrows(
+        CelException.class,
+        () -> env.parse("proto.getExt(m, ext.nope)").evaluate(Map.of("m", value)));
+    assertThrows(
+        CelException.class,
+        () -> env.compile("proto.getExt(dyn(m), ext.nope)").evaluate(Map.of("m", value)));
+    assertThrows(CelException.class, () -> env.compile("proto.getExt(1, ext.string_one)"));
+    assertThrows(CelException.class, () -> env.parse("proto.getExt(1, ext.string_one)").evaluate());
+    assertThrows(
+        CelException.class, () -> env.parse("proto.hasExt({}, ext.string_one)").evaluate());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new ProtobufType(base, List.of(record.getFields().get(0))));
+    assertThrows(IllegalArgumentException.class, () -> new ProtobufType(record, extensions));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new ProtobufType(base, List.of(extensions.get(0), extensions.get(0))));
+    assertTrue(env.compile(".proto.hasExt(m, .ext.string_one)").test(Map.of("m", value)));
+    var ordinary =
+        new ObjectType() {
+          public String name() {
+            return "Ordinary";
+          }
+
+          public Map<String, CelType> fields() {
+            return Map.of();
+          }
+
+          public Object construct(Map<String, Object> f) {
+            return new Object();
+          }
+
+          public Object get(Object v, String f) {
+            return 0L;
+          }
+
+          public boolean has(Object v, String f) {
+            return false;
+          }
+
+          public boolean accepts(Object v) {
+            return false;
+          }
+        };
+    assertTrue(ordinary.extensions().isEmpty());
+    for (boolean editions : List.of(false, true)) {
+      var unsupported =
+          FileDescriptorProto.newBuilder()
+              .setName("unsupported.proto")
+              .setSyntax(editions ? "editions" : "proto2")
+              .addMessageType(
+                  DescriptorProto.newBuilder()
+                      .setName("Unsupported")
+                      .setOptions(MessageOptions.newBuilder().setMessageSetWireFormat(!editions)));
+      if (editions) unsupported.setEdition(Edition.EDITION_2023);
+      Descriptor root =
+          FileDescriptor.buildFrom(unsupported.build(), new FileDescriptor[] {})
+              .getMessageTypes()
+              .get(0);
+      assertThrows(IllegalArgumentException.class, () -> new ProtobufType(root, extensions, base));
+    }
+    var many = FileDescriptorProto.newBuilder().setName("many.proto");
+    for (int i = 0; i < 256; i++)
+      many.addMessageType(DescriptorProto.newBuilder().setName("Message" + i));
+    var roots =
+        FileDescriptor.buildFrom(many.build(), new FileDescriptor[] {})
+            .getMessageTypes()
+            .toArray(Descriptor[]::new);
+    assertThrows(ContractViolation.class, () -> new ProtobufType(base, extensions, roots));
+  }
 }

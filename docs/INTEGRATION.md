@@ -103,11 +103,26 @@ Registration covers reachable messages and enums. Supply additional descriptors 
 payload types not reachable through fields; unknown `Any` types fail explicitly. Timestamps,
 durations, wrappers, Struct/Value/ListValue and registered Any payloads map to CEL values.
 JSON integers become doubles when constructing protobuf Value, as required by that type.
-Descriptor initialization remains a host operation. TruffleData's lossless plan compiler
-rejects Editions, extension ranges, and MessageSet; applications needing these can supply a
-specialized `ObjectType`. There is no proto2 extension registry in this bridge.
+Descriptor initialization remains a host operation. Register proto2 extensions explicitly:
 
-The 2,587-case core and extension suite retains its independent test-only `ProtoSchema` oracle. Separate
+```java
+var type = new ProtobufType(messageDescriptor, extensionFieldDescriptors);
+var environment = type.register(Cel.newBuilder())
+    .variable("msg", CelType.of(type.name())).build();
+var program = environment.compile("proto.getExt(msg, example.my_extension)");
+```
+
+The second constructor argument is a `List<FieldDescriptor>` containing package-scoped or
+message-scoped extensions. Additional message descriptors may follow it for `Any` payloads.
+TruffleCEL compiles these descriptors into explicit TruffleData native field plans, using
+extension wire numbers and fully qualified names. Binary ingestion, construction, defaults,
+presence, repeated extensions, and nested message extensions use native rows. Host message
+snapshots with extensions enter through the native binary parser; host export uses an
+explicit protobuf extension registry. No classpath scanning or reflection is added.
+Editions and MessageSet remain unsupported. Custom adapters can expose registered extensions
+through `ObjectType.extensions()`, with access implemented by their existing `get`/`has` methods.
+
+The 2,771-case complete conformance suite retains its independent test-only `ProtoSchema` oracle. Separate
 published-artifact tests cover all scalar types, defaults/presence, nested messages, repeated
 fields/maps, unknown enums, construction, wire decoding and well-known mappings. No tests
 load classes or artifacts from the sibling TruffleData checkout.

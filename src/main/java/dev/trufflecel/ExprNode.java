@@ -44,18 +44,21 @@ class ExprNode extends CelNode {
     return tag == StandardTags.ExpressionTag.class
         || (rootBody || statement) && tag == StandardTags.StatementTag.class
         || rootBody && (tag == StandardTags.RootTag.class || tag == StandardTags.RootBodyTag.class)
-        || kind == Kind.CALL && tag == StandardTags.CallTag.class
-        || kind == Kind.IDENT && tag == StandardTags.ReadVariableTag.class;
+        || (kind == Kind.CALL || kind == Kind.BLOCK) && tag == StandardTags.CallTag.class
+        || (kind == Kind.IDENT || kind == Kind.BLOCK_INDEX)
+            && tag == StandardTags.ReadVariableTag.class;
   }
 
   @Override
   public Object getNodeObject() {
-    return kind == Kind.IDENT
+    return kind == Kind.IDENT || kind == Kind.BLOCK_INDEX
         ? GuestValue.wrap(Map.of(StandardTags.ReadVariableTag.NAME, name))
         : null;
   }
 
   enum Kind {
+    BLOCK,
+    BLOCK_INDEX,
     CONSTANT,
     IDENT,
     SELECT,
@@ -73,6 +76,7 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal Object value;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalEntry;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean extensionCall;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean extensionSelect;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean optionalFallback;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean stringPredicate;
   final int offset;
@@ -136,8 +140,11 @@ class ExprNode extends CelNode {
   boolean escapesContext() {
     if (kind == Kind.CONSTANT) return false;
     if (kind == Kind.IDENT) return name.startsWith(".");
-    if (extensionCall || kind == Kind.SELECT || kind == Kind.OBJECT || name.equals("sortBy"))
-      return true;
+    if (kind == Kind.BLOCK
+        || extensionCall
+        || kind == Kind.SELECT
+        || kind == Kind.OBJECT
+        || name.equals("sortBy")) return true;
     for (ExprNode child : children) if (child.escapesContext()) return true;
     return false;
   }
@@ -304,6 +311,7 @@ class ExprNode extends CelNode {
   }
 
   String qualifiedName() {
+    if (extensionSelect) return null;
     if (kind == Kind.IDENT) return name;
     if (kind == Kind.SELECT && !Boolean.TRUE.equals(value)) {
       String prefix = children[0].qualifiedName();
@@ -338,6 +346,8 @@ class ExprNode extends CelNode {
   Object execute(VirtualFrame frame, EvalContext ctx) {
     ctx.tick();
     return switch (kind) {
+      case BLOCK -> block(frame.materialize(), ctx);
+      case BLOCK_INDEX -> ctx.block.read(Math.toIntExact((Long) value));
       case CONSTANT -> value;
       case IDENT ->
           localSlot >= 0
@@ -388,6 +398,16 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   private Object selectValue(EvalContext ctx, boolean presence, Object operand) {
     if (operand instanceof Unknown) return operand;
+    if (extensionSelect) {
+      for (ObjectType type : ctx.environment.runtimeObjectTypes)
+        if (type.accepts(operand)) {
+          String extension = ctx.environment.resolve(name, type.extensions().keySet());
+          if (extension == null)
+            throw Values.error(CelException.Code.NO_SUCH_FIELD, "unregistered extension: " + name);
+          return presence ? type.has(operand, extension) : Values.in(type.get(operand, extension));
+        }
+      throw Values.overload("protobuf extension");
+    }
     boolean lifted = Boolean.TRUE.equals(value) || operand instanceof OptionalValue;
     if (operand instanceof OptionalValue o) {
       if (!o.present()) return presence ? false : o;
@@ -527,11 +547,74 @@ class ExprNode extends CelNode {
     throw Values.overload("optional");
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private Object block(com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
+    ctx.charge(children.length);
+    EvalContext scoped = ctx.fork();
+    VirtualFrame captured = forkFrame(frame, scoped);
+    scoped.block = new BlockScope(children, captured, scoped);
+    EvalContext body = ctx.fork();
+    body.block = scoped.block;
+    return children[children.length - 1].execute(forkFrame(frame, body), body);
+  }
+
+  private static VirtualFrame forkFrame(com.oracle.truffle.api.frame.Frame frame, EvalContext ctx) {
+    VirtualFrame copy =
+        com.oracle.truffle.api.Truffle.getRuntime()
+            .createVirtualFrame(new Object[] {ctx}, frame.getFrameDescriptor());
+    // Blocks force context-based locals, so no auxiliary frame slots need copying.
+    return copy;
+  }
+
+  static final class BlockScope {
+    private final ExprNode[] expressions;
+    private final VirtualFrame frame;
+    private final EvalContext context;
+    private final Object[] results;
+    private int depth;
+
+    BlockScope(ExprNode[] expressions, VirtualFrame frame, EvalContext context) {
+      this.expressions = expressions;
+      this.frame = frame;
+      this.context = context;
+      results = new Object[expressions.length - 1];
+    }
+
+    Object read(int index) {
+      Object result = results[index];
+      if (result == null) {
+        if (depth >= context.environment.maxDepth)
+          throw Values.error(
+              CelException.Code.RESOURCE_EXHAUSTED, "block evaluation nesting limit exceeded");
+        depth++;
+        try {
+          EvalContext localContext = context.fork();
+          result = expressions[index].execute(forkFrame(frame, localContext), localContext);
+        } catch (CelException e) {
+          result = e;
+        } finally {
+          depth--;
+        }
+        results[index] = result;
+      }
+      if (result instanceof CelException error) throw error;
+      return result;
+    }
+  }
+
   private Object macro(VirtualFrame frame, EvalContext ctx) {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
     Object range = children[0].execute(frame, ctx);
     if (range instanceof Unknown) return range;
     String[] variables = (String[]) value;
+    if (name.equals("bind")) {
+      bindings[0].execute(frame, ctx, range);
+      try {
+        return children[1].execute(frame, ctx);
+      } finally {
+        bindings[0].clear(frame, ctx);
+      }
+    }
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;

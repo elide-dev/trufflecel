@@ -15,9 +15,13 @@ python tools/import_conformance.py /path/to/cel-spec
 
 Regeneration requires `protoc` and Python `protobuf`; ordinary Bazel builds/tests do not.
 The importer checks the source revision and fails on unknown textproto fields/types.
-`ConformanceTest.SUITES` selects 20 core suites and six extension suites: `optionals`,
-`macros2`, `string_ext`, `lists_ext`, `math_ext`, and `network_ext`. All 2,587 selected
-cases execute as JUnit parameters; there is no case skip or expected-failure mechanism.
-Other extensions remain in the snapshot. An upstream case encoded as `eval_error` may
-be rejected earlier by the checker; in that situation the harness also parses and executes
-unchecked to verify the required runtime error. Syntax failures are never accepted this way.
+`ConformanceTest` executes all 2,771 cases in all 32 imported files, with no suite
+allowlist, per-case skips, or expected-failure mechanism. `unknowns` is an empty upstream
+file; it contributes no cases. This includes bindings, block, encoders, sets, proto2
+extensions, and plumbing in addition to the previously enabled core and extension suites.
+The plumbing cases execute through the JVM harness; they do not imply a CEL RPC server.
+
+An upstream case encoded as `eval_error` may be rejected earlier by the checker; in that
+situation the harness also parses and executes unchecked to verify the required runtime
+error. Syntax failures are never accepted this way. The harness checks that an evaluation
+error occurs, not that its diagnostic text matches the upstream reference text.
