@@ -210,6 +210,27 @@ report identifies the base revision and applied patch: this measurement predates
 of the lexer optimization. It covers native guest-JIT evaluation only; the README charts
 remain the explicitly dated full-suite snapshot until the next complete matrix is available.
 
+The lexer and binding-lookup changes (`31f6702`,
+[run 41741898254](https://github.com/elide-dev/trufflecel/actions/runs/41741898254))
+reduce CodSpeed compile/evaluate instructions by 12.3%, to 19,123 instructions/op, relative
+to `325e7cb`. Other cases change by at most 1.1%; all 14 profile totals reconcile. The
+comprehension profile still attributes about 13% of instructions to scope-name lookup,
+which motivates resolving local reads to lexical slots during program creation.
+
+Two [independent lookup diagnostics](benchmarks/lookup-diagnostics.json) apply separate patches
+to `31f6702`. Validating small immutable scalar activations through declared names
+(`04d83d6`) records 28 bytes/op for native policy evaluation, versus the earlier 116.
+Its paired policy RSS is 75.2 MiB for TruffleCEL and 67.1 MiB for cel-java, so the allocation
+reduction does not yet establish a policy RSS win. Extra and unmatched inputs still pass
+through normalization; nulls and mutable inputs retain snapshot behavior.
+
+Resolving local reads to lexical slots (`252466e`) removes repeated scope-name searches.
+Its native comprehension diagnostic records 384 bytes/op and 118.6 MiB RSS, versus cel-java's
+648 bytes/op and 66.4 MiB. This does not close the comprehension footprint gap. Both candidates
+pass the native JIT/blocklist and comparison checks. The saved report includes all 72 process
+measurements, binary hashes, worker CPU models, and independently reconstructed source hashes.
+These runs do not measure the combined implementation; its full CI matrix remains separate.
+
 ## Guest compilation and allocation gates
 
 `bazel test //benchmarks:compiled` runs on the pinned Elide GraalVM JDK, as part of
