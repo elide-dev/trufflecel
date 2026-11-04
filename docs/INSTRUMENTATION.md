@@ -54,6 +54,11 @@ and the original evaluation budget are preserved. The `Source` APIs retain every
 operator and literal, including when instantiating a template that has already produced an
 optimized program, so tools continue to receive the complete sequence of source events.
 
+Without a `Source`, `size()` applied directly to `map`, `filter`, or `transformList` counts
+results without storing the final list. Predicates and mappers still execute in their original
+order, including host calls, unknown propagation, errors and budget charges. Source-backed
+programs retain the list result and the complete sequence of instrumentation events.
+
 Expressions without local bindings or source instrumentation create evaluation state inside
 the call target, allowing guest compilation to eliminate it on eligible paths. Uninstrumented
 comprehensions whose state stays in guest code reserve auxiliary frame slots for local values,
