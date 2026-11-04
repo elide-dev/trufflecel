@@ -1,6 +1,7 @@
 [![TruffleCEL — Common Expression Language on GraalVM Truffle](docs/images/trufflecel-banner.png)](docs/images/trufflecel.svg)
 
 [![CI](https://github.com/elide-dev/trufflecel/actions/workflows/ci.yml/badge.svg)](https://github.com/elide-dev/trufflecel/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/elide-dev/trufflecel/graph/badge.svg?token=LH1rsnWmBY)](https://codecov.io/gh/elide-dev/trufflecel)
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json%3Frepository%3Delide-dev/trufflecel)](https://codspeed.io/elide-dev/trufflecel)
 [![Release](https://img.shields.io/github/v/release/elide-dev/trufflecel?include_prereleases)](https://github.com/elide-dev/trufflecel/releases)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
