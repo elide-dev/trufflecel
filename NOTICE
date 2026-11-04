@@ -1,0 +1,12 @@
+TruffleCEL
+Copyright (c) 2026 Elide Technologies, Inc. and TruffleCEL contributors
+https://github.com/elide-dev/trufflecel
+
+Available under MIT OR Apache-2.0, at your option; see LICENSE.
+
+The source repository includes CEL specification conformance data from
+https://github.com/cel-expr/cel-spec under Apache-2.0. Its license and provenance
+are retained in third_party/cel-spec/LICENSE and third_party/cel-spec/README.md.
+These fixtures are not included in the runtime JARs.
+
+Dependencies are distributed separately and retain their own licenses.
