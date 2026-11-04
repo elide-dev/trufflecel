@@ -20,14 +20,7 @@ final class EncoderFunctions {
     if (name.endsWith("encode")) {
       Object value = jsonValue(args[0], ctx, 0);
       var buffer = new StringWriter();
-      try {
-        var writer = new JsonWriter(new BudgetWriter(buffer, ctx));
-        write(value, writer);
-        writer.flush();
-        writer.close();
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e);
-      }
+      writeJson(value, buffer, ctx);
       String json = buffer.toString();
       if (!yaml) return json;
       // Dump only the data model already validated for JSON. No bean representer is involved.
@@ -260,6 +253,18 @@ final class EncoderFunctions {
         return fields;
       }
     throw new IllegalArgumentException("value cannot be encoded as JSON");
+  }
+
+  /** Serialize the normalized data model, charging output before writing to the destination. */
+  static void writeJson(Object value, Writer destination, EvalContext ctx) {
+    try {
+      var writer = new JsonWriter(new BudgetWriter(destination, ctx));
+      write(value, writer);
+      writer.flush();
+      writer.close();
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   private static void write(Object value, JsonWriter writer) throws IOException {

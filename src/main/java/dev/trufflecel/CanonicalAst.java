@@ -478,7 +478,8 @@ public final class CanonicalAst {
     throw new IllegalArgumentException("Missing constant kind");
   }
 
-  private static final class Writer {
+  /** Serializes compiler IR independently of source parsing. */
+  static final class Writer {
     long nextId = 1;
     final Set<Long> reserved = new HashSet<>();
 

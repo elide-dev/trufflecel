@@ -68,9 +68,23 @@ The gRPC host tool is tested separately from library coverage. JVM compilation/a
 checks include structured parsing; the Linux native JIT/blocklist gate includes those paths
 as well. The native gate cannot execute on a macOS ARM host and still requires Linux CI.
 
+## Serializer failure coverage
+
+Package-level serializer tests cover JSON destination failures during writing, flushing and
+closing, preserve the original I/O exception, and verify that output budgets are charged
+before characters reach the destination. Canonical AST tests also verify rejection of
+unsupported compiler macro nodes independently of source parsing. The serializer entry points
+remain package-private; no public API, coverage exclusions or thresholds change.
+
+| Metric | Measured after serializer failure tests |
+| --- | ---: |
+| Line hits | 4,229 / 4,233 (99.91%) |
+| Branch hits | 4,329 / 4,333 (99.91%) |
+| Local patch coverage against `main`, counting partial lines as uncovered | 933 / 933 (100%) |
+
 ## Remaining paths
 
-Seven missed lines remain in defensive paths:
+Four missed lines remain in defensive paths:
 
 - `DataValues.from`: the checked interop exception handler for native arrays/nulls.
   TruffleData validates their representations before this conversion; arbitrary objects
@@ -78,12 +92,7 @@ Seven missed lines remain in defensive paths:
 - `ProtobufType.Value.message`: the checked protobuf parse exception handler during host
   export. The wire bytes come from the validated native plan's encoder.
 
-- `EncoderFunctions`: the checked I/O exception handler for a JSON writer backed only by
-  an in-memory StringWriter and budget writer.
-- `CanonicalAst`: the defensive unsupported-macro rejection after handling every macro
-  produced by the parser.
-
-Five uncovered branch outcomes follow existing invariants:
+Four uncovered branch outcomes follow existing invariants:
 
 - `Environment.prepare`: built-in type names have already been removed from the free
   variable set before its additional built-in-name check.
@@ -91,8 +100,6 @@ Five uncovered branch outcomes follow existing invariants:
   extension exclusion cannot reject a currently supported extension.
 - `ExprNode.call`: scalar operators and string predicates are disjoint from the extension
   dispatch set; their extension exclusion remains defensive.
-- `CanonicalAst`: the unsupported-macro branch follows exhaustive handling of the parser
-  macro set.
 - `Parser.string`: `codePointAt` and the checked escape decoder already bound code points
   to the Unicode range. The surrogate rejection is exercised; the additional invalid-range
   check cannot fail for those inputs.

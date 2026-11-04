@@ -9,6 +9,22 @@ import org.junit.Test;
 
 public final class CanonicalAstTest {
   @Test
+  public void serializerRejectsUnsupportedCompilerMacros() {
+    var node =
+        new ExprNode(
+            ExprNode.Kind.MACRO,
+            "unsupported",
+            new String[] {"x"},
+            0,
+            new ExprNode(ExprNode.Kind.LIST, "", null, 0),
+            ExprNode.constant(true, 0));
+    var error =
+        assertThrows(
+            IllegalArgumentException.class, () -> new CanonicalAst.Writer().expression(node));
+    assertEquals("Unsupported macro: unsupported", error.getMessage());
+  }
+
+  @Test
   public void canonicalRoundTripsCoverLanguageFormsAndMacros() {
     Environment env = Cel.newBuilder().inferVariables(true).build();
     for (String source :

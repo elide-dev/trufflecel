@@ -2,6 +2,9 @@ package dev.trufflecel;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.*;
 import org.junit.Test;
 
@@ -12,6 +15,47 @@ public final class EncoderTest {
 
   private static void yes(String source) {
     assertEquals(source, true, eval(source));
+  }
+
+  @Test
+  public void outputFailuresRetainTheirCause() {
+    for (String phase : List.of("write", "flush", "close")) {
+      var failure = new IOException("failure during " + phase);
+      Writer destination =
+          new Writer() {
+            public void write(char[] chars, int offset, int count) throws IOException {
+              if (phase.equals("write")) throw failure;
+            }
+
+            public void flush() throws IOException {
+              if (phase.equals("flush")) throw failure;
+            }
+
+            public void close() throws IOException {
+              if (phase.equals("close")) throw failure;
+            }
+          };
+      var context = new EvalContext(Cel.newBuilder().build(), Map.of());
+      var error =
+          assertThrows(
+              IllegalArgumentException.class,
+              () ->
+                  EncoderFunctions.writeJson(
+                      Map.of("value", List.of(1L, true)), destination, context));
+      assertSame(phase, failure, error.getCause());
+    }
+  }
+
+  @Test
+  public void outputBudgetIsChargedBeforeTheDestinationReceivesCharacters() {
+    var context = new EvalContext(Cel.newBuilder().evaluationBudget(1).build(), Map.of());
+    var destination = new StringWriter();
+    var error =
+        assertThrows(
+            CelException.class, () -> EncoderFunctions.writeJson("abc", destination, context));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, error.code());
+    // Only the opening quote fits. The string contents must never reach the destination.
+    assertEquals("\"", destination.toString());
   }
 
   @Test
