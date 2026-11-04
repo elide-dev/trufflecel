@@ -39,9 +39,9 @@ branch protection. Those administrative settings must be provisioned on GitHub/C
 
 ## Version and publishing contract
 
-`VERSION` and `.release-please-manifest.json` start at the bootstrap baseline
-`0.1.0-alpha.0`; this is not a published release. Conventional `feat:`/`fix:` commits produce
-alpha release PRs, updating VERSION, the manifest and CHANGELOG together. All three Maven
+`VERSION` and `.release-please-manifest.json` record the latest release. Conventional
+commits produce stable release PRs, updating VERSION, the manifest, CHANGELOG and Bazel
+module version together. Before 1.0, feature commits advance the minor version. All three Maven
 artifacts share the resulting version. Bazel's default publication version is a development
 snapshot; the release workflow always supplies the exact version explicitly.
 

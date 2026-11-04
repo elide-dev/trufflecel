@@ -44,10 +44,10 @@ public final class CompiledTest {
             true,
             Map.of("xs", List.of(1L, -2L)),
             false,
-            192);
+            160);
         check(
             "xs.filter(v, v % 2 == 0).map(v, v * v).size()",
-            Map.of("xs", List.of(1L, 2L, 3L, 4L)), 2L, Map.of("xs", List.of(2L, 4L, 6L)), 3L, 512);
+            Map.of("xs", List.of(1L, 2L, 3L, 4L)), 2L, Map.of("xs", List.of(2L, 4L, 6L)), 3L, 320);
         check("[x, x + 1].size() == 2", Map.of("x", 10L), true, Map.of("x", -1L), true, 320);
         check("{'v': x}.v > 5", Map.of("x", 10L), true, Map.of("x", 0L), false, 512);
         check(

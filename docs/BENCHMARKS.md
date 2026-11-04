@@ -251,6 +251,13 @@ instructions relative to `717f203`; the remaining cases change by at most 1.0%. 
 reconcile. These existing cases do not isolate the string-predicate path, so the paired policy
 measurements remain the direct evidence for its allocation reduction.
 
+The completed paired suite for `5bdd9be` retains 24/24 timing and allocation wins and
+records 17/24 fixed-work RSS wins on an AMD EPYC 9V45 runner. The README charts use this
+full snapshot. Remaining RSS losses are native comprehension compilation, JVM and native
+guest-JIT comprehension evaluation, native comprehension interpretation, and image-build
+policy evaluation. Runner hardware differs from the earlier full runs, so the win counts
+describe paired comparisons within each run, not a controlled measurement of revision gains.
+
 Reusing immutable compiler declarations (`385d755`) copies the declaration map only when
 inference adds a name. A [paired native compilation diagnostic](benchmarks/declaration-reuse-diagnostic.json)
 records lower time, allocation, and fixed-work RSS for all three fixtures:
@@ -264,6 +271,9 @@ records lower time, allocation, and fixed-work RSS for all three fixtures:
 This closes the comprehension compile-RSS gap in the diagnostic. Native JIT/blocklist and
 comparison checks pass; the final full-suite snapshot must verify it across execution modes.
 The measured revision includes the string-predicate change and excludes frame-storage experiments.
+Its [CodSpeed run](https://github.com/elide-dev/trufflecel/actions/runs/41747068746)
+records 0.9% fewer compile/evaluate instructions relative to `5bdd9be`; all 14 totals
+reconcile and the other cases change by less than 0.9%.
 
 Auxiliary frame locals and exploded binding cleanup (`83d8ffc`) let guest compilation
 eliminate scope storage for eligible comprehensions. Source-backed programs retain named
@@ -279,6 +289,20 @@ The change passes 21 JVM test targets, the native JIT/blocklist and comparison c
 and tightened allocation gates. Production coverage is 98.63% of lines and 92.87% of
 branches. Reentrant evaluation, nested ranges, shadowed bindings, and instrumented scopes
 remain covered.
+
+Counting the final comprehension result (`63e1139`) avoids retaining a list consumed only
+by `size()`. The [native diagnostic](benchmarks/comprehension-count-diagnostic.json) records
+196 bytes/op for guest-JIT comprehension evaluation versus cel-java's 648, and 284 bytes/op
+for interpretation versus 648. Paired median times are lower in all nine native comparisons.
+Comprehension RSS remains higher: 117.4 MiB versus 66.3 MiB under guest JIT, and 69.4 MiB
+versus 66.2 MiB under interpretation. Compilation retains lower paired RSS for all fixtures.
+The 108-process report predates the subsequent reuse of owned input snapshots during iteration.
+
+Internal iteration can also reuse normalized list storage instead of cloning it. Public array
+conversion still returns a copy, and host mutation cannot alter the evaluation snapshot.
+With both changes, the JVM allocation gate records 104 bytes/evaluation for `all` and
+256 for filter/map/size, with limits of 160 and 320 respectively. All 21 JVM targets pass;
+production coverage is 98.64% of lines and 93.04% of branches.
 
 ## Guest compilation and allocation gates
 
@@ -300,8 +324,8 @@ JVM thread-allocation accounting, synchronous C2 host compilation (`-Xbatch` and
 Pinning C2 for the host harness avoids a synchronous Graal host-compiler/class-loader
 deadlock observed on macOS; the guest compiler is still Graal, with mandatory last-tier checks. Unsupported accounting or an interpreter-only runtime
 fails rather than skips. Scalar, logical, conditional, and addition fixtures are capped at
-64 bytes/op; optional evaluation and `all` at 192; list construction at 320; filter/map and
-maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
+64 bytes/op; `all` at 160; optional evaluation at 192; list construction and filter/map at
+320; maps at 512; row access at 640; protobuf/JSON at 1,024; and CIDR parsing/containment
 at 20,000. These are bounded regression budgets for the fixed
 fixtures, not zero-allocation claims or limits for arbitrary inputs.
 

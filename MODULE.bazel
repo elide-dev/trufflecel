@@ -1,4 +1,4 @@
-module(name = "trufflecel", version = "0.1.0")
+module(name = "trufflecel", version = "0.1.0")  # x-release-please-version
 
 bazel_dep(name = "rules_java", version = "9.9.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
