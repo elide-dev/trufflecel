@@ -17,6 +17,7 @@
 * **benchmarks:** initialize upstream constants for image-build ASTs ([e3df286](https://github.com/elide-dev/trufflecel/commit/e3df286ada04fe052f5ab2d6e732b0ee893bd732))
 * **benchmarks:** materialize runfiles for local timing after RBE builds ([64abff6](https://github.com/elide-dev/trufflecel/commit/64abff68e40a56993266af1c555c0a2e6e3e6f19))
 * **release:** keep Bazel module version synchronized ([d3a0c42](https://github.com/elide-dev/trufflecel/commit/d3a0c42bbb5954b32ab74905e89cddd47c92fd8e))
+* **release:** keep Maven versions out of Bazel dependency resolution ([aa7eab5](https://github.com/elide-dev/trufflecel/commit/aa7eab5801616515d79d3ec57a11c333728c11f2))
 
 
 ### Performance Improvements
