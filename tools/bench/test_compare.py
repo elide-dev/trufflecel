@@ -9,6 +9,7 @@ from compare import LEGACY_PANELS, PANELS, WORKLOADS, ENGINES, render, validate
 
 def fixture():
     return {'schema': 3, 'forks': 3, 'captured_at': 'test', 'commit': '0' * 40,
+            'versions': {'graalvm': 'historical-toolchain'},
             'host': {'system': 'Linux', 'machine': 'x86_64', 'cpu': 'test <cpu> & name'},
             'results': [dict(runtime=p[0], stage=p[1], workload=w, engine=e, fork=f,
                              ns_per_op=[10.0 + f] * 7, image_prepare_ns=100, image_build_ast=p[0] == 'svm',
@@ -29,6 +30,7 @@ class ComparisonTest(unittest.TestCase):
             root = ET.parse(path).getroot()
             self.assertEqual(root.tag, '{http://www.w3.org/2000/svg}svg')
             self.assertIn('test &lt;cpu&gt; &amp; name', path.read_text())
+            self.assertIn('GraalVM historical-toolchain', path.read_text())
             render(data, path, 'peak-rss')
             self.assertIn('2.0 MiB', path.read_text())
             ET.parse(path)

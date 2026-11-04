@@ -155,7 +155,7 @@ def render(data, path, metric="time"):
                  "Historical dataset: no RSS or interpreter measurements."]
     for i, note in enumerate(notes):
         parts.append(f'<text x="{32+(i%2)*584}" y="{chart_bottom+24+(i//2)*23}" class="label">{esc(note)}</text>')
-    footer = [f'Captured {data["captured_at"]} · source {data["commit"][:12]} · GraalVM 25.5.5-elide.23',
+    footer = [f'Captured {data["captured_at"]} · source {data["commit"][:12]} · GraalVM {data["versions"]["graalvm"]}',
               f'{data["host"]["system"]} {data["host"]["machine"]} · {data["host"]["cpu"][:100]}',
               'Shared CI hardware: diagnostic results for these fixtures, not a performance guarantee. Raw samples accompany this SVG.']
     for i, line in enumerate(footer):
@@ -183,7 +183,7 @@ def measure(args):
             "dirty": bool(run(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip()),
             "sources_sha256": before, "host": {"system": platform.system(), "machine": platform.machine(),
             "cpu": cpu, "kernel": platform.release(), "logical_cpus": os.cpu_count()},
-            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.23"},
+            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.24"},
             "svm_binary_sha256": hashlib.sha256(paths["svm"].read_bytes()).hexdigest(),
             "memory_measurement": {"method": "GNU time %M", "unit": "KiB",
                                    "scope": "whole process lifetime", "native_image_layout": "shared two-engine harness",
