@@ -1582,6 +1582,119 @@
           "checksum": 256
         }
       }
+    },
+    {
+      "run_id": 41745899048,
+      "url": "https://github.com/elide-dev/trufflecel/actions/runs/41745899048",
+      "prepared": {
+        "sources_sha256": "7e9bd886b76ba741e425af162a0333f10545782cde1b5abc01006855bf45567d",
+        "binary_sha256": "d9ea31efbe46b674a2a6f47d5fa2b292f6d7e95f94d09bacb004969e2e61a649",
+        "cases_sha256": "adaa63ff7166e7872f5c380721fbd26b2b294b4f6d6b9ae970cc4fcdbc2ff9d8",
+        "commit": "5bdd9be291d45cc606b94e8b353cd52c6a55139d",
+        "platform": "linux-amd64",
+        "mode": "native-aot",
+        "build_system": "bazel"
+      },
+      "results": {
+        "benchmarks/cases.json::native-aot/compile-evaluate[iterations=256]": {
+          "instructions": 4947854,
+          "instructions_per_operation": 19327.5546875,
+          "case": "compile-evaluate",
+          "iterations": 256,
+          "checksum": 21760
+        },
+        "benchmarks/cases.json::native-aot/evaluate-scalar[iterations=256]": {
+          "instructions": 272209,
+          "instructions_per_operation": 1063.31640625,
+          "case": "evaluate-scalar",
+          "iterations": 256,
+          "checksum": 21760
+        },
+        "benchmarks/cases.json::native-aot/short-circuit[iterations=256]": {
+          "instructions": 319393,
+          "instructions_per_operation": 1247.62890625,
+          "case": "short-circuit",
+          "iterations": 256,
+          "checksum": 256
+        },
+        "benchmarks/cases.json::native-aot/comprehension[iterations=256]": {
+          "instructions": 2812168,
+          "instructions_per_operation": 10985.03125,
+          "case": "comprehension",
+          "iterations": 256,
+          "checksum": 1024
+        },
+        "benchmarks/cases.json::native-aot/regex[iterations=256]": {
+          "instructions": 9713579,
+          "instructions_per_operation": 37943.66796875,
+          "case": "regex",
+          "iterations": 256,
+          "checksum": 256
+        },
+        "benchmarks/cases.json::native-aot/native-row[iterations=256]": {
+          "instructions": 526417,
+          "instructions_per_operation": 2056.31640625,
+          "case": "native-row",
+          "iterations": 256,
+          "checksum": 21504
+        },
+        "benchmarks/cases.json::native-aot/protobuf[iterations=256]": {
+          "instructions": 946601,
+          "instructions_per_operation": 3697.66015625,
+          "case": "protobuf",
+          "iterations": 256,
+          "checksum": 256
+        },
+        "benchmarks/cases.json::native-aot/json[iterations=256]": {
+          "instructions": 1512809,
+          "instructions_per_operation": 5909.41015625,
+          "case": "json",
+          "iterations": 256,
+          "checksum": 256
+        },
+        "benchmarks/cases.json::native-aot/optional-chain[iterations=256]": {
+          "instructions": 970840,
+          "instructions_per_operation": 3792.34375,
+          "case": "optional-chain",
+          "iterations": 256,
+          "checksum": 10752
+        },
+        "benchmarks/cases.json::native-aot/two-variable-transform[iterations=256]": {
+          "instructions": 1314287,
+          "instructions_per_operation": 5133.93359375,
+          "case": "two-variable-transform",
+          "iterations": 256,
+          "checksum": 1024
+        },
+        "benchmarks/cases.json::native-aot/string-format[iterations=256]": {
+          "instructions": 2476091,
+          "instructions_per_operation": 9672.23046875,
+          "case": "string-format",
+          "iterations": 256,
+          "checksum": 2048
+        },
+        "benchmarks/cases.json::native-aot/list-sort[iterations=256]": {
+          "instructions": 2187642,
+          "instructions_per_operation": 8545.4765625,
+          "case": "list-sort",
+          "iterations": 256,
+          "checksum": 1024
+        },
+        "benchmarks/cases.json::native-aot/math-extrema[iterations=256]": {
+          "instructions": 1219413,
+          "instructions_per_operation": 4763.33203125,
+          "case": "math-extrema",
+          "iterations": 256,
+          "checksum": 1024
+        },
+        "benchmarks/cases.json::native-aot/network-cidr[iterations=256]": {
+          "instructions": 15700377,
+          "instructions_per_operation": 61329.59765625,
+          "case": "network-cidr",
+          "iterations": 256,
+          "checksum": 256
+        }
+      }
     }
   ]
 }
