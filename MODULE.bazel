@@ -2,6 +2,7 @@
 module(name = "trufflecel")
 
 bazel_dep(name = "rules_java", version = "9.9.0")
+bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "rules_jvm_external", version = "7.1")
 
@@ -22,10 +23,15 @@ maven.install(
         "com.h2database:h2:2.3.232",
         "junit:junit:4.13.2",
         "com.google.code.gson:gson:2.13.2",
+        "org.snakeyaml:snakeyaml-engine:3.2",
+        "io.grpc:grpc-netty-shaded:1.85.1",
+        "io.grpc:grpc-protobuf:1.85.1",
+        "io.grpc:grpc-stub:1.85.1",
         "com.google.googlejavaformat:google-java-format:1.28.0",
     ],
     repositories = ["https://repo.maven.apache.org/maven2", "https://maven.elide.dev", "https://maven.elide.dev/gvm-elide/25.5.5-elide.24"],
     lock_file = "//:maven_install.json",
+    version_conflict_policy = "pinned",
     fail_if_repin_required = True,
     known_contributing_modules = ["protobuf"],
 )
