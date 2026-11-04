@@ -89,8 +89,7 @@ libraries/drivers it needs.
 
 ## Release Please
 
-Release PRs maintain `VERSION`, `.release-please-manifest.json`, `CHANGELOG.md` and the
-version in `MODULE.bazel`. The
+Release PRs maintain `VERSION`, `.release-please-manifest.json` and `CHANGELOG.md`. The
 reusable publisher checks out and verifies the exact release tag before calling the uploader
 with its version. All modules release together. The explicit local `--publish` command
 remains available; coordinate manual publishes with CI to avoid concurrent metadata writes.
