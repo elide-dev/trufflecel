@@ -20,6 +20,16 @@ public final class Smoke {
           }
           e.peak(evaluate);
           e.verifyTier(true);
+          if (e.ours) {
+            var snapshots = new Activation[4];
+            for (int i = 0; i < 4; i++)
+              snapshots[i] = Activation.snapshot(Workloads.input(workload, true, i));
+            e.peak(i -> e.truffle.evaluate(snapshots[i & 3]));
+            for (int i = 0; i < 4; i++)
+              if (!Workloads.expected(workload, i).equals(e.truffle.evaluate(snapshots[i])))
+                throw new AssertionError("prepared/" + engine + "/" + workload + "/" + i);
+            e.verifyTier(true);
+          }
         }
       }
     }

@@ -68,6 +68,16 @@ public class ConformanceTest {
     conforms(true, true);
   }
 
+  @Test
+  public void preparedProductionProtobufConforms() {
+    conforms(false, true, true);
+  }
+
+  @Test
+  public void preparedProductionProtobufCanonicalConforms() {
+    conforms(true, true, true);
+  }
+
   private Program plan(Environment env, String source, boolean check, boolean canonical) {
     if (!canonical) return check ? env.compile(source) : env.parse(source);
     var parsed = CanonicalAst.parse(env, source);
@@ -75,6 +85,10 @@ public class ConformanceTest {
   }
 
   private void conforms(boolean canonical, boolean production) {
+    conforms(canonical, production, false);
+  }
+
+  private void conforms(boolean canonical, boolean production, boolean preparedActivation) {
     Environment.Builder builder = Cel.newBuilder();
     if (production) ProductionCorpus.register(builder);
     else TestObjects.register(builder);
@@ -135,7 +149,10 @@ public class ConformanceTest {
     if (flag("check_only")) return;
     Object actual;
     try {
-      actual = program.evaluateInternal(bindings);
+      actual =
+          preparedActivation
+              ? Values.in(program.evaluate(Activation.snapshot(bindings)))
+              : program.evaluateInternal(bindings);
     } catch (CelException e) {
       if (error && e.code() != CelException.Code.RESOURCE_EXHAUSTED) return;
       throw new AssertionError(test.get("expr") + ": " + e.getMessage(), e);

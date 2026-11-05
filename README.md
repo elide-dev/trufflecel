@@ -31,6 +31,10 @@ scopes and operation budget. Host collections are snapshotted, and failures carr
 CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
 explicit adapters; expressions cannot discover arbitrary Java methods.
 
+For repeated evaluations over the same input, `Activation.snapshot(bindings)` prepares reusable
+bindings for `program.evaluate(activation)` or `program.test(activation)`. See
+[snapshot ownership and reuse](docs/INTEGRATION.md#reusing-input-snapshots).
+
 ## Architecture
 
 Compile expressions once, then evaluate them against fresh inputs. The frontend implements
