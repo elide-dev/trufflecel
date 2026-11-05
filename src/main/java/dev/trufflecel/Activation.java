@@ -18,9 +18,10 @@ public final class Activation {
   }
 
   /**
-   * Snapshot all supplied bindings, including unused ones, with the same per-value normalization
-   * and bounds as {@link Program#evaluate(Map)}. Do not mutate inputs while preparing the snapshot.
-   * Subsequent host collection mutations are not visible to evaluations using this activation.
+   * Eagerly snapshot all supplied bindings, including unused ones. Unlike borrowed map evaluation,
+   * validation happens during preparation, using the same per-value normalization and bounds. Do
+   * not mutate inputs while preparing the snapshot. Subsequent host collection mutations are not
+   * visible to evaluations using this activation.
    */
   public static Activation snapshot(Map<String, ?> variables) {
     var owned = new HashMap<String, Object>();

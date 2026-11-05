@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Breaking changes
+
+* Ordinary `Program.evaluate(Map)` / `test(Map)` now borrow inputs. Callers must keep
+  bindings and reachable data stable until evaluation returns, including during callbacks.
+  Normalization and bounds checks happen when a binding is read; unused bindings are no
+  longer eagerly traversed or rejected. Use `Activation.snapshot` for eager validation
+  and isolation. See [the input contract](docs/INTEGRATION.md#borrowed-input-bindings).
+
 ## [0.4.1](https://github.com/elide-dev/trufflecel/compare/v0.4.0...v0.4.1) (2026-11-05)
 
 

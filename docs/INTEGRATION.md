@@ -31,6 +31,26 @@ A Polyglot integration can instead use language ID `cel`, MIME type `application
 and `context.getBindings("cel")`. Host object access is explicit: proxy objects, arrays,
 and hash entries are copied into CEL values. No Java methods are exposed to expressions.
 
+### Borrowed input bindings
+
+`Program.evaluate(Map)` and `Program.test(Map)` borrow the supplied activation for the
+call. Keep the map and all reachable input data stable until the call returns, including
+inside host functions and adapter callbacks. Mutation during evaluation is unsupported;
+Truffle assumptions cannot detect arbitrary writes to caller-owned Java collections.
+Updates between calls are observed. No input values are cached in the program across calls.
+
+Bindings are normalized when read. Collections and bytes that require conversion are
+snapshotted once per binding within that evaluation; unused bindings are not traversed
+or validated. Per-value depth/size bounds still apply when a binding is read, including
+its nested contents. Short-circuited bindings need not be read. This avoids rebuilding a
+complete activation for each request. Debugger inspection may read additional bindings.
+Public collection and byte results remain owned copies.
+
+This changes the previous eager `evaluate(Map)` behavior: unused invalid inputs no longer
+cause an evaluation error, and callers must not mutate inputs during evaluation. Use
+`Activation.snapshot` before evaluation when eager validation of all bindings or input
+isolation is required. Explicit snapshots retain their existing semantics.
+
 ### Reusing input snapshots
 
 When several policies or repeated evaluations use the same input, prepare its bindings once:
@@ -46,7 +66,7 @@ same per-value depth and size limits as ordinary map evaluation. Maps, lists, it
 arrays and bytes are copied into owned CEL values. Later mutations of those host collections
 do not change the snapshot; create a new activation to observe new input. Do not mutate input
 while snapshotting. Binding names must be non-null. Null values and missing bindings remain
-distinct. The existing `evaluate(Map)` API continues to snapshot on every call.
+distinct. Ordinary map evaluation instead borrows inputs and normalizes bindings on demand.
 
 An activation contains no program, execution scopes or operation budget. It can serve multiple
 programs, with fresh evaluation state on each call. Custom/opaque adapter values retain their
@@ -70,7 +90,7 @@ for that holder class, store a `PreparedProgram` alongside it if useful, and cal
 `org.graalvm.nativeimage.imagecode=buildtime` system property) identifies the execution
 phase, not input immutability or future reuse. TruffleCEL therefore does not automatically
 cache map bindings based on that property. A map created during image construction can
-still be mutated at runtime; ordinary map evaluation must observe its current contents.
+still be mutated between runtime evaluations; ordinary map evaluation observes the new contents.
 The representative native smoke gate checks that build-time snapshots retain owned
 collections and bytes after the source input changes at runtime, in both interpreter
 and guest-JIT execution. The adapter ownership restrictions above still apply.
