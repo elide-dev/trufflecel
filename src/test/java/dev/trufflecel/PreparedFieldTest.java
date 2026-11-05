@@ -8,6 +8,7 @@ import com.oracle.truffle.api.source.Source;
 import java.util.*;
 import java.util.concurrent.*;
 import dev.elide.truffledata.DataArray;
+import dev.elide.truffledata.protobuf.GeneratedMessage;
 import com.oracle.truffle.api.debug.Debugger;
 import com.oracle.truffle.api.debug.Breakpoint;
 import org.graalvm.polyglot.Context;
@@ -347,6 +348,304 @@ public final class PreparedFieldTest {
       } finally {
         context.leave();
       }
+    }
+  }
+
+  private static FieldDescriptorProto.Builder nestedField(
+      String name, int number, FieldDescriptorProto.Type type, String typeName, boolean repeated) {
+    var field =
+        FieldDescriptorProto.newBuilder()
+            .setName(name)
+            .setNumber(number)
+            .setType(type)
+            .setLabel(
+                repeated
+                    ? FieldDescriptorProto.Label.LABEL_REPEATED
+                    : FieldDescriptorProto.Label.LABEL_OPTIONAL);
+    if (!typeName.isEmpty()) field.setTypeName(typeName);
+    return field;
+  }
+
+  private static Descriptor nestedDescriptor(boolean required) throws Exception {
+    var leaf =
+        DescriptorProto.newBuilder()
+            .setName("Leaf")
+            .addField(
+                nestedField("count", 1, FieldDescriptorProto.Type.TYPE_INT64, "", false)
+                    .setLabel(
+                        required
+                            ? FieldDescriptorProto.Label.LABEL_REQUIRED
+                            : FieldDescriptorProto.Label.LABEL_OPTIONAL));
+    var labels =
+        DescriptorProto.newBuilder()
+            .setName("LabelsEntry")
+            .setOptions(MessageOptions.newBuilder().setMapEntry(true))
+            .addField(nestedField("key", 1, FieldDescriptorProto.Type.TYPE_STRING, "", false))
+            .addField(nestedField("value", 2, FieldDescriptorProto.Type.TYPE_STRING, "", false));
+    var byId =
+        DescriptorProto.newBuilder()
+            .setName("ByIdEntry")
+            .setOptions(MessageOptions.newBuilder().setMapEntry(true))
+            .addField(nestedField("key", 1, FieldDescriptorProto.Type.TYPE_INT64, "", false))
+            .addField(
+                nestedField(
+                    "value", 2, FieldDescriptorProto.Type.TYPE_MESSAGE, ".nested.Leaf", false));
+    var root =
+        DescriptorProto.newBuilder()
+            .setName("Root")
+            .addNestedType(labels)
+            .addNestedType(byId)
+            .addField(
+                nestedField(
+                    "child", 1, FieldDescriptorProto.Type.TYPE_MESSAGE, ".nested.Leaf", false))
+            .addField(
+                nestedField(
+                    "children", 2, FieldDescriptorProto.Type.TYPE_MESSAGE, ".nested.Leaf", true))
+            .addField(
+                nestedField(
+                    "labels",
+                    3,
+                    FieldDescriptorProto.Type.TYPE_MESSAGE,
+                    ".nested.Root.LabelsEntry",
+                    true))
+            .addField(
+                nestedField(
+                    "by_id",
+                    4,
+                    FieldDescriptorProto.Type.TYPE_MESSAGE,
+                    ".nested.Root.ByIdEntry",
+                    true));
+    return FileDescriptor.buildFrom(
+            FileDescriptorProto.newBuilder()
+                .setName("nested.proto")
+                .setPackage("nested")
+                .setSyntax(required ? "proto2" : "proto3")
+                .addMessageType(leaf)
+                .addMessageType(root)
+                .build(),
+            new FileDescriptor[0])
+        .findMessageTypeByName("Root");
+  }
+
+  @Test
+  public void nestedMessagesAndMapsPreserveGenericSemantics() throws Exception {
+    Descriptor descriptor = nestedDescriptor(false);
+    var type = new ProtobufType(descriptor);
+    var leaf = new ProtobufType(descriptor.findFieldByName("child").getMessageType());
+    Object child = leaf.construct(Map.of("count", 7L));
+    var fields =
+        Map.<String, Object>of(
+            "child",
+            child,
+            "children",
+            List.of(child, child),
+            "labels",
+            Map.of("env", "prod"),
+            "by_id",
+            Map.of(1L, child));
+    var input = type.construct(fields);
+    var other = new ProtobufType(descriptor).construct(fields);
+    for (long budget : new long[] {1, 5, 12, 30, 1000}) {
+      var planned = environment(type, budget);
+      var reference =
+          type.register(Cel.newBuilder())
+              .objectType(generic(type))
+              .variable("r", CelType.of(type.name()))
+              .evaluationBudget(budget)
+              .build();
+      for (String source :
+          List.of(
+              "r.child",
+              "r.child.count",
+              "has(r.child)",
+              "r.?child",
+              "r.children",
+              "r.children.map(v, v.count * 2)",
+              "r.children.map(v, v.count / (v.count - 7))",
+              "r.labels",
+              "r.labels['env']",
+              "r.labels.map(k, r.labels[k])",
+              "has(r.labels.env)",
+              "r.by_id",
+              "dyn(r.by_id)[1u].count",
+              "dyn(r.by_id)[1.0].count",
+              "r.by_id[2].count",
+              "r.labels.size()")) {
+        var template = planned.prepare(source);
+        var ordinary = template.instantiate();
+        var imported =
+            CanonicalAst.program(
+                planned, CanonicalAst.check(planned, CanonicalAst.parse(planned, source)));
+        var generic = reference.compile(source);
+        var genericImported =
+            CanonicalAst.program(
+                reference, CanonicalAst.check(reference, CanonicalAst.parse(reference, source)));
+        for (Object value :
+            List.of(input, other, type.construct(Map.of()), Unknown.of("r"), Map.of())) {
+          var bindings = Map.of("r", value);
+          Object expected = outcome(() -> generic.evaluate(bindings));
+          assertEquals(source + "/" + budget, expected, outcome(() -> ordinary.evaluate(bindings)));
+          assertEquals(
+              source,
+              outcome(() -> genericImported.evaluate(Activation.snapshot(bindings))),
+              outcome(() -> imported.evaluate(Activation.snapshot(bindings))));
+        }
+      }
+    }
+    var env = environment(type, 1000);
+    var snapshot = Activation.snapshot(Map.of("r", input));
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> ((Map<?, ?>) env.compile("r.labels").evaluate(snapshot)).clear());
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> ((List<?>) env.compile("r.children").evaluate(snapshot)).clear());
+    assertEquals(
+        List.of(14L, 14L), env.compile("r.children.map(v, v.count * 2)").evaluate(snapshot));
+    // Duplicate wire entries retain protobuf's last-value-wins behavior.
+    Descriptor entry = descriptor.findFieldByName("labels").getMessageType();
+    var first =
+        com.google.protobuf.DynamicMessage.newBuilder(entry)
+            .setField(entry.findFieldByName("key"), "env")
+            .setField(entry.findFieldByName("value"), "old")
+            .build();
+    var last = first.toBuilder().setField(entry.findFieldByName("value"), "new").build();
+    var message =
+        com.google.protobuf.DynamicMessage.newBuilder(descriptor)
+            .addRepeatedField(descriptor.findFieldByName("labels"), first)
+            .addRepeatedField(descriptor.findFieldByName("labels"), last)
+            .build();
+    assertEquals(
+        Map.of("env", "new"), env.compile("r.labels").evaluate(Map.of("r", type.input(message))));
+  }
+
+  @Test
+  public void absentRequiredMessagesFailOnlyWhenReadAndOwnedStorageStaysBounded() throws Exception {
+    var type = new ProtobufType(nestedDescriptor(true));
+    var env = environment(type, 1000);
+    var input = Map.of("r", type.construct(Map.of()));
+    assertEquals(false, env.compile("false && r.child.count > 0").evaluate(input));
+    var program = env.prepare("r.child").instantiate();
+    assertThrows(dev.elide.truffledata.ContractViolation.class, () -> program.evaluate(input));
+    assertEquals(List.of(1L), Values.ownedList(new Object[] {1L}));
+    assertThrows(CelException.class, () -> Values.ownedList(new Object[1_000_000]));
+    var large = new HashMap<Object, Object>();
+    for (long i = 0; i < 500_000; i++) large.put(i, i);
+    assertThrows(CelException.class, () -> Values.ownedMap(large));
+  }
+
+  @Test
+  public void mappedFieldsShareValidationAndPreserveAbsentValues() throws Exception {
+    Descriptor[] mapped = {
+      com.google.protobuf.BoolValue.getDescriptor(),
+      com.google.protobuf.Int32Value.getDescriptor(),
+      com.google.protobuf.Int64Value.getDescriptor(),
+      com.google.protobuf.FloatValue.getDescriptor(),
+      com.google.protobuf.DoubleValue.getDescriptor(),
+      com.google.protobuf.StringValue.getDescriptor(),
+      com.google.protobuf.Timestamp.getDescriptor(),
+      com.google.protobuf.Duration.getDescriptor()
+    };
+    String[] names = {"flag", "small", "count", "single", "real", "text", "created", "elapsed"};
+    var root = DescriptorProto.newBuilder().setName("Mapped");
+    for (int i = 0; i < names.length; i++)
+      root.addField(
+          nestedField(
+              names[i],
+              i + 1,
+              FieldDescriptorProto.Type.TYPE_MESSAGE,
+              "." + mapped[i].getFullName(),
+              false));
+    FileDescriptor[] dependencies = {mapped[0].getFile(), mapped[6].getFile(), mapped[7].getFile()};
+    var file =
+        FileDescriptorProto.newBuilder()
+            .setName("mapped.proto")
+            .setSyntax("proto3")
+            .addMessageType(root);
+    for (FileDescriptor dependency : dependencies) file.addDependency(dependency.getName());
+    Descriptor descriptor =
+        FileDescriptor.buildFrom(file.build(), dependencies).findMessageTypeByName("Mapped");
+    var type = new ProtobufType(descriptor);
+    var env = environment(type, 1000);
+    var reference =
+        type.register(Cel.newBuilder())
+            .objectType(generic(type))
+            .variable("r", CelType.of(type.name()))
+            .build();
+    var fields =
+        Map.<String, Object>of(
+            "flag",
+            true,
+            "small",
+            12L,
+            "count",
+            17L,
+            "single",
+            1.25,
+            "real",
+            2.5,
+            "text",
+            "yes",
+            "created",
+            java.time.Instant.ofEpochSecond(100, 5),
+            "elapsed",
+            java.time.Duration.ofSeconds(-2, 5));
+    for (String name : names) {
+      assertNotNull(type.prepareField(name, new ObjectType[] {type}));
+      for (String expression : List.of("r." + name, "has(r." + name + ")", "r.?" + name)) {
+        var planned = env.compile(expression);
+        var generic = reference.compile(expression);
+        for (Object value :
+            List.of(
+                type.construct(fields),
+                type.construct(Map.of()),
+                new ProtobufType(descriptor).construct(fields),
+                Unknown.of("r"))) {
+          var input = Activation.snapshot(Map.of("r", value));
+          assertEquals(
+              expression,
+              outcome(() -> generic.evaluate(input)),
+              outcome(() -> planned.evaluate(input)));
+        }
+      }
+    }
+    // Generated-message rows are outside this adapter's existing nested-row contract.
+    var reads = new java.util.concurrent.atomic.AtomicInteger();
+    var generated =
+        new GeneratedMessage(type.plan().nested(2), 1, new byte[0]) {
+          public Object get(int ordinal) {
+            reads.incrementAndGet();
+            return 7L;
+          }
+
+          public byte[] encode() {
+            return new byte[] {8, 7};
+          }
+        };
+    Object generatedInput = type.input(type.plan().newBuilder().set(2, generated).build());
+    reads.set(0);
+    assertThrows(
+        ClassCastException.class,
+        () -> reference.compile("r.count").evaluate(Map.of("r", generatedInput)));
+    assertThrows(
+        ClassCastException.class,
+        () -> env.compile("r.count").evaluate(Map.of("r", generatedInput)));
+    assertEquals(0, reads.get());
+    var descriptorFields = descriptor.getFields();
+    // Direct native builders can represent invalid well-known values; both paths must validate
+    // them.
+    for (int index : new int[] {6, 7}) {
+      var nested = type.plan().nested(index);
+      var builder = nested.newBuilder();
+      builder.set(1, 1_000_000_000L);
+      Object value = type.input(type.plan().newBuilder().set(index, builder.build()).build());
+      String source = "r." + descriptorFields.get(index).getName();
+      assertEquals(
+          CelException.Code.OVERFLOW,
+          outcome(() -> env.compile(source).evaluate(Map.of("r", value))));
+      assertEquals(
+          outcome(() -> reference.compile(source).evaluate(Map.of("r", value))),
+          outcome(() -> env.compile(source).evaluate(Map.of("r", value))));
     }
   }
 }

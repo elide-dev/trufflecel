@@ -352,29 +352,120 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     // Custom adapters may overlap protobuf values or have observable accepts/get callbacks.
     for (ObjectType type : runtimeTypes) if (!(type instanceof ProtobufType)) return null;
     FieldDescriptor field = descriptors.get(name);
-    if (field == null || field.isExtension() || field.isMapField()) return null;
-    boolean scalar =
-        switch (field.getType()) {
-          case INT32, INT64, SINT32, SINT64, SFIXED32, SFIXED64, FLOAT, DOUBLE, BOOL, STRING ->
-              true;
-          default -> false;
-        };
-    if (!scalar) return null;
-    return new ScalarField(this, ordinals.get(field), field.isRepeated());
+    if (field == null || field.isExtension()) return null;
+    if (!field.isRepeated() && field.getJavaType() == FieldDescriptor.JavaType.MESSAGE) {
+      Descriptor nested = field.getMessageType();
+      // These exact standard descriptors establish the scalar storage and ordinal contract.
+      String wrapper =
+          nested == BoolValue.getDescriptor()
+              ? "BoolValue"
+              : nested == Int32Value.getDescriptor()
+                  ? "Int32Value"
+                  : nested == Int64Value.getDescriptor()
+                      ? "Int64Value"
+                      : nested == FloatValue.getDescriptor()
+                          ? "FloatValue"
+                          : nested == DoubleValue.getDescriptor()
+                              ? "DoubleValue"
+                              : nested == StringValue.getDescriptor() ? "StringValue" : null;
+      if (wrapper != null
+          || nested == Timestamp.getDescriptor()
+          || nested == Duration.getDescriptor())
+        return new MappedField(
+            this, ordinals.get(field), wrapper, nested == Duration.getDescriptor());
+    }
+    if (field.isMapField()) {
+      ProtobufType entry = graph.get(field.getMessageType());
+      FieldDescriptor key = field.getMessageType().findFieldByNumber(1);
+      FieldDescriptor value = field.getMessageType().findFieldByNumber(2);
+      if (!canonicalScalar(key) || !preparedValue(value)) return null;
+      return new PreparedField(
+          this,
+          ordinals.get(field),
+          false,
+          null,
+          new MapField(entry.ordinals.get(key), entry.ordinals.get(value), nestedType(value)));
+    }
+    if (!preparedValue(field)) return null;
+    return new PreparedField(
+        this, ordinals.get(field), field.isRepeated(), nestedType(field), null);
   }
 
-  private record ScalarField(ProtobufType type, int ordinal, boolean repeated)
+  private record MappedField(ProtobufType type, int ordinal, String wrapper, boolean duration)
       implements FieldPlan {
     public ReadNode instantiate() {
-      return new ScalarRead(this);
+      return new MappedRead(this);
     }
   }
 
-  private static final class ScalarRead extends FieldPlan.ReadNode {
-    private final ScalarField field;
+  private static final class MappedRead extends FieldPlan.ReadNode {
+    private final MappedField field;
+    @Child private DataLibrary data = DataLibrary.factory().createDispatched(2);
+    @Child private DataLibrary nestedData = DataLibrary.factory().createDispatched(2);
+
+    MappedRead(MappedField field) {
+      this.field = field;
+    }
+
+    boolean accepts(Object value) {
+      return value instanceof Value v && v.type == field.type;
+    }
+
+    Object read(Object value) {
+      Object nested = data.read(((Value) value).row, field.ordinal);
+      if (field.wrapper != null) {
+        if (nested == Missing.INSTANCE) return CelNull.INSTANCE;
+        return mappedWrapper(field.wrapper, nestedData.read((ProtoRow) nested, 0));
+      }
+      if (nested == Missing.INSTANCE) return WellKnownTypes.time(0, 0, field.duration);
+      return WellKnownTypes.time(
+          (Long) nestedData.read((ProtoRow) nested, 0),
+          (Long) nestedData.read((ProtoRow) nested, 1),
+          field.duration);
+    }
+
+    boolean has(Object value) {
+      return ((Value) value).row.has(field.ordinal);
+    }
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static Object mappedWrapper(String wrapper, Object value) {
+    return WellKnownTypes.wrapperValue(wrapper, value);
+  }
+
+  private static boolean canonicalScalar(FieldDescriptor field) {
+    return switch (field.getType()) {
+      case INT32, INT64, SINT32, SINT64, SFIXED32, SFIXED64, FLOAT, DOUBLE, BOOL, STRING -> true;
+      default -> false;
+    };
+  }
+
+  private boolean preparedValue(FieldDescriptor field) {
+    return canonicalScalar(field) || nestedType(field) != null;
+  }
+
+  private ProtobufType nestedType(FieldDescriptor field) {
+    if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE
+        || WELL_KNOWN.containsKey(field.getMessageType().getFullName())) return null;
+    return graph.get(field.getMessageType());
+  }
+
+  private record MapField(int keyOrdinal, int valueOrdinal, ProtobufType nested) {}
+
+  private record PreparedField(
+      ProtobufType type, int ordinal, boolean repeated, ProtobufType nested, MapField map)
+      implements FieldPlan {
+    public ReadNode instantiate() {
+      return new PreparedRead(this);
+    }
+  }
+
+  private static final class PreparedRead extends FieldPlan.ReadNode {
+    private final PreparedField field;
     @Child private DataLibrary data = DataLibrary.factory().createDispatched(2);
 
-    ScalarRead(ScalarField field) {
+    PreparedRead(PreparedField field) {
       this.field = field;
     }
 
@@ -385,12 +476,49 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
     Object read(Object value) {
       Object result = data.read(((Value) value).row, field.ordinal);
-      return field.repeated ? Values.scalarRange((DataArray) result) : result;
+      if (field.map != null) return readMap((DataArray) result, field.map);
+      if (field.repeated) {
+        DataArray entries = (DataArray) result;
+        return field.nested == null
+            ? Values.scalarRange(entries)
+            : readMessages(entries, field.nested);
+      }
+      return field.nested == null ? result : message(result, field.nested);
     }
 
     boolean has(Object value) {
       return ((Value) value).row.has(field.ordinal);
     }
+  }
+
+  private static Object message(Object value, ProtobufType type) {
+    return value == Missing.INSTANCE ? defaultMessage(type) : new Value(type, (ProtoRow) value);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static Object defaultMessage(ProtobufType type) {
+    // Preserve lazy required-field validation: preparing an unused access must not fail.
+    return new Value(type, type.plan.newBuilder().build());
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static Object readMessages(DataArray entries, ProtobufType type) {
+    Object[] values = new Object[entries.size()];
+    for (int i = 0; i < values.length; i++) values[i] = message(entries.get(i), type);
+    return Values.ownedList(values);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static Object readMap(DataArray entries, MapField field) {
+    var values = new LinkedHashMap<Object, Object>();
+    for (int i = 0; i < entries.size(); i++) {
+      ProtoRow entry = (ProtoRow) entries.get(i);
+      Object value = entry.get(field.valueOrdinal);
+      values.put(
+          entry.get(field.keyOrdinal), field.nested == null ? value : message(value, field.nested));
+    }
+    // Count unique keys after protobuf's last-value-wins mapping, as generic normalization does.
+    return Values.ownedMap(values);
   }
 
   public boolean isZero(Object value) {
