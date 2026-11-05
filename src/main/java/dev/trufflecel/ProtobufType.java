@@ -117,8 +117,11 @@ public final class ProtobufType implements ObjectType {
       for (Descriptor d :
           List.of(
               BoolValue.getDescriptor(),
+              Int32Value.getDescriptor(),
               Int64Value.getDescriptor(),
+              UInt32Value.getDescriptor(),
               UInt64Value.getDescriptor(),
+              FloatValue.getDescriptor(),
               DoubleValue.getDescriptor(),
               StringValue.getDescriptor(),
               BytesValue.getDescriptor(),
