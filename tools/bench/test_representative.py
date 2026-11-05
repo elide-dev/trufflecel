@@ -40,5 +40,20 @@ class ResultsTest(unittest.TestCase):
         del row['total_ns_through_evaluations']['100']
         with self.assertRaises(ValueError): r.validate_lifecycle(row, *args)
 
+    def test_lifecycle_matrix_rejects_lost_or_repeated_processes(self):
+        rows = []
+        for runtime, engine, workload, fork in itertools.product(('jvm', 'svm'), r.ENGINES, r.WORKLOADS, range(3)):
+            for mode in (('cold',) if runtime == 'jvm' else ('cold', 'image-cold', 'steady', 'image-steady')):
+                rows.append(dict(runtime=runtime, engine=engine, workload=workload, mode=mode, fork=fork))
+        rows.extend(dict(runtime=runtime, engine=engine, workload='proto-policy', mode='ingest', fork=fork)
+                    for runtime, engine, fork in itertools.product(('jvm', 'svm'), ('truffle-interpreter', 'cel-java'), range(3)))
+        for row in rows:
+            row.update(configure_ns=1, prepare_ns=2, plan_ns=3,
+                       total_ns_through_evaluations={'1': 10, '10': 20, '100': 30, '1000': 40, '10000': 50},
+                       warmup_ns_per_op=[1.] * 5, ns_per_op=[1.] * 7)
+        r.validate_lifecycle_results(rows)
+        for broken in (rows[:-1], rows[1:], rows + rows[:1]):
+            with self.assertRaises(ValueError): r.validate_lifecycle_results(broken)
+
 
 if __name__ == '__main__': unittest.main()
