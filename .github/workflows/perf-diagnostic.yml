@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [base, boundary, dependencies, head]
+        variant: [base, boundary, dependencies, head, host-call]
     steps:
       - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
         with:
@@ -30,6 +30,15 @@ jobs:
           if [[ "$VARIANT" == base || "$VARIANT" == dependencies ]]; then
             git restore --source=df80d0d -- src/main/java/dev/trufflecel/CelNode.java
           fi
+      - name: Select explicit host entry
+        if: matrix.variant == 'host-call'
+        run: |
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          p = Path('src/main/java/dev/trufflecel/Program.java')
+          s = p.read_text().replace('return Values.out(evaluateInternal(variables));', 'return Values.out(target.call(null, arguments(variables)));')
+          p.write_text(s)
+          PYCODE
       - name: Configure BuildBuddy
         env:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY }}
@@ -67,7 +76,7 @@ jobs:
         run: |
           mkdir -p results
           lscpu > results/cpu.txt
-          for variant in base boundary dependencies head; do
+          for variant in base boundary dependencies head host-call; do
             chmod +x "images/diagnostic-$variant/image"
             for worker in false true; do
               for case_name in evaluate-scalar short-circuit; do
