@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/elide-dev/trufflecel/compare/v0.4.0...v0.4.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* isolate source lookup and upgrade TruffleData to 0.6.0 ([#14](https://github.com/elide-dev/trufflecel/issues/14)) ([cbfbb22](https://github.com/elide-dev/trufflecel/commit/cbfbb22254bee5eba1844af527a342eb34074e23))
+
 ## [0.4.0](https://github.com/elide-dev/trufflecel/compare/v0.3.0...v0.4.0) (2026-11-04)
 
 
