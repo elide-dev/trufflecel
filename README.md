@@ -186,6 +186,11 @@ curves. Compilation includes this library's own parser and checker; it is not Tr
 guest compilation. Corpus coverage and microbenchmark speedups do not establish a
 general replacement for another CEL engine.
 
+The [dedicated Threadripper measurements](docs/benchmarks/representative-20261105/README.md)
+show mixed JVM results: TruffleCEL performs well on scalar arithmetic and repeated-list
+materialization, while cel-java is faster on wide activations and the protobuf policy fixtures.
+The report retains raw samples, preparation costs, runtime settings and follow-up priorities.
+
 <details>
 <summary>Historical three-expression comparison (TruffleCEL 0.2.0)</summary>
 
