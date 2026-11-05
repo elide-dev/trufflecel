@@ -91,6 +91,39 @@ with C2, a 512 MiB heap and JMH's GC profiler for allocated bytes/op. Preparatio
 excluded only from the reusable-snapshot evaluation cell. This measures reuse of an existing
 input; ingestion and changed-input preparation remain application costs.
 
+### Structured-data preparation and scaling
+
+The [first prepared-field/owned-collection report](benchmarks/structured-20261105/README.md)
+retains the full activation comparison, matched size/selectivity/preparation
+diagnostics, baseline profiles and native qualification.
+
+`StructuredAccess` isolates prepared repeated-field evaluation with a materialized
+filter/map result. Its parameters vary list length and selected percentage. Separate
+methods measure `Environment.prepare` and `PreparedProgram.instantiate`; schema setup,
+ingestion and activation preparation happen in trial setup and are not timed here.
+The fixture is a focused single-request diagnostic, distinct from the four-input,
+full-activation comparison above.
+
+Build the same benchmark sources against reference and candidate runtime revisions.
+The paired driver runs list sizes 0, 16, 128 and 1024 at 50% selection, 128 elements at
+0%/100% selection, and preparation/instantiation for 128 elements. It alternates artifact
+order by scenario, records source/artifact/toolchain identity, and rejects incomplete
+forks or cells. Both artifacts must use the same `Engines`, `Workloads`, `StructuredAccess`
+and benchmark build configuration. Compilation warnings and oversized guest graphs are
+errors in the current representative engine harness.
+
+```sh
+python3 tools/bench/structured.py --java /path/to/pinned-graalvm/bin/java \
+  --reference-jar /path/to/reference.jar --candidate-jar /path/to/candidate.jar \
+  --reference-source /path/to/reference-source.json \
+  --candidate-source /path/to/candidate-source.json --output /new/results/structured
+```
+
+Run this after other timed jobs on the dedicated host have completed. It uses three
+forks, five one-second warmups and five one-second measurements, explicit C2 host
+compilation and JMH's GC profiler. A peak evaluation improvement does not establish
+startup amortization or a complete-request improvement.
+
 Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
 interpretation, and guest-JIT evaluation separate, including image-build AST preparation.
 Use CodSpeed to locate CPU regressions and existing allocation budgets to enforce limits;
