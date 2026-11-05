@@ -39,6 +39,11 @@ Native steady-state uses an explicitly recorded five-window warmup and seven sam
 are separate from JMH. Compare cold curves to identify an observed amortization point, and
 report when the sampled range does not show one.
 
+The native comparison registers reflection metadata for the generated protobuf accessors
+used by cel-java. This configuration belongs to the benchmark executable; it adds no
+reflection requirement to TruffleCEL's production adapter. The native correctness gate
+runs every engine/workload pair with both runtime and image-build AST preparation.
+
 ```sh
 bazel test --config=local //benchmarks/representative:smoke //benchmarks/representative:semantics
 bazel build --config=local //benchmarks/representative:jmh_deploy.jar //benchmarks/representative:lifecycle_deploy.jar
