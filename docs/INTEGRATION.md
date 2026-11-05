@@ -75,6 +75,22 @@ The representative native smoke gate checks that build-time snapshots retain own
 collections and bytes after the source input changes at runtime, in both interpreter
 and guest-JIT execution. The adapter ownership restrictions above still apply.
 
+### Prepared protobuf field access
+
+`Environment.prepare` builds internal access plans for supported, statically typed
+protobuf scalar fields and repeated scalar fields. Instantiating the template creates
+independent execution nodes and library caches. Plans retain schema metadata, never
+request values. Reads guard the exact adapter identity; another adapter for the same
+descriptor still follows the generic path. Environments with custom runtime object
+adapters retain generic dispatch to preserve their precedence and callbacks.
+
+Supported repeated scalar fields can be iterated directly over their immutable native
+storage. Internal list results use owned storage transferred between evaluation stages;
+public collection and byte results retain their existing conversion and ownership rules.
+Filter and map still execute as separate stages, preserving callback ordering, errors,
+unknowns and budgets. Dynamic access, optional lifting, extensions, map/message fields,
+and scalar conversions outside the qualified set continue through the generic adapter.
+
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`

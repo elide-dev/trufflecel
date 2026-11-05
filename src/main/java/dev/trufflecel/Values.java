@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import dev.elide.truffledata.DataArray;
 
 final class Values {
   private Values() {}
@@ -37,7 +38,7 @@ final class Values {
         throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
       Object[] snapshot = values.toArray();
       for (int i = 0; i < snapshot.length; i++) snapshot[i] = in(snapshot[i], depth + 1, remaining);
-      return new InputList(snapshot);
+      return new OwnedList(snapshot);
     }
     if (v instanceof Iterable<?> values) {
       var r = new ArrayList<Object>();
@@ -49,31 +50,86 @@ final class Values {
   }
 
   /** Internal read-only iteration may share our owned snapshot; public toArray still copies. */
-  static Object[] listRange(List<?> list) {
-    return list instanceof InputList input ? input.values : list.toArray();
+  static OwnedList listRange(List<?> list) {
+    return new OwnedList(list.toArray());
   }
 
-  /** Owns a normalized snapshot; no host array or mutable list is retained. */
-  private static final class InputList extends AbstractList<Object> implements RandomAccess {
-    private final Object[] values;
+  static OwnedList mapRange(Map<?, ?> map) {
+    return new OwnedList(map.keySet().toArray());
+  }
 
-    InputList(Object[] values) {
-      this.values = values;
+  /** Only a qualified protobuf scalar field may supply already canonical immutable elements. */
+  static OwnedList scalarRange(DataArray values) {
+    if (values.size() >= 1_000_000)
+      throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
+    return new OwnedList(values);
+  }
+
+  /** Owned immutable array or an immutable, canonical protobuf scalar range. */
+  static final class OwnedList extends AbstractList<Object> implements RandomAccess {
+    private final Object storage;
+    private final int length;
+
+    private OwnedList(Object storage) {
+      this(
+          storage, storage instanceof Object[] array ? array.length : ((DataArray) storage).size());
+    }
+
+    private OwnedList(Object storage, int length) {
+      this.storage = storage;
+      this.length = length;
     }
 
     @Override
     public Object get(int index) {
-      return values[index];
+      Objects.checkIndex(index, length);
+      return storage instanceof Object[] values ? values[index] : ((DataArray) storage).get(index);
     }
 
     @Override
     public int size() {
-      return values.length;
+      return length;
     }
 
     @Override
     public Object[] toArray() {
-      return values.clone();
+      if (storage instanceof Object[] values) return Arrays.copyOf(values, length);
+      Object[] copy = new Object[size()];
+      for (int i = 0; i < copy.length; i++) copy[i] = get(i);
+      return copy;
+    }
+  }
+
+  /** Evaluation-local output storage. Finishing transfers ownership and resets the builder. */
+  static final class ListBuilder extends AbstractList<Object> {
+    private static final Object[] EMPTY = new Object[0];
+    private Object[] values = EMPTY;
+    private int length;
+
+    public boolean add(Object value) {
+      if (length == values.length) grow();
+      values[length++] = value;
+      return true;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private void grow() {
+      values = Arrays.copyOf(values, values.length == 0 ? 8 : Math.multiplyExact(values.length, 2));
+    }
+
+    public Object get(int index) {
+      return values[Objects.checkIndex(index, length)];
+    }
+
+    public int size() {
+      return length;
+    }
+
+    OwnedList finish() {
+      var result = new OwnedList(values, length);
+      values = EMPTY;
+      length = 0;
+      return result;
     }
   }
 

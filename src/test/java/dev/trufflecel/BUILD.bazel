@@ -208,3 +208,19 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "preparedField",
+    srcs = ["PreparedFieldTest.java"],
+    test_class = "dev.trufflecel.PreparedFieldTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)

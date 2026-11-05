@@ -7,7 +7,7 @@ import dev.elide.truffledata.protobuf.*;
 import java.util.*;
 
 /** Descriptor-compiled CEL binding backed by published TruffleData protobuf snapshots. */
-public final class ProtobufType implements ObjectType {
+public final class ProtobufType implements ObjectType, FieldPlan.Provider {
   private static final Map<String, ObjectType> WELL_KNOWN = Cel.newBuilder().build().objectTypes;
 
   private final Descriptor descriptor;
@@ -345,6 +345,52 @@ public final class ProtobufType implements ObjectType {
 
   public boolean accepts(Object value) {
     return value instanceof Value v && v.type.descriptor == descriptor;
+  }
+
+  @Override
+  public FieldPlan prepareField(String name, ObjectType[] runtimeTypes) {
+    // Custom adapters may overlap protobuf values or have observable accepts/get callbacks.
+    for (ObjectType type : runtimeTypes) if (!(type instanceof ProtobufType)) return null;
+    FieldDescriptor field = descriptors.get(name);
+    if (field == null || field.isExtension() || field.isMapField()) return null;
+    boolean scalar =
+        switch (field.getType()) {
+          case INT32, INT64, SINT32, SINT64, SFIXED32, SFIXED64, FLOAT, DOUBLE, BOOL, STRING ->
+              true;
+          default -> false;
+        };
+    if (!scalar) return null;
+    return new ScalarField(this, ordinals.get(field), field.isRepeated());
+  }
+
+  private record ScalarField(ProtobufType type, int ordinal, boolean repeated)
+      implements FieldPlan {
+    public ReadNode instantiate() {
+      return new ScalarRead(this);
+    }
+  }
+
+  private static final class ScalarRead extends FieldPlan.ReadNode {
+    private final ScalarField field;
+    @Child private DataLibrary data = DataLibrary.factory().createDispatched(2);
+
+    ScalarRead(ScalarField field) {
+      this.field = field;
+    }
+
+    boolean accepts(Object value) {
+      // Value construction guarantees this adapter's exact plan; descriptor identity is weaker.
+      return value instanceof Value v && v.type == field.type;
+    }
+
+    Object read(Object value) {
+      Object result = data.read(((Value) value).row, field.ordinal);
+      return field.repeated ? Values.scalarRange((DataArray) result) : result;
+    }
+
+    boolean has(Object value) {
+      return ((Value) value).row.has(field.ordinal);
+    }
   }
 
   public boolean isZero(Object value) {

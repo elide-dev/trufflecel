@@ -12,6 +12,14 @@ class ExprNode extends CelNode {
   boolean rootBody, statement;
   long canonicalId;
   CelType checkedType;
+  FieldPlan fieldPlan;
+  @Child private FieldPlan.ReadNode fieldRead;
+
+  void instantiateFieldPlans() {
+    if (fieldPlan != null) fieldRead = insert(fieldPlan.instantiate());
+    for (ExprNode child : children) child.instantiateFieldPlans();
+  }
+
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
 
   void resolveBlocks(ExprNode owner) {
@@ -153,7 +161,7 @@ class ExprNode extends CelNode {
     if (kind == Kind.COMPREHENSION
         || kind == Kind.BLOCK
         || extensionCall
-        || kind == Kind.SELECT
+        || kind == Kind.SELECT && fieldPlan == null
         || kind == Kind.OBJECT
         || name.equals("sortBy")) return true;
     for (ExprNode child : children) if (child.escapesContext()) return true;
@@ -430,7 +438,10 @@ class ExprNode extends CelNode {
   }
 
   private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
-    return selectValue(ctx, presence, children[0].execute(frame, ctx));
+    Object operand = children[0].execute(frame, ctx);
+    if (fieldRead != null && fieldRead.accepts(operand))
+      return presence ? fieldRead.has(operand) : fieldRead.read(operand);
+    return selectValue(ctx, presence, operand);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -701,7 +712,7 @@ class ExprNode extends CelNode {
         bindings[0].clear(frame, ctx);
       }
     }
-    Object[] values = HostCollections.range(range);
+    Values.OwnedList values = HostCollections.range(range);
     boolean mapResult = name.equals("transformMap") || name.equals("transformMapEntry");
     boolean sorting = name.equals("sortBy");
     boolean mapping = name.equals("map") || name.startsWith("transform");
@@ -716,7 +727,8 @@ class ExprNode extends CelNode {
     long count = 0;
     Unknown unknown = null;
     CelException error = null;
-    for (Object item : values) {
+    for (int position = 0; position < values.size(); position++) {
+      Object item = values.get(position);
       ctx.tick();
       Object key = range instanceof List<?> && variables.length == 2 ? index : item;
       bindings[0].execute(frame, ctx, key);
