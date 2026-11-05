@@ -61,6 +61,26 @@ def validate_lifecycle(row, runtime, engine, workload, mode):
                 raise ValueError('Invalid native samples')
 
 
+def validate_lifecycle_results(rows, native=True):
+    runtimes = ('jvm', 'svm') if native else ('jvm',)
+    expected = {
+        (runtime, engine, workload, mode, fork)
+        for runtime, engine, workload, fork in itertools.product(runtimes, ENGINES, WORKLOADS, range(3))
+        for mode in (('cold',) if runtime == 'jvm' else ('cold', 'image-cold', 'steady', 'image-steady'))
+    }
+    expected.update((runtime, engine, 'proto-policy', 'ingest', fork)
+                    for runtime, engine, fork in itertools.product(runtimes, ('truffle-interpreter', 'cel-java'), range(3)))
+    seen = set()
+    for row in rows:
+        key = tuple(row[k] for k in ('runtime', 'engine', 'workload', 'mode', 'fork'))
+        if key not in expected or key in seen:
+            raise ValueError('Unexpected or duplicate lifecycle cell: ' + str(key))
+        validate_lifecycle(row, *key[:4])
+        seen.add(key)
+    if seen != expected:
+        raise ValueError('Missing lifecycle cells: ' + str(expected - seen))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('kind', choices=['jmh', 'lifecycle'])
@@ -135,6 +155,7 @@ def main():
             row['fork'] = fork
             results.append(row)
             (args.output / 'results.partial.json').write_text(json.dumps(results, indent=2) + '\n')
+        validate_lifecycle_results(results, bool(args.native))
         (args.output / 'results.partial.json').rename(args.output / 'results.json')
     if sha(args.jar) != metadata['jar_sha256'] or (args.native and sha(args.native) != metadata['native_sha256']):
         raise ValueError('Artifact changed during measurement')
