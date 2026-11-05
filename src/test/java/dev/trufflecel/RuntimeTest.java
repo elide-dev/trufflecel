@@ -117,6 +117,58 @@ public class RuntimeTest {
   }
 
   @Test
+  public void hostEntryRetainsTruffleFramesAcrossReentryAndFailures() {
+    Program[] programs = new Program[2];
+    var innerEnvironment =
+        Cel.newBuilder()
+            .variable("x", CelType.INT)
+            .function(
+                "inspect",
+                List.of(),
+                CelType.INT,
+                args -> {
+                  var frames = new ArrayList<com.oracle.truffle.api.CallTarget>();
+                  com.oracle.truffle.api.Truffle.getRuntime()
+                      .iterateFrames(
+                          frame -> {
+                            var target = frame.getCallTarget();
+                            if (target == programs[0].callTarget()
+                                || target == programs[1].callTarget()) frames.add(target);
+                            return null;
+                          });
+                  assertEquals(List.of(programs[0].callTarget(), programs[1].callTarget()), frames);
+                  return 10L;
+                })
+            .build();
+    programs[0] = innerEnvironment.compile("inspect() / x");
+    programs[1] =
+        Cel.newBuilder()
+            .variable("x", CelType.INT)
+            .function(
+                "nested",
+                List.of(CelType.INT),
+                CelType.INT,
+                args -> programs[0].evaluate(Map.of("x", args.get(0))))
+            .build()
+            .compile("nested(x)");
+    for (long x : new long[] {2, 0, 5}) {
+      if (x == 0)
+        assertEquals(
+            CelException.Code.DIVIDE_BY_ZERO,
+            assertThrows(CelException.class, () -> programs[1].evaluate(Map.of("x", x))).code());
+      else assertEquals(10L / x, programs[1].evaluate(Map.of("x", x)));
+      assertNull(
+          com.oracle.truffle.api.Truffle.getRuntime()
+              .iterateFrames(
+                  frame ->
+                      frame.getCallTarget() == programs[0].callTarget()
+                              || frame.getCallTarget() == programs[1].callTarget()
+                          ? frame
+                          : null));
+    }
+  }
+
+  @Test
   public void frameLocalsSurviveReentrantEvaluationAndNestedRanges() {
     Program[] current = new Program[1];
     var environment =

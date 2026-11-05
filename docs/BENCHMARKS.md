@@ -592,3 +592,37 @@ On Linux, reproduce one cell after building `//benchmarks/comparison:svm`:
 Replace the engine with `cel-java` for the paired measurement, repeat in fresh processes,
 and omit the runtime option for the default. An application compiling in its application
 isolate must also assess GC interference under its own concurrency and workload.
+
+
+## Explicit Java host entry
+
+During the TruffleData 0.6.0 upgrade and source-boundary fix, CodSpeed flagged scalar
+and short-circuit fallback-interpreter regressions. Retained profiles attribute about
+187 extra instructions per evaluation to Truffle frame-stack thread-local map probes.
+The images embed different thread-local hash values; the CEL scalar operation counts
+are unchanged. A fresh evaluation thread does not remove the difference.
+
+A [controlled five-image diagnostic](https://github.com/elide-dev/trufflecel/actions/runs/41972037029)
+uses the same harness and one Linux runner to compare the release baseline, boundary-only,
+dependency-only, combined, and explicit-host-entry variants. Each runs on both the setup
+thread and a fresh evaluation thread. [Raw counts, checksums and image identities](benchmarks/host-entry-diagnostic.json)
+record the evidence. On the setup thread:
+
+| Variant | Scalar instructions/op | Short-circuit instructions/op |
+| --- | ---: | ---: |
+| Release baseline | 1,113.77 | 1,316.80 |
+| Boundary only | 1,300.77 | 1,503.80 |
+| Dependencies only | 1,300.77 | 1,503.80 |
+| Boundary and dependencies | 1,300.77 | 1,503.80 |
+| Explicit Java host entry | 936.02 | 1,140.65 |
+
+`Program.evaluate` now calls Truffle's explicit-location overload with no guest call site
+for the Java entry. This avoids the ambient call-location lookup while retaining the
+call target, guest frame tracking, and compilation heuristics. The internal Polyglot
+entry retains its ambient location lookup. Nested-call tests verify frame presence and
+cleanup after success and failure; existing instrumentation, concurrency, allocation,
+and native-JIT gates qualify the remaining contracts.
+
+The production benchmark harness, workload, iteration count, and thresholds are unchanged.
+The fresh-thread experiment remains diagnostic only. These instruction measurements do
+not establish wall-clock throughput or memory improvements across arbitrary embeddings.

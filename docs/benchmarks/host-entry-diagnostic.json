@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "diagnostic_commit": "842aead",
+  "run": "https://github.com/elide-dev/trufflecel/actions/runs/41972037029",
+  "baseline_commit": "df80d0d",
+  "upgrade_commit": "d954815",
+  "tool": "Valgrind Callgrind 3.22.0",
+  "iterations": 256,
+  "protocol": "All five images measured on one Linux runner; unchanged scalar and short-circuit inputs, warmup and measured callback. Worker true prepares fixtures on main and evaluates on a new platform thread. Diagnostic harness only; production benchmark is unchanged.",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "variants": {
+    "base": {
+      "binary_sha256": "3ed273d6712fff9b3533fef78f2220c9d19179f2940d0c28bfa2b40f94fb2af1",
+      "measurements": [
+        {
+          "worker": false,
+          "case": "evaluate-scalar",
+          "instructions": 285125,
+          "instructions_per_operation": 1113.76953125,
+          "checksum": 21760
+        },
+        {
+          "worker": false,
+          "case": "short-circuit",
+          "instructions": 337100,
+          "instructions_per_operation": 1316.796875,
+          "checksum": 256
+        },
+        {
+          "worker": true,
+          "case": "evaluate-scalar",
+          "instructions": 285121,
+          "instructions_per_operation": 1113.75390625,
+          "checksum": 21760
+        },
+        {
+          "worker": true,
+          "case": "short-circuit",
+          "instructions": 337100,
+          "instructions_per_operation": 1316.796875,
+          "checksum": 256
+        }
+      ]
+    },
+    "boundary": {
+      "binary_sha256": "9711ee73103b49689b0e5fca3d235aeab847318252b1cb8c9c35e3024dd29882",
+      "measurements": [
+        {
+          "worker": false,
+          "case": "evaluate-scalar",
+          "instructions": 332997,
+          "instructions_per_operation": 1300.76953125,
+          "checksum": 21760
+        },
+        {
+          "worker": false,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        },
+        {
+          "worker": true,
+          "case": "evaluate-scalar",
+          "instructions": 332993,
+          "instructions_per_operation": 1300.75390625,
+          "checksum": 21760
+        },
+        {
+          "worker": true,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        }
+      ]
+    },
+    "dependencies": {
+      "binary_sha256": "72d96a736e7d0ff88c10afae34c5a8ae556bcfa8e6e30792160186134b170f32",
+      "measurements": [
+        {
+          "worker": false,
+          "case": "evaluate-scalar",
+          "instructions": 332997,
+          "instructions_per_operation": 1300.76953125,
+          "checksum": 21760
+        },
+        {
+          "worker": false,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        },
+        {
+          "worker": true,
+          "case": "evaluate-scalar",
+          "instructions": 332993,
+          "instructions_per_operation": 1300.75390625,
+          "checksum": 21760
+        },
+        {
+          "worker": true,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        }
+      ]
+    },
+    "head": {
+      "binary_sha256": "6432e00e6f176f2169822c912b568cc376e46a05a7fbd13faae83bdde4264c30",
+      "measurements": [
+        {
+          "worker": false,
+          "case": "evaluate-scalar",
+          "instructions": 332997,
+          "instructions_per_operation": 1300.76953125,
+          "checksum": 21760
+        },
+        {
+          "worker": false,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        },
+        {
+          "worker": true,
+          "case": "evaluate-scalar",
+          "instructions": 332993,
+          "instructions_per_operation": 1300.75390625,
+          "checksum": 21760
+        },
+        {
+          "worker": true,
+          "case": "short-circuit",
+          "instructions": 384972,
+          "instructions_per_operation": 1503.796875,
+          "checksum": 256
+        }
+      ]
+    },
+    "host-call": {
+      "binary_sha256": "be7b5829c9d64c077a76202e87ad006e16c5ee505212fdf134be34ef6d709621",
+      "measurements": [
+        {
+          "worker": false,
+          "case": "evaluate-scalar",
+          "instructions": 239621,
+          "instructions_per_operation": 936.01953125,
+          "checksum": 21760
+        },
+        {
+          "worker": false,
+          "case": "short-circuit",
+          "instructions": 292006,
+          "instructions_per_operation": 1140.6484375,
+          "checksum": 256
+        },
+        {
+          "worker": true,
+          "case": "evaluate-scalar",
+          "instructions": 239610,
+          "instructions_per_operation": 935.9765625,
+          "checksum": 21760
+        },
+        {
+          "worker": true,
+          "case": "short-circuit",
+          "instructions": 292006,
+          "instructions_per_operation": 1140.6484375,
+          "checksum": 256
+        }
+      ]
+    }
+  }
+}
