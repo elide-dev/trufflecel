@@ -1,6 +1,9 @@
-# Continuous simulation benchmarks
+# Benchmark methodology and results
 
 ## Representative comparisons
+
+See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
+for measured results, raw data, uncertainty and follow-up priorities.
 
 `//benchmarks/representative` is the response to the methodology gaps in the historical
 three-expression suite. It compares the same CEL sources and four independently checked

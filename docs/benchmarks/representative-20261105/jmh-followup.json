@@ -1,0 +1,156 @@
+[
+  {
+    "jmhVersion": "1.37",
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "mode": "avgt",
+    "threads": 1,
+    "forks": 3,
+    "jvm": "/home/sam/trufflecel-feedback-20261105/graalvm-ce-25.5.5-elide.24-linux-amd64/bin/java",
+    "jvmArgs": [
+      "-XX:ThreadPriorityPolicy=1",
+      "-XX:+UnlockExperimentalVMOptions",
+      "-XX:+EnableJVMCIProduct",
+      "-XX:+EnableJVMCI",
+      "-XX:-UnlockExperimentalVMOptions",
+      "-XX:-UseJVMCICompiler",
+      "-Xms512m",
+      "-Xmx512m",
+      "--enable-native-access=ALL-UNNAMED"
+    ],
+    "jdkVersion": "25.0.4.1.1",
+    "vmName": "OpenJDK 64-Bit Server VM",
+    "vmVersion": "25.0.4.1.1+1-jvmci-25.5-b24",
+    "warmupIterations": 15,
+    "warmupTime": "1 s",
+    "warmupBatchSize": 1,
+    "measurementIterations": 5,
+    "measurementTime": "1 s",
+    "measurementBatchSize": 1,
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "primaryMetric": {
+      "score": 4322.431515421476,
+      "scoreError": 402.10692969964066,
+      "scoreConfidence": [
+        3920.324585721836,
+        4724.538445121118
+      ],
+      "scorePercentiles": {
+        "0.0": 3941.15990510831,
+        "50.0": 4197.193154301014,
+        "90.0": 4795.068925587426,
+        "95.0": 4798.31642709093,
+        "99.0": 4798.31642709093,
+        "99.9": 4798.31642709093,
+        "99.99": 4798.31642709093,
+        "99.999": 4798.31642709093,
+        "99.9999": 4798.31642709093,
+        "100.0": 4798.31642709093
+      },
+      "scoreUnit": "ns/op",
+      "rawData": [
+        [
+          4602.178655573553,
+          4476.094828898019,
+          4197.193154301014,
+          4028.049315686448,
+          3983.3902734351664
+        ],
+        [
+          3943.8701209076353,
+          3943.455088875921,
+          3953.580182395332,
+          3964.6238166970584,
+          3941.15990510831
+        ],
+        [
+          4792.903924585089,
+          4798.31642709093,
+          4762.034517075214,
+          4735.318011363636,
+          4714.304509328833
+        ]
+      ]
+    },
+    "secondaryMetrics": {}
+  },
+  {
+    "jmhVersion": "1.37",
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "mode": "avgt",
+    "threads": 1,
+    "forks": 3,
+    "jvm": "/home/sam/trufflecel-feedback-20261105/graalvm-ce-25.5.5-elide.24-linux-amd64/bin/java",
+    "jvmArgs": [
+      "-XX:ThreadPriorityPolicy=1",
+      "-XX:+UnlockExperimentalVMOptions",
+      "-XX:+EnableJVMCIProduct",
+      "-XX:+EnableJVMCI",
+      "-XX:-UnlockExperimentalVMOptions",
+      "-XX:-UseJVMCICompiler",
+      "-Xms512m",
+      "-Xmx512m",
+      "--enable-native-access=ALL-UNNAMED"
+    ],
+    "jdkVersion": "25.0.4.1.1",
+    "vmName": "OpenJDK 64-Bit Server VM",
+    "vmVersion": "25.0.4.1.1+1-jvmci-25.5-b24",
+    "warmupIterations": 15,
+    "warmupTime": "1 s",
+    "warmupBatchSize": 1,
+    "measurementIterations": 5,
+    "measurementTime": "1 s",
+    "measurementBatchSize": 1,
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "primaryMetric": {
+      "score": 945.5820440917894,
+      "scoreError": 57.991768822002875,
+      "scoreConfidence": [
+        887.5902752697865,
+        1003.5738129137923
+      ],
+      "scorePercentiles": {
+        "0.0": 882.8865641469292,
+        "50.0": 934.8999471841684,
+        "90.0": 1047.6693786781361,
+        "95.0": 1054.4619062681218,
+        "99.0": 1054.4619062681218,
+        "99.9": 1054.4619062681218,
+        "99.99": 1054.4619062681218,
+        "99.999": 1054.4619062681218,
+        "99.9999": 1054.4619062681218,
+        "100.0": 1054.4619062681218
+      },
+      "scoreUnit": "ns/op",
+      "rawData": [
+        [
+          938.6636739398126,
+          967.3894183149163,
+          934.8999471841684,
+          953.3236530225314,
+          886.4313216664096
+        ],
+        [
+          1043.141026951479,
+          1054.4619062681218,
+          1015.4213831377816,
+          953.8607982291132,
+          925.3414173787855
+        ],
+        [
+          921.0952973009812,
+          902.5661980499673,
+          894.5873399084398,
+          882.8865641469292,
+          909.6607158774019
+        ]
+      ]
+    },
+    "secondaryMetrics": {}
+  }
+]

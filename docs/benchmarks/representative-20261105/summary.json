@@ -1,0 +1,8288 @@
+{
+  "jmh": [
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.check",
+      "engine": "cel-java-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        111166.39837566158,
+        106820.48493098123,
+        102991.15689844202
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 106820.48493098123,
+        "min": 102991.15689844202,
+        "max": 111166.39837566158
+      },
+      "jmh_mean_ns": 106992.6800683616,
+      "jmh_error_ns": 3851.1701630970433
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.check",
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        111830.53163697905,
+        106907.31522820234,
+        105439.79030168688
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 106907.31522820234,
+        "min": 105439.79030168688,
+        "max": 111830.53163697905
+      },
+      "jmh_mean_ns": 108059.21238895608,
+      "jmh_error_ns": 3071.1809762441744
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.check",
+      "engine": "cel-java-pratt-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        103162.26468545235,
+        103320.04578016631,
+        104100.14547747768
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 103320.04578016631,
+        "min": 103162.26468545235,
+        "max": 104100.14547747768
+      },
+      "jmh_mean_ns": 103527.48531436543,
+      "jmh_error_ns": 798.8487745574351
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.check",
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        108150.15387742525,
+        105560.79504314726,
+        106434.2818991171
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 106434.2818991171,
+        "min": 105560.79504314726,
+        "max": 108150.15387742525
+      },
+      "jmh_mean_ns": 106715.07693989653,
+      "jmh_error_ns": 1608.6847372487339
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.optimize",
+      "engine": "cel-java-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        1056.7251477474686,
+        1034.3723936090018,
+        1083.3768717113035
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1056.7251477474686,
+        "min": 1034.3723936090018,
+        "max": 1083.3768717113035
+      },
+      "jmh_mean_ns": 1058.158137689258,
+      "jmh_error_ns": 23.805202595401585
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.optimize",
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        3492.9738089531193,
+        3450.0876387685225,
+        3443.86038344935
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 3450.0876387685225,
+        "min": 3443.86038344935,
+        "max": 3492.9738089531193
+      },
+      "jmh_mean_ns": 3462.307277056998,
+      "jmh_error_ns": 27.286517463135688
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.optimize",
+      "engine": "cel-java-pratt-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        1013.2284637533211,
+        1065.1288447118914,
+        1048.4594570391148
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1048.4594570391148,
+        "min": 1013.2284637533211,
+        "max": 1065.1288447118914
+      },
+      "jmh_mean_ns": 1042.2722551681088,
+      "jmh_error_ns": 26.069625314519076
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.optimize",
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        3458.1307368397074,
+        3394.2695042041128,
+        3449.885791935805
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 3449.885791935805,
+        "min": 3394.2695042041128,
+        "max": 3458.1307368397074
+      },
+      "jmh_mean_ns": 3434.0953443265416,
+      "jmh_error_ns": 34.09768476080431
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.parse",
+      "engine": "cel-java-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        1102.372483692425,
+        1073.5631494996726,
+        1066.1438786827382
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1073.5631494996726,
+        "min": 1066.1438786827382,
+        "max": 1102.372483692425
+      },
+      "jmh_mean_ns": 1080.6931706249454,
+      "jmh_error_ns": 25.836178283484056
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.parse",
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        2411.9617917176547,
+        2384.429546643719,
+        2444.637362447108
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2411.9617917176547,
+        "min": 2384.429546643719,
+        "max": 2444.637362447108
+      },
+      "jmh_mean_ns": 2413.6762336028273,
+      "jmh_error_ns": 46.95769431965806
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.parse",
+      "engine": "cel-java-pratt-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        76.15578923030034,
+        74.75836608076254,
+        75.3718600697585
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 75.3718600697585,
+        "min": 74.75836608076254,
+        "max": 76.15578923030034
+      },
+      "jmh_mean_ns": 75.42867179360714,
+      "jmh_error_ns": 0.7104818001300492
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.parse",
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        161.77421979472015,
+        156.95953539430906,
+        160.11390053805553
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 160.11390053805553,
+        "min": 156.95953539430906,
+        "max": 161.77421979472015
+      },
+      "jmh_mean_ns": 159.61588524236151,
+      "jmh_error_ns": 3.059772157781334
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.plan",
+      "engine": "cel-java-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        8.042101621397789,
+        7.516816427472492,
+        8.026124591488768
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 8.026124591488768,
+        "min": 7.516816427472492,
+        "max": 8.042101621397789
+      },
+      "jmh_mean_ns": 7.861680880119683,
+      "jmh_error_ns": 0.28146214083130605
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.plan",
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        81.34247384430819,
+        80.95661326123573,
+        81.96781743725859
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 81.34247384430819,
+        "min": 80.95661326123573,
+        "max": 81.96781743725859
+      },
+      "jmh_mean_ns": 81.4223015142675,
+      "jmh_error_ns": 0.7115216110906817
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.plan",
+      "engine": "cel-java-pratt-optimized",
+      "source": "true",
+      "fork_means_ns": [
+        7.690193567139999,
+        8.124776319267239,
+        7.491165736286755
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 7.690193567139999,
+        "min": 7.491165736286755,
+        "max": 8.124776319267239
+      },
+      "jmh_mean_ns": 7.7687118742313315,
+      "jmh_error_ns": 0.3068711327973598
+    },
+    {
+      "benchmark": "dev.trufflecel.FrontendStages.plan",
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1",
+      "fork_means_ns": [
+        84.09690006350924,
+        81.47900996315414,
+        82.42455263420806
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 82.42455263420806,
+        "min": 81.47900996315414,
+        "max": 84.09690006350924
+      },
+      "jmh_mean_ns": 82.66682088695714,
+      "jmh_error_ns": 1.257885308173728
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "fork_means_ns": [
+        997.1953595268709,
+        941.7364470643486,
+        923.9330276986257
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 941.7364470643486,
+        "min": 923.9330276986257,
+        "max": 997.1953595268709
+      },
+      "jmh_mean_ns": 954.288278096615,
+      "jmh_error_ns": 45.08907588900072
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        955.2512233862902,
+        947.3434730042385,
+        972.0392716108844
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 955.2512233862902,
+        "min": 947.3434730042385,
+        "max": 972.0392716108844
+      },
+      "jmh_mean_ns": 958.2113226671376,
+      "jmh_error_ns": 40.755902915867566
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        4257.38124557884,
+        3949.3378227968515,
+        4760.57547788874
+      ],
+      "warmup_iterations": 15,
+      "ns_per_op": {
+        "median": 4257.38124557884,
+        "min": 3949.3378227968515,
+        "max": 4760.57547788874
+      },
+      "jmh_mean_ns": 4322.431515421476,
+      "jmh_error_ns": 402.10692969964066
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        2167.1822501434885,
+        2517.9380954507246,
+        2763.9889975829883
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2517.9380954507246,
+        "min": 2167.1822501434885,
+        "max": 2763.9889975829883
+      },
+      "jmh_mean_ns": 2483.036447725733,
+      "jmh_error_ns": 272.897045394756
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2781.7237297557713,
+        2825.5841758841198,
+        2818.1276260133704
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2818.1276260133704,
+        "min": 2781.7237297557713,
+        "max": 2825.5841758841198
+      },
+      "jmh_mean_ns": 2808.4785105510873,
+      "jmh_error_ns": 41.40902477005394
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        4833.194579443017,
+        4749.5062304550875,
+        4853.769184769129
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 4833.194579443017,
+        "min": 4749.5062304550875,
+        "max": 4853.769184769129
+      },
+      "jmh_mean_ns": 4812.156664889078,
+      "jmh_error_ns": 105.86362356185674
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "fork_means_ns": [
+        936.1416028255677,
+        998.4453063930563,
+        902.1592230567439
+      ],
+      "warmup_iterations": 15,
+      "ns_per_op": {
+        "median": 936.1416028255677,
+        "min": 902.1592230567439,
+        "max": 998.4453063930563
+      },
+      "jmh_mean_ns": 945.5820440917894,
+      "jmh_error_ns": 57.991768822002875
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        947.6504151409865,
+        938.8098503464457,
+        1013.0969822054565
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 947.6504151409865,
+        "min": 938.8098503464457,
+        "max": 1013.0969822054565
+      },
+      "jmh_mean_ns": 966.5190825642964,
+      "jmh_error_ns": 44.96053613063709
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        4420.747621388398,
+        4805.889613711325,
+        4013.880141382622
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 4420.747621388398,
+        "min": 4013.880141382622,
+        "max": 4805.889613711325
+      },
+      "jmh_mean_ns": 4413.505792160781,
+      "jmh_error_ns": 428.7698324542311
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        2688.6544279821464,
+        2606.660213496036,
+        2539.6854652088414
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2606.660213496036,
+        "min": 2539.6854652088414,
+        "max": 2688.6544279821464
+      },
+      "jmh_mean_ns": 2611.6667022290076,
+      "jmh_error_ns": 78.962693259256
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2682.17974861442,
+        2838.7976191455873,
+        3019.722905248757
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2838.7976191455873,
+        "min": 2682.17974861442,
+        "max": 3019.722905248757
+      },
+      "jmh_mean_ns": 2846.9000910029213,
+      "jmh_error_ns": 170.71962849514907
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        4268.3245366784595,
+        4847.875234030215,
+        4970.6723690659755
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 4847.875234030215,
+        "min": 4268.3245366784595,
+        "max": 4970.6723690659755
+      },
+      "jmh_mean_ns": 4695.624046591551,
+      "jmh_error_ns": 346.5071673065332
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "fork_means_ns": [
+        109622.24398279411,
+        107756.56774865507,
+        108656.74082611913
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 108656.74082611913,
+        "min": 107756.56774865507,
+        "max": 109622.24398279411
+      },
+      "jmh_mean_ns": 108678.51751918947,
+      "jmh_error_ns": 967.6197094393062
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        110717.9719565741,
+        110241.8057639225,
+        110454.31771505228
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 110454.31771505228,
+        "min": 110241.8057639225,
+        "max": 110717.9719565741
+      },
+      "jmh_mean_ns": 110471.36514518295,
+      "jmh_error_ns": 849.8627058963696
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        133901.0089759047,
+        131690.05905500002,
+        131854.20789905245
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 131854.20789905245,
+        "min": 131690.05905500002,
+        "max": 133901.0089759047
+      },
+      "jmh_mean_ns": 132481.75864331904,
+      "jmh_error_ns": 1268.1635788799529
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        128373.44937631897,
+        126916.9691709593,
+        133298.53745833927
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 128373.44937631897,
+        "min": 126916.9691709593,
+        "max": 133298.53745833927
+      },
+      "jmh_mean_ns": 129529.65200187253,
+      "jmh_error_ns": 4207.957826774779
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        127246.04561051379,
+        124502.96283256149,
+        121065.7469104725
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 124502.96283256149,
+        "min": 121065.7469104725,
+        "max": 127246.04561051379
+      },
+      "jmh_mean_ns": 124271.58511784926,
+      "jmh_error_ns": 2846.719015447329
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        131760.81081747208,
+        134865.39245944988,
+        135726.73826910893
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 134865.39245944988,
+        "min": 131760.81081747208,
+        "max": 135726.73826910893
+      },
+      "jmh_mean_ns": 134117.6471820103,
+      "jmh_error_ns": 1935.6355826196314
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "fork_means_ns": [
+        114741.37785286397,
+        114574.35293410205,
+        115020.73001153539
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 114741.37785286397,
+        "min": 114574.35293410205,
+        "max": 115020.73001153539
+      },
+      "jmh_mean_ns": 114778.82026616712,
+      "jmh_error_ns": 1802.8256077908347
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        116201.46321870151,
+        114690.85867633675,
+        117543.86372681992
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 116201.46321870151,
+        "min": 114690.85867633675,
+        "max": 117543.86372681992
+      },
+      "jmh_mean_ns": 116145.39520728607,
+      "jmh_error_ns": 1476.6915143620643
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        456411.06942944654,
+        448862.33509665827,
+        471560.5731421861
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 456411.06942944654,
+        "min": 448862.33509665827,
+        "max": 471560.5731421861
+      },
+      "jmh_mean_ns": 458944.6592227636,
+      "jmh_error_ns": 12560.99561752095
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        377094.39564578433,
+        355887.89458442276,
+        354430.3117696864
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 355887.89458442276,
+        "min": 354430.3117696864,
+        "max": 377094.39564578433
+      },
+      "jmh_mean_ns": 362470.8673332978,
+      "jmh_error_ns": 12144.897691749113
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        351524.8013691082,
+        350030.0303089956,
+        348077.62725833897
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 350030.0303089956,
+        "min": 348077.62725833897,
+        "max": 351524.8013691082
+      },
+      "jmh_mean_ns": 349877.4863121476,
+      "jmh_error_ns": 6739.697555145393
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        1014372.1851379074,
+        1017432.9299917156,
+        1005391.3313304881
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1014372.1851379074,
+        "min": 1005391.3313304881,
+        "max": 1017432.9299917156
+      },
+      "jmh_mean_ns": 1012398.8154867035,
+      "jmh_error_ns": 13307.696118364223
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "fork_means_ns": [
+        115421.46157925985,
+        113565.00372523125,
+        112282.57216534967
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 113565.00372523125,
+        "min": 112282.57216534967,
+        "max": 115421.46157925985
+      },
+      "jmh_mean_ns": 113756.34582328024,
+      "jmh_error_ns": 1749.6317425032212
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        119644.62698310385,
+        111589.8481149646,
+        109975.38820594417
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 111589.8481149646,
+        "min": 109975.38820594417,
+        "max": 119644.62698310385
+      },
+      "jmh_mean_ns": 113736.62110133753,
+      "jmh_error_ns": 4739.37480887598
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        438748.51232820057,
+        436803.33601679024,
+        441441.14282126166
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 438748.51232820057,
+        "min": 436803.33601679024,
+        "max": 441441.14282126166
+      },
+      "jmh_mean_ns": 438997.6637220842,
+      "jmh_error_ns": 3024.4531913628516
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        338865.2118520111,
+        340849.4314581355,
+        340930.8352053587
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 340849.4314581355,
+        "min": 338865.2118520111,
+        "max": 340930.8352053587
+      },
+      "jmh_mean_ns": 340215.1595051684,
+      "jmh_error_ns": 3494.2216243657595
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        329291.43496086955,
+        334637.1607821006,
+        336239.6404674146
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 334637.1607821006,
+        "min": 329291.43496086955,
+        "max": 336239.6404674146
+      },
+      "jmh_mean_ns": 333389.41207012825,
+      "jmh_error_ns": 5271.991490150059
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.compile",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        981346.0367157724,
+        979971.9951473238,
+        1025841.3528150326
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 981346.0367157724,
+        "min": 979971.9951473238,
+        "max": 1025841.3528150326
+      },
+      "jmh_mean_ns": 995719.7948927096,
+      "jmh_error_ns": 24702.273393416148
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "fork_means_ns": [
+        18.151833180735743,
+        18.178976241579246,
+        18.349103883750924
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 18.178976241579246,
+        "min": 18.151833180735743,
+        "max": 18.349103883750924
+      },
+      "jmh_mean_ns": 18.226637768688636,
+      "jmh_error_ns": 0.11406541485489996
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        1726.419367567013,
+        1667.8746204508261,
+        1749.67635486172
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1726.419367567013,
+        "min": 1667.8746204508261,
+        "max": 1749.67635486172
+      },
+      "jmh_mean_ns": 1714.656780959853,
+      "jmh_error_ns": 38.32242265669211
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        2462.406250719244,
+        2353.0361237916336,
+        2409.750930464107
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2409.750930464107,
+        "min": 2353.0361237916336,
+        "max": 2462.406250719244
+      },
+      "jmh_mean_ns": 2408.397768324995,
+      "jmh_error_ns": 50.04971016658489
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        5950.782549736731,
+        5886.782365598589,
+        6025.294109584692
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 5950.782549736731,
+        "min": 5886.782365598589,
+        "max": 6025.294109584692
+      },
+      "jmh_mean_ns": 5954.286341640004,
+      "jmh_error_ns": 96.35793634709029
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2450.2890555044314,
+        2606.733867733685,
+        2453.203562020377
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2453.203562020377,
+        "min": 2450.2890555044314,
+        "max": 2606.733867733685
+      },
+      "jmh_mean_ns": 2503.4088284194977,
+      "jmh_error_ns": 81.02111066173832
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        1944.019224273752,
+        1956.9348854053208,
+        1965.6808727971397
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1956.9348854053208,
+        "min": 1944.019224273752,
+        "max": 1965.6808727971397
+      },
+      "jmh_mean_ns": 1955.5449941587374,
+      "jmh_error_ns": 11.665393139435903
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "fork_means_ns": [
+        8.495076131266803,
+        8.627860785737164,
+        9.281766912391198
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 8.627860785737164,
+        "min": 8.495076131266803,
+        "max": 9.281766912391198
+      },
+      "jmh_mean_ns": 8.801567943131722,
+      "jmh_error_ns": 0.3845984952795793
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        1706.519194837468,
+        1729.2404219612165,
+        1659.6595070238825
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1706.519194837468,
+        "min": 1659.6595070238825,
+        "max": 1729.2404219612165
+      },
+      "jmh_mean_ns": 1698.473041274189,
+      "jmh_error_ns": 33.22229579631565
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        2383.4548733182596,
+        2278.7109922451955,
+        2389.151639642577
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2383.4548733182596,
+        "min": 2278.7109922451955,
+        "max": 2389.151639642577
+      },
+      "jmh_mean_ns": 2350.43916840201,
+      "jmh_error_ns": 61.35072382738152
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        4674.565824182247,
+        4677.9450968617875,
+        4633.948834353907
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 4674.565824182247,
+        "min": 4633.948834353907,
+        "max": 4677.9450968617875
+      },
+      "jmh_mean_ns": 4662.153251799314,
+      "jmh_error_ns": 24.93095634000468
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2252.956158158136,
+        2286.281530198021,
+        2239.896083986217
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2252.956158158136,
+        "min": 2239.896083986217,
+        "max": 2286.281530198021
+      },
+      "jmh_mean_ns": 2259.711257447458,
+      "jmh_error_ns": 22.148617155377153
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        1885.2909567151112,
+        1875.2884514551954,
+        1862.5150065973505
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1875.2884514551954,
+        "min": 1862.5150065973505,
+        "max": 1885.2909567151112
+      },
+      "jmh_mean_ns": 1874.3648049225521,
+      "jmh_error_ns": 11.735132573988396
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "fork_means_ns": [
+        27.018367734133243,
+        26.929068799436312,
+        26.859920566630976
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 26.929068799436312,
+        "min": 26.859920566630976,
+        "max": 27.018367734133243
+      },
+      "jmh_mean_ns": 26.935785700066845,
+      "jmh_error_ns": 0.07609417277075034
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        506.0503241115638,
+        470.77756031151506,
+        512.930503079061
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 506.0503241115638,
+        "min": 470.77756031151506,
+        "max": 512.930503079061
+      },
+      "jmh_mean_ns": 496.58612916737997,
+      "jmh_error_ns": 21.006277506546983
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        1218.9279774971699,
+        1265.1122858852398,
+        1145.372987734921
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1218.9279774971699,
+        "min": 1145.372987734921,
+        "max": 1265.1122858852398
+      },
+      "jmh_mean_ns": 1209.8044170391104,
+      "jmh_error_ns": 56.30480815398479
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        7439.6138753749465,
+        7734.653659762845,
+        7627.555249935714
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 7627.555249935714,
+        "min": 7439.6138753749465,
+        "max": 7734.653659762845
+      },
+      "jmh_mean_ns": 7600.607595024502,
+      "jmh_error_ns": 135.64299073061252
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2619.4508101925194,
+        2598.488051143431,
+        2582.8563899261276
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2598.488051143431,
+        "min": 2582.8563899261276,
+        "max": 2619.4508101925194
+      },
+      "jmh_mean_ns": 2600.265083754026,
+      "jmh_error_ns": 17.110222605306685
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        799.1333599903645,
+        765.4645771330514,
+        766.0646322729175
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 766.0646322729175,
+        "min": 765.4645771330514,
+        "max": 799.1333599903645
+      },
+      "jmh_mean_ns": 776.8875231321113,
+      "jmh_error_ns": 17.902369661948047
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "fork_means_ns": [
+        28.189330231261238,
+        26.90710635342113,
+        28.475049909212306
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 28.189330231261238,
+        "min": 26.90710635342113,
+        "max": 28.475049909212306
+      },
+      "jmh_mean_ns": 27.857162164631564,
+      "jmh_error_ns": 0.8181657431436867
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        481.70340683618844,
+        438.73801985851213,
+        519.985425762057
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 481.70340683618844,
+        "min": 438.73801985851213,
+        "max": 519.985425762057
+      },
+      "jmh_mean_ns": 480.14228415225256,
+      "jmh_error_ns": 37.03876386829538
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        1136.3964813091627,
+        1205.163520636881,
+        1170.6677745526722
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1170.6677745526722,
+        "min": 1136.3964813091627,
+        "max": 1205.163520636881
+      },
+      "jmh_mean_ns": 1170.7425921662389,
+      "jmh_error_ns": 31.171872786794086
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        7434.726032156646,
+        7926.528880941041,
+        7673.367630511588
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 7673.367630511588,
+        "min": 7434.726032156646,
+        "max": 7926.528880941041
+      },
+      "jmh_mean_ns": 7678.207514536424,
+      "jmh_error_ns": 222.71001208348025
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2661.1697206459335,
+        2743.189010882121,
+        2605.074824628009
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2661.1697206459335,
+        "min": 2605.074824628009,
+        "max": 2743.189010882121
+      },
+      "jmh_mean_ns": 2669.8111853853543,
+      "jmh_error_ns": 62.97532687914305
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        720.7931542730316,
+        699.9390118610515,
+        740.0991270554782
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 720.7931542730316,
+        "min": 699.9390118610515,
+        "max": 740.0991270554782
+      },
+      "jmh_mean_ns": 720.277097729854,
+      "jmh_error_ns": 18.816904162756423
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "fork_means_ns": [
+        27.12284082338077,
+        27.15785457934868,
+        27.35800287026182
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 27.15785457934868,
+        "min": 27.12284082338077,
+        "max": 27.35800287026182
+      },
+      "jmh_mean_ns": 27.212899424330423,
+      "jmh_error_ns": 0.14234105625696913
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "fork_means_ns": [
+        508.42104916157103,
+        544.7034900254647,
+        528.0110074863238
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 528.0110074863238,
+        "min": 508.42104916157103,
+        "max": 544.7034900254647
+      },
+      "jmh_mean_ns": 527.0451822244532,
+      "jmh_error_ns": 16.907565575722852
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "fork_means_ns": [
+        1081.0956239016014,
+        1175.2433005594812,
+        1071.7431930802366
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 1081.0956239016014,
+        "min": 1071.7431930802366,
+        "max": 1175.2433005594812
+      },
+      "jmh_mean_ns": 1109.3607058471061,
+      "jmh_error_ns": 51.908040372892714
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "fork_means_ns": [
+        7385.045262272413,
+        7373.129307067919,
+        7424.2203399895025
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 7385.045262272413,
+        "min": 7373.129307067919,
+        "max": 7424.2203399895025
+      },
+      "jmh_mean_ns": 7394.131636443278,
+      "jmh_error_ns": 35.42250218325705
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "fork_means_ns": [
+        2588.1931323771664,
+        2517.3832223908157,
+        2563.12754601776
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 2563.12754601776,
+        "min": 2517.3832223908157,
+        "max": 2588.1931323771664
+      },
+      "jmh_mean_ns": 2556.234633595247,
+      "jmh_error_ns": 37.69638776441655
+    },
+    {
+      "benchmark": "dev.trufflecel.SteadyState.evaluate",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "fork_means_ns": [
+        621.4165579369176,
+        756.5095719363077,
+        705.0834106620867
+      ],
+      "warmup_iterations": 5,
+      "ns_per_op": {
+        "median": 705.0834106620867,
+        "min": 621.4165579369176,
+        "max": 756.5095719363077
+      },
+      "jmh_mean_ns": 694.3365135117707,
+      "jmh_error_ns": 61.66549297026543
+    }
+  ],
+  "lifecycle": [
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 118864860,
+        "min": 116143182,
+        "max": 124189539
+      },
+      "prepare_ns": {
+        "median": 37479268,
+        "min": 36574730,
+        "max": 38635546
+      },
+      "plan_ns": {
+        "median": 6157680,
+        "min": 6101145,
+        "max": 6217760
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 164091206,
+          "min": 162171662,
+          "max": 171551463
+        },
+        "10": {
+          "median": 165635246,
+          "min": 163699407,
+          "max": 173205397
+        },
+        "100": {
+          "median": 171243380,
+          "min": 169345068,
+          "max": 179598581
+        },
+        "1000": {
+          "median": 199090260,
+          "min": 192300600,
+          "max": 214137082
+        },
+        "10000": {
+          "median": 235705410,
+          "min": 228352224,
+          "max": 248903937
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 116915301,
+        "min": 116786288,
+        "max": 125433877
+      },
+      "prepare_ns": {
+        "median": 40661419,
+        "min": 39283238,
+        "max": 43458020
+      },
+      "plan_ns": {
+        "median": 4402193,
+        "min": 4363255,
+        "max": 4685708
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 165874435,
+          "min": 164902674,
+          "max": 177880369
+        },
+        "10": {
+          "median": 166386885,
+          "min": 165409736,
+          "max": 178400500
+        },
+        "100": {
+          "median": 170651151,
+          "min": 169637356,
+          "max": 182601200
+        },
+        "1000": {
+          "median": 186772966,
+          "min": 186517845,
+          "max": 196164684
+        },
+        "10000": {
+          "median": 217514684,
+          "min": 216762616,
+          "max": 227191570
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 117361572,
+        "min": 115811294,
+        "max": 124784232
+      },
+      "prepare_ns": {
+        "median": 39367485,
+        "min": 39017058,
+        "max": 41747580
+      },
+      "plan_ns": {
+        "median": 4376634,
+        "min": 4361361,
+        "max": 4652248
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 167965435,
+          "min": 166387406,
+          "max": 178539349
+        },
+        "10": {
+          "median": 168901762,
+          "min": 167311644,
+          "max": 179542125
+        },
+        "100": {
+          "median": 175937460,
+          "min": 174368915,
+          "max": 187046347
+        },
+        "1000": {
+          "median": 198059480,
+          "min": 196515192,
+          "max": 211177706
+        },
+        "10000": {
+          "median": 242492275,
+          "min": 240869346,
+          "max": 254368183
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "ingest",
+      "configure_ns": {
+        "median": 122144076,
+        "min": 115044771,
+        "max": 125775289
+      },
+      "prepare_ns": {
+        "median": 39252972,
+        "min": 39198331,
+        "max": 41699458
+      },
+      "plan_ns": {
+        "median": 4413459,
+        "min": 4387361,
+        "max": 4663796
+      },
+      "ns_per_op": {
+        "median": 495.7008076246355,
+        "min": 471.0610194050174,
+        "max": 512.3001612196741
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 118056837,
+        "min": 116044343,
+        "max": 124944413
+      },
+      "prepare_ns": {
+        "median": 37445768,
+        "min": 37371317,
+        "max": 40852085
+      },
+      "plan_ns": {
+        "median": 4653630,
+        "min": 4527371,
+        "max": 4855403
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 163970766,
+          "min": 161697930,
+          "max": 174707744
+        },
+        "10": {
+          "median": 166980157,
+          "min": 164609834,
+          "max": 178123254
+        },
+        "100": {
+          "median": 174509096,
+          "min": 173691236,
+          "max": 186193447
+        },
+        "1000": {
+          "median": 197818568,
+          "min": 197055874,
+          "max": 208114936
+        },
+        "10000": {
+          "median": 311829867,
+          "min": 308630194,
+          "max": 324689375
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 115885284,
+        "min": 115249570,
+        "max": 124349308
+      },
+      "prepare_ns": {
+        "median": 33251818,
+        "min": 32994141,
+        "max": 36006937
+      },
+      "plan_ns": {
+        "median": 4033429,
+        "min": 3961010,
+        "max": 4242763
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 154374500,
+          "min": 153298645,
+          "max": 165722836
+        },
+        "10": {
+          "median": 154442201,
+          "min": 153367478,
+          "max": 165795836
+        },
+        "100": {
+          "median": 154829102,
+          "min": 153747439,
+          "max": 166249848
+        },
+        "1000": {
+          "median": 158160476,
+          "min": 156905633,
+          "max": 169683936
+        },
+        "10000": {
+          "median": 164985108,
+          "min": 163434089,
+          "max": 176609970
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 116790884,
+        "min": 114879675,
+        "max": 116886649
+      },
+      "prepare_ns": {
+        "median": 33770118,
+        "min": 33184007,
+        "max": 33992311
+      },
+      "plan_ns": {
+        "median": 3988341,
+        "min": 3942121,
+        "max": 4027920
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 155726342,
+          "min": 153225215,
+          "max": 155918840
+        },
+        "10": {
+          "median": 156048005,
+          "min": 153549122,
+          "max": 156262065
+        },
+        "100": {
+          "median": 158074088,
+          "min": 155480603,
+          "max": 158289290
+        },
+        "1000": {
+          "median": 164015712,
+          "min": 161335448,
+          "max": 164200972
+        },
+        "10000": {
+          "median": 188527574,
+          "min": 186463183,
+          "max": 190526474
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 122955164,
+        "min": 116501149,
+        "max": 124266324
+      },
+      "prepare_ns": {
+        "median": 59074096,
+        "min": 58407425,
+        "max": 62637179
+      },
+      "plan_ns": {
+        "median": 2156870,
+        "min": 2110089,
+        "max": 2284341
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 185490720,
+          "min": 179805650,
+          "max": 191398675
+        },
+        "10": {
+          "median": 186972285,
+          "min": 181284451,
+          "max": 192850045
+        },
+        "100": {
+          "median": 198029464,
+          "min": 190202107,
+          "max": 201430604
+        },
+        "1000": {
+          "median": 219828429,
+          "min": 219453596,
+          "max": 232639895
+        },
+        "10000": {
+          "median": 258451045,
+          "min": 257142439,
+          "max": 269805552
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 116312127,
+        "min": 115132424,
+        "max": 124784543
+      },
+      "prepare_ns": {
+        "median": 74216423,
+        "min": 73224083,
+        "max": 79134791
+      },
+      "plan_ns": {
+        "median": 620272,
+        "min": 580712,
+        "max": 667272
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 195108429,
+          "min": 193071229,
+          "max": 208812043
+        },
+        "10": {
+          "median": 195587269,
+          "min": 193516267,
+          "max": 209332205
+        },
+        "100": {
+          "median": 199065233,
+          "min": 196920231,
+          "max": 212418341
+        },
+        "1000": {
+          "median": 211177297,
+          "min": 209404424,
+          "max": 223960829
+        },
+        "10000": {
+          "median": 245475367,
+          "min": 235487434,
+          "max": 254509517
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 119719153,
+        "min": 119104691,
+        "max": 120683030
+      },
+      "prepare_ns": {
+        "median": 57058219,
+        "min": 56958039,
+        "max": 57557989
+      },
+      "plan_ns": {
+        "median": 8045716,
+        "min": 7956181,
+        "max": 8257364
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 193272720,
+          "min": 191613399,
+          "max": 194180693
+        },
+        "10": {
+          "median": 194109938,
+          "min": 192413821,
+          "max": 194980414
+        },
+        "100": {
+          "median": 201006337,
+          "min": 200014619,
+          "max": 201369101
+        },
+        "1000": {
+          "median": 222876637,
+          "min": 219649072,
+          "max": 225972970
+        },
+        "10000": {
+          "median": 263021720,
+          "min": 258750328,
+          "max": 266718716
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 117362133,
+        "min": 116031003,
+        "max": 124847547
+      },
+      "prepare_ns": {
+        "median": 63630301,
+        "min": 60747481,
+        "max": 66313853
+      },
+      "plan_ns": {
+        "median": 262524,
+        "min": 243386,
+        "max": 265799
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 188404287,
+          "min": 184205820,
+          "max": 198411380
+        },
+        "10": {
+          "median": 191465215,
+          "min": 187070403,
+          "max": 201329654
+        },
+        "100": {
+          "median": 199413124,
+          "min": 195036710,
+          "max": 213235007
+        },
+        "1000": {
+          "median": 220098566,
+          "min": 218827757,
+          "max": 243099798
+        },
+        "10000": {
+          "median": 333081601,
+          "min": 323767209,
+          "max": 371922818
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 124876090,
+        "min": 116035760,
+        "max": 126821682
+      },
+      "prepare_ns": {
+        "median": 42988905,
+        "min": 42422213,
+        "max": 43907584
+      },
+      "plan_ns": {
+        "median": 4076844,
+        "min": 3952858,
+        "max": 4401242
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 172440077,
+          "min": 164004265,
+          "max": 176229538
+        },
+        "10": {
+          "median": 172510463,
+          "min": 164067440,
+          "max": 176303179
+        },
+        "100": {
+          "median": 172904495,
+          "min": 164477936,
+          "max": 176751462
+        },
+        "1000": {
+          "median": 176064962,
+          "min": 167559766,
+          "max": 180102196
+        },
+        "10000": {
+          "median": 185578002,
+          "min": 176737171,
+          "max": 190523770
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 117288522,
+        "min": 115189498,
+        "max": 124010579
+      },
+      "prepare_ns": {
+        "median": 41858417,
+        "min": 40933448,
+        "max": 46494541
+      },
+      "plan_ns": {
+        "median": 4044425,
+        "min": 3963063,
+        "max": 4484146
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 164236364,
+          "min": 161296928,
+          "max": 176267316
+        },
+        "10": {
+          "median": 164593310,
+          "min": 161626112,
+          "max": 176621968
+        },
+        "100": {
+          "median": 166523940,
+          "min": 163592456,
+          "max": 178590365
+        },
+        "1000": {
+          "median": 174526861,
+          "min": 171649969,
+          "max": 189822788
+        },
+        "10000": {
+          "median": 196283703,
+          "min": 194210598,
+          "max": 213205942
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 125266646,
+        "min": 116548950,
+        "max": 126174611
+      },
+      "prepare_ns": {
+        "median": 45008708,
+        "min": 43371490,
+        "max": 45843012
+      },
+      "plan_ns": {
+        "median": 2123710,
+        "min": 2097380,
+        "max": 2231532
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 175381816,
+          "min": 164022301,
+          "max": 175556167
+        },
+        "10": {
+          "median": 177018895,
+          "min": 165459520,
+          "max": 177052345
+        },
+        "100": {
+          "median": 183017725,
+          "min": 171216938,
+          "max": 183290426
+        },
+        "1000": {
+          "median": 210075820,
+          "min": 205663131,
+          "max": 215903845
+        },
+        "10000": {
+          "median": 245785611,
+          "min": 244093097,
+          "max": 251547737
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 126820180,
+        "min": 124183629,
+        "max": 127090365
+      },
+      "prepare_ns": {
+        "median": 61850718,
+        "min": 60715532,
+        "max": 61911649
+      },
+      "plan_ns": {
+        "median": 1064710,
+        "min": 1038620,
+        "max": 1207274
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 193694334,
+          "min": 189996989,
+          "max": 194236127
+        },
+        "10": {
+          "median": 194164550,
+          "min": 190483320,
+          "max": 195010770
+        },
+        "100": {
+          "median": 197812209,
+          "min": 194043888,
+          "max": 199646153
+        },
+        "1000": {
+          "median": 211620741,
+          "min": 205670843,
+          "max": 213869869
+        },
+        "10000": {
+          "median": 238243252,
+          "min": 232095676,
+          "max": 243206917
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 115795359,
+        "min": 115583511,
+        "max": 125676832
+      },
+      "prepare_ns": {
+        "median": 40897182,
+        "min": 40870312,
+        "max": 43551149
+      },
+      "plan_ns": {
+        "median": 5054963,
+        "min": 4872920,
+        "max": 5214553
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 169196924,
+          "min": 169041150,
+          "max": 181644182
+        },
+        "10": {
+          "median": 170011608,
+          "min": 169883496,
+          "max": 182480979
+        },
+        "100": {
+          "median": 178247609,
+          "min": 177877734,
+          "max": 190666935
+        },
+        "1000": {
+          "median": 206715732,
+          "min": 205978575,
+          "max": 217111969
+        },
+        "10000": {
+          "median": 247065563,
+          "min": 245308343,
+          "max": 256277500
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 125671244,
+        "min": 115224842,
+        "max": 127838000
+      },
+      "prepare_ns": {
+        "median": 47059620,
+        "min": 45966157,
+        "max": 50432196
+      },
+      "plan_ns": {
+        "median": 249475,
+        "min": 246510,
+        "max": 249795
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 176236750,
+          "min": 164777206,
+          "max": 181961541
+        },
+        "10": {
+          "median": 179324468,
+          "min": 167823582,
+          "max": 185847428
+        },
+        "100": {
+          "median": 190434086,
+          "min": 181263140,
+          "max": 198283519
+        },
+        "1000": {
+          "median": 210547048,
+          "min": 200403821,
+          "max": 218721620
+        },
+        "10000": {
+          "median": 319568342,
+          "min": 316027843,
+          "max": 336172326
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 116239186,
+        "min": 115758174,
+        "max": 125576743
+      },
+      "prepare_ns": {
+        "median": 28715464,
+        "min": 28358068,
+        "max": 30473946
+      },
+      "plan_ns": {
+        "median": 3911535,
+        "min": 3876573,
+        "max": 4138286
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 149501070,
+          "min": 149377845,
+          "max": 161277741
+        },
+        "10": {
+          "median": 149567470,
+          "min": 149446938,
+          "max": 161349448
+        },
+        "100": {
+          "median": 149971887,
+          "min": 149890294,
+          "max": 161846044
+        },
+        "1000": {
+          "median": 153138494,
+          "min": 153120917,
+          "max": 165408676
+        },
+        "10000": {
+          "median": 159541472,
+          "min": 159389433,
+          "max": 172318595
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 123675877,
+        "min": 114512902,
+        "max": 125713078
+      },
+      "prepare_ns": {
+        "median": 27747130,
+        "min": 27584005,
+        "max": 30566354
+      },
+      "plan_ns": {
+        "median": 3905005,
+        "min": 3794931,
+        "max": 4062012
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 156166553,
+          "min": 147271309,
+          "max": 161518652
+        },
+        "10": {
+          "median": 156508566,
+          "min": 147632201,
+          "max": 161952063
+        },
+        "100": {
+          "median": 158489342,
+          "min": 149664043,
+          "max": 164172118
+        },
+        "1000": {
+          "median": 163997456,
+          "min": 157587445,
+          "max": 170152902
+        },
+        "10000": {
+          "median": 189028185,
+          "min": 180612862,
+          "max": 193782667
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71505210,
+        "min": 71358619,
+        "max": 80633832
+      },
+      "prepare_ns": {
+        "median": 5384558,
+        "min": 5335515,
+        "max": 5466140
+      },
+      "plan_ns": {
+        "median": 1994286,
+        "min": 1945703,
+        "max": 2004291
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 84217175,
+          "min": 83999898,
+          "max": 93647680
+        },
+        "10": {
+          "median": 84969285,
+          "min": 84757146,
+          "max": 94403856
+        },
+        "100": {
+          "median": 89813110,
+          "min": 89711478,
+          "max": 99228042
+        },
+        "1000": {
+          "median": 109103066,
+          "min": 108885930,
+          "max": 118272309
+        },
+        "10000": {
+          "median": 162736290,
+          "min": 157469939,
+          "max": 172754348
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71128314,
+        "min": 70922555,
+        "max": 72270550
+      },
+      "prepare_ns": {
+        "median": 5381373,
+        "min": 5375725,
+        "max": 5449846
+      },
+      "plan_ns": {
+        "median": 1928698,
+        "min": 1924701,
+        "max": 2149128
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 79986660,
+          "min": 79759560,
+          "max": 81482327
+        },
+        "10": {
+          "median": 80473051,
+          "min": 80248865,
+          "max": 81984301
+        },
+        "100": {
+          "median": 85007472,
+          "min": 83419316,
+          "max": 85918631
+        },
+        "1000": {
+          "median": 95784120,
+          "min": 94282795,
+          "max": 98587982
+        },
+        "10000": {
+          "median": 132977840,
+          "min": 130494870,
+          "max": 133961178
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 74182571,
+        "min": 71727534,
+        "max": 75262233
+      },
+      "prepare_ns": {
+        "median": 6232782,
+        "min": 6188526,
+        "max": 6606063
+      },
+      "plan_ns": {
+        "median": 2043781,
+        "min": 1975527,
+        "max": 2209920
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 86074094,
+          "min": 82835699,
+          "max": 86387445
+        },
+        "10": {
+          "median": 86884271,
+          "min": 83569171,
+          "max": 87137271
+        },
+        "100": {
+          "median": 91977462,
+          "min": 88554840,
+          "max": 92341037
+        },
+        "1000": {
+          "median": 109529006,
+          "min": 106899797,
+          "max": 112017163
+        },
+        "10000": {
+          "median": 161671901,
+          "min": 160796456,
+          "max": 164909214
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "ingest",
+      "configure_ns": {
+        "median": 72276488,
+        "min": 69649943,
+        "max": 73709851
+      },
+      "prepare_ns": {
+        "median": 6146873,
+        "min": 6144540,
+        "max": 6554727
+      },
+      "plan_ns": {
+        "median": 2090119,
+        "min": 2058211,
+        "max": 2324301
+      },
+      "ns_per_op": {
+        "median": 3369.701949149228,
+        "min": 3275.969166695653,
+        "max": 3529.6679656091483
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71479381,
+        "min": 71239110,
+        "max": 74327329
+      },
+      "prepare_ns": {
+        "median": 5211157,
+        "min": 5194182,
+        "max": 5656557
+      },
+      "plan_ns": {
+        "median": 2045944,
+        "min": 2023089,
+        "max": 2259123
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 80333310,
+          "min": 79854150,
+          "max": 83777234
+        },
+        "10": {
+          "median": 81886193,
+          "min": 81418871,
+          "max": 85626862
+        },
+        "100": {
+          "median": 89272158,
+          "min": 88941190,
+          "max": 93296172
+        },
+        "1000": {
+          "median": 115111762,
+          "min": 108534011,
+          "max": 122842094
+        },
+        "10000": {
+          "median": 232736238,
+          "min": 231399109,
+          "max": 262390744
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71118679,
+        "min": 70633050,
+        "max": 74538617
+      },
+      "prepare_ns": {
+        "median": 4972489,
+        "min": 4897747,
+        "max": 5211969
+      },
+      "plan_ns": {
+        "median": 2014536,
+        "min": 1984501,
+        "max": 2080405
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 78526707,
+          "min": 78004553,
+          "max": 82306125
+        },
+        "10": {
+          "median": 78579967,
+          "min": 78057773,
+          "max": 82366526
+        },
+        "100": {
+          "median": 78857113,
+          "min": 78325265,
+          "max": 82658514
+        },
+        "1000": {
+          "median": 81373443,
+          "min": 80887954,
+          "max": 84923106
+        },
+        "10000": {
+          "median": 86663279,
+          "min": 86430580,
+          "max": 89780613
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 74989894,
+        "min": 71229135,
+        "max": 75235393
+      },
+      "prepare_ns": {
+        "median": 4875734,
+        "min": 4875244,
+        "max": 4882695
+      },
+      "plan_ns": {
+        "median": 1977009,
+        "min": 1976559,
+        "max": 1999384
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 82808559,
+          "min": 79007479,
+          "max": 83023211
+        },
+        "10": {
+          "median": 83135229,
+          "min": 79333469,
+          "max": 83410784
+        },
+        "100": {
+          "median": 84789154,
+          "min": 81698422,
+          "max": 85371108
+        },
+        "1000": {
+          "median": 92031713,
+          "min": 89005568,
+          "max": 93079397
+        },
+        "10000": {
+          "median": 119547696,
+          "min": 119110469,
+          "max": 130417153
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71344848,
+        "min": 71256506,
+        "max": 73913828
+      },
+      "prepare_ns": {
+        "median": 5427202,
+        "min": 5261213,
+        "max": 5652451
+      },
+      "plan_ns": {
+        "median": 1898212,
+        "min": 1880866,
+        "max": 2023139
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 83887569,
+          "min": 83843152,
+          "max": 87199024
+        },
+        "10": {
+          "median": 84648072,
+          "min": 84609293,
+          "max": 88007188
+        },
+        "100": {
+          "median": 89626049,
+          "min": 89448333,
+          "max": 93129342
+        },
+        "1000": {
+          "median": 175058409,
+          "min": 174614442,
+          "max": 179222345
+        },
+        "10000": {
+          "median": 255836348,
+          "min": 252894017,
+          "max": 263763637
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 74555532,
+        "min": 71066932,
+        "max": 75963767
+      },
+      "prepare_ns": {
+        "median": 5462535,
+        "min": 5398790,
+        "max": 5930248
+      },
+      "plan_ns": {
+        "median": 2019684,
+        "min": 1996039,
+        "max": 2117641
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 84218257,
+          "min": 79947682,
+          "max": 85005609
+        },
+        "10": {
+          "median": 84741813,
+          "min": 80442636,
+          "max": 85479611
+        },
+        "100": {
+          "median": 87809301,
+          "min": 83291896,
+          "max": 88397123
+        },
+        "1000": {
+          "median": 170906793,
+          "min": 165250559,
+          "max": 171098932
+        },
+        "10000": {
+          "median": 253191295,
+          "min": 244682486,
+          "max": 256924873
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 73397232,
+        "min": 71158719,
+        "max": 74092507
+      },
+      "prepare_ns": {
+        "median": 6493164,
+        "min": 6321365,
+        "max": 6639433
+      },
+      "plan_ns": {
+        "median": 2160986,
+        "min": 2009939,
+        "max": 2344742
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 85100662,
+          "min": 82375257,
+          "max": 86177940
+        },
+        "10": {
+          "median": 85959542,
+          "min": 83123882,
+          "max": 86984622
+        },
+        "100": {
+          "median": 91087115,
+          "min": 87834237,
+          "max": 92438194
+        },
+        "1000": {
+          "median": 187245327,
+          "min": 181680436,
+          "max": 195721589
+        },
+        "10000": {
+          "median": 290704787,
+          "min": 286506858,
+          "max": 299328270
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 71966062,
+        "min": 71049085,
+        "max": 73809881
+      },
+      "prepare_ns": {
+        "median": 5383617,
+        "min": 5301723,
+        "max": 5669627
+      },
+      "plan_ns": {
+        "median": 2002028,
+        "min": 1989438,
+        "max": 2166634
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 80741914,
+          "min": 79777546,
+          "max": 83121098
+        },
+        "10": {
+          "median": 82387336,
+          "min": 81325291,
+          "max": 84904957
+        },
+        "100": {
+          "median": 90136956,
+          "min": 88961071,
+          "max": 93130102
+        },
+        "1000": {
+          "median": 167477681,
+          "min": 166880936,
+          "max": 173667860
+        },
+        "10000": {
+          "median": 283131770,
+          "min": 281786908,
+          "max": 289328817
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 70741723,
+        "min": 70435954,
+        "max": 75149033
+      },
+      "prepare_ns": {
+        "median": 4938649,
+        "min": 4904156,
+        "max": 5230807
+      },
+      "plan_ns": {
+        "median": 2138502,
+        "min": 1975869,
+        "max": 2316670
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 78452336,
+          "min": 77761538,
+          "max": 83016821
+        },
+        "10": {
+          "median": 78503713,
+          "min": 77815980,
+          "max": 83069160
+        },
+        "100": {
+          "median": 78770033,
+          "min": 78099325,
+          "max": 83330532
+        },
+        "1000": {
+          "median": 124730801,
+          "min": 124159504,
+          "max": 128819933
+        },
+        "10000": {
+          "median": 142026131,
+          "min": 140880200,
+          "max": 145888032
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 74586109,
+        "min": 71690779,
+        "max": 74715292
+      },
+      "prepare_ns": {
+        "median": 5125779,
+        "min": 4886320,
+        "max": 5204247
+      },
+      "plan_ns": {
+        "median": 2152524,
+        "min": 1989038,
+        "max": 2268337
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 82984083,
+          "min": 79493380,
+          "max": 83049141
+        },
+        "10": {
+          "median": 83328480,
+          "min": 79825359,
+          "max": 83402562
+        },
+        "100": {
+          "median": 85763598,
+          "min": 82236070,
+          "max": 85839252
+        },
+        "1000": {
+          "median": 137640114,
+          "min": 136538478,
+          "max": 140436485
+        },
+        "10000": {
+          "median": 180417572,
+          "min": 178456114,
+          "max": 181894750
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 343867,
+        "min": 333541,
+        "max": 369214
+      },
+      "prepare_ns": {
+        "median": 803257,
+        "min": 780302,
+        "max": 852290
+      },
+      "plan_ns": {
+        "median": 46259,
+        "min": 43635,
+        "max": 49956
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1230979,
+          "min": 1219692,
+          "max": 1322056
+        },
+        "10": {
+          "median": 1305080,
+          "min": 1291300,
+          "max": 1398080
+        },
+        "100": {
+          "median": 1956329,
+          "min": 1921286,
+          "max": 2054876
+        },
+        "1000": {
+          "median": 8662803,
+          "min": 8540199,
+          "max": 8767670
+        },
+        "10000": {
+          "median": 74287620,
+          "min": 70809135,
+          "max": 75034871
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 289986,
+        "min": 286780,
+        "max": 294052
+      },
+      "prepare_ns": {
+        "median": 731,
+        "min": 601,
+        "max": 811
+      },
+      "plan_ns": {
+        "median": 61633,
+        "min": 61492,
+        "max": 65017
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 388414,
+          "min": 381883,
+          "max": 408854
+        },
+        "10": {
+          "median": 460842,
+          "min": 456305,
+          "max": 478268
+        },
+        "100": {
+          "median": 1109497,
+          "min": 1080843,
+          "max": 1114734
+        },
+        "1000": {
+          "median": 7863321,
+          "min": 7610041,
+          "max": 7922090
+        },
+        "10000": {
+          "median": 73424492,
+          "min": 70396725,
+          "max": 74564715
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 339931,
+        "min": 319309,
+        "max": 348885
+      },
+      "prepare_ns": {
+        "median": 811,
+        "min": 802,
+        "max": 841
+      },
+      "plan_ns": {
+        "median": 71307,
+        "min": 69874,
+        "max": 72739
+      },
+      "ns_per_op": {
+        "median": 6382.43826912024,
+        "min": 6135.440968825159,
+        "max": 6698.463036523553
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 250
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 338458,
+        "min": 336516,
+        "max": 338769
+      },
+      "prepare_ns": {
+        "median": 800533,
+        "min": 787903,
+        "max": 812260
+      },
+      "plan_ns": {
+        "median": 45519,
+        "min": 45137,
+        "max": 45729
+      },
+      "ns_per_op": {
+        "median": 6139.25433273179,
+        "min": 6137.112362172431,
+        "max": 6267.751114019765
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 170,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 339591,
+        "min": 293871,
+        "max": 404979
+      },
+      "prepare_ns": {
+        "median": 910056,
+        "min": 883517,
+        "max": 1002295
+      },
+      "plan_ns": {
+        "median": 24788,
+        "min": 19379,
+        "max": 25719
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1891582,
+          "min": 1630899,
+          "max": 1941427
+        },
+        "10": {
+          "median": 1932243,
+          "min": 1659122,
+          "max": 1972613
+        },
+        "100": {
+          "median": 2189289,
+          "min": 1870700,
+          "max": 2202739
+        },
+        "1000": {
+          "median": 4369935,
+          "min": 4241240,
+          "max": 4384557
+        },
+        "10000": {
+          "median": 25875808,
+          "min": 25175688,
+          "max": 25945494
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 290205,
+        "min": 223626,
+        "max": 291738
+      },
+      "prepare_ns": {
+        "median": 581,
+        "min": 561,
+        "max": 671
+      },
+      "plan_ns": {
+        "median": 35102,
+        "min": 27281,
+        "max": 40511
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 800893,
+          "min": 678529,
+          "max": 810046
+        },
+        "10": {
+          "median": 830747,
+          "min": 706461,
+          "max": 838809
+        },
+        "100": {
+          "median": 1042075,
+          "min": 922275,
+          "max": 1064669
+        },
+        "1000": {
+          "median": 3122069,
+          "min": 2994748,
+          "max": 3252555
+        },
+        "10000": {
+          "median": 24261333,
+          "min": 23871788,
+          "max": 25447104
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 322724,
+        "min": 317467,
+        "max": 333922
+      },
+      "prepare_ns": {
+        "median": 831,
+        "min": 812,
+        "max": 881
+      },
+      "plan_ns": {
+        "median": 47702,
+        "min": 47431,
+        "max": 48182
+      },
+      "ns_per_op": {
+        "median": 1698.9085036732693,
+        "min": 1667.602704265744,
+        "max": 1712.6638335162108
+      },
+      "forced_guest_preparation_ns": {
+        "median": 280,
+        "min": 170,
+        "max": 290
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 260161,
+        "min": 244627,
+        "max": 309495
+      },
+      "prepare_ns": {
+        "median": 858690,
+        "min": 846201,
+        "max": 914734
+      },
+      "plan_ns": {
+        "median": 17386,
+        "min": 16334,
+        "max": 22073
+      },
+      "ns_per_op": {
+        "median": 1701.7625482477465,
+        "min": 1699.3027424632737,
+        "max": 1703.739087084756
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 271
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 364117,
+        "min": 304418,
+        "max": 365889
+      },
+      "prepare_ns": {
+        "median": 862395,
+        "min": 807292,
+        "max": 889146
+      },
+      "plan_ns": {
+        "median": 23125,
+        "min": 22334,
+        "max": 25058
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1799443,
+          "min": 1641506,
+          "max": 1836679
+        },
+        "10": {
+          "median": 1835888,
+          "min": 1681106,
+          "max": 1876559
+        },
+        "100": {
+          "median": 2119754,
+          "min": 1955418,
+          "max": 2179403
+        },
+        "1000": {
+          "median": 4908042,
+          "min": 4659239,
+          "max": 5389586
+        },
+        "10000": {
+          "median": 33120050,
+          "min": 32155292,
+          "max": 36337343
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 303596,
+        "min": 264337,
+        "max": 309204
+      },
+      "prepare_ns": {
+        "median": 561,
+        "min": 521,
+        "max": 862
+      },
+      "plan_ns": {
+        "median": 39399,
+        "min": 36024,
+        "max": 40741
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 852301,
+          "min": 795214,
+          "max": 933612
+        },
+        "10": {
+          "median": 888495,
+          "min": 845199,
+          "max": 966021
+        },
+        "100": {
+          "median": 1183768,
+          "min": 1120743,
+          "max": 1270068
+        },
+        "1000": {
+          "median": 4096934,
+          "min": 4032186,
+          "max": 4112277
+        },
+        "10000": {
+          "median": 32833219,
+          "min": 32569775,
+          "max": 33933312
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 322274,
+        "min": 313121,
+        "max": 323646
+      },
+      "prepare_ns": {
+        "median": 871,
+        "min": 871,
+        "max": 901
+      },
+      "plan_ns": {
+        "median": 44297,
+        "min": 42864,
+        "max": 44898
+      },
+      "ns_per_op": {
+        "median": 2465.659807056972,
+        "min": 2463.038462277349,
+        "max": 2556.783278654665
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "ingest",
+      "configure_ns": {
+        "median": 380701,
+        "min": 294401,
+        "max": 384446
+      },
+      "prepare_ns": {
+        "median": 899667,
+        "min": 843864,
+        "max": 936693
+      },
+      "plan_ns": {
+        "median": 23215,
+        "min": 19840,
+        "max": 24416
+      },
+      "ns_per_op": {
+        "median": 738.2336372988472,
+        "min": 727.0717048755874,
+        "max": 790.8001425141075
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 270186,
+        "min": 255895,
+        "max": 290216
+      },
+      "prepare_ns": {
+        "median": 869516,
+        "min": 799831,
+        "max": 878689
+      },
+      "plan_ns": {
+        "median": 17997,
+        "min": 15834,
+        "max": 20982
+      },
+      "ns_per_op": {
+        "median": 2449.3909333926485,
+        "min": 2437.9671318266996,
+        "max": 2550.5138158819655
+      },
+      "forced_guest_preparation_ns": {
+        "median": 241,
+        "min": 160,
+        "max": 291
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 337958,
+        "min": 331198,
+        "max": 363265
+      },
+      "prepare_ns": {
+        "median": 796356,
+        "min": 784789,
+        "max": 806241
+      },
+      "plan_ns": {
+        "median": 24677,
+        "min": 23325,
+        "max": 27692
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1212542,
+          "min": 1195947,
+          "max": 1248225
+        },
+        "10": {
+          "median": 1359222,
+          "min": 1335166,
+          "max": 1382907
+        },
+        "100": {
+          "median": 2715980,
+          "min": 2642168,
+          "max": 2716040
+        },
+        "1000": {
+          "median": 15806913,
+          "min": 15715907,
+          "max": 16732975
+        },
+        "10000": {
+          "median": 141810206,
+          "min": 141598719,
+          "max": 148119314
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 286009,
+        "min": 254282,
+        "max": 317256
+      },
+      "prepare_ns": {
+        "median": 881,
+        "min": 681,
+        "max": 962
+      },
+      "plan_ns": {
+        "median": 44177,
+        "min": 33200,
+        "max": 46330
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 376625,
+          "min": 324087,
+          "max": 417236
+        },
+        "10": {
+          "median": 506801,
+          "min": 458950,
+          "max": 548494
+        },
+        "100": {
+          "median": 1765803,
+          "min": 1757349,
+          "max": 1804801
+        },
+        "1000": {
+          "median": 15295595,
+          "min": 15176958,
+          "max": 15441354
+        },
+        "10000": {
+          "median": 142344108,
+          "min": 141829986,
+          "max": 143045533
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 310967,
+        "min": 251809,
+        "max": 316726
+      },
+      "prepare_ns": {
+        "median": 801,
+        "min": 711,
+        "max": 871
+      },
+      "plan_ns": {
+        "median": 46590,
+        "min": 36325,
+        "max": 50185
+      },
+      "ns_per_op": {
+        "median": 11878.769002490037,
+        "min": 11849.029399062103,
+        "max": 12006.752872826331
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 151,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 327382,
+        "min": 260952,
+        "max": 331408
+      },
+      "prepare_ns": {
+        "median": 797237,
+        "min": 793101,
+        "max": 802535
+      },
+      "plan_ns": {
+        "median": 24047,
+        "min": 17717,
+        "max": 25979
+      },
+      "ns_per_op": {
+        "median": 11824.620848964927,
+        "min": 11816.217339219587,
+        "max": 12374.015975153825
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 359129,
+        "min": 334252,
+        "max": 361924
+      },
+      "prepare_ns": {
+        "median": 770578,
+        "min": 644739,
+        "max": 811279
+      },
+      "plan_ns": {
+        "median": 15733,
+        "min": 13360,
+        "max": 15864
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1160222,
+          "min": 1006823,
+          "max": 1203248
+        },
+        "10": {
+          "median": 1163077,
+          "min": 1009547,
+          "max": 1205762
+        },
+        "100": {
+          "median": 1176958,
+          "min": 1020924,
+          "max": 1216758
+        },
+        "1000": {
+          "median": 1314514,
+          "min": 1135796,
+          "max": 1332762
+        },
+        "10000": {
+          "median": 2433766,
+          "min": 2227817,
+          "max": 2442920
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 203095,
+        "min": 197046,
+        "max": 236275
+      },
+      "prepare_ns": {
+        "median": 461,
+        "min": 311,
+        "max": 832
+      },
+      "plan_ns": {
+        "median": 14561,
+        "min": 10966,
+        "max": 15523
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 222224,
+          "min": 221533,
+          "max": 264177
+        },
+        "10": {
+          "median": 224357,
+          "min": 223626,
+          "max": 266831
+        },
+        "100": {
+          "median": 236225,
+          "min": 234462,
+          "max": 280582
+        },
+        "1000": {
+          "median": 352389,
+          "min": 339570,
+          "max": 402965
+        },
+        "10000": {
+          "median": 1488065,
+          "min": 1401305,
+          "max": 1516959
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 325148,
+        "min": 253200,
+        "max": 326661
+      },
+      "prepare_ns": {
+        "median": 721,
+        "min": 661,
+        "max": 731
+      },
+      "plan_ns": {
+        "median": 26259,
+        "min": 17607,
+        "max": 26500
+      },
+      "ns_per_op": {
+        "median": 82.72276731117645,
+        "min": 79.01785940829386,
+        "max": 83.7719186717925
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 210866,
+        "min": 187471,
+        "max": 222133
+      },
+      "prepare_ns": {
+        "median": 531178,
+        "min": 496196,
+        "max": 589265
+      },
+      "plan_ns": {
+        "median": 6490,
+        "min": 4166,
+        "max": 6570
+      },
+      "ns_per_op": {
+        "median": 79.29077130123075,
+        "min": 79.186389372398,
+        "max": 83.30556855048579
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 170,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 353381,
+        "min": 330327,
+        "max": 354343
+      },
+      "prepare_ns": {
+        "median": 654984,
+        "min": 634893,
+        "max": 660542
+      },
+      "plan_ns": {
+        "median": 13580,
+        "min": 13560,
+        "max": 13891
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1042907,
+          "min": 1002526,
+          "max": 1051360
+        },
+        "10": {
+          "median": 1063227,
+          "min": 1024830,
+          "max": 1072061
+        },
+        "100": {
+          "median": 1219052,
+          "min": 1178160,
+          "max": 1246723
+        },
+        "1000": {
+          "median": 2916501,
+          "min": 2674978,
+          "max": 2959346
+        },
+        "10000": {
+          "median": 18603196,
+          "min": 18409684,
+          "max": 18769424
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 245429,
+        "min": 228293,
+        "max": 248914
+      },
+      "prepare_ns": {
+        "median": 601,
+        "min": 321,
+        "max": 621
+      },
+      "plan_ns": {
+        "median": 17196,
+        "min": 14862,
+        "max": 20100
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 281373,
+          "min": 261293,
+          "max": 298108
+        },
+        "10": {
+          "median": 300372,
+          "min": 281383,
+          "max": 317307
+        },
+        "100": {
+          "median": 452340,
+          "min": 436646,
+          "max": 479481
+        },
+        "1000": {
+          "median": 1958873,
+          "min": 1935968,
+          "max": 2037581
+        },
+        "10000": {
+          "median": 18137805,
+          "min": 17876944,
+          "max": 18274171
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 330366,
+        "min": 327502,
+        "max": 330416
+      },
+      "prepare_ns": {
+        "median": 892,
+        "min": 871,
+        "max": 932
+      },
+      "plan_ns": {
+        "median": 26029,
+        "min": 25909,
+        "max": 27641
+      },
+      "ns_per_op": {
+        "median": 1284.3472678650453,
+        "min": 1260.4273797297471,
+        "max": 1338.4579945248572
+      },
+      "forced_guest_preparation_ns": {
+        "median": 241,
+        "min": 171,
+        "max": 251
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 250216,
+        "min": 240552,
+        "max": 268083
+      },
+      "prepare_ns": {
+        "median": 609165,
+        "min": 578108,
+        "max": 615414
+      },
+      "plan_ns": {
+        "median": 7241,
+        "min": 7221,
+        "max": 7541
+      },
+      "ns_per_op": {
+        "median": 1255.4367380431597,
+        "min": 1217.779947518115,
+        "max": 1256.8257144262834
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 160,
+        "max": 301
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 342935,
+        "min": 334913,
+        "max": 418439
+      },
+      "prepare_ns": {
+        "median": 1289387,
+        "min": 1246493,
+        "max": 1397569
+      },
+      "plan_ns": {
+        "median": 26950,
+        "min": 26149,
+        "max": 29624
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1705071,
+          "min": 1656949,
+          "max": 1892012
+        },
+        "10": {
+          "median": 1779153,
+          "min": 1730249,
+          "max": 1966284
+        },
+        "100": {
+          "median": 2430381,
+          "min": 2345133,
+          "max": 2621348
+        },
+        "1000": {
+          "median": 9146049,
+          "min": 8850244,
+          "max": 9318768
+        },
+        "10000": {
+          "median": 74486248,
+          "min": 71752061,
+          "max": 75726540
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 307392,
+        "min": 236385,
+        "max": 328504
+      },
+      "prepare_ns": {
+        "median": 801,
+        "min": 791,
+        "max": 931
+      },
+      "plan_ns": {
+        "median": 66350,
+        "min": 50246,
+        "max": 70086
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 409215,
+          "min": 315724,
+          "max": 449405
+        },
+        "10": {
+          "median": 488234,
+          "min": 387923,
+          "max": 528464
+        },
+        "100": {
+          "median": 1145521,
+          "min": 1028325,
+          "max": 1177309
+        },
+        "1000": {
+          "median": 7845485,
+          "min": 7622660,
+          "max": 7957875
+        },
+        "10000": {
+          "median": 73011693,
+          "min": 69848191,
+          "max": 75007421
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 262124,
+        "min": 253020,
+        "max": 319439
+      },
+      "prepare_ns": {
+        "median": 962,
+        "min": 802,
+        "max": 971
+      },
+      "plan_ns": {
+        "median": 53170,
+        "min": 51147,
+        "max": 69594
+      },
+      "ns_per_op": {
+        "median": 6422.30236234112,
+        "min": 6156.896836312689,
+        "max": 6450.6791270821395
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 170,
+        "max": 280
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 296856,
+        "min": 286170,
+        "max": 331158
+      },
+      "prepare_ns": {
+        "median": 1361205,
+        "min": 1225090,
+        "max": 1371380
+      },
+      "plan_ns": {
+        "median": 27381,
+        "min": 24677,
+        "max": 36114
+      },
+      "ns_per_op": {
+        "median": 6457.670120612783,
+        "min": 6335.640403560627,
+        "max": 6554.82168674509
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 191
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 340291,
+        "min": 327201,
+        "max": 359460
+      },
+      "prepare_ns": {
+        "median": 2729450,
+        "min": 2472715,
+        "max": 2761649
+      },
+      "plan_ns": {
+        "median": 7871,
+        "min": 6810,
+        "max": 8523
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 3577043,
+          "min": 3259646,
+          "max": 3601079
+        },
+        "10": {
+          "median": 3604995,
+          "min": 3286827,
+          "max": 3629331
+        },
+        "100": {
+          "median": 3837855,
+          "min": 3479216,
+          "max": 4078507
+        },
+        "1000": {
+          "median": 5870148,
+          "min": 5423767,
+          "max": 5949607
+        },
+        "10000": {
+          "median": 25782709,
+          "min": 24971981,
+          "max": 26054847
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 198539,
+        "min": 176655,
+        "max": 232419
+      },
+      "prepare_ns": {
+        "median": 801,
+        "min": 450,
+        "max": 4046
+      },
+      "plan_ns": {
+        "median": 27281,
+        "min": 24247,
+        "max": 32329
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 624258,
+          "min": 597908,
+          "max": 730677
+        },
+        "10": {
+          "median": 649546,
+          "min": 621403,
+          "max": 758509
+        },
+        "100": {
+          "median": 845841,
+          "min": 802105,
+          "max": 962385
+        },
+        "1000": {
+          "median": 2739585,
+          "min": 2587466,
+          "max": 2970322
+        },
+        "10000": {
+          "median": 22248000,
+          "min": 21041437,
+          "max": 22985387
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 328483,
+        "min": 326411,
+        "max": 331017
+      },
+      "prepare_ns": {
+        "median": 791,
+        "min": 782,
+        "max": 862
+      },
+      "plan_ns": {
+        "median": 47932,
+        "min": 47641,
+        "max": 53039
+      },
+      "ns_per_op": {
+        "median": 1616.538222982335,
+        "min": 1606.39059203015,
+        "max": 1689.2948355946323
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 259250,
+        "min": 222054,
+        "max": 296636
+      },
+      "prepare_ns": {
+        "median": 2531162,
+        "min": 2332403,
+        "max": 2686335
+      },
+      "plan_ns": {
+        "median": 6059,
+        "min": 5949,
+        "max": 6580
+      },
+      "ns_per_op": {
+        "median": 1575.5693858098123,
+        "min": 1556.652809547741,
+        "max": 1676.877806238998
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 50,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 352350,
+        "min": 323927,
+        "max": 381443
+      },
+      "prepare_ns": {
+        "median": 1515837,
+        "min": 1502627,
+        "max": 1569097
+      },
+      "plan_ns": {
+        "median": 22744,
+        "min": 21553,
+        "max": 23125
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 2462560,
+          "min": 2442549,
+          "max": 2489920
+        },
+        "10": {
+          "median": 2496901,
+          "min": 2478503,
+          "max": 2524082
+        },
+        "100": {
+          "median": 2756511,
+          "min": 2746376,
+          "max": 2791654
+        },
+        "1000": {
+          "median": 5375865,
+          "min": 5338309,
+          "max": 5553573
+        },
+        "10000": {
+          "median": 31561229,
+          "min": 31048148,
+          "max": 31812808
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 282724,
+        "min": 259199,
+        "max": 285298
+      },
+      "prepare_ns": {
+        "median": 892,
+        "min": 791,
+        "max": 1032
+      },
+      "plan_ns": {
+        "median": 42293,
+        "min": 40922,
+        "max": 43145
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 821574,
+          "min": 792600,
+          "max": 833852
+        },
+        "10": {
+          "median": 854072,
+          "min": 823907,
+          "max": 866181
+        },
+        "100": {
+          "median": 1109306,
+          "min": 1079291,
+          "max": 1131860
+        },
+        "1000": {
+          "median": 3701369,
+          "min": 3598585,
+          "max": 3724585
+        },
+        "10000": {
+          "median": 30143589,
+          "min": 30110169,
+          "max": 30443910
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 314682,
+        "min": 313260,
+        "max": 321192
+      },
+      "prepare_ns": {
+        "median": 882,
+        "min": 782,
+        "max": 962
+      },
+      "plan_ns": {
+        "median": 49644,
+        "min": 44246,
+        "max": 49915
+      },
+      "ns_per_op": {
+        "median": 2291.487204223705,
+        "min": 2226.727282786422,
+        "max": 2310.295688792485
+      },
+      "forced_guest_preparation_ns": {
+        "median": 161,
+        "min": 160,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 313220,
+        "min": 302965,
+        "max": 313311
+      },
+      "prepare_ns": {
+        "median": 1484149,
+        "min": 1452452,
+        "max": 1493353
+      },
+      "plan_ns": {
+        "median": 21582,
+        "min": 21152,
+        "max": 21863
+      },
+      "ns_per_op": {
+        "median": 2266.347054330723,
+        "min": 2198.2509733203988,
+        "max": 2318.047216399065
+      },
+      "forced_guest_preparation_ns": {
+        "median": 300,
+        "min": 281,
+        "max": 371
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 337588,
+        "min": 336626,
+        "max": 352920
+      },
+      "prepare_ns": {
+        "median": 1336779,
+        "min": 1323818,
+        "max": 1439502
+      },
+      "plan_ns": {
+        "median": 2443,
+        "min": 2053,
+        "max": 2714
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1745102,
+          "min": 1717590,
+          "max": 1839033
+        },
+        "10": {
+          "median": 1885903,
+          "min": 1849909,
+          "max": 2003690
+        },
+        "100": {
+          "median": 3278525,
+          "min": 3112766,
+          "max": 3336963
+        },
+        "1000": {
+          "median": 16996732,
+          "min": 16085382,
+          "max": 17184555
+        },
+        "10000": {
+          "median": 148306775,
+          "min": 139037742,
+          "max": 149716334
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 316816,
+        "min": 268533,
+        "max": 332149
+      },
+      "prepare_ns": {
+        "median": 782,
+        "min": 741,
+        "max": 821
+      },
+      "plan_ns": {
+        "median": 49574,
+        "min": 41943,
+        "max": 50055
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 421984,
+          "min": 359700,
+          "max": 434903
+        },
+        "10": {
+          "median": 558910,
+          "min": 490246,
+          "max": 576386
+        },
+        "100": {
+          "median": 1872523,
+          "min": 1759032,
+          "max": 1940565
+        },
+        "1000": {
+          "median": 15784480,
+          "min": 15088294,
+          "max": 16030780
+        },
+        "10000": {
+          "median": 146557527,
+          "min": 139066085,
+          "max": 148358993
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 317978,
+        "min": 314793,
+        "max": 326841
+      },
+      "prepare_ns": {
+        "median": 821,
+        "min": 801,
+        "max": 931
+      },
+      "plan_ns": {
+        "median": 48232,
+        "min": 47581,
+        "max": 50586
+      },
+      "ns_per_op": {
+        "median": 11858.511920557907,
+        "min": 11846.115856380064,
+        "max": 12143.00158621874
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 150,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 336165,
+        "min": 317727,
+        "max": 338859
+      },
+      "prepare_ns": {
+        "median": 1361325,
+        "min": 1281905,
+        "max": 1384209
+      },
+      "plan_ns": {
+        "median": 1913,
+        "min": 1903,
+        "max": 2274
+      },
+      "ns_per_op": {
+        "median": 12652.378000180152,
+        "min": 11907.321845274895,
+        "max": 12799.263944354345
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 160,
+        "max": 161
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 342504,
+        "min": 326830,
+        "max": 374352
+      },
+      "prepare_ns": {
+        "median": 722656,
+        "min": 678550,
+        "max": 747282
+      },
+      "plan_ns": {
+        "median": 13440,
+        "min": 11827,
+        "max": 14692
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1092851,
+          "min": 1033622,
+          "max": 1152290
+        },
+        "10": {
+          "median": 1094484,
+          "min": 1036246,
+          "max": 1153903
+        },
+        "100": {
+          "median": 1105971,
+          "min": 1047663,
+          "max": 1166882
+        },
+        "1000": {
+          "median": 1216617,
+          "min": 1156757,
+          "max": 1281625
+        },
+        "10000": {
+          "median": 2259003,
+          "min": 2181847,
+          "max": 2410891
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 216706,
+        "min": 208253,
+        "max": 231208
+      },
+      "prepare_ns": {
+        "median": 440,
+        "min": 380,
+        "max": 541
+      },
+      "plan_ns": {
+        "median": 15002,
+        "min": 13290,
+        "max": 18488
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 243887,
+          "min": 232519,
+          "max": 262154
+        },
+        "10": {
+          "median": 245699,
+          "min": 234362,
+          "max": 264468
+        },
+        "100": {
+          "median": 256135,
+          "min": 244567,
+          "max": 275294
+        },
+        "1000": {
+          "median": 363846,
+          "min": 358619,
+          "max": 386291
+        },
+        "10000": {
+          "median": 1440424,
+          "min": 1401746,
+          "max": 1534635
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 324377,
+        "min": 318719,
+        "max": 330206
+      },
+      "prepare_ns": {
+        "median": 581,
+        "min": 571,
+        "max": 701
+      },
+      "plan_ns": {
+        "median": 26239,
+        "min": 26149,
+        "max": 26720
+      },
+      "ns_per_op": {
+        "median": 80.34715461894146,
+        "min": 78.41011566899711,
+        "max": 83.83878279547052
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 160,
+        "max": 301
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 230416,
+        "min": 214703,
+        "max": 254302
+      },
+      "prepare_ns": {
+        "median": 576055,
+        "min": 564368,
+        "max": 679100
+      },
+      "plan_ns": {
+        "median": 9524,
+        "min": 7601,
+        "max": 12308
+      },
+      "ns_per_op": {
+        "median": 79.2814155318128,
+        "min": 79.14174023748272,
+        "max": 79.32147209052329
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 161,
+        "max": 270
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 341183,
+        "min": 334382,
+        "max": 348614
+      },
+      "prepare_ns": {
+        "median": 690076,
+        "min": 687683,
+        "max": 712230
+      },
+      "plan_ns": {
+        "median": 11838,
+        "min": 11237,
+        "max": 11978
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1063959,
+          "min": 1054634,
+          "max": 1093313
+        },
+        "10": {
+          "median": 1083919,
+          "min": 1075215,
+          "max": 1116467
+        },
+        "100": {
+          "median": 1237499,
+          "min": 1226863,
+          "max": 1282487
+        },
+        "1000": {
+          "median": 2865475,
+          "min": 2743190,
+          "max": 2888489
+        },
+        "10000": {
+          "median": 19091358,
+          "min": 18066608,
+          "max": 19202304
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 276906,
+        "min": 235314,
+        "max": 291228
+      },
+      "prepare_ns": {
+        "median": 570,
+        "min": 461,
+        "max": 861
+      },
+      "plan_ns": {
+        "median": 19609,
+        "min": 15213,
+        "max": 21192
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 316445,
+          "min": 264087,
+          "max": 332960
+        },
+        "10": {
+          "median": 336175,
+          "min": 286150,
+          "max": 352079
+        },
+        "100": {
+          "median": 482235,
+          "min": 446932,
+          "max": 497638
+        },
+        "1000": {
+          "median": 1948247,
+          "min": 1932333,
+          "max": 2100916
+        },
+        "10000": {
+          "median": 17916373,
+          "min": 17842242,
+          "max": 19130327
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 329405,
+        "min": 326471,
+        "max": 357397
+      },
+      "prepare_ns": {
+        "median": 1011,
+        "min": 781,
+        "max": 1132
+      },
+      "plan_ns": {
+        "median": 25689,
+        "min": 24988,
+        "max": 26300
+      },
+      "ns_per_op": {
+        "median": 1297.4198772251805,
+        "min": 1293.910547737999,
+        "max": 1332.83226167577
+      },
+      "forced_guest_preparation_ns": {
+        "median": 280,
+        "min": 170,
+        "max": 320
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 296005,
+        "min": 258358,
+        "max": 364849
+      },
+      "prepare_ns": {
+        "median": 703977,
+        "min": 703326,
+        "max": 724888
+      },
+      "plan_ns": {
+        "median": 9344,
+        "min": 7081,
+        "max": 13040
+      },
+      "ns_per_op": {
+        "median": 1279.9017910930695,
+        "min": 1239.346025717056,
+        "max": 1339.2216033037641
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 339991,
+        "min": 333822,
+        "max": 341804
+      },
+      "prepare_ns": {
+        "median": 897167,
+        "min": 870057,
+        "max": 928604
+      },
+      "plan_ns": {
+        "median": 27672,
+        "min": 27041,
+        "max": 214923
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1343729,
+          "min": 1300123,
+          "max": 1467675
+        },
+        "10": {
+          "median": 1420324,
+          "min": 1374956,
+          "max": 1539983
+        },
+        "100": {
+          "median": 2080826,
+          "min": 2025142,
+          "max": 2155067
+        },
+        "1000": {
+          "median": 8697694,
+          "min": 8694500,
+          "max": 9105057
+        },
+        "10000": {
+          "median": 74328080,
+          "min": 72679212,
+          "max": 75017606
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 319730,
+        "min": 249204,
+        "max": 322685
+      },
+      "prepare_ns": {
+        "median": 801,
+        "min": 781,
+        "max": 821
+      },
+      "plan_ns": {
+        "median": 69174,
+        "min": 58919,
+        "max": 71327
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 423846,
+          "min": 342785,
+          "max": 428944
+        },
+        "10": {
+          "median": 498218,
+          "min": 413641,
+          "max": 504378
+        },
+        "100": {
+          "median": 1159211,
+          "min": 1030338,
+          "max": 1166342
+        },
+        "1000": {
+          "median": 7964153,
+          "min": 7645685,
+          "max": 8119486
+        },
+        "10000": {
+          "median": 74515611,
+          "min": 71269586,
+          "max": 75404236
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 338198,
+        "min": 319490,
+        "max": 350005
+      },
+      "prepare_ns": {
+        "median": 851,
+        "min": 771,
+        "max": 872
+      },
+      "plan_ns": {
+        "median": 72519,
+        "min": 70906,
+        "max": 72599
+      },
+      "ns_per_op": {
+        "median": 6262.146282739412,
+        "min": 6180.117995150412,
+        "max": 6562.308395731633
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 270
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 339330,
+        "min": 334532,
+        "max": 343046
+      },
+      "prepare_ns": {
+        "median": 908134,
+        "min": 872631,
+        "max": 914754
+      },
+      "plan_ns": {
+        "median": 27221,
+        "min": 26790,
+        "max": 27602
+      },
+      "ns_per_op": {
+        "median": 6352.995364839372,
+        "min": 6294.649775112522,
+        "max": 6374.852914871304
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 161,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 338338,
+        "min": 331578,
+        "max": 339731
+      },
+      "prepare_ns": {
+        "median": 2147185,
+        "min": 2092033,
+        "max": 2163610
+      },
+      "plan_ns": {
+        "median": 7201,
+        "min": 7000,
+        "max": 7601
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 2965054,
+          "min": 2896411,
+          "max": 2978724
+        },
+        "10": {
+          "median": 2993567,
+          "min": 2925675,
+          "max": 3009390
+        },
+        "100": {
+          "median": 3201670,
+          "min": 3119366,
+          "max": 3210773
+        },
+        "1000": {
+          "median": 5205560,
+          "min": 5044308,
+          "max": 5228443
+        },
+        "10000": {
+          "median": 25286664,
+          "min": 24803058,
+          "max": 25288947
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 225609,
+        "min": 188423,
+        "max": 227813
+      },
+      "prepare_ns": {
+        "median": 701,
+        "min": 691,
+        "max": 821
+      },
+      "plan_ns": {
+        "median": 31557,
+        "min": 23586,
+        "max": 31718
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 706702,
+          "min": 622365,
+          "max": 707243
+        },
+        "10": {
+          "median": 732781,
+          "min": 648925,
+          "max": 733032
+        },
+        "100": {
+          "median": 919752,
+          "min": 846902,
+          "max": 939341
+        },
+        "1000": {
+          "median": 2789411,
+          "min": 2739155,
+          "max": 2930472
+        },
+        "10000": {
+          "median": 22255050,
+          "min": 22114319,
+          "max": 23169574
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 331197,
+        "min": 261623,
+        "max": 334212
+      },
+      "prepare_ns": {
+        "median": 792,
+        "min": 761,
+        "max": 861
+      },
+      "plan_ns": {
+        "median": 47251,
+        "min": 33511,
+        "max": 48924
+      },
+      "ns_per_op": {
+        "median": 1557.2785695397995,
+        "min": 1556.6562291418495,
+        "max": 1580.1617887691013
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 160,
+        "max": 161
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 242384,
+        "min": 235474,
+        "max": 253181
+      },
+      "prepare_ns": {
+        "median": 2130480,
+        "min": 2035587,
+        "max": 2169218
+      },
+      "plan_ns": {
+        "median": 5549,
+        "min": 5098,
+        "max": 6410
+      },
+      "ns_per_op": {
+        "median": 1588.6133078958935,
+        "min": 1586.582996268256,
+        "max": 1669.1414926940427
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 150,
+        "max": 351
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 339179,
+        "min": 300311,
+        "max": 404648
+      },
+      "prepare_ns": {
+        "median": 1124900,
+        "min": 1113233,
+        "max": 1293112
+      },
+      "plan_ns": {
+        "median": 22784,
+        "min": 18928,
+        "max": 23977
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 2021636,
+          "min": 1955959,
+          "max": 2271863
+        },
+        "10": {
+          "median": 2058992,
+          "min": 1993204,
+          "max": 2306845
+        },
+        "100": {
+          "median": 2333705,
+          "min": 2271883,
+          "max": 2573796
+        },
+        "1000": {
+          "median": 5046200,
+          "min": 5009035,
+          "max": 5156646
+        },
+        "10000": {
+          "median": 31671525,
+          "min": 31619797,
+          "max": 32095000
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 248914,
+        "min": 217817,
+        "max": 262724
+      },
+      "prepare_ns": {
+        "median": 862,
+        "min": 601,
+        "max": 891
+      },
+      "plan_ns": {
+        "median": 37707,
+        "min": 29975,
+        "max": 41883
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 789626,
+          "min": 711338,
+          "max": 792600
+        },
+        "10": {
+          "median": 823417,
+          "min": 744488,
+          "max": 825870
+        },
+        "100": {
+          "median": 1085430,
+          "min": 1018550,
+          "max": 1099842
+        },
+        "1000": {
+          "median": 3735882,
+          "min": 3616252,
+          "max": 3828781
+        },
+        "10000": {
+          "median": 30054796,
+          "min": 29893134,
+          "max": 31243311
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 311518,
+        "min": 260992,
+        "max": 347032
+      },
+      "prepare_ns": {
+        "median": 851,
+        "min": 781,
+        "max": 921
+      },
+      "plan_ns": {
+        "median": 45338,
+        "min": 35614,
+        "max": 49925
+      },
+      "ns_per_op": {
+        "median": 2394.8371197157085,
+        "min": 2270.6242264103225,
+        "max": 2418.4773432660213
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 170,
+        "max": 181
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 306510,
+        "min": 214522,
+        "max": 308714
+      },
+      "prepare_ns": {
+        "median": 1091480,
+        "min": 1054734,
+        "max": 1137318
+      },
+      "plan_ns": {
+        "median": 19860,
+        "min": 12559,
+        "max": 20591
+      },
+      "ns_per_op": {
+        "median": 2331.9160664834253,
+        "min": 2274.8764382546215,
+        "max": 2351.6702503074594
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 50,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 377006,
+        "min": 369365,
+        "max": 448113
+      },
+      "prepare_ns": {
+        "median": 986101,
+        "min": 971389,
+        "max": 1260764
+      },
+      "plan_ns": {
+        "median": 2033,
+        "min": 1903,
+        "max": 2664
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 1422216,
+          "min": 1395166,
+          "max": 1774065
+        },
+        "10": {
+          "median": 1563388,
+          "min": 1537009,
+          "max": 1948917
+        },
+        "100": {
+          "median": 2909240,
+          "min": 2892806,
+          "max": 3299486
+        },
+        "1000": {
+          "median": 16552695,
+          "min": 16522979,
+          "max": 16681968
+        },
+        "10000": {
+          "median": 145552109,
+          "min": 142469977,
+          "max": 149003621
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 314002,
+        "min": 310226,
+        "max": 323355
+      },
+      "prepare_ns": {
+        "median": 911,
+        "min": 871,
+        "max": 1272
+      },
+      "plan_ns": {
+        "median": 47341,
+        "min": 46460,
+        "max": 47732
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 411037,
+          "min": 410807,
+          "max": 421383
+        },
+        "10": {
+          "median": 550977,
+          "min": 539010,
+          "max": 560161
+        },
+        "100": {
+          "median": 1891160,
+          "min": 1776339,
+          "max": 1906053
+        },
+        "1000": {
+          "median": 15812693,
+          "min": 15216087,
+          "max": 15920594
+        },
+        "10000": {
+          "median": 144627019,
+          "min": 139884895,
+          "max": 147582897
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 325138,
+        "min": 291548,
+        "max": 326220
+      },
+      "prepare_ns": {
+        "median": 901,
+        "min": 741,
+        "max": 962
+      },
+      "plan_ns": {
+        "median": 47852,
+        "min": 37397,
+        "max": 48933
+      },
+      "ns_per_op": {
+        "median": 11804.655322359944,
+        "min": 11748.983931338453,
+        "max": 12362.455079679961
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 160,
+        "max": 280
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 319821,
+        "min": 315835,
+        "max": 327331
+      },
+      "prepare_ns": {
+        "median": 990809,
+        "min": 921744,
+        "max": 1023157
+      },
+      "plan_ns": {
+        "median": 1852,
+        "min": 1793,
+        "max": 2063
+      },
+      "ns_per_op": {
+        "median": 11882.526263486721,
+        "min": 11687.752449344065,
+        "max": 12385.915991873435
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 161,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 342574,
+        "min": 328674,
+        "max": 366831
+      },
+      "prepare_ns": {
+        "median": 436967,
+        "min": 410336,
+        "max": 447472
+      },
+      "plan_ns": {
+        "median": 11938,
+        "min": 11517,
+        "max": 12840
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 806371,
+          "min": 765900,
+          "max": 844188
+        },
+        "10": {
+          "median": 809005,
+          "min": 768705,
+          "max": 846622
+        },
+        "100": {
+          "median": 826872,
+          "min": 785059,
+          "max": 864910
+        },
+        "1000": {
+          "median": 939832,
+          "min": 886091,
+          "max": 983668
+        },
+        "10000": {
+          "median": 2057711,
+          "min": 1926263,
+          "max": 2125733
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 224488,
+        "min": 208293,
+        "max": 237537
+      },
+      "prepare_ns": {
+        "median": 550,
+        "min": 420,
+        "max": 601
+      },
+      "plan_ns": {
+        "median": 14652,
+        "min": 13180,
+        "max": 15593
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 251008,
+          "min": 233811,
+          "max": 265219
+        },
+        "10": {
+          "median": 253331,
+          "min": 235874,
+          "max": 267162
+        },
+        "100": {
+          "median": 266351,
+          "min": 247061,
+          "max": 278679
+        },
+        "1000": {
+          "median": 384027,
+          "min": 359610,
+          "max": 418169
+        },
+        "10000": {
+          "median": 1483558,
+          "min": 1431180,
+          "max": 1630750
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 323777,
+        "min": 316316,
+        "max": 324077
+      },
+      "prepare_ns": {
+        "median": 831,
+        "min": 771,
+        "max": 891
+      },
+      "plan_ns": {
+        "median": 26279,
+        "min": 24958,
+        "max": 27221
+      },
+      "ns_per_op": {
+        "median": 79.01535140847399,
+        "min": 78.36198699249171,
+        "max": 81.57643033463118
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 160,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 230055,
+        "min": 215424,
+        "max": 231037
+      },
+      "prepare_ns": {
+        "median": 348303,
+        "min": 336535,
+        "max": 361353
+      },
+      "plan_ns": {
+        "median": 6340,
+        "min": 6309,
+        "max": 6430
+      },
+      "ns_per_op": {
+        "median": 81.60424898472138,
+        "min": 78.3706668601585,
+        "max": 82.69628385621579
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 160,
+        "max": 230
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 362885,
+        "min": 307943,
+        "max": 370777
+      },
+      "prepare_ns": {
+        "median": 423947,
+        "min": 400912,
+        "max": 435414
+      },
+      "plan_ns": {
+        "median": 12789,
+        "min": 11547,
+        "max": 13430
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 819281,
+          "min": 741074,
+          "max": 839792
+        },
+        "10": {
+          "median": 845981,
+          "min": 769146,
+          "max": 867583
+        },
+        "100": {
+          "median": 998350,
+          "min": 914734,
+          "max": 1018430
+        },
+        "1000": {
+          "median": 2529049,
+          "min": 2381197,
+          "max": 2535829
+        },
+        "10000": {
+          "median": 18175692,
+          "min": 17963884,
+          "max": 18199047
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 270476,
+        "min": 261402,
+        "max": 276896
+      },
+      "prepare_ns": {
+        "median": 621,
+        "min": 511,
+        "max": 751
+      },
+      "plan_ns": {
+        "median": 19529,
+        "min": 19249,
+        "max": 19970
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 309314,
+          "min": 299399,
+          "max": 315925
+        },
+        "10": {
+          "median": 334061,
+          "min": 329414,
+          "max": 337167
+        },
+        "100": {
+          "median": 480982,
+          "min": 477747,
+          "max": 492510
+        },
+        "1000": {
+          "median": 2057250,
+          "min": 1996449,
+          "max": 2100635
+        },
+        "10000": {
+          "median": 18116262,
+          "min": 17899087,
+          "max": 18582392
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 336996,
+        "min": 322124,
+        "max": 366180
+      },
+      "prepare_ns": {
+        "median": 1001,
+        "min": 971,
+        "max": 1132
+      },
+      "plan_ns": {
+        "median": 26050,
+        "min": 24607,
+        "max": 26670
+      },
+      "ns_per_op": {
+        "median": 1292.3079824344131,
+        "min": 1277.1562530076935,
+        "max": 1378.9104468417736
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 160,
+        "max": 161
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 280512,
+        "min": 276074,
+        "max": 297527
+      },
+      "prepare_ns": {
+        "median": 419300,
+        "min": 411478,
+        "max": 422535
+      },
+      "plan_ns": {
+        "median": 7962,
+        "min": 7351,
+        "max": 9054
+      },
+      "ns_per_op": {
+        "median": 1310.6173877089852,
+        "min": 1272.176280022732,
+        "max": 1354.4844027069553
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 170,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 494443,
+        "min": 441303,
+        "max": 500512
+      },
+      "prepare_ns": {
+        "median": 55484,
+        "min": 51257,
+        "max": 56344
+      },
+      "plan_ns": {
+        "median": 35283,
+        "min": 31697,
+        "max": 37456
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 650387,
+          "min": 580081,
+          "max": 652611
+        },
+        "10": {
+          "median": 701974,
+          "min": 630998,
+          "max": 705009
+        },
+        "100": {
+          "median": 1100884,
+          "min": 1035375,
+          "max": 1114314
+        },
+        "1000": {
+          "median": 5070797,
+          "min": 5006570,
+          "max": 5111809
+        },
+        "10000": {
+          "median": 45416381,
+          "min": 45253466,
+          "max": 45657634
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 426821,
+        "min": 412911,
+        "max": 437618
+      },
+      "prepare_ns": {
+        "median": 931,
+        "min": 841,
+        "max": 1122
+      },
+      "plan_ns": {
+        "median": 48553,
+        "min": 44848,
+        "max": 48793
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 518849,
+          "min": 516496,
+          "max": 528314
+        },
+        "10": {
+          "median": 566211,
+          "min": 565600,
+          "max": 574473
+        },
+        "100": {
+          "median": 968365,
+          "min": 959472,
+          "max": 1005601
+        },
+        "1000": {
+          "median": 5011698,
+          "min": 5003617,
+          "max": 5226771
+        },
+        "10000": {
+          "median": 46458627,
+          "min": 45002580,
+          "max": 46467460
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 461323,
+        "min": 454843,
+        "max": 463136
+      },
+      "prepare_ns": {
+        "median": 1202,
+        "min": 941,
+        "max": 1252
+      },
+      "plan_ns": {
+        "median": 51398,
+        "min": 50135,
+        "max": 52468
+      },
+      "ns_per_op": {
+        "median": 3046.4684057204554,
+        "min": 3027.9955348278786,
+        "max": 3069.134182158451
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 160,
+        "max": 220
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 364628,
+        "min": 355514,
+        "max": 427452
+      },
+      "prepare_ns": {
+        "median": 54041,
+        "min": 52839,
+        "max": 55673
+      },
+      "plan_ns": {
+        "median": 28283,
+        "min": 26029,
+        "max": 32870
+      },
+      "ns_per_op": {
+        "median": 3025.0876243588264,
+        "min": 3016.4016241522495,
+        "max": 3047.8061342306682
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 181
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 481734,
+        "min": 464578,
+        "max": 494983
+      },
+      "prepare_ns": {
+        "median": 65399,
+        "min": 58598,
+        "max": 65689
+      },
+      "plan_ns": {
+        "median": 35813,
+        "min": 31728,
+        "max": 36565
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 612080,
+          "min": 592410,
+          "max": 632069
+        },
+        "10": {
+          "median": 663066,
+          "min": 633702,
+          "max": 671839
+        },
+        "100": {
+          "median": 995646,
+          "min": 979001,
+          "max": 996166
+        },
+        "1000": {
+          "median": 4406730,
+          "min": 4189914,
+          "max": 4463625
+        },
+        "10000": {
+          "median": 36705796,
+          "min": 35429059,
+          "max": 36795011
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 394011,
+        "min": 350687,
+        "max": 412149
+      },
+      "prepare_ns": {
+        "median": 822,
+        "min": 792,
+        "max": 971
+      },
+      "plan_ns": {
+        "median": 43916,
+        "min": 33020,
+        "max": 44667
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 472910,
+          "min": 410617,
+          "max": 497998
+        },
+        "10": {
+          "median": 506000,
+          "min": 447432,
+          "max": 543627
+        },
+        "100": {
+          "median": 804849,
+          "min": 782826,
+          "max": 874944
+        },
+        "1000": {
+          "median": 4083314,
+          "min": 3866908,
+          "max": 4217525
+        },
+        "10000": {
+          "median": 35645304,
+          "min": 35309889,
+          "max": 38040151
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 447232,
+        "min": 440411,
+        "max": 447241
+      },
+      "prepare_ns": {
+        "median": 1031,
+        "min": 832,
+        "max": 1132
+      },
+      "plan_ns": {
+        "median": 52599,
+        "min": 51878,
+        "max": 52719
+      },
+      "ns_per_op": {
+        "median": 2355.529050267333,
+        "min": 2346.496906747807,
+        "max": 2390.035950953636
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 425669,
+        "min": 299289,
+        "max": 465449
+      },
+      "prepare_ns": {
+        "median": 62174,
+        "min": 52780,
+        "max": 62754
+      },
+      "plan_ns": {
+        "median": 31076,
+        "min": 19359,
+        "max": 34452
+      },
+      "ns_per_op": {
+        "median": 2372.4278042498972,
+        "min": 2348.142690117028,
+        "max": 2479.193021190531
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 160,
+        "max": 270
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 465609,
+        "min": 425119,
+        "max": 505600
+      },
+      "prepare_ns": {
+        "median": 61382,
+        "min": 58468,
+        "max": 66059
+      },
+      "plan_ns": {
+        "median": 31407,
+        "min": 29985,
+        "max": 35714
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 643977,
+          "min": 594513,
+          "max": 687663
+        },
+        "10": {
+          "median": 693441,
+          "min": 642285,
+          "max": 735325
+        },
+        "100": {
+          "median": 1078940,
+          "min": 1038661,
+          "max": 1115666
+        },
+        "1000": {
+          "median": 4851407,
+          "min": 4820011,
+          "max": 4862835
+        },
+        "10000": {
+          "median": 42582244,
+          "min": 42385509,
+          "max": 43020834
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 425068,
+        "min": 348133,
+        "max": 437217
+      },
+      "prepare_ns": {
+        "median": 911,
+        "min": 851,
+        "max": 981
+      },
+      "plan_ns": {
+        "median": 48473,
+        "min": 40651,
+        "max": 48533
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 549315,
+          "min": 459300,
+          "max": 558319
+        },
+        "10": {
+          "median": 593481,
+          "min": 502124,
+          "max": 603256
+        },
+        "100": {
+          "median": 978189,
+          "min": 897498,
+          "max": 987934
+        },
+        "1000": {
+          "median": 4886420,
+          "min": 4831016,
+          "max": 5097767
+        },
+        "10000": {
+          "median": 43198449,
+          "min": 42502935,
+          "max": 44136139
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 468254,
+        "min": 439871,
+        "max": 490607
+      },
+      "prepare_ns": {
+        "median": 1081,
+        "min": 981,
+        "max": 1372
+      },
+      "plan_ns": {
+        "median": 52349,
+        "min": 51307,
+        "max": 58578
+      },
+      "ns_per_op": {
+        "median": 2941.040945013877,
+        "min": 2911.2818789485013,
+        "max": 3040.257301354926
+      },
+      "forced_guest_preparation_ns": {
+        "median": 190,
+        "min": 151,
+        "max": 190
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "ingest",
+      "configure_ns": {
+        "median": 498278,
+        "min": 470456,
+        "max": 498849
+      },
+      "prepare_ns": {
+        "median": 64727,
+        "min": 60882,
+        "max": 65288
+      },
+      "plan_ns": {
+        "median": 37136,
+        "min": 31327,
+        "max": 37767
+      },
+      "ns_per_op": {
+        "median": 5375.10266895661,
+        "min": 5087.3606880485295,
+        "max": 5428.2859677549195
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 392910,
+        "min": 347062,
+        "max": 447953
+      },
+      "prepare_ns": {
+        "median": 64347,
+        "min": 55984,
+        "max": 69144
+      },
+      "plan_ns": {
+        "median": 29244,
+        "min": 22824,
+        "max": 33079
+      },
+      "ns_per_op": {
+        "median": 2936.595045531709,
+        "min": 2930.476288870561,
+        "max": 3091.8295360895113
+      },
+      "forced_guest_preparation_ns": {
+        "median": 171,
+        "min": 170,
+        "max": 171
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 486071,
+        "min": 448324,
+        "max": 491258
+      },
+      "prepare_ns": {
+        "median": 57306,
+        "min": 51106,
+        "max": 60601
+      },
+      "plan_ns": {
+        "median": 34501,
+        "min": 31027,
+        "max": 38068
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 623447,
+          "min": 577668,
+          "max": 630217
+        },
+        "10": {
+          "median": 726712,
+          "min": 678239,
+          "max": 729226
+        },
+        "100": {
+          "median": 1668737,
+          "min": 1631511,
+          "max": 1795257
+        },
+        "1000": {
+          "median": 11146494,
+          "min": 11026704,
+          "max": 11310150
+        },
+        "10000": {
+          "median": 99231919,
+          "min": 98764437,
+          "max": 99646753
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 429004,
+        "min": 411688,
+        "max": 465228
+      },
+      "prepare_ns": {
+        "median": 1062,
+        "min": 1012,
+        "max": 1062
+      },
+      "plan_ns": {
+        "median": 48543,
+        "min": 47541,
+        "max": 49615
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 522124,
+          "min": 501073,
+          "max": 556446
+        },
+        "10": {
+          "median": 622145,
+          "min": 609295,
+          "max": 648954
+        },
+        "100": {
+          "median": 1591220,
+          "min": 1556789,
+          "max": 1652472
+        },
+        "1000": {
+          "median": 11087655,
+          "min": 11069878,
+          "max": 11610019
+        },
+        "10000": {
+          "median": 98459619,
+          "min": 98419388,
+          "max": 99869487
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 440502,
+        "min": 351959,
+        "max": 458939
+      },
+      "prepare_ns": {
+        "median": 1062,
+        "min": 871,
+        "max": 1141
+      },
+      "plan_ns": {
+        "median": 47802,
+        "min": 33220,
+        "max": 49434
+      },
+      "ns_per_op": {
+        "median": 7667.948605958082,
+        "min": 7639.094430892087,
+        "max": 7690.998723105911
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 160,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 456606,
+        "min": 448594,
+        "max": 457547
+      },
+      "prepare_ns": {
+        "median": 53931,
+        "min": 52770,
+        "max": 54402
+      },
+      "plan_ns": {
+        "median": 32629,
+        "min": 31817,
+        "max": 33530
+      },
+      "ns_per_op": {
+        "median": 7694.357261417545,
+        "min": 7674.75975912016,
+        "max": 7712.016885128131
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 150,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 479550,
+        "min": 446481,
+        "max": 492570
+      },
+      "prepare_ns": {
+        "median": 37136,
+        "min": 32078,
+        "max": 39199
+      },
+      "plan_ns": {
+        "median": 32970,
+        "min": 32649,
+        "max": 33761
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 561073,
+          "min": 521744,
+          "max": 571759
+        },
+        "10": {
+          "median": 562455,
+          "min": 523556,
+          "max": 573151
+        },
+        "100": {
+          "median": 566641,
+          "min": 528233,
+          "max": 578590
+        },
+        "1000": {
+          "median": 606441,
+          "min": 570196,
+          "max": 623287
+        },
+        "10000": {
+          "median": 1025741,
+          "min": 982967,
+          "max": 1066002
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 284197,
+        "min": 207512,
+        "max": 351388
+      },
+      "prepare_ns": {
+        "median": 751,
+        "min": 520,
+        "max": 781
+      },
+      "plan_ns": {
+        "median": 29835,
+        "min": 18628,
+        "max": 30766
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 321953,
+          "min": 231408,
+          "max": 393141
+        },
+        "10": {
+          "median": 323265,
+          "min": 232810,
+          "max": 395474
+        },
+        "100": {
+          "median": 327682,
+          "min": 237397,
+          "max": 400381
+        },
+        "1000": {
+          "median": 368724,
+          "min": 281493,
+          "max": 445970
+        },
+        "10000": {
+          "median": 788845,
+          "min": 723226,
+          "max": 898149
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 475444,
+        "min": 444628,
+        "max": 505259
+      },
+      "prepare_ns": {
+        "median": 671,
+        "min": 671,
+        "max": 701
+      },
+      "plan_ns": {
+        "median": 49204,
+        "min": 48242,
+        "max": 49585
+      },
+      "ns_per_op": {
+        "median": 29.614283281599842,
+        "min": 29.404434782035146,
+        "max": 29.823876350850583
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 171,
+        "max": 200
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 298248,
+        "min": 297727,
+        "max": 323957
+      },
+      "prepare_ns": {
+        "median": 23906,
+        "min": 21822,
+        "max": 29785
+      },
+      "plan_ns": {
+        "median": 18478,
+        "min": 17677,
+        "max": 18989
+      },
+      "ns_per_op": {
+        "median": 29.530325142879228,
+        "min": 29.3804448231323,
+        "max": 29.587870917841006
+      },
+      "forced_guest_preparation_ns": {
+        "median": 170,
+        "min": 170,
+        "max": 270
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 418669,
+        "min": 384188,
+        "max": 473712
+      },
+      "prepare_ns": {
+        "median": 31868,
+        "min": 29364,
+        "max": 34001
+      },
+      "plan_ns": {
+        "median": 28513,
+        "min": 23735,
+        "max": 31377
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 496085,
+          "min": 449626,
+          "max": 556496
+        },
+        "10": {
+          "median": 531599,
+          "min": 479170,
+          "max": 591609
+        },
+        "100": {
+          "median": 803187,
+          "min": 743097,
+          "max": 871580
+        },
+        "1000": {
+          "median": 3587829,
+          "min": 3289552,
+          "max": 3677134
+        },
+        "10000": {
+          "median": 31571895,
+          "min": 29267344,
+          "max": 31925948
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 432870,
+        "min": 414813,
+        "max": 443336
+      },
+      "prepare_ns": {
+        "median": 1152,
+        "min": 1071,
+        "max": 1282
+      },
+      "plan_ns": {
+        "median": 43765,
+        "min": 40130,
+        "max": 47572
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 491127,
+          "min": 476245,
+          "max": 510987
+        },
+        "10": {
+          "median": 524948,
+          "min": 504548,
+          "max": 543476
+        },
+        "100": {
+          "median": 832330,
+          "min": 759961,
+          "max": 850597
+        },
+        "1000": {
+          "median": 3685226,
+          "min": 3314469,
+          "max": 3824294
+        },
+        "10000": {
+          "median": 31140167,
+          "min": 30050150,
+          "max": 33126380
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 461463,
+        "min": 370547,
+        "max": 473652
+      },
+      "prepare_ns": {
+        "median": 1252,
+        "min": 1062,
+        "max": 1442
+      },
+      "plan_ns": {
+        "median": 49184,
+        "min": 30816,
+        "max": 78298
+      },
+      "ns_per_op": {
+        "median": 1923.5866993679676,
+        "min": 1899.2951240525867,
+        "max": 1988.7300536874113
+      },
+      "forced_guest_preparation_ns": {
+        "median": 180,
+        "min": 170,
+        "max": 180
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 358609,
+        "min": 343796,
+        "max": 464408
+      },
+      "prepare_ns": {
+        "median": 36936,
+        "min": 29925,
+        "max": 37536
+      },
+      "plan_ns": {
+        "median": 22714,
+        "min": 22133,
+        "max": 31277
+      },
+      "ns_per_op": {
+        "median": 2023.1400735387565,
+        "min": 1917.813885033404,
+        "max": 2030.81770056763
+      },
+      "forced_guest_preparation_ns": {
+        "median": 160,
+        "min": 40,
+        "max": 170
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 498168,
+        "min": 454663,
+        "max": 502696
+      },
+      "prepare_ns": {
+        "median": 55663,
+        "min": 52458,
+        "max": 56074
+      },
+      "plan_ns": {
+        "median": 37687,
+        "min": 31568,
+        "max": 38158
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 654773,
+          "min": 596596,
+          "max": 655205
+        },
+        "10": {
+          "median": 704488,
+          "min": 648243,
+          "max": 708615
+        },
+        "100": {
+          "median": 1110968,
+          "min": 1065610,
+          "max": 1130849
+        },
+        "1000": {
+          "median": 18309983,
+          "min": 18275953,
+          "max": 18601111
+        },
+        "10000": {
+          "median": 67040163,
+          "min": 66920342,
+          "max": 67535166
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 345108,
+        "min": 333011,
+        "max": 358939
+      },
+      "prepare_ns": {
+        "median": 2123,
+        "min": 2053,
+        "max": 2324
+      },
+      "plan_ns": {
+        "median": 35363,
+        "min": 32839,
+        "max": 36234
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 419560,
+          "min": 403887,
+          "max": 437708
+        },
+        "10": {
+          "median": 470006,
+          "min": 449346,
+          "max": 487493
+        },
+        "100": {
+          "median": 856987,
+          "min": 833673,
+          "max": 908214
+        },
+        "1000": {
+          "median": 16974937,
+          "min": 16667127,
+          "max": 18198827
+        },
+        "10000": {
+          "median": 64058092,
+          "min": 63549199,
+          "max": 67645272
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 396926,
+        "min": 370827,
+        "max": 457678
+      },
+      "prepare_ns": {
+        "median": 2283,
+        "min": 2003,
+        "max": 2304
+      },
+      "plan_ns": {
+        "median": 38267,
+        "min": 35453,
+        "max": 51287
+      },
+      "ns_per_op": {
+        "median": 2686.3752870324793,
+        "min": 2679.637588259087,
+        "max": 2807.1815751464756
+      },
+      "forced_guest_preparation_ns": {
+        "median": 32188152,
+        "min": 32085456,
+        "max": 32698747
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 386270,
+        "min": 342454,
+        "max": 465128
+      },
+      "prepare_ns": {
+        "median": 49054,
+        "min": 48533,
+        "max": 52439
+      },
+      "plan_ns": {
+        "median": 27111,
+        "min": 23545,
+        "max": 31888
+      },
+      "ns_per_op": {
+        "median": 2807.4239244089345,
+        "min": 2701.9534591854176,
+        "max": 2833.0219538378437
+      },
+      "forced_guest_preparation_ns": {
+        "median": 31871625,
+        "min": 30134145,
+        "max": 32479727
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 482315,
+        "min": 461793,
+        "max": 514403
+      },
+      "prepare_ns": {
+        "median": 63115,
+        "min": 62524,
+        "max": 65188
+      },
+      "plan_ns": {
+        "median": 37616,
+        "min": 31468,
+        "max": 37616
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 620442,
+          "min": 594272,
+          "max": 654553
+        },
+        "10": {
+          "median": 662125,
+          "min": 637057,
+          "max": 695004
+        },
+        "100": {
+          "median": 975516,
+          "min": 973973,
+          "max": 1112761
+        },
+        "1000": {
+          "median": 21251062,
+          "min": 20609740,
+          "max": 21539996
+        },
+        "10000": {
+          "median": 68042388,
+          "min": 66822156,
+          "max": 68384442
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 329405,
+        "min": 280461,
+        "max": 341473
+      },
+      "prepare_ns": {
+        "median": 1633,
+        "min": 1432,
+        "max": 1633
+      },
+      "plan_ns": {
+        "median": 33851,
+        "min": 28733,
+        "max": 36134
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 394292,
+          "min": 338578,
+          "max": 400963
+        },
+        "10": {
+          "median": 426581,
+          "min": 375063,
+          "max": 437488
+        },
+        "100": {
+          "median": 719751,
+          "min": 690417,
+          "max": 770908
+        },
+        "1000": {
+          "median": 19724137,
+          "min": 19094744,
+          "max": 19959311
+        },
+        "10000": {
+          "median": 65110704,
+          "min": 64298014,
+          "max": 65648432
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 367923,
+        "min": 365949,
+        "max": 451148
+      },
+      "prepare_ns": {
+        "median": 1612,
+        "min": 1583,
+        "max": 2213
+      },
+      "plan_ns": {
+        "median": 39529,
+        "min": 36726,
+        "max": 51527
+      },
+      "ns_per_op": {
+        "median": 2273.0394800265162,
+        "min": 2253.9511039889708,
+        "max": 2377.9878968948997
+      },
+      "forced_guest_preparation_ns": {
+        "median": 39637150,
+        "min": 39237589,
+        "max": 39752954
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 358509,
+        "min": 285599,
+        "max": 367181
+      },
+      "prepare_ns": {
+        "median": 55784,
+        "min": 51477,
+        "max": 56595
+      },
+      "plan_ns": {
+        "median": 25067,
+        "min": 18107,
+        "max": 28463
+      },
+      "ns_per_op": {
+        "median": 2250.6038258117183,
+        "min": 2248.811703436278,
+        "max": 2255.7401005145034
+      },
+      "forced_guest_preparation_ns": {
+        "median": 38426051,
+        "min": 37483746,
+        "max": 38624139
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 495374,
+        "min": 481353,
+        "max": 528193
+      },
+      "prepare_ns": {
+        "median": 67031,
+        "min": 63045,
+        "max": 73651
+      },
+      "plan_ns": {
+        "median": 37256,
+        "min": 35303,
+        "max": 39068
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 686241,
+          "min": 673882,
+          "max": 739310
+        },
+        "10": {
+          "median": 741444,
+          "min": 720492,
+          "max": 801514
+        },
+        "100": {
+          "median": 1162176,
+          "min": 1105962,
+          "max": 1281074
+        },
+        "1000": {
+          "median": 22898727,
+          "min": 22199927,
+          "max": 23349724
+        },
+        "10000": {
+          "median": 77402809,
+          "min": 76656047,
+          "max": 81282025
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 341012,
+        "min": 327742,
+        "max": 361443
+      },
+      "prepare_ns": {
+        "median": 1653,
+        "min": 1512,
+        "max": 1662
+      },
+      "plan_ns": {
+        "median": 33200,
+        "min": 32719,
+        "max": 35373
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 431208,
+          "min": 414472,
+          "max": 453401
+        },
+        "10": {
+          "median": 473842,
+          "min": 454823,
+          "max": 497467
+        },
+        "100": {
+          "median": 861264,
+          "min": 810657,
+          "max": 867293
+        },
+        "1000": {
+          "median": 21578273,
+          "min": 21526576,
+          "max": 22432166
+        },
+        "10000": {
+          "median": 75975204,
+          "min": 75797747,
+          "max": 76443067
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 453642,
+        "min": 452230,
+        "max": 458479
+      },
+      "prepare_ns": {
+        "median": 2674,
+        "min": 2413,
+        "max": 2934
+      },
+      "plan_ns": {
+        "median": 52960,
+        "min": 52559,
+        "max": 53240
+      },
+      "ns_per_op": {
+        "median": 2811.533454523656,
+        "min": 2808.6201594615727,
+        "max": 2814.2925957855637
+      },
+      "forced_guest_preparation_ns": {
+        "median": 43615255,
+        "min": 43549486,
+        "max": 44352734
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 359580,
+        "min": 300812,
+        "max": 379089
+      },
+      "prepare_ns": {
+        "median": 57516,
+        "min": 56195,
+        "max": 58228
+      },
+      "plan_ns": {
+        "median": 23926,
+        "min": 19940,
+        "max": 24397
+      },
+      "ns_per_op": {
+        "median": 2957.366036507302,
+        "min": 2918.609500860226,
+        "max": 2971.466365962427
+      },
+      "forced_guest_preparation_ns": {
+        "median": 42140750,
+        "min": 41458436,
+        "max": 44079033
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 495755,
+        "min": 492399,
+        "max": 505089
+      },
+      "prepare_ns": {
+        "median": 56976,
+        "min": 55133,
+        "max": 63745
+      },
+      "plan_ns": {
+        "median": 36405,
+        "min": 34942,
+        "max": 37115
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 631819,
+          "min": 622686,
+          "max": 654122
+        },
+        "10": {
+          "median": 736135,
+          "min": 723617,
+          "max": 760943
+        },
+        "100": {
+          "median": 1798601,
+          "min": 1668987,
+          "max": 1875647
+        },
+        "1000": {
+          "median": 21334217,
+          "min": 20629508,
+          "max": 21361528
+        },
+        "10000": {
+          "median": 102922633,
+          "min": 101866046,
+          "max": 104916408
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 433741,
+        "min": 422846,
+        "max": 448404
+      },
+      "prepare_ns": {
+        "median": 2093,
+        "min": 1923,
+        "max": 2313
+      },
+      "plan_ns": {
+        "median": 43716,
+        "min": 43335,
+        "max": 46530
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 540752,
+          "min": 526111,
+          "max": 547883
+        },
+        "10": {
+          "median": 650757,
+          "min": 630558,
+          "max": 653322
+        },
+        "100": {
+          "median": 1642027,
+          "min": 1641976,
+          "max": 1703819
+        },
+        "1000": {
+          "median": 20499093,
+          "min": 20245571,
+          "max": 20768377
+        },
+        "10000": {
+          "median": 104558461,
+          "min": 104062945,
+          "max": 104792702
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 382595,
+        "min": 381653,
+        "max": 386090
+      },
+      "prepare_ns": {
+        "median": 1863,
+        "min": 1753,
+        "max": 1923
+      },
+      "plan_ns": {
+        "median": 35833,
+        "min": 35233,
+        "max": 36755
+      },
+      "ns_per_op": {
+        "median": 5465.151513955506,
+        "min": 5452.422994665801,
+        "max": 5485.254718406833
+      },
+      "forced_guest_preparation_ns": {
+        "median": 41045906,
+        "min": 40644594,
+        "max": 41121240
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 442745,
+        "min": 438639,
+        "max": 452930
+      },
+      "prepare_ns": {
+        "median": 51478,
+        "min": 51187,
+        "max": 51979
+      },
+      "plan_ns": {
+        "median": 32158,
+        "min": 31677,
+        "max": 37135
+      },
+      "ns_per_op": {
+        "median": 5576.25709847673,
+        "min": 5521.507881959023,
+        "max": 5602.191390238952
+      },
+      "forced_guest_preparation_ns": {
+        "median": 40672234,
+        "min": 40499956,
+        "max": 41745127
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 453471,
+        "min": 451449,
+        "max": 508694
+      },
+      "prepare_ns": {
+        "median": 33680,
+        "min": 32539,
+        "max": 37276
+      },
+      "plan_ns": {
+        "median": 31588,
+        "min": 29234,
+        "max": 35773
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 526822,
+          "min": 524078,
+          "max": 590156
+        },
+        "10": {
+          "median": 528264,
+          "min": 525860,
+          "max": 591598
+        },
+        "100": {
+          "median": 533371,
+          "min": 530688,
+          "max": 596195
+        },
+        "1000": {
+          "median": 8305546,
+          "min": 8147438,
+          "max": 8530895
+        },
+        "10000": {
+          "median": 10999252,
+          "min": 10814384,
+          "max": 11285352
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 258318,
+        "min": 228853,
+        "max": 263186
+      },
+      "prepare_ns": {
+        "median": 1652,
+        "min": 1583,
+        "max": 1943
+      },
+      "plan_ns": {
+        "median": 23585,
+        "min": 20461,
+        "max": 25358
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 290867,
+          "min": 257196,
+          "max": 296706
+        },
+        "10": {
+          "median": 292649,
+          "min": 258638,
+          "max": 298278
+        },
+        "100": {
+          "median": 298338,
+          "min": 263275,
+          "max": 303276
+        },
+        "1000": {
+          "median": 6732043,
+          "min": 6352001,
+          "max": 6833575
+        },
+        "10000": {
+          "median": 9262544,
+          "min": 8983214,
+          "max": 9393189
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 349725,
+        "min": 348203,
+        "max": 456726
+      },
+      "prepare_ns": {
+        "median": 1873,
+        "min": 1773,
+        "max": 1943
+      },
+      "plan_ns": {
+        "median": 32859,
+        "min": 30135,
+        "max": 44997
+      },
+      "ns_per_op": {
+        "median": 20.180677658803567,
+        "min": 19.662753415346753,
+        "max": 20.738898807775254
+      },
+      "forced_guest_preparation_ns": {
+        "median": 9917868,
+        "min": 9825599,
+        "max": 9975995
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 260781,
+        "min": 212840,
+        "max": 292309
+      },
+      "prepare_ns": {
+        "median": 17196,
+        "min": 15152,
+        "max": 20761
+      },
+      "plan_ns": {
+        "median": 12609,
+        "min": 10727,
+        "max": 13650
+      },
+      "ns_per_op": {
+        "median": 20.45405092032557,
+        "min": 19.679973003631567,
+        "max": 20.65854011814588
+      },
+      "forced_guest_preparation_ns": {
+        "median": 8584615,
+        "min": 8466137,
+        "max": 8692007
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "mode": "cold",
+      "configure_ns": {
+        "median": 482565,
+        "min": 449295,
+        "max": 489165
+      },
+      "prepare_ns": {
+        "median": 34982,
+        "min": 34351,
+        "max": 38377
+      },
+      "plan_ns": {
+        "median": 29695,
+        "min": 28884,
+        "max": 30446
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 568914,
+          "min": 529916,
+          "max": 571408
+        },
+        "10": {
+          "median": 602295,
+          "min": 566230,
+          "max": 609115
+        },
+        "100": {
+          "median": 866311,
+          "min": 855064,
+          "max": 910838
+        },
+        "1000": {
+          "median": 10917930,
+          "min": 10886934,
+          "max": 11499513
+        },
+        "10000": {
+          "median": 41088019,
+          "min": 40918344,
+          "max": 42184226
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "mode": "image-cold",
+      "configure_ns": {
+        "median": 359951,
+        "min": 258298,
+        "max": 409666
+      },
+      "prepare_ns": {
+        "median": 2463,
+        "min": 2173,
+        "max": 7472
+      },
+      "plan_ns": {
+        "median": 33380,
+        "min": 25408,
+        "max": 39870
+      },
+      "total_ns_through_evaluations": {
+        "1": {
+          "median": 413501,
+          "min": 306110,
+          "max": 475274
+        },
+        "10": {
+          "median": 445279,
+          "min": 336576,
+          "max": 509826
+        },
+        "100": {
+          "median": 709877,
+          "min": 589406,
+          "max": 793472
+        },
+        "1000": {
+          "median": 9561233,
+          "min": 9557938,
+          "max": 10411329
+        },
+        "10000": {
+          "median": 38496918,
+          "min": 37191467,
+          "max": 38929627
+        }
+      },
+      "guest_compiled_forks_at_checkpoint": {
+        "1": 0,
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 3
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "mode": "image-steady",
+      "configure_ns": {
+        "median": 453502,
+        "min": 406140,
+        "max": 453762
+      },
+      "prepare_ns": {
+        "median": 2634,
+        "min": 2093,
+        "max": 3224
+      },
+      "plan_ns": {
+        "median": 45718,
+        "min": 36594,
+        "max": 48213
+      },
+      "ns_per_op": {
+        "median": 1940.6011280243447,
+        "min": 1927.2174909861353,
+        "max": 2023.3360619091409
+      },
+      "forced_guest_preparation_ns": {
+        "median": 15900524,
+        "min": 15532752,
+        "max": 16375088
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "mode": "steady",
+      "configure_ns": {
+        "median": 396866,
+        "min": 263866,
+        "max": 429755
+      },
+      "prepare_ns": {
+        "median": 34562,
+        "min": 27802,
+        "max": 34652
+      },
+      "plan_ns": {
+        "median": 24717,
+        "min": 15784,
+        "max": 26520
+      },
+      "ns_per_op": {
+        "median": 1924.2070903255283,
+        "min": 1913.0161432630769,
+        "max": 1940.006772158993
+      },
+      "forced_guest_preparation_ns": {
+        "median": 14152409,
+        "min": 13875693,
+        "max": 14848435
+      }
+    }
+  ]
+}
