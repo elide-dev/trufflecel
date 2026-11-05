@@ -101,7 +101,7 @@ def tables(summary):
     lines += ['', '# Cumulative cold curves', '',
               'Milliseconds: median [minimum–maximum] across three fresh processes. Guest compilation',
               'is natural, synchronous and unforced. All checkpoint samples remain in the JSON summary.', '',
-              '| Runtime | Engine | Workload | Entry | Mode | Evaluations | Cumulative ms | Compiled processes |',
+              '| Runtime | Engine | Workload | Entry | Mode | Evaluations | Cumulative ms | Last-tier processes |',
               '| --- | --- | --- | --- | --- | ---: | ---: | ---: |']
     for row in summary['cold']:
         for point, value in row['cumulative_ns'].items():
