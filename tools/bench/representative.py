@@ -22,14 +22,16 @@ def sha(path):
 
 def validate_jmh(rows):
     expected = set(itertools.product(('compile', 'evaluate'), ENGINES, WORKLOADS))
+    stages = set(itertools.product(('parse', 'check', 'optimize', 'plan'), ENGINES[-2:], ('true', 'x * 2 + 1')))
     seen = set()
+    stage_seen = set()
     for row in rows:
-        if '.SteadyState.' not in row['benchmark']:
-            continue
-        key = (row['benchmark'].rsplit('.', 1)[1], row['params']['engine'], row['params']['workload'])
-        if key not in expected or key in seen:
+        frontend = '.FrontendStages.' in row['benchmark']
+        key = (row['benchmark'].rsplit('.', 1)[1], row['params']['engine'], row['params']['source' if frontend else 'workload'])
+        inventory, observed = (stages, stage_seen) if frontend else (expected, seen)
+        if key not in inventory or key in observed:
             raise ValueError('Unexpected or duplicate JMH cell: ' + str(key))
-        seen.add(key)
+        observed.add(key)
         raw = row['primaryMetric']['rawData']
         if row['forks'] != 3 or len(raw) != 3 or any(len(fork) != 5 for fork in raw):
             raise ValueError('Missing JMH forks/samples')
@@ -37,6 +39,26 @@ def validate_jmh(rows):
             raise ValueError('Invalid timing')
     if seen != expected:
         raise ValueError('Missing JMH cells: ' + str(expected - seen))
+    if stage_seen != stages:
+        raise ValueError('Missing frontend stages: ' + str(stages - stage_seen))
+
+
+def validate_lifecycle(row, runtime, engine, workload, mode):
+    if (row['runtime'], row['engine'], row['workload'], row['mode']) != (runtime, engine, workload, mode):
+        raise ValueError('Mislabeled lifecycle result')
+    if any(type(row[k]) is not int or row[k] < 0 for k in ('configure_ns', 'prepare_ns', 'plan_ns')):
+        raise ValueError('Invalid phase timings')
+    if mode.endswith('cold'):
+        points = row['total_ns_through_evaluations']
+        if list(points) != ['1', '10', '100', '1000', '10000']:
+            raise ValueError('Missing cold checkpoints')
+        times = list(points.values())
+        if any(type(v) is not int or v <= 0 for v in times) or any(b <= a for a, b in zip(times, times[1:])):
+            raise ValueError('Invalid cumulative timings')
+    else:
+        for field, count in (('warmup_ns_per_op', 5), ('ns_per_op', 7)):
+            if len(row[field]) != count or any(not 0 < n < float('inf') for n in row[field]):
+                raise ValueError('Invalid native samples')
 
 
 def main():
@@ -97,11 +119,22 @@ def main():
                 if len(records) != 1:
                     raise ValueError('Missing result: ' + name)
                 row = records[0]
-                if (row['runtime'], row['engine'], row['workload'], row['mode']) != (runtime, engine, workload, mode):
-                    raise ValueError('Mislabeled result: ' + name)
+                validate_lifecycle(row, runtime, engine, workload, mode)
                 row['fork'] = fork
                 results.append(row)
                 (args.output / 'results.partial.json').write_text(json.dumps(results, indent=2) + '\n')
+        for runtime, engine, fork in itertools.product(('jvm', 'svm') if args.native else ('jvm',), ('truffle-interpreter', 'cel-java'), range(3)):
+            command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm' else [str(args.native)])
+            logfile = args.output / f'{runtime}-{engine}-ingest-{fork}.log'
+            run(command + [engine, 'proto-policy', 'ingest'], logfile, 300)
+            records = [json.loads(line) for line in logfile.read_text().splitlines() if line.startswith('{')]
+            if len(records) != 1:
+                raise ValueError('Missing ingestion result')
+            row = records[0]
+            validate_lifecycle(row, runtime, engine, 'proto-policy', 'ingest')
+            row['fork'] = fork
+            results.append(row)
+            (args.output / 'results.partial.json').write_text(json.dumps(results, indent=2) + '\n')
         (args.output / 'results.partial.json').rename(args.output / 'results.json')
     if sha(args.jar) != metadata['jar_sha256'] or (args.native and sha(args.native) != metadata['native_sha256']):
         raise ValueError('Artifact changed during measurement')

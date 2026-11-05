@@ -1,6 +1,7 @@
 package dev.trufflecel;
 
 import com.google.gson.Gson;
+import com.oracle.truffle.runtime.OptimizedCallTarget;
 import java.util.*;
 import org.graalvm.nativeimage.ImageInfo;
 
@@ -13,8 +14,8 @@ public final class Lifecycle {
       throw new IllegalArgumentException(
           "engine workload cold|steady|image-cold|image-steady|ingest");
     String engine = args[0], workload = args[1], mode = args[2];
-    if (!Set.of("cold", "steady", "image-cold", "image-steady", "ingest").contains(mode))
-      throw new IllegalArgumentException(mode);
+    if (!Set.of("cold", "steady", "image-cold", "image-steady", "ingest", "smoke", "image-smoke")
+        .contains(mode)) throw new IllegalArgumentException(mode);
     boolean image = mode.startsWith("image-");
     if (image && !ImageInfo.inImageRuntimeCode())
       throw new IllegalArgumentException("Image preparation requires Native Image");
@@ -38,15 +39,25 @@ public final class Lifecycle {
       out.put("configure_ns", configured - start);
       out.put("prepare_ns", prepared - configured);
       out.put("plan_ns", planned - prepared);
-      if (mode.endsWith("cold")) {
+      if (mode.endsWith("smoke")) {
+        e.peak(evaluation);
+        e.verifyTier(true);
+      } else if (mode.endsWith("cold")) {
         int previous = 0;
         var checkpoints = new LinkedHashMap<String, Long>();
+        var compiled = new LinkedHashMap<String, Boolean>();
         for (int n : new int[] {1, 10, 100, 1000, 10000}) {
           for (int i = previous; i < n; i++) sink = evaluation.run(i);
           checkpoints.put(Integer.toString(n), System.nanoTime() - start);
+          compiled.put(
+              Integer.toString(n),
+              e.truffle != null
+                  && e.truffle.callTarget() instanceof OptimizedCallTarget target
+                  && target.isValidLastTier());
           previous = n;
         }
         out.put("total_ns_through_evaluations", checkpoints);
+        out.put("guest_compiled_at_checkpoint", compiled);
         e.verifyTier(false);
       } else {
         Engines.Evaluation operation = evaluation;
@@ -60,7 +71,11 @@ public final class Lifecycle {
               e.ours
                   ? i -> Workloads.Native.ADAPTER.decode(new Bytes(wire[i & 3]))
                   : i -> dev.trufflecel.bench.proto.PolicySchema.Request.parseFrom(wire[i & 3]);
-        } else e.peak(evaluation);
+        } else {
+          long peakStart = System.nanoTime();
+          e.peak(evaluation);
+          out.put("forced_guest_preparation_ns", System.nanoTime() - peakStart);
+        }
         var warmup = new ArrayList<Double>();
         for (int i = 0; i < 5; i++) warmup.add(sample(operation, 1_000_000_000L));
         var samples = new ArrayList<Double>();
@@ -68,6 +83,13 @@ public final class Lifecycle {
         out.put("warmup_ns_per_op", warmup);
         out.put("ns_per_op", samples);
         e.verifyTier(!mode.equals("ingest"));
+        if (mode.equals("ingest"))
+          for (int i = 0; i < 4; i++) {
+            Object decoded = operation.run(i);
+            if (decoded instanceof ProtobufType.Value value) decoded = value.message();
+            if (!Workloads.Raw.INPUTS.get(i).get("request").equals(decoded))
+              throw new AssertionError("Ingestion changed protobuf content");
+          }
       }
       // Validate after cold timing so correctness checks cannot warm the measured expression.
       for (int i = 0; i < 4; i++)

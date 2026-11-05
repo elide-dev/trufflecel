@@ -3,6 +3,7 @@ load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("//bazel:proto_schema.bzl", "java_proto_sources")
 load("@rules_graalvm//graalvm:defs.bzl", "native_image")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 proto_library(name = "policy", testonly = True, srcs = ["policy.proto"], deps = ["@protobuf//:wrappers_proto", "@protobuf//:timestamp_proto"])
 java_proto_library(name = "policy_generated", testonly = True, deps = [":policy"])
@@ -23,7 +24,7 @@ java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", 
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@maven//:junit_junit"])
-java_library(name = "lifecycle_lib", testonly = True, srcs = ["Lifecycle.java", "ImagePrepared.java"], deps = [":engines", ":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:com_google_code_gson_gson"])
+java_library(name = "lifecycle_lib", testonly = True, srcs = ["Lifecycle.java", "ImagePrepared.java"], deps = [":engines", ":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
 java_binary(name = "lifecycle", testonly = True, main_class = "dev.trufflecel.Lifecycle", runtime_deps = [":lifecycle_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 native_image(
     name = "svm", testonly = True, executable_name = "representative",
@@ -38,3 +39,5 @@ native_image(
     exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
 )
+sh_test(name = "native_smoke", srcs = ["native_smoke.sh"], args = ["$(rootpath :svm)"], data = [":svm"],
+    tags = ["manual"], size = "large", target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
