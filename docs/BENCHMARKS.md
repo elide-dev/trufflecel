@@ -124,6 +124,42 @@ forks, five one-second warmups and five one-second measurements, explicit C2 hos
 compilation and JMH's GC profiler. A peak evaluation improvement does not establish
 startup amortization or a complete-request improvement.
 
+### Prepared-input cold curves and native throughput
+
+`PreparedLifecycle` measures ordinary map entry, explicit snapshot reuse and creation
+of a fresh snapshot for every evaluation. Its cold modes include runtime configuration,
+expression preparation/instantiation and creation of four reusable snapshots when that
+entry path is selected. Fixture generation/ingestion and VM launch remain outside the
+timer; this is expression-lifecycle payback in a preloaded process, not application
+startup or whole-request latency. No evaluation warms the expression before the first
+checkpoint, and correctness is checked after timing.
+
+Natural guest compilation is synchronous and unforced for cold curves. Checkpoints
+extend through one million evaluations by default; `--maximum 10000000` allows a
+separate longer investigation. Every checkpoint records whether last-tier guest code
+is valid. Native steady-state measurements separately force and verify guest compilation,
+use five one-second warmups, and retain seven half-second measured windows per process.
+Results always escape through a volatile consumer, including materialized list outputs.
+
+```sh
+bazel build --config=local //benchmarks/representative:prepared_lifecycle_deploy.jar
+bazel test //benchmarks/representative:prepared_native_smoke
+python3 tools/bench/prepared_lifecycle.py all --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/prepared_lifecycle_deploy.jar --native /path/to/prepared-representative \
+  --source-manifest /path/to/source.json --output /new/results/lifecycle
+```
+
+The complete driver runs 228 fresh processes: three forks for all six native steady-state
+workloads across both execution modes and all three entry paths; JVM and native cold
+curves for full-activation scalar, protobuf policy and repeated-field policy across those
+entry paths; and image-build AST cold curves for the two protobuf snapshot workloads.
+Image preparation includes the AST, with activation snapshots still prepared at runtime.
+`cold` and `native` subcommands allow separately retained runs. All processes run sequentially
+on the dedicated host, in a fixed shuffled order, with explicit C2 host compilation for
+JVM runs. The validator rejects missing/duplicate cells, invalid checkpoint/tier states
+and incomplete measurement windows. Report sampled median crossings alongside process
+ranges and cases with no observed payback; peak throughput alone cannot establish one.
+
 Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
 interpretation, and guest-JIT evaluation separate, including image-build AST preparation.
 Use CodSpeed to locate CPU regressions and existing allocation budgets to enforce limits;
