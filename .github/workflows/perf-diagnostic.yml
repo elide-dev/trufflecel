@@ -1,0 +1,90 @@
+name: Diagnostic - fallback thread locals
+on:
+  push:
+    branches: [diagnostic/fallback-threadlocals]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, boundary, dependencies, head]
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select controlled inputs
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          if [[ "$VARIANT" == base || "$VARIANT" == boundary ]]; then
+            git restore --source=df80d0d -- MODULE.bazel maven_install.json src/main/java/dev/trufflecel/BUILD.bazel
+          fi
+          if [[ "$VARIANT" == base || "$VARIANT" == dependencies ]]; then
+            git restore --source=df80d0d -- src/main/java/dev/trufflecel/CelNode.java
+          fi
+      - name: Configure BuildBuddy
+        env:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY }}
+        run: .github/scripts/configure-buildbuddy.sh
+      - name: Install Bazelisk
+        run: .github/scripts/install-bazelisk.sh
+      - name: Build diagnostic image
+        run: |
+          bazel build //benchmarks:simulation
+          mkdir -p build/diagnostic
+          cp bazel-bin/benchmarks/trufflecel-simulation build/diagnostic/image
+          sha256sum build/diagnostic/image > build/diagnostic/image.sha256
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: diagnostic-${{ matrix.variant }}
+          path: build/diagnostic/
+      - name: Remove credentials
+        if: always()
+        run: rm -f user.bazelrc
+  measure:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: diagnostic-*
+          path: images
+      - name: Install Callgrind
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: Measure identical regions on one runner
+        run: |
+          mkdir -p results
+          lscpu > results/cpu.txt
+          for variant in base boundary dependencies head; do
+            chmod +x "images/diagnostic-$variant/image"
+            for worker in false true; do
+              for case_name in evaluate-scalar short-circuit; do
+                label="$variant-$worker-$case_name"
+                valgrind --tool=callgrind --collect-atstart=no \
+                  --toggle-collect=__codspeed_root_frame__celbench \
+                  --callgrind-out-file="results/$label.out" \
+                  "images/diagnostic-$variant/image" "-Dtrufflecel.bench.worker=$worker" "$case_name" \
+                  > "results/$label.log" 2>&1
+                callgrind_annotate --inclusive=no --threshold=95 "results/$label.out" > "results/$label.txt"
+                echo "$label"
+                grep '^summary:' "results/$label.out"
+              done
+            done
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: threadlocal-diagnostic-results
+          path: results/

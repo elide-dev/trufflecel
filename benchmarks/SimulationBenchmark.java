@@ -99,6 +99,20 @@ public final class SimulationBenchmark {
       return;
     }
     Case c = cases.stream().filter(item -> item.name().equals(args[0])).findFirst().orElseThrow();
+    if (Boolean.getBoolean("trufflecel.bench.worker")) {
+      var failure = new java.util.concurrent.atomic.AtomicReference<Throwable>();
+      var worker = new Thread(() -> {
+        try { measure(c); } catch (Throwable error) { failure.set(error); }
+      }, "cel-measurement");
+      worker.start();
+      worker.join();
+      if (failure.get() != null) throw new AssertionError(failure.get());
+    } else {
+      measure(c);
+    }
+  }
+
+  private static void measure(Case c) {
     for (int i = 0; i < 16; i++) sink = c.operation().getAsLong();
     Runnable body =
         () -> {
