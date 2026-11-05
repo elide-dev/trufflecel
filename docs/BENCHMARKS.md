@@ -80,9 +80,12 @@ python3 tools/bench/representative.py activation --java /path/to/pinned-graalvm/
   --jar /path/to/jmh_deploy.jar --source-manifest /path/to/source.json --output /new/results/activation
 ```
 
-The focused matrix contains six preparation cells (scalar/full activation) and eighteen
-evaluation cells (full-activation scalar, protobuf policy, maps/regex; interpreter/guest JIT;
-three entry modes). Each runs three forks, five one-second warmups and five one-second samples,
+The default matrix contains six preparation cells (scalar/full activation) and thirty-six
+evaluation cells (all six representative workloads; interpreter/guest JIT; three entry modes).
+An explicit `--activation-workloads scalar,proto-repeated,optimizer-policy` selection can measure
+a subset; the exact selection is recorded and validated, so partial runs cannot be mistaken for
+complete six-workload results. The original focused report retains its three-workload inventory.
+Each cell runs three forks, five one-second warmups and five one-second samples,
 with C2, a 512 MiB heap and JMH's GC profiler for allocated bytes/op. Preparation is explicitly
 excluded only from the reusable-snapshot evaluation cell. This measures reuse of an existing
 input; ingestion and changed-input preparation remain application costs.
