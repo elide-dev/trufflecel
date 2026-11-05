@@ -123,7 +123,7 @@ jobs:
         run: .github/scripts/install-bazelisk.sh
       - name: Enforce native blocklist and guest compilation
         id: tests
-        run: bazel test //benchmarks:jit_smoke
+        run: bazel test //benchmarks:jit_smoke //benchmarks/representative:native_smoke
       - name: Collect native JIT test results
         if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
         run: python3 .github/scripts/reports.py junit
@@ -149,6 +149,8 @@ jobs:
             build/reports/
             bazel-testlogs/benchmarks/jit_smoke/test.log
             bazel-testlogs/benchmarks/jit_smoke/test.xml
+            bazel-testlogs/benchmarks/representative/native_smoke/test.log
+            bazel-testlogs/benchmarks/representative/native_smoke/test.xml
       - name: Remove credentials
         if: always()
         run: rm -f user.bazelrc
