@@ -5,6 +5,30 @@ import representative as r
 
 
 class ResultsTest(unittest.TestCase):
+    def test_activation_matrix_requires_all_forks_and_allocation_samples(self):
+        for benchmark, methods, workloads, engines in (
+                ('ActivationPreparation', ('copyBindings', 'normalizeValues', 'snapshot'),
+                 ('scalar', 'scalar-wide'), (None,)),
+                ('ActivationEvaluation', ('evaluateMap', 'evaluateSnapshot', 'snapshotAndEvaluate'),
+                 ('scalar-wide', 'proto-policy', 'map-regex'), r.ENGINES[:2])):
+            rows = []
+            for method, workload, engine in itertools.product(methods, workloads, engines):
+                params = dict(workload=workload)
+                if engine is not None: params['engine'] = engine
+                metric = dict(rawData=[[1.] * 5 for _ in range(3)])
+                rows.append(dict(benchmark='dev.trufflecel.' + benchmark + '.' + method,
+                                 params=params, forks=3, primaryMetric=copy.deepcopy(metric),
+                                 secondaryMetrics={'gc.alloc.rate.norm': copy.deepcopy(metric)}))
+            r.validate_activation(rows, benchmark)
+            for broken in (rows[:-1], rows + rows[:1]):
+                with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+            broken = copy.deepcopy(rows)
+            broken[0]['secondaryMetrics']['gc.alloc.rate.norm']['rawData'][0].pop()
+            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+            broken = copy.deepcopy(rows)
+            broken[0]['primaryMetric']['rawData'][0][0] = float('nan')
+            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+
     def rows(self):
         rows = []
         for stage, engine, workload in itertools.product(('compile', 'evaluate'), r.ENGINES, r.WORKLOADS):

@@ -89,6 +89,11 @@ public final class Program {
     return Values.out(target.call(null, arguments(variables)));
   }
 
+  /** Evaluate a reusable snapshot with fresh scopes and an independent operation budget. */
+  public Object evaluate(Activation activation) {
+    return Values.out(target.call(null, arguments(activation.binding, activation.value)));
+  }
+
   RootCallTarget callTarget() {
     return target;
   }
@@ -172,6 +177,13 @@ public final class Program {
 
   public boolean test(Map<String, ?> variables) {
     Object result = evaluate(variables);
+    if (result instanceof Boolean b) return b;
+    throw Values.error(CelException.Code.TYPE, "expected a boolean result");
+  }
+
+  /** Test a reusable snapshot; the result must be boolean. */
+  public boolean test(Activation activation) {
+    Object result = evaluate(activation);
     if (result instanceof Boolean b) return b;
     throw Values.error(CelException.Code.TYPE, "expected a boolean result");
   }

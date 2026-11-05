@@ -21,6 +21,7 @@ java_plugin(
 java_library(
     name = "trufflecel",
     srcs = [
+        "Activation.java",
         "Bytes.java",
         "Cel.java",
         "CelException.java",

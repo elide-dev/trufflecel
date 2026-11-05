@@ -63,6 +63,27 @@ python3 tools/bench/representative.py lifecycle --java /path/to/pinned-graalvm/b
 Existing measurements below are historical evidence. Their raw files are immutable and use
 their original workload definitions, host configuration, and methodology.
 
+### Activation preparation and reuse
+
+`ActivationPreparation` separates shallow map copying, value normalization (with every result
+consumed), and complete `Activation.snapshot` preparation. These independent diagnostic stages
+must not be summed to claim an end-to-end cost. `ActivationEvaluation` compares the unchanged
+map entry, evaluation of a reusable snapshot, and snapshot preparation plus one evaluation.
+All paths retain the full input and check all four fixture variants before measurement.
+The guest-JIT configurations require last-tier code before and after timing.
+
+```sh
+python3 tools/bench/representative.py activation --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/jmh_deploy.jar --source-manifest /path/to/source.json --output /new/results/activation
+```
+
+The focused matrix contains six preparation cells (scalar/full activation) and eighteen
+evaluation cells (full-activation scalar, protobuf policy, maps/regex; interpreter/guest JIT;
+three entry modes). Each runs three forks, five one-second warmups and five one-second samples,
+with C2, a 512 MiB heap and JMH's GC profiler for allocated bytes/op. Preparation is explicitly
+excluded only from the reusable-snapshot evaluation cell. This measures reuse of an existing
+input; ingestion and changed-input preparation remain application costs.
+
 Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
 interpretation, and guest-JIT evaluation separate, including image-build AST preparation.
 Use CodSpeed to locate CPU regressions and existing allocation budgets to enforce limits;

@@ -31,6 +31,34 @@ A Polyglot integration can instead use language ID `cel`, MIME type `application
 and `context.getBindings("cel")`. Host object access is explicit: proxy objects, arrays,
 and hash entries are copied into CEL values. No Java methods are exposed to expressions.
 
+### Reusing input snapshots
+
+When several policies or repeated evaluations use the same input, prepare its bindings once:
+
+```java
+Activation activation = Activation.snapshot(Map.of("user", userData));
+boolean allowed = accessPolicy.test(activation);
+Object classification = classificationPolicy.evaluate(activation);
+```
+
+`Activation.snapshot` normalizes **all** supplied bindings, including unused ones, using the
+same per-value depth and size limits as ordinary map evaluation. Maps, lists, iterables,
+arrays and bytes are copied into owned CEL values. Later mutations of those host collections
+do not change the snapshot; create a new activation to observe new input. Do not mutate input
+while snapshotting. Binding names must be non-null. Null values and missing bindings remain
+distinct. The existing `evaluate(Map)` API continues to snapshot on every call.
+
+An activation contains no program, execution scopes or operation budget. It can serve multiple
+programs, with fresh evaluation state on each call. Custom/opaque adapter values retain their
+existing ownership and thread-safety contracts: preparing bindings does not freeze a live
+`DynamicRecord` or make an arbitrary host object thread-safe. Use immutable adapter values
+for concurrent reuse. Source-backed programs retain their Polyglot context requirements and
+instrumentation behavior. Returned bytes and collections retain the ordinary output-copy rules.
+
+Preparation has a cost. Reuse avoids repeating it; preparing a fresh activation for a single
+evaluation is not promised to be faster. Benchmark preparation plus the actual number of uses,
+and include upstream data ingestion when measuring the whole request.
+
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`

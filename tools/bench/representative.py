@@ -21,6 +21,31 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def validate_activation(rows, benchmark):
+    if benchmark == 'ActivationPreparation':
+        expected = set(itertools.product(('copyBindings', 'normalizeValues', 'snapshot'), ('scalar', 'scalar-wide'), (None,)))
+    elif benchmark == 'ActivationEvaluation':
+        expected = set(itertools.product(('evaluateMap', 'evaluateSnapshot', 'snapshotAndEvaluate'),
+                                        ('scalar-wide', 'proto-policy', 'map-regex'), ENGINES[:2]))
+    else:
+        raise ValueError('Unknown activation benchmark')
+    seen = set()
+    for row in rows:
+        key = (row['benchmark'].rsplit('.', 1)[1], row['params']['workload'], row['params'].get('engine'))
+        if row['benchmark'] != 'dev.trufflecel.' + benchmark + '.' + key[0] or key not in expected or key in seen:
+            raise ValueError('Unexpected or duplicate activation cell: ' + str(key))
+        seen.add(key)
+        metrics = [row['primaryMetric'], row['secondaryMetrics']['gc.alloc.rate.norm']]
+        for metric in metrics:
+            raw = metric['rawData']
+            if row['forks'] != 3 or len(raw) != 3 or any(len(fork) != 5 for fork in raw):
+                raise ValueError('Missing activation forks/samples')
+            if any(not 0 <= value < float('inf') for fork in raw for value in fork):
+                raise ValueError('Invalid activation measurement')
+    if seen != expected:
+        raise ValueError('Missing activation cells: ' + str(expected - seen))
+
+
 def validate_jmh(rows):
     expected = set(itertools.product(('compile', 'evaluate'), ENGINES, WORKLOADS))
     stages = set(itertools.product(('parse', 'check', 'optimize', 'plan'), ENGINES[-2:], ('true', 'x * 2 + 1')))
@@ -84,7 +109,7 @@ def validate_lifecycle_results(rows, native=True):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('kind', choices=['jmh', 'lifecycle'])
+    parser.add_argument('kind', choices=['jmh', 'activation', 'lifecycle'])
     parser.add_argument('--java', type=Path, required=True)
     parser.add_argument('--jar', type=Path, required=True)
     parser.add_argument('--native', type=Path)
@@ -122,10 +147,20 @@ def main():
     save()
     if args.kind == 'jmh':
         output = args.output / 'jmh.json'
-        run([str(args.java), '-jar', str(args.jar), 'dev.trufflecel.*', '-foe', 'true',
+        run([str(args.java), '-jar', str(args.jar), 'dev.trufflecel.(SteadyState|FrontendStages).*', '-foe', 'true',
              '-rf', 'json', '-rff', str(output), '-jvmArgsAppend', ' '.join(FLAGS)],
             args.output / 'jmh.log', 10800)
         validate_jmh(json.loads(output.read_text()))
+    elif args.kind == 'activation':
+        for benchmark, workloads in (
+                ('ActivationPreparation', 'scalar,scalar-wide'),
+                ('ActivationEvaluation', 'scalar-wide,proto-policy,map-regex')):
+            output = args.output / (benchmark + '.json')
+            run([str(args.java), '-jar', str(args.jar), 'dev.trufflecel.' + benchmark + '.*',
+                 '-p', 'workload=' + workloads, '-foe', 'true', '-prof', 'gc',
+                 '-rf', 'json', '-rff', str(output), '-jvmArgsAppend', ' '.join(FLAGS)],
+                args.output / (benchmark + '.log'), 10800)
+            validate_activation(json.loads(output.read_text()), benchmark)
     else:
         jobs = list(itertools.product(('jvm', 'svm') if args.native else ('jvm',), ENGINES, WORKLOADS, range(3)))
         random.Random(20261105).shuffle(jobs)
