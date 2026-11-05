@@ -19,6 +19,8 @@ public final class Lifecycle {
     boolean image = mode.startsWith("image-");
     if (image && !ImageInfo.inImageRuntimeCode())
       throw new IllegalArgumentException("Image preparation requires Native Image");
+    if (image && !ImagePrepared.BUILT_IN_IMAGE)
+      throw new AssertionError("AST preparation did not run during image construction");
     // Dataset creation/ingestion is excluded from these eval curves and measured separately.
     for (int i = 0; i < 4; i++) Workloads.input(workload, engine.startsWith("truffle-"), i);
     long start = System.nanoTime();
@@ -36,6 +38,7 @@ public final class Lifecycle {
       out.put("workload", workload);
       out.put("mode", mode);
       out.put("runtime", ImageInfo.inImageRuntimeCode() ? "svm" : "jvm");
+      out.put("image_prepared", image);
       out.put("configure_ns", configured - start);
       out.put("prepare_ns", prepared - configured);
       out.put("plan_ns", planned - prepared);
