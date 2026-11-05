@@ -10,7 +10,9 @@ class ResultsTest(unittest.TestCase):
                 ('ActivationPreparation', ('copyBindings', 'normalizeValues', 'snapshot'),
                  ('scalar', 'scalar-wide'), (None,)),
                 ('ActivationEvaluation', ('evaluateMap', 'evaluateSnapshot', 'snapshotAndEvaluate'),
-                 ('scalar-wide', 'proto-policy', 'map-regex'), r.ENGINES[:2])):
+                 r.ACTIVATION_FOCUSED, r.ENGINES[:2]),
+                ('ActivationEvaluation', ('evaluateMap', 'evaluateSnapshot', 'snapshotAndEvaluate'),
+                 r.WORKLOADS, r.ENGINES[:2])):
             rows = []
             for method, workload, engine in itertools.product(methods, workloads, engines):
                 params = dict(workload=workload)
@@ -19,15 +21,22 @@ class ResultsTest(unittest.TestCase):
                 rows.append(dict(benchmark='dev.trufflecel.' + benchmark + '.' + method,
                                  params=params, forks=3, primaryMetric=copy.deepcopy(metric),
                                  secondaryMetrics={'gc.alloc.rate.norm': copy.deepcopy(metric)}))
-            r.validate_activation(rows, benchmark)
+            selection = workloads if benchmark == 'ActivationEvaluation' else r.WORKLOADS
+            r.validate_activation(rows, benchmark, selection)
             for broken in (rows[:-1], rows + rows[:1]):
-                with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+                with self.assertRaises(ValueError): r.validate_activation(broken, benchmark, selection)
             broken = copy.deepcopy(rows)
             broken[0]['secondaryMetrics']['gc.alloc.rate.norm']['rawData'][0].pop()
-            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark, selection)
             broken = copy.deepcopy(rows)
             broken[0]['primaryMetric']['rawData'][0][0] = float('nan')
-            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark)
+            with self.assertRaises(ValueError): r.validate_activation(broken, benchmark, selection)
+            if benchmark == 'ActivationEvaluation':
+                # A focused result must never silently satisfy the expanded matrix (or vice versa).
+                other = r.WORKLOADS if selection == r.ACTIVATION_FOCUSED else r.ACTIVATION_FOCUSED
+                with self.assertRaises(ValueError): r.validate_activation(rows, benchmark, other)
+                for invalid in ((), ('unknown',), ('scalar', 'scalar')):
+                    with self.assertRaises(ValueError): r.validate_activation(rows, benchmark, invalid)
 
     def rows(self):
         rows = []

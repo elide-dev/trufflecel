@@ -13,6 +13,7 @@ import subprocess
 
 WORKLOADS = ('scalar', 'scalar-wide', 'proto-policy', 'proto-repeated', 'map-regex', 'optimizer-policy')
 ENGINES = ('truffle-interpreter', 'truffle-jit', 'cel-java', 'cel-java-optimized', 'cel-java-pratt-optimized')
+ACTIVATION_FOCUSED = ('scalar-wide', 'proto-policy', 'map-regex')
 FLAGS = ['-XX:-UseJVMCICompiler', '-Xms512m', '-Xmx512m', '--enable-native-access=ALL-UNNAMED']
 NATIVE_FLAGS = ['-Xms512m', '-Xmx512m']
 
@@ -21,12 +22,14 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def validate_activation(rows, benchmark):
+def validate_activation(rows, benchmark, workloads=ACTIVATION_FOCUSED):
+    if not workloads or len(set(workloads)) != len(workloads) or not set(workloads) <= set(WORKLOADS):
+        raise ValueError('Invalid activation workload selection')
     if benchmark == 'ActivationPreparation':
         expected = set(itertools.product(('copyBindings', 'normalizeValues', 'snapshot'), ('scalar', 'scalar-wide'), (None,)))
     elif benchmark == 'ActivationEvaluation':
         expected = set(itertools.product(('evaluateMap', 'evaluateSnapshot', 'snapshotAndEvaluate'),
-                                        ('scalar-wide', 'proto-policy', 'map-regex'), ENGINES[:2]))
+                                        workloads, ENGINES[:2]))
     else:
         raise ValueError('Unknown activation benchmark')
     seen = set()
@@ -116,7 +119,13 @@ def main():
     parser.add_argument('--cpus', default='2,3,4,5,6,7,8,9')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--source-manifest', type=Path, required=True)
+    parser.add_argument('--activation-workloads', help='Comma-separated activation workloads; defaults to all six')
     args = parser.parse_args()
+    if args.activation_workloads is not None and args.kind != 'activation':
+        parser.error('--activation-workloads requires activation mode')
+    activation_workloads = tuple(args.activation_workloads.split(',')) if args.activation_workloads is not None else WORKLOADS
+    if not activation_workloads or len(set(activation_workloads)) != len(activation_workloads) or not set(activation_workloads) <= set(WORKLOADS):
+        parser.error('Select unique known activation workloads')
     if platform.system() != 'Linux' or platform.machine() != 'x86_64':
         raise ValueError('Use the pinned Linux x86_64 toolchain')
     cpus = set(map(int, args.cpus.split(',')))
@@ -136,6 +145,8 @@ def main():
         'source_manifest': json.loads(args.source_manifest.read_text()),
         'commands': [], 'complete': False,
     }
+    if args.kind == 'activation':
+        metadata['activation_workloads'] = activation_workloads
     meta = args.output / 'metadata.json'
     def save():
         meta.write_text(json.dumps(metadata, indent=2) + '\n')
@@ -154,13 +165,13 @@ def main():
     elif args.kind == 'activation':
         for benchmark, workloads in (
                 ('ActivationPreparation', 'scalar,scalar-wide'),
-                ('ActivationEvaluation', 'scalar-wide,proto-policy,map-regex')):
+                ('ActivationEvaluation', ','.join(activation_workloads))):
             output = args.output / (benchmark + '.json')
             run([str(args.java), '-jar', str(args.jar), 'dev.trufflecel.' + benchmark + '.*',
                  '-p', 'workload=' + workloads, '-foe', 'true', '-prof', 'gc',
                  '-rf', 'json', '-rff', str(output), '-jvmArgsAppend', ' '.join(FLAGS)],
                 args.output / (benchmark + '.log'), 10800)
-            validate_activation(json.loads(output.read_text()), benchmark)
+            validate_activation(json.loads(output.read_text()), benchmark, activation_workloads)
     else:
         jobs = list(itertools.product(('jvm', 'svm') if args.native else ('jvm',), ENGINES, WORKLOADS, range(3)))
         random.Random(20261105).shuffle(jobs)

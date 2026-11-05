@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import statistics as st
 
-from representative import validate_activation
+from representative import ACTIVATION_FOCUSED, validate_activation
 
 
 def describe(metric):
@@ -21,7 +21,7 @@ def summarize(directory):
     drift = []
     for benchmark in ('ActivationPreparation', 'ActivationEvaluation'):
         rows = json.loads((directory / (benchmark + '.json')).read_text())
-        validate_activation(rows, benchmark)
+        validate_activation(rows, benchmark, metadata.get('activation_workloads', ACTIVATION_FOCUSED))
         for row in rows:
             name = row['benchmark'].rsplit('.', 1)[1]
             summary.append(dict(benchmark=benchmark, method=name, **row['params'],
