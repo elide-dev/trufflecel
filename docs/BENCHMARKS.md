@@ -65,8 +65,9 @@ their original workload definitions, host configuration, and methodology.
 
 ### Activation preparation and reuse
 
-See the [dedicated-host activation report](benchmarks/activation-20261105/README.md) for the
-measured preparation/reuse tradeoff, raw samples and validation.
+See the [all-six-workload snapshot report](benchmarks/activation-suite-20261105/README.md) and
+[initial activation investigation](benchmarks/activation-20261105/README.md) for measured
+preparation/reuse tradeoffs, raw samples and validation.
 
 `ActivationPreparation` separates shallow map copying, value normalization (with every result
 consumed), and complete `Activation.snapshot` preparation. These independent diagnostic stages
