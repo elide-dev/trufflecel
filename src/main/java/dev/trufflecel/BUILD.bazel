@@ -38,6 +38,7 @@ java_library(
         "EvalContext.java",
         "ExprNode.java",
         "ExtensionFunctions.java",
+        "FieldPlan.java",
         "Functions.java",
         "GuestException.java",
         "GuestValue.java",

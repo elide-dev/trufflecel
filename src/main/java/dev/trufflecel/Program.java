@@ -47,6 +47,7 @@ public final class Program {
             : variables.size() == 1 ? variables.iterator().next() : null;
     this.resultType = resultType;
     this.environment = environment;
+    body.instantiateFieldPlans();
     // Tooling receives the complete source tree, including every literal and operator event.
     if (truffleSource == null) body = body.lowerUninstrumented();
     body.resolveBlocks(null);
@@ -203,7 +204,7 @@ public final class Program {
         Source source,
         FrameDescriptor frameDescriptor) {
       super(language, frameDescriptor);
-      this.body = body;
+      this.body = insert(body);
       this.environment = environment;
       this.contextInArguments = contextInArguments;
       section = source == null ? null : source.createSection(0, source.getLength());

@@ -12,13 +12,11 @@ final class HostCollections {
     return new LinkedHashMap<>();
   }
 
-  @TruffleBoundary
-  static List<Object> list() {
-    return new ArrayList<>();
+  static Values.ListBuilder list() {
+    return new Values.ListBuilder();
   }
 
-  @TruffleBoundary
-  static void add(List<Object> list, Object value) {
+  static void add(Values.ListBuilder list, Object value) {
     list.add(value);
   }
 
@@ -37,15 +35,19 @@ final class HostCollections {
     return Collections.unmodifiableMap(map);
   }
 
-  @TruffleBoundary
-  static List<?> freezeList(List<?> list) {
-    return List.copyOf(list);
+  static List<?> freezeList(Values.ListBuilder list) {
+    return list.finish();
+  }
+
+  static Values.OwnedList range(Object range) {
+    if (range instanceof Values.OwnedList list) return list;
+    return snapshotRange(range);
   }
 
   @TruffleBoundary
-  static Object[] range(Object range) {
+  private static Values.OwnedList snapshotRange(Object range) {
     if (range instanceof List<?> list) return Values.listRange(list);
-    if (range instanceof Map<?, ?> map) return map.keySet().toArray();
+    if (range instanceof Map<?, ?> map) return Values.mapRange(map);
     throw Values.overload("comprehension");
   }
 
