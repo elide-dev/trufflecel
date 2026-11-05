@@ -14,6 +14,7 @@ import subprocess
 WORKLOADS = ('scalar', 'scalar-wide', 'proto-policy', 'proto-repeated', 'map-regex', 'optimizer-policy')
 ENGINES = ('truffle-interpreter', 'truffle-jit', 'cel-java', 'cel-java-optimized', 'cel-java-pratt-optimized')
 FLAGS = ['-XX:-UseJVMCICompiler', '-Xms512m', '-Xmx512m', '--enable-native-access=ALL-UNNAMED']
+NATIVE_FLAGS = ['-Xms512m', '-Xmx512m']
 
 
 def sha(path):
@@ -106,6 +107,7 @@ def main():
         'vm_flags': capture([str(args.java), *FLAGS, '-XX:+PrintFlagsFinal', '-version']),
         'java_sha256': sha(args.java), 'jar_sha256': sha(args.jar),
         'native_sha256': sha(args.native) if args.native else None,
+        'native_flags': NATIVE_FLAGS if args.native else None,
         'source_manifest': json.loads(args.source_manifest.read_text()),
         'commands': [], 'complete': False,
     }
@@ -131,7 +133,7 @@ def main():
         for runtime, engine, workload, fork in jobs:
             modes = ('cold',) if runtime == 'jvm' else ('cold', 'image-cold', 'steady', 'image-steady')
             for mode in modes:
-                command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm' else [str(args.native)])
+                command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm' else [str(args.native), *NATIVE_FLAGS])
                 name = f'{runtime}-{engine}-{workload}-{mode}-{fork}'
                 logfile = args.output / (name + '.log')
                 run(command + [engine, workload, mode], logfile, 300)
@@ -144,7 +146,7 @@ def main():
                 results.append(row)
                 (args.output / 'results.partial.json').write_text(json.dumps(results, indent=2) + '\n')
         for runtime, engine, fork in itertools.product(('jvm', 'svm') if args.native else ('jvm',), ('truffle-interpreter', 'cel-java'), range(3)):
-            command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm' else [str(args.native)])
+            command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm' else [str(args.native), *NATIVE_FLAGS])
             logfile = args.output / f'{runtime}-{engine}-ingest-{fork}.log'
             run(command + [engine, 'proto-policy', 'ingest'], logfile, 300)
             records = [json.loads(line) for line in logfile.read_text().splitlines() if line.startswith('{')]

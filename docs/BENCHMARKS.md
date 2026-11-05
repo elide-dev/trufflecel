@@ -8,8 +8,9 @@ activations across five explicit configurations: TruffleCEL interpreter, Truffle
 JIT, cel-java's default planner, planner plus constant folding/CSE, and the optimized planner
 with the opt-in Pratt parser. cel-java remains an isolated test/benchmark dependency.
 
-The six workloads cover a scalar with one binding, the same expression with 64 unrelated
-bindings, nested protobuf presence/wrapper/timestamp/map fields, a 128-item protobuf repeated
+The six workloads cover a scalar with one binding, the same expression with a 69-binding
+activation (including unrelated maps, lists, and protobuf data), nested protobuf
+presence/wrapper/timestamp/map fields, a 128-item protobuf repeated
 field producing an actual list, maps/regexes, and a policy with repeated subexpressions and
 constant arithmetic. Input activations are not trimmed except in the explicitly named
 single-binding scalar control. Generated protobuf messages and native snapshots contain
