@@ -58,6 +58,8 @@ final class Engines implements AutoCloseable {
                   .option("engine.Compilation", engine.equals("truffle-jit") ? "true" : "false")
                   .option("engine.BackgroundCompilation", "false")
                   .option("engine.CompilationFailureAction", "Throw")
+                  .option("compiler.TreatPerformanceWarningsAsErrors", "all")
+                  .option("compiler.MaximumGraalGraphSize", "10000")
                   .build();
       if (context != null) {
         context.initialize("cel");
