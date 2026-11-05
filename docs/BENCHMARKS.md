@@ -95,7 +95,11 @@ input; ingestion and changed-input preparation remain application costs.
 
 The [first prepared-field/owned-collection report](benchmarks/structured-20261105/README.md)
 retains the full activation comparison, matched size/selectivity/preparation
-diagnostics, baseline profiles and native qualification.
+diagnostics, baseline profiles and native qualification. The
+[nested-field follow-up](benchmarks/nested-20261105/README.md) adds nested/map and
+common well-known reads, empty-input allocation checks, native entry-path measurements
+and natural compilation-payback curves, including selected snapshot cases through
+ten million evaluations.
 
 `StructuredAccess` isolates prepared repeated-field evaluation with a materialized
 filter/map result. Its parameters vary list length and selected percentage. Separate

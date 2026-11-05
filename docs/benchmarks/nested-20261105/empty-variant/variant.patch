@@ -1,0 +1,11 @@
+--- a/src/main/java/dev/trufflecel/Values.java
++++ b/src/main/java/dev/trufflecel/Values.java
+@@ -62,7 +62,7 @@
+   static OwnedList scalarRange(DataArray values) {
+     if (values.size() >= 1_000_000)
+       throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
+-    return values.size() == 0 ? OwnedList.EMPTY : new OwnedList(values);
++    return new OwnedList(values);
+   }
+ 
+   /** Transfer internal, canonical storage; callers must not retain mutable aliases. */
