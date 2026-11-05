@@ -245,6 +245,10 @@ public class ProtobufIntegrationTest {
     var any = Any.pack(Int64Value.of(7));
     assertEquals(7L, new ProtobufType(Any.getDescriptor(), Int64Value.getDescriptor()).input(any));
     assertEquals(7L, new ProtobufType(Any.getDescriptor()).input(any));
+    var standardAny = new ProtobufType(Any.getDescriptor());
+    assertEquals(-7L, standardAny.input(Any.pack(Int32Value.of(-7))));
+    assertEquals(new UInt(4294967295L), standardAny.input(Any.pack(UInt32Value.of(-1))));
+    assertEquals(1.5, standardAny.input(Any.pack(FloatValue.of(1.5f))));
     assertThrows(
         CelException.class,
         () ->
