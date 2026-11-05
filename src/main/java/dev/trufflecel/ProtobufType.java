@@ -353,7 +353,10 @@ public final class ProtobufType implements ObjectType {
   }
 
   public boolean equal(Object a, Object b) {
-    return a.equals(b) && reflexive(((Value) a).message());
+    Value left = (Value) a;
+    if (!(b instanceof Value right) || left.type.descriptor != right.type.descriptor) return false;
+    Message message = left.message();
+    return message.equals(right.message()) && reflexive(message);
   }
 
   // protobuf-java considers NaNs equal; CEL preserves IEEE equality inside messages.

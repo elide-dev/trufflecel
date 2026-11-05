@@ -22,6 +22,9 @@ public class ProtobufIntegrationTest {
     assertFalse(type.equal(floating, floating));
     Object finite = type.construct(Map.of("float", 1.5));
     assertTrue(type.equal(finite, finite));
+    assertTrue(type.equal(finite, new ProtobufType(d).construct(Map.of("float", 1.5))));
+    assertFalse(type.equal(finite, 1.5));
+    assertFalse(type.equal(finite, new ProtobufType(descriptor()).construct(Map.of("float", 1.5))));
 
     var json = new ProtobufType(ListValue.getDescriptor());
     Object nanList = json.construct(Map.of("values", List.of(Double.NaN)));
