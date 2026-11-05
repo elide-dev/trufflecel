@@ -21,12 +21,17 @@ java_library(
     name = "test_support",
     testonly = True,
     srcs = [
+        "ProductionCorpus.java",
         "ProtoSchema.java",
         "TestObjects.java",
     ],
     deps = [
         "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "//third_party/cel-spec/proto:fixtures_java",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
     ],
 )
 

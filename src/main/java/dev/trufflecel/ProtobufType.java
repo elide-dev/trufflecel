@@ -9,6 +9,7 @@ import java.util.*;
 /** Descriptor-compiled CEL binding backed by published TruffleData protobuf snapshots. */
 public final class ProtobufType implements ObjectType {
   private static final Map<String, ObjectType> WELL_KNOWN = Cel.newBuilder().build().objectTypes;
+
   private final Descriptor descriptor;
   private final ProtoPlan plan;
   private final Map<String, CelType> fields;
@@ -66,29 +67,86 @@ public final class ProtobufType implements ObjectType {
   /** Register extensions explicitly; native rows store their values by wire field number. */
   public ProtobufType(
       Descriptor descriptor, List<FieldDescriptor> extensions, Descriptor... additionalTypes) {
+    this(descriptor, extensions, Limits.DEFAULT, additionalTypes);
+  }
+
+  /** Explicit bounded structural limits for trusted schemas larger than the default. */
+  public ProtobufType(
+      Descriptor descriptor,
+      List<FieldDescriptor> extensions,
+      Limits limits,
+      Descriptor... additionalTypes) {
+    this(descriptor, extensions, limits, expandedTypes(descriptor, additionalTypes, extensions));
+  }
+
+  private ProtobufType(
+      Descriptor descriptor,
+      List<FieldDescriptor> extensions,
+      Limits limits,
+      List<Descriptor> additionalTypes) {
     this(
         descriptor,
         new IdentityHashMap<>(),
-        model(descriptor, additionalTypes, extensions),
+        model(
+            descriptor,
+            additionalTypes.toArray(Descriptor[]::new),
+            extensions,
+            Objects.requireNonNull(limits)),
         List.copyOf(extensions));
     for (Descriptor additional : additionalTypes)
       if (!graph.containsKey(additional))
         new ProtobufType(additional, graph, model, this.extensions);
   }
 
+  private static List<Descriptor> expandedTypes(
+      Descriptor root, Descriptor[] additional, List<FieldDescriptor> extensions) {
+    var pending = new ArrayDeque<Descriptor>();
+    pending.add(root);
+    pending.addAll(Arrays.asList(additional));
+    for (FieldDescriptor e : extensions)
+      if (e.getJavaType() == FieldDescriptor.JavaType.MESSAGE) pending.add(e.getMessageType());
+    var names = new HashSet<String>();
+    while (!pending.isEmpty()) {
+      Descriptor d = pending.remove();
+      if (!names.add(d.getFullName())) continue;
+      for (FieldDescriptor f : d.getFields())
+        if (f.getJavaType() == FieldDescriptor.JavaType.MESSAGE) pending.add(f.getMessageType());
+    }
+    var result = new ArrayList<>(Arrays.asList(additional));
+    if (names.contains("google.protobuf.Any"))
+      for (Descriptor d :
+          List.of(
+              BoolValue.getDescriptor(),
+              Int64Value.getDescriptor(),
+              UInt64Value.getDescriptor(),
+              DoubleValue.getDescriptor(),
+              StringValue.getDescriptor(),
+              BytesValue.getDescriptor(),
+              Timestamp.getDescriptor(),
+              Duration.getDescriptor(),
+              ListValue.getDescriptor(),
+              Struct.getDescriptor(),
+              com.google.protobuf.Value.getDescriptor()))
+        if (!names.contains(d.getFullName())) result.add(d);
+    return List.copyOf(result);
+  }
+
   private final ProtoPlan.Model model;
 
   private static ProtoPlan.Model model(
-      Descriptor descriptor, Descriptor[] additionalTypes, List<FieldDescriptor> extensions) {
+      Descriptor descriptor,
+      Descriptor[] additionalTypes,
+      List<FieldDescriptor> extensions,
+      Limits limits) {
     var roots = new ArrayList<Descriptor>();
     roots.add(descriptor);
     roots.addAll(Arrays.asList(additionalTypes));
     return new ProtoPlan.Model(
-        null, extensionDefinitions(roots, extensions), Limits.DEFAULT, 100, 8 * 1024 * 1024);
+        null, extensionDefinitions(roots, extensions, limits), limits, 100, 8 * 1024 * 1024);
   }
 
   private static List<ProtoPlan.Type> extensionDefinitions(
-      List<Descriptor> roots, List<FieldDescriptor> extensions) {
+      List<Descriptor> roots, List<FieldDescriptor> extensions, Limits limits) {
     for (FieldDescriptor extension : extensions)
       if (!extension.isExtension())
         throw new IllegalArgumentException("Not an extension: " + extension.getFullName());
@@ -104,8 +162,8 @@ public final class ProtobufType implements ObjectType {
           fields.add(extension);
           used.add(extension);
         }
-      Limits.DEFAULT.check(1, fields.size());
-      if (types.size() >= Limits.DEFAULT.maxColumns())
+      limits.check(1, fields.size());
+      if (types.size() >= limits.maxColumns())
         throw new ContractViolation("Protobuf descriptor graph budget exceeded");
       var plans = new ArrayList<ProtoPlan.FieldPlan>();
       for (FieldDescriptor field : fields) {
@@ -292,7 +350,19 @@ public final class ProtobufType implements ObjectType {
   }
 
   public boolean equal(Object a, Object b) {
-    return a.equals(b);
+    return a.equals(b) && reflexive(((Value) a).message());
+  }
+
+  // protobuf-java considers NaNs equal; CEL preserves IEEE equality inside messages.
+  private static boolean reflexive(Object value) {
+    if (value instanceof Double d) return !d.isNaN();
+    if (value instanceof Float f) return !f.isNaN();
+    if (value instanceof Message m) {
+      for (Object field : m.getAllFields().values()) if (!reflexive(field)) return false;
+    } else if (value instanceof List<?> list) {
+      for (Object item : list) if (!reflexive(item)) return false;
+    }
+    return true;
   }
 
   private FieldDescriptor field(String name) {
@@ -315,11 +385,13 @@ public final class ProtobufType implements ObjectType {
 
   public Object get(Object value, String name) {
     Value v = (Value) value;
+    if (v.type != this) return v.type.get(v, name);
     FieldDescriptor f = field(name);
     Object nativeValue = DataLibrary.factory().getUncached().read(v.row(), ordinals.get(f));
     if (nativeValue == Missing.INSTANCE) {
       String nestedName = f.getMessageType().getFullName();
-      if ((nestedName.endsWith("Value") || nestedName.equals("google.protobuf.Any"))
+      if ((nestedName.endsWith("Value") && !nestedName.equals("google.protobuf.ListValue")
+              || nestedName.equals("google.protobuf.Any"))
           && WELL_KNOWN.containsKey(nestedName)) return CelNull.INSTANCE;
       ProtobufType nested = graph.get(f.getMessageType());
       return nested.canonical(new Value(nested, nested.plan.newBuilder().build()));
@@ -375,14 +447,15 @@ public final class ProtobufType implements ObjectType {
       for (var entry : values.entrySet()) {
         FieldDescriptor f = field(entry.getKey());
         Object value = entry.getValue();
-        if (value == CelNull.INSTANCE && f.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
-          continue;
+        if (value == CelNull.INSTANCE && !f.isRepeated() && nullableMessage(f)) continue;
         if (f.getContainingOneof() != null && !oneofs.add(f.getContainingOneof()))
           throw new IllegalArgumentException("Multiple oneof fields");
         if (f.isMapField()) {
           var entries = new ArrayList<Object>();
           for (var item : ((Map<?, ?>) value).entrySet()) {
             Descriptor d = f.getMessageType();
+            if (item.getValue() == CelNull.INSTANCE && nullableMessage(d.findFieldByNumber(2)))
+              continue;
             ProtobufType entryType = graph.get(d);
             entries.add(
                 ((Value)
@@ -395,7 +468,8 @@ public final class ProtobufType implements ObjectType {
           builder.set(ordinals.get(f), new DataArray(entries.toArray()));
         } else if (f.isRepeated()) {
           var entries = new ArrayList<Object>();
-          for (Object item : (List<?>) value) entries.add(toProto(item, f));
+          for (Object item : (List<?>) value)
+            if (item != CelNull.INSTANCE || !nullableMessage(f)) entries.add(toProto(item, f));
           builder.set(ordinals.get(f), new DataArray(entries.toArray()));
         } else builder.set(ordinals.get(f), toProto(value, f));
       }
@@ -407,6 +481,16 @@ public final class ProtobufType implements ObjectType {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT, "Invalid protobuf construction: " + e.getMessage());
     }
+  }
+
+  private static boolean nullableMessage(FieldDescriptor f) {
+    return f.getJavaType() == FieldDescriptor.JavaType.MESSAGE
+        && !Set.of(
+                "google.protobuf.Value",
+                "google.protobuf.Any",
+                "google.protobuf.Struct",
+                "google.protobuf.ListValue")
+            .contains(f.getMessageType().getFullName());
   }
 
   private Object toProto(Object value, FieldDescriptor f) {
@@ -461,6 +545,16 @@ public final class ProtobufType implements ObjectType {
       case "google.protobuf.Struct" -> fields = Map.of("fields", value);
       case "google.protobuf.ListValue" -> fields = Map.of("values", value);
       case "google.protobuf.Value" -> {
+        if (value instanceof Bytes bytes)
+          value = Base64.getEncoder().encodeToString(bytes.toByteArray());
+        else if (value instanceof java.time.Instant time) value = time.toString();
+        else if (value instanceof java.time.Duration time) value = Functions.durationString(time);
+        else if (value instanceof Long number
+            && (number < -9007199254740991L || number > 9007199254740991L))
+          value = number.toString();
+        else if (value instanceof UInt number
+            && Long.compareUnsigned(number.bits(), 9007199254740991L) > 0)
+          value = number.toString();
         String field =
             value == CelNull.INSTANCE
                 ? "null_value"
@@ -480,7 +574,36 @@ public final class ProtobufType implements ObjectType {
         fields = Map.of(field, mapped);
       }
       case "google.protobuf.Any" -> {
-        Value message = (Value) value;
+        Value message;
+        if (value instanceof Value v) message = v;
+        else {
+          String payload =
+              value instanceof Long
+                  ? "Int64Value"
+                  : value instanceof UInt
+                      ? "UInt64Value"
+                      : value instanceof Double
+                          ? "DoubleValue"
+                          : value instanceof Boolean
+                              ? "BoolValue"
+                              : value instanceof String
+                                  ? "StringValue"
+                                  : value instanceof Bytes
+                                      ? "BytesValue"
+                                      : value instanceof java.time.Instant
+                                          ? "Timestamp"
+                                          : value instanceof java.time.Duration
+                                              ? "Duration"
+                                              : value instanceof List<?>
+                                                  ? "ListValue"
+                                                  : value instanceof Map<?, ?> ? "Struct" : "Value";
+          ProtobufType payloadType =
+              graph.values().stream()
+                  .filter(t -> t.name().equals("google.protobuf." + payload))
+                  .findFirst()
+                  .orElseThrow();
+          message = new Value(payloadType, payloadType.messageValue(value, payloadType.descriptor));
+        }
         fields =
             Map.of(
                 "type_url",
@@ -605,7 +728,15 @@ public final class ProtobufType implements ObjectType {
           case BOOL -> CelType.BOOL;
           case STRING -> CelType.STRING;
           case BYTES -> CelType.BYTES;
-          case MESSAGE, GROUP -> WellKnownTypes.mapped(f.getMessageType().getFullName());
+          case MESSAGE, GROUP -> {
+            String name = f.getMessageType().getFullName();
+            CelType mapped = WellKnownTypes.mapped(name);
+            yield name.startsWith("google.protobuf.")
+                    && name.endsWith("Value")
+                    && !Set.of("google.protobuf.Value", "google.protobuf.ListValue").contains(name)
+                ? CelType.wrapper(mapped)
+                : mapped;
+          }
         };
     return f.isRepeated() ? CelType.list(scalar) : scalar;
   }

@@ -50,12 +50,22 @@ public class ConformanceTest {
 
   @Test
   public void conforms() {
-    conforms(false);
+    conforms(false, false);
   }
 
   @Test
   public void canonicalConforms() {
-    conforms(true);
+    conforms(true, false);
+  }
+
+  @Test
+  public void productionProtobufConforms() {
+    conforms(false, true);
+  }
+
+  @Test
+  public void productionProtobufCanonicalConforms() {
+    conforms(true, true);
   }
 
   private Program plan(Environment env, String source, boolean check, boolean canonical) {
@@ -64,9 +74,10 @@ public class ConformanceTest {
     return CanonicalAst.program(env, check ? CanonicalAst.check(env, parsed) : parsed);
   }
 
-  private void conforms(boolean canonical) {
+  private void conforms(boolean canonical, boolean production) {
     Environment.Builder builder = Cel.newBuilder();
-    TestObjects.register(builder);
+    if (production) ProductionCorpus.register(builder);
+    else TestObjects.register(builder);
     if (test.has("container")) builder.container(test.get("container").getAsString());
     if (flag("disable_macros")) builder.macros(false);
     if (test.has("type_env"))
@@ -75,7 +86,8 @@ public class ConformanceTest {
         String id = decl.get("name").getAsString();
         if (decl.has("ident")) {
           var ident = decl.getAsJsonObject("ident");
-          if (ident.has("value")) builder.constant(id, value(ident.getAsJsonObject("value")));
+          if (ident.has("value"))
+            builder.constant(id, input(ident.getAsJsonObject("value"), production));
           else builder.variable(id, type(ident.getAsJsonObject("type")));
         }
         if (decl.has("function"))
@@ -97,7 +109,8 @@ public class ConformanceTest {
     if (test.has("bindings"))
       for (var binding : test.getAsJsonObject("bindings").entrySet()) {
         JsonObject v = binding.getValue().getAsJsonObject();
-        if (v.has("value")) bindings.put(binding.getKey(), value(v.getAsJsonObject("value")));
+        if (v.has("value"))
+          bindings.put(binding.getKey(), input(v.getAsJsonObject("value"), production));
         else if (v.has("unknown")) bindings.put(binding.getKey(), Unknown.of(binding.getKey()));
       }
     boolean error = test.has("eval_error") || test.has("any_eval_errors");
@@ -135,9 +148,18 @@ public class ConformanceTest {
                 ? test.getAsJsonObject("typed_result").getAsJsonObject("result")
                 : null;
     Object wanted = expected == null ? true : value(expected);
+    if (production) {
+      wanted = ProductionCorpus.expected(wanted);
+      actual = ProductionCorpus.export(actual);
+    }
     assertTrue(
         "expression=" + test.get("expr") + " expected=" + wanted + " actual=" + actual,
         same(wanted, actual));
+  }
+
+  private static Object input(JsonObject value, boolean production) {
+    Object fixture = value(value);
+    return production ? ProductionCorpus.input(fixture) : fixture;
   }
 
   private boolean flag(String name) {
