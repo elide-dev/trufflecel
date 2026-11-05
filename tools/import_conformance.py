@@ -10,6 +10,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import shutil
 from google.protobuf import json_format, text_format
 
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -18,6 +19,12 @@ revision = (root / 'third_party/cel-spec/REVISION').read_text().strip()
 actual = subprocess.check_output(['git', '-C', str(spec), 'rev-parse', 'HEAD'], text=True).strip()
 if actual != revision:
     raise SystemExit(f'Expected cel-spec {revision}, got {actual}')
+for syntax in ('proto2', 'proto3'):
+    source = spec / 'proto/cel/expr/conformance' / syntax
+    destination = root / 'third_party/cel-spec/proto/cel/expr/conformance' / syntax
+    destination.mkdir(parents=True, exist_ok=True)
+    for proto in source.glob('*.proto'):
+        shutil.copyfile(proto, destination / proto.name)
 with tempfile.TemporaryDirectory() as generated:
     protos = list((spec / 'proto/cel/expr').glob('*.proto'))
     protos += list((spec / 'proto/cel/expr/conformance/proto2').glob('*.proto'))

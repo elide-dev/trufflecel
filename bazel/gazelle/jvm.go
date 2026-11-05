@@ -44,6 +44,7 @@ func (*java) Kinds() map[string]rule.KindInfo {
 var imports = regexp.MustCompile(`(?m)^\s*import\s+(?:static\s+)?([\w.]+)`)
 var packages = regexp.MustCompile(`(?m)^\s*package\s+([\w.]+)\s*;`)
 var external = map[string][]string{
+	"dev.cel.expr.conformance.": {"//third_party/cel-spec/proto:fixtures_java"},
 	"org.snakeyaml.engine.":       {"@maven//:org_snakeyaml_snakeyaml_engine"},
 	"com.oracle.truffle.runtime.": {"@maven//:org_graalvm_truffle_truffle_runtime"},
 	"dev.elide.truffledata.":      {"@maven//:dev_elide_truffledata_core"},
@@ -142,7 +143,9 @@ func (*java) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 			}
 		}
 		if len(helpers) > 0 {
-			r := target("java_library", "test_support", helpers, append(dependencies(helperText), "//:trufflecel"))
+			deps := append(dependencies(helperText), "//:trufflecel")
+			if strings.Contains(helperText, "ProtobufType") { deps = append(deps, "//:trufflecel-protobuf") }
+			r := target("java_library", "test_support", helpers, deps)
 			r.SetAttr("testonly", true)
 			result.Gen = append(result.Gen, r)
 		}

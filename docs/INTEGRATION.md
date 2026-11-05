@@ -85,6 +85,21 @@ CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a l
 provides protobuf presence independently of readable defaults, and enums retain numeric values.
 Bytes use compact immutable storage; unsigned integers preserve their full width.
 
+Trusted embedders can register larger schemas with the explicit bounded constructor:
+`new ProtobufType(descriptor, extensions, limits, additionalTypes)`, where `limits` is a
+TruffleData `Limits`. Existing constructors retain `Limits.DEFAULT` (256 columns/types).
+The complete upstream all-types fixture uses 512; this does not change application defaults.
+The selected structural/payload budgets also apply to the native plan. Depth (100) and
+wire-size (8 MiB) bounds remain in force.
+
+Wrapper fields retain nullable wrapper types during checking. CEL construction prunes null
+entries from repeated/map message fields where required, preserves JSON `Value` nulls, and
+rejects null aggregate assignments. Primitive and standard well-known `Any` payloads are
+registered automatically when the descriptor graph contains `Any`; application payload
+descriptors still require explicit registration. CEL message equality rejects NaN equality,
+including nested/repeated floating fields, while host `Value.equals` retains protobuf-java's
+equality contract.
+
 Binary decoding and CEL message construction use TruffleData's embedded codec and native
 builders. To reuse a native plan directly:
 
