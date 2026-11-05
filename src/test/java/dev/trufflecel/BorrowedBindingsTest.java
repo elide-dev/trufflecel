@@ -93,6 +93,25 @@ public class BorrowedBindingsTest {
   }
 
   @Test
+  public void reentrantCallsKeepIndependentBorrowedConversions() {
+    var recursive = new java.util.concurrent.atomic.AtomicReference<Program>();
+    var environment =
+        Cel.newBuilder()
+            .inferVariables(true)
+            .function(
+                "inner",
+                List.of(),
+                CelType.INT,
+                ignored ->
+                    recursive.get().evaluate(Map.of("reenter", false, "xs", List.of(10, 20))))
+            .build();
+    Program program = environment.compile("(reenter ? inner() : 0) + xs[0] + xs[1]");
+    recursive.set(program);
+    assertEquals(33L, program.evaluate(Map.of("reenter", true, "xs", List.of(1, 2))));
+    assertEquals(7L, program.evaluate(Map.of("reenter", false, "xs", List.of(3, 4))));
+  }
+
+  @Test
   public void returnedValuesOwnStorageAndConcurrentEvaluationsHaveIndependentCaches()
       throws Exception {
     byte[] bytes = {1};
