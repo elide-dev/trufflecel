@@ -78,7 +78,8 @@ and guest-JIT execution. The adapter ownership restrictions above still apply.
 ### Prepared protobuf field access
 
 `Environment.prepare` builds internal access plans for supported, statically typed
-protobuf scalar fields and repeated scalar fields. Instantiating the template creates
+protobuf scalar fields, nested messages, repeated messages, and maps with qualified
+scalar keys and scalar or ordinary message values. Instantiating the template creates
 independent execution nodes and library caches. Plans retain schema metadata, never
 request values. Reads guard the exact adapter identity; another adapter for the same
 descriptor still follows the generic path. Environments with custom runtime object
@@ -88,8 +89,17 @@ Supported repeated scalar fields can be iterated directly over their immutable n
 storage. Internal list results use owned storage transferred between evaluation stages;
 public collection and byte results retain their existing conversion and ownership rules.
 Filter and map still execute as separate stages, preserving callback ordering, errors,
-unknowns and budgets. Dynamic access, optional lifting, extensions, map/message fields,
-and scalar conversions outside the qualified set continue through the generic adapter.
+unknowns and budgets. Nested messages retain their exact native plan; absent defaults
+are constructed only when read. Repeated messages and maps materialize canonical owned
+values once, preserving size bounds and protobuf map semantics without a second
+normalization copy. Empty owned lists share immutable storage.
+
+Singular Bool/Int32/Int64/Float/Double/String wrappers, Timestamp and Duration also
+specialize when their descriptors are the standard protobuf-java descriptor instances.
+These paths reuse the existing wrapper/time validation. Reconstructed or custom
+well-known descriptors use generic conversion. Dynamic access, optional lifting,
+extensions, unsigned/byte conversions, and unqualified map/message representations
+continue through the generic adapter.
 
 ## Published TruffleData integration
 

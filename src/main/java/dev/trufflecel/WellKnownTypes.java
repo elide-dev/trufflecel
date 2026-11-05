@@ -86,6 +86,11 @@ final class WellKnownTypes {
 
   static Object time(Map<String, Object> f, boolean duration) {
     long seconds = (long) f.getOrDefault("seconds", 0L), nanos = (long) f.getOrDefault("nanos", 0L);
+    return time(seconds, nanos, duration);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  static Object time(long seconds, long nanos, boolean duration) {
     if (duration) {
       if (seconds < -315576000000L
           || seconds > 315576000000L

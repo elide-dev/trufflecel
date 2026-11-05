@@ -62,11 +62,25 @@ final class Values {
   static OwnedList scalarRange(DataArray values) {
     if (values.size() >= 1_000_000)
       throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
-    return new OwnedList(values);
+    return values.size() == 0 ? OwnedList.EMPTY : new OwnedList(values);
+  }
+
+  /** Transfer internal, canonical storage; callers must not retain mutable aliases. */
+  static OwnedList ownedList(Object[] values) {
+    if (values.length >= 1_000_000)
+      throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
+    return values.length == 0 ? OwnedList.EMPTY : new OwnedList(values);
+  }
+
+  static Map<?, ?> ownedMap(Map<Object, Object> values) {
+    if (values.size() >= 500_000)
+      throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
+    return Collections.unmodifiableMap(values);
   }
 
   /** Owned immutable array or an immutable, canonical protobuf scalar range. */
   static final class OwnedList extends AbstractList<Object> implements RandomAccess {
+    private static final OwnedList EMPTY = new OwnedList(new Object[0]);
     private final Object storage;
     private final int length;
 
@@ -126,7 +140,7 @@ final class Values {
     }
 
     OwnedList finish() {
-      var result = new OwnedList(values, length);
+      var result = length == 0 ? OwnedList.EMPTY : new OwnedList(values, length);
       values = EMPTY;
       length = 0;
       return result;
