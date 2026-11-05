@@ -85,7 +85,8 @@ public final class Program {
   }
 
   public Object evaluate(Map<String, ?> variables) {
-    return Values.out(evaluateInternal(variables));
+    // The Java entry has no guest AST call site. Keep frame tracking without an ambient lookup.
+    return Values.out(target.call(null, arguments(variables)));
   }
 
   RootCallTarget callTarget() {
