@@ -36,6 +36,7 @@ def summarize(jmh, lifecycle):
         forks = [st.mean(values) for values in row['primaryMetric']['rawData']]
         result['jmh'].append({
             'benchmark': row['benchmark'], **row['params'], 'fork_means_ns': forks,
+            'warmup_iterations': row['warmupIterations'],
             'ns_per_op': describe(forks), 'jmh_mean_ns': row['primaryMetric']['score'],
             'jmh_error_ns': row['primaryMetric']['scoreError'],
         })
@@ -156,7 +157,17 @@ def main():
     for name in ('jmh', 'lifecycle'):
         if not json.loads((args.directory / f'{name}-metadata.json').read_text())['complete']:
             raise ValueError('Cannot report incomplete measurements')
-    summary = summarize(json.loads((args.directory / 'jmh.json').read_text()),
+    jmh = json.loads((args.directory / 'jmh.json').read_text())
+    followup = args.directory / 'jmh-followup.json'
+    if followup.exists():
+        if not json.loads((args.directory / 'jmh-followup-metadata.json').read_text())['complete']:
+            raise ValueError('Incomplete warmup follow-up')
+        def key(row): return row['benchmark'], tuple(sorted(row['params'].items()))
+        replacements = {key(row): row for row in json.loads(followup.read_text())}
+        if not set(replacements).issubset({key(row) for row in jmh}):
+            raise ValueError('Unexpected follow-up cell')
+        jmh = [replacements.get(key(row), row) for row in jmh]
+    summary = summarize(jmh,
                         json.loads((args.directory / 'lifecycle.json').read_text()))
     (args.directory / 'summary.json').write_text(json.dumps(summary, indent=2, allow_nan=False) + '\n')
     (args.directory / 'tables.md').write_text(tables(summary))
