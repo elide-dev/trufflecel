@@ -92,6 +92,7 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:dev_elide_truffledata_core",
         "@maven//:dev_elide_truffledata_protobuf",
+        "@maven//:dev_elide_truffledata_protobuf_runtime",
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )

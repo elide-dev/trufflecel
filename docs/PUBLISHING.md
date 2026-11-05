@@ -6,11 +6,11 @@ upload convention. It produces three thin Maven artifacts under `dev.elide`:
 | Artifact | Runtime dependencies in addition to core |
 | --- | --- |
 | `trufflecel-core` | Truffle API, RE2/J, TruffleData core |
-| `trufflecel-protobuf` | TruffleData protobuf, protobuf-java, TruffleData core, Truffle API |
+| `trufflecel-protobuf` | TruffleData protobuf and protobuf-runtime, protobuf-java, TruffleData core, Truffle API |
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 
 Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
-required. Publications built from the current source tree pin TruffleData `0.4.0` and Elide GraalVM `25.5.5-elide.24`,
+required. Publications built from the current source tree pin TruffleData `0.5.0` and Elide GraalVM `25.5.5-elide.24`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 

@@ -16,6 +16,16 @@ func TestDependencies(t *testing.T) {
 		t.Fatalf("got %v, want %v", got, want)
 	}
 }
+func TestSplitProtobufDependencies(t *testing.T) {
+	for _, imported := range []string{"*", "ProtoPlan", "ProtoCompiler", "ProtoRow"} {
+		got := dependencies("import dev.elide.truffledata.protobuf." + imported + ";")
+		want := []string{"@maven//:dev_elide_truffledata_core", "@maven//:dev_elide_truffledata_protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime"}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("%s: got %v, want %v", imported, got, want)
+		}
+	}
+}
+
 func TestGenerationAndRemoval(t *testing.T) {
 	dir := t.TempDir()
 	for name, text := range map[string]string{"NewTest.java": "package dev.trufflecel;\nimport org.junit.Test;", "Support.java": "package dev.trufflecel;", "ignored.txt": ""} {
