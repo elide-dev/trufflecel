@@ -76,9 +76,10 @@ public class ActivationTest {
       assertEquals(
           CelException.Code.RESOURCE_EXHAUSTED,
           assertThrows(CelException.class, () -> Activation.snapshot(inputs)).code());
+      assertEquals(1L, Cel.compile("used").evaluate(inputs));
       assertEquals(
           CelException.Code.RESOURCE_EXHAUSTED,
-          assertThrows(CelException.class, () -> Cel.compile("used").evaluate(inputs)).code());
+          assertThrows(CelException.class, () -> Cel.compile("unused").evaluate(inputs)).code());
     }
   }
 

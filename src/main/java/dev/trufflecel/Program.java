@@ -13,7 +13,7 @@ public final class Program {
   private final String source;
   private final Set<String> variables;
   private final String bindingHint;
-  private final String[] scalarBindingHints;
+  private final Map<String, Integer> bindingLayout;
   private final CelType resultType;
   private final Environment environment;
   private final boolean contextInArguments;
@@ -38,8 +38,9 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    scalarBindingHints =
-        variables.size() > 1 && variables.size() <= 4 ? variables.toArray(String[]::new) : null;
+    var layout = new LinkedHashMap<String, Integer>();
+    for (String name : variables) layout.put(name, layout.size());
+    bindingLayout = Map.copyOf(layout);
     String identifier = body.firstIdentifier();
     bindingHint =
         identifier != null
@@ -85,6 +86,12 @@ public final class Program {
     return evaluate(Map.of());
   }
 
+  /**
+   * Evaluate borrowed bindings. Keep the map and reachable data stable until this call returns,
+   * including during host callbacks. Read bindings are normalized once per evaluation; unused
+   * bindings are not traversed. Use {@link Activation#snapshot(Map)} for eager validation and
+   * reuse.
+   */
   public Object evaluate(Map<String, ?> variables) {
     // The Java entry has no guest AST call site. Keep frame tracking without an ambient lookup.
     return Values.out(target.call(null, arguments(variables)));
@@ -106,23 +113,12 @@ public final class Program {
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   private Object[] arguments(Map<String, ?> variables) {
     if (variables.isEmpty()) return arguments(Map.of(), null);
-    if (variables.size() == 1) {
-      // This is only a lookup hint; unmatched single-entry inputs retain their actual key.
-      if (bindingHint != null) {
-        Object value = variables.get(bindingHint);
-        if (value != null || variables.containsKey(bindingHint))
-          return arguments(bindingHint, Values.in(value));
-      }
-      var binding = variables.entrySet().iterator().next();
-      return arguments(binding.getKey(), Values.in(binding.getValue()));
+    if (variables.size() == 1 && bindingHint != null) {
+      // Canonical scalars need no normalization or collection ownership. Keep the tiny-input path.
+      Object value = variables.get(bindingHint);
+      if (normalizedScalar(value)) return arguments(bindingHint, value);
     }
-    if (variables.size() <= 4) {
-      var snapshot = immutableScalarBindings(variables);
-      if (snapshot != null) return arguments(snapshot, null);
-    }
-    var activation = new HashMap<String, Object>();
-    variables.forEach((name, value) -> activation.put(name, Values.in(value)));
-    return arguments(activation, null);
+    return arguments(new BorrowedBindings(variables, bindingLayout), null);
   }
 
   private Object[] arguments(Object binding, Object value) {
@@ -133,36 +129,10 @@ public final class Program {
         : new Object[] {binding, value};
   }
 
-  @SuppressWarnings("unchecked")
   private static EvalContext context(Environment environment, Object binding, Object value) {
     return binding instanceof String name
         ? new EvalContext(environment, name, value)
-        : new EvalContext(environment, (Map<String, Object>) binding);
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, Object> immutableScalarBindings(Map<String, ?> variables) {
-    Map<String, ?> snapshot;
-    try {
-      snapshot = Map.copyOf(variables);
-    } catch (NullPointerException e) {
-      // Host nulls remain supported by the normalizing path.
-      return null;
-    }
-    // Map.copyOf excludes nulls. Count matches so extra, undeclared inputs still get validated.
-    if (scalarBindingHints != null) {
-      int matches = 0;
-      for (String name : scalarBindingHints) {
-        Object value = snapshot.get(name);
-        if (value != null) {
-          if (!normalizedScalar(value)) return null;
-          matches++;
-        }
-      }
-      if (matches == snapshot.size()) return (Map<String, Object>) snapshot;
-    }
-    for (Object value : snapshot.values()) if (!normalizedScalar(value)) return null;
-    return (Map<String, Object>) snapshot;
+        : new EvalContext(environment, binding);
   }
 
   private static boolean normalizedScalar(Object value) {

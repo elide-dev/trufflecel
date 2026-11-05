@@ -27,8 +27,8 @@ boolean allowed = policy.test(Map.of(
 ```
 
 Compile once and reuse across threads. Evaluation has its own activation, comprehension
-scopes and operation budget. Host collections are snapshotted, and failures carry stable
-CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
+scopes and operation budget. Map inputs are borrowed: keep their contents stable until
+evaluation returns. Bindings are normalized when read; failures carry stable CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
 explicit adapters; expressions cannot discover arbitrary Java methods.
 
 For repeated evaluations over the same input, `Activation.snapshot(bindings)` prepares reusable

@@ -226,3 +226,14 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "borrowedBindings",
+    srcs = ["BorrowedBindingsTest.java"],
+    test_class = "dev.trufflecel.BorrowedBindingsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

@@ -16,7 +16,7 @@ final class EvalContext {
   EvalContext fork() {
     EvalContext copy =
         singleName == null
-            ? new EvalContext(environment, activationMap())
+            ? new EvalContext(environment, activation)
             : new EvalContext(environment, singleName, activation);
     copy.scopes = scopes == null ? null : scopes.clone();
     copy.scopeSize = scopeSize;
@@ -25,7 +25,7 @@ final class EvalContext {
     return copy;
   }
 
-  EvalContext(Environment environment, Map<String, Object> activation) {
+  EvalContext(Environment environment, Object activation) {
     this.environment = environment;
     this.activation = activation;
     singleName = null;
@@ -48,6 +48,7 @@ final class EvalContext {
   Map<String, Object> visibleBindings() {
     var visible = new LinkedHashMap<String, Object>();
     if (singleName != null) visible.put(singleName, activation);
+    else if (activation instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
     else visible.putAll(activationMap());
     for (int i = 0; i < scopeSize; i += 2) visible.put((String) scopes[i], scopes[i + 1]);
     return Collections.unmodifiableMap(visible);
@@ -88,9 +89,7 @@ final class EvalContext {
   private Object rootBinding(String name) {
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value =
-        singleName == null
-            ? lookup(activationMap(), name)
-            : singleName.equals(name) ? activation : null;
+        singleName == null ? lookup(activation, name) : singleName.equals(name) ? activation : null;
     if (value != null) return value;
     throw undeclared(name);
   }
@@ -101,8 +100,11 @@ final class EvalContext {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private static Object lookup(Map<String, Object> activation, String name) {
-    return activation.get(name);
+  @SuppressWarnings("unchecked")
+  private static Object lookup(Object activation, String name) {
+    return activation instanceof BorrowedBindings borrowed
+        ? borrowed.get(name)
+        : ((Map<String, Object>) activation).get(name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
