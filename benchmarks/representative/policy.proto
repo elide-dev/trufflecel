@@ -1,0 +1,17 @@
+syntax = "proto3";
+package benchmark;
+option java_package = "dev.trufflecel.bench.proto";
+option java_outer_classname = "PolicySchema";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+message Request {
+  message Principal {
+    string email = 1;
+    repeated string roles = 2;
+    google.protobuf.Int64Value quota = 3;
+  }
+  Principal principal = 1;
+  map<string, string> labels = 2;
+  repeated int64 amounts = 3;
+  google.protobuf.Timestamp created = 4;
+}

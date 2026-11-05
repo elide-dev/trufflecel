@@ -88,11 +88,11 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
-**Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.4.0`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.6.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
-for available versions. The example below uses released TruffleCEL `0.3.0`, whose POM pins
-TruffleData `0.3.0`; the `0.4.0` dependency upgrade and newly added conformance suites are on `main`:
+for available versions. The example below uses released TruffleCEL `0.4.1`, whose POM pins
+TruffleData `0.6.0`:
 
 ```kotlin
 repositories {
@@ -101,7 +101,7 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.24")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.3.0")
+    implementation("dev.elide:trufflecel-core:0.4.1")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
 ```
@@ -177,7 +177,19 @@ Separate JVM and Native Image gates require guest compilation, enforce allocatio
 AST-size budgets, and reject compilation blocklist violations. CodSpeed does not measure
 JVM/JIT throughput. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
 
-A separate suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
+For cross-engine comparisons, start with **interpreter-to-interpreter** results under
+the same host runtime. Guest-JIT throughput answers a separate question about hot,
+reused expressions: include preparation and warmup when evaluating that tradeoff.
+The [representative suite](docs/BENCHMARKS.md#representative-comparisons) adds protobuf
+policies, wide activations, optimizer-enabled cel-java, JMH, and fresh-process evaluation
+curves. Compilation includes this library's own parser and checker; it is not Truffle
+guest compilation. Corpus coverage and microbenchmark speedups do not establish a
+general replacement for another CEL engine.
+
+<details>
+<summary>Historical three-expression comparison (TruffleCEL 0.2.0)</summary>
+
+The earlier suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
 arithmetic, a policy expression, and a list comprehension. It measures compilation,
 guest-JIT evaluation, and interpretation on the JVM and Native Image (SVM), including
 checked ASTs embedded at image build time.
@@ -219,6 +231,11 @@ this fixed-work measurement. The [original timing baseline](docs/benchmarks/comp
 
 CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
 
+These microbenchmarks use small activations, cel-java without its optional AST optimizers,
+and a 500 ms warmup on shared hardware. Guest compilation is forced before timing.
+They do not measure cold-start costs or representative protobuf evaluation.
+</details>
+
 After successful main checks, Release Please opens version/changelog PRs from conventional
 commits. Merging a release PR creates a version tag. The Maven publisher uses that exact tag to
 publish JARs, sources, POMs, and checksums to `maven.elide.dev`; it requires the R2 credentials
@@ -234,8 +251,15 @@ It checks values, errors, namespaces, declarations, macros and inferred types.
 
 CI requires **99.8% production line coverage and 99.8% branch coverage**, including optional
 adapters. Additional tests cover resource limits, concurrency, interop, published TruffleData
-artifacts and Maven consumption. The core corpus uses an independent test-only protobuf
-fixture; adapter tests separately exercise the published protobuf implementation.
+artifacts and Maven consumption. Every corpus case runs with both an independent test-only
+protobuf fixture and the shipped `ProtobufType` adapter backed by TruffleData, through both
+the direct frontend and canonical AST interchange (11,084 executions of 2,771 cases).
+The production-adapter path uses unmodified upstream proto2/proto3 schemas and protobuf-java
+fixture construction. This is evidence of compatibility with the pinned corpus, not exhaustive
+specification compliance. Corpus error cases assert an evaluation failure, not its category
+or diagnostic text; separate negative and differential tests check rejection phases and
+selected error categories. Custom functions, limits, concurrency, and unknown propagation
+have separate regression tests.
 See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
 The table describes the current `main` branch against the pinned corpus, not every CEL
