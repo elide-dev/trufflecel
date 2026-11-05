@@ -43,28 +43,31 @@ func (*java) Kinds() map[string]rule.KindInfo {
 
 var imports = regexp.MustCompile(`(?m)^\s*import\s+(?:static\s+)?([\w.]+)`)
 var packages = regexp.MustCompile(`(?m)^\s*package\s+([\w.]+)\s*;`)
-var external = map[string]string{
-	"org.snakeyaml.engine.":           "@maven//:org_snakeyaml_snakeyaml_engine",
-	"com.oracle.truffle.runtime.":     "@maven//:org_graalvm_truffle_truffle_runtime",
-	"dev.elide.truffledata.":          "@maven//:dev_elide_truffledata_core",
-	"dev.elide.truffledata.protobuf.": "@maven//:dev_elide_truffledata_protobuf",
-	"dev.elide.truffledata.jdbc.":     "@maven//:dev_elide_truffledata_jdbc",
-	"com.google.protobuf.":            "@maven//:com_google_protobuf_protobuf_java",
-	"org.graalvm.shadowed.org.json.":  "@maven//:org_graalvm_shadowed_json",
-	"org.h2.":                         "@maven//:com_h2database_h2",
-	"com.oracle.truffle.":             "@maven//:org_graalvm_truffle_truffle_api",
-	"org.graalvm.polyglot.":           "@maven//:org_graalvm_polyglot_polyglot",
-	"com.google.re2j.":                "@maven//:com_google_re2j_re2j",
-	"com.google.gson.":                "@maven//:com_google_code_gson_gson",
-	"org.junit.":                      "@maven//:junit_junit",
+var external = map[string][]string{
+	"org.snakeyaml.engine.":       {"@maven//:org_snakeyaml_snakeyaml_engine"},
+	"com.oracle.truffle.runtime.": {"@maven//:org_graalvm_truffle_truffle_runtime"},
+	"dev.elide.truffledata.":      {"@maven//:dev_elide_truffledata_core"},
+	// The bridge and runtime artifacts share this Java package.
+	"dev.elide.truffledata.protobuf.": {"@maven//:dev_elide_truffledata_protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime"},
+	"dev.elide.truffledata.jdbc.":     {"@maven//:dev_elide_truffledata_jdbc"},
+	"com.google.protobuf.":            {"@maven//:com_google_protobuf_protobuf_java"},
+	"org.graalvm.shadowed.org.json.":  {"@maven//:org_graalvm_shadowed_json"},
+	"org.h2.":                         {"@maven//:com_h2database_h2"},
+	"com.oracle.truffle.":             {"@maven//:org_graalvm_truffle_truffle_api"},
+	"org.graalvm.polyglot.":           {"@maven//:org_graalvm_polyglot_polyglot"},
+	"com.google.re2j.":                {"@maven//:com_google_re2j_re2j"},
+	"com.google.gson.":                {"@maven//:com_google_code_gson_gson"},
+	"org.junit.":                      {"@maven//:junit_junit"},
 }
 
 func dependencies(text string) []string {
 	found := map[string]bool{}
 	for _, match := range imports.FindAllStringSubmatch(text, -1) {
-		for prefix, dep := range external {
+		for prefix, deps := range external {
 			if strings.HasPrefix(match[1], prefix) {
-				found[dep] = true
+				for _, dep := range deps {
+					found[dep] = true
+				}
 			}
 		}
 	}

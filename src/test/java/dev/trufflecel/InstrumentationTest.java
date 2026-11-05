@@ -86,6 +86,15 @@ public class InstrumentationTest {
   }
 
   @Test
+  public void sourceLookupStaysOutsideRuntimeCompilation() throws Exception {
+    // Native Image follows virtual root lookups into other languages unless this is a boundary.
+    assertTrue(
+        CelNode.class
+            .getDeclaredMethod("getSourceSection")
+            .isAnnotationPresent(com.oracle.truffle.api.CompilerDirectives.TruffleBoundary.class));
+  }
+
+  @Test
   public void instrumentsSourceSpansBindingsAndErrors() throws Exception {
     try (Context context = Context.newBuilder("cel").build()) {
       Events events =

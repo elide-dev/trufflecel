@@ -18,6 +18,8 @@ abstract class CelNode extends Node implements InstrumentableNode {
     return getSourceSection() != null;
   }
 
+  // Root source lookup can reach other languages' parsers during Native Image analysis.
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   @Override
   public SourceSection getSourceSection() {
     var root = getRootNode();
