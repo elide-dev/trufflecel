@@ -63,6 +63,16 @@ python3 tools/bench/representative.py lifecycle --java /path/to/pinned-graalvm/b
 Existing measurements below are historical evidence. Their raw files are immutable and use
 their original workload definitions, host configuration, and methodology.
 
+### Borrowed map inputs
+
+The [borrowed-input report](benchmarks/borrowed-20261105/README.md) records the current
+stable-input contract and matched JVM comparison with optimized cel-java, plus targeted
+native timings. Ordinary map evaluation borrows bindings and normalizes values when read;
+callers must keep inputs stable until evaluation returns. Explicit activation snapshots
+remain eager and isolated. Earlier reports timed the previous eager map-entry behavior;
+the new result is an intentional API-contract change, not equivalent eager validation made
+faster. All original workload bindings remain present in the comparisons.
+
 ### Activation preparation and reuse
 
 See the [all-six-workload snapshot report](benchmarks/activation-suite-20261105/README.md) and
@@ -71,7 +81,7 @@ preparation/reuse tradeoffs, raw samples and validation.
 
 `ActivationPreparation` separates shallow map copying, value normalization (with every result
 consumed), and complete `Activation.snapshot` preparation. These independent diagnostic stages
-must not be summed to claim an end-to-end cost. `ActivationEvaluation` compares the unchanged
+must not be summed to claim an end-to-end cost. `ActivationEvaluation` compares ordinary
 map entry, evaluation of a reusable snapshot, and snapshot preparation plus one evaluation.
 All paths retain the full input and check all four fixture variants before measurement.
 The guest-JIT configurations require last-tier code before and after timing.
