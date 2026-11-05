@@ -1,5 +1,59 @@
 # Continuous simulation benchmarks
 
+## Representative comparisons
+
+`//benchmarks/representative` is the response to the methodology gaps in the historical
+three-expression suite. It compares the same CEL sources and four independently checked
+activations across five explicit configurations: TruffleCEL interpreter, TruffleCEL guest
+JIT, cel-java's default planner, planner plus constant folding/CSE, and the optimized planner
+with the opt-in Pratt parser. cel-java remains an isolated test/benchmark dependency.
+
+The six workloads cover a scalar with one binding, the same expression with 64 unrelated
+bindings, nested protobuf presence/wrapper/timestamp/map fields, a 128-item protobuf repeated
+field producing an actual list, maps/regexes, and a policy with repeated subexpressions and
+constant arithmetic. Input activations are not trimmed except in the explicitly named
+single-binding scalar control. Generated protobuf messages and native snapshots contain
+the same data. Evaluation excludes ingestion; `Lifecycle ... ingest` measures wire ingestion
+separately. These are broader fixtures, not a claim to represent every application's workload.
+
+JVM steady-state and compilation measurements use JMH 1.37, three forks, five one-second
+warmup iterations, and five one-second measured iterations. Every result escapes through
+JMH's result consumer. Compilation includes parse/check/optional optimization/program creation
+with reused environment objects. `FrontendStages` separately measures upstream parse, check,
+optimize, and plan on `true` and a small arithmetic expression to investigate fixed overhead.
+Its stage timings are diagnostic and should not be added into a claimed engine speedup.
+
+The dedicated-host driver explicitly disables the JVMCI *host* compiler to select C2 while
+retaining Truffle guest compilation. The pinned GraalVM enables the JVMCI host compiler by
+default; historical JVM results must not be labeled C2 without checking their VM flags.
+Each run preserves effective VM flags, CPU model/affinity, kernel, load, artifact hashes,
+source manifest, exact commands, per-fork samples, and warmup logs. Five warmup iterations
+do not prove peak convergence: inspect trends and rerun longer if performance is still changing.
+Do not run a profiler or another benchmark concurrently with timing.
+
+Fresh processes also measure cumulative preparation plus the first 1, 10, 100, 1,000 and
+10,000 evaluations without forced guest compilation. Fixture preparation precedes that clock;
+VM launch is outside it. Native `image-cold` uses checked/optimized ASTs prepared during image
+construction, while `cold` prepares expressions at runtime. Neither embeds guest machine code.
+Native steady-state uses an explicitly recorded five-window warmup and seven samples; these
+are separate from JMH. Compare cold curves to identify an observed amortization point, and
+report when the sampled range does not show one.
+
+```sh
+bazel test --config=local //benchmarks/representative:smoke //benchmarks/representative:semantics
+bazel build --config=local //benchmarks/representative:jmh_deploy.jar //benchmarks/representative:lifecycle_deploy.jar
+bazel build //benchmarks/representative:svm --remote_download_toplevel
+# Run prebuilt artifacts on quiet Linux x86_64; use the pinned GraalVM, not a system JDK:
+python3 tools/bench/representative.py jmh --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/jmh_deploy.jar --source-manifest /path/to/source.json --output /new/results/jmh
+python3 tools/bench/representative.py lifecycle --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/lifecycle_deploy.jar --native /path/to/representative \
+  --source-manifest /path/to/source.json --output /new/results/lifecycle
+```
+
+Existing measurements below are historical evidence. Their raw files are immutable and use
+their original workload definitions, host configuration, and methodology.
+
 Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
 interpretation, and guest-JIT evaluation separate, including image-build AST preparation.
 Use CodSpeed to locate CPU regressions and existing allocation budgets to enforce limits;

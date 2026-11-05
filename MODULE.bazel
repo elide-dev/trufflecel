@@ -42,7 +42,7 @@ use_repo(maven, "maven")
 maven.install(
     name = "cel_java",
     lock_file = "//:cel_java_install.json",
-    artifacts = ["dev.cel:cel:0.15.0"],
+    artifacts = ["dev.cel:cel:0.15.0", "org.openjdk.jmh:jmh-core:1.37", "org.openjdk.jmh:jmh-generator-annprocess:1.37"],
     repositories = ["https://repo.maven.apache.org/maven2"],
     fail_if_repin_required = True,
 )
