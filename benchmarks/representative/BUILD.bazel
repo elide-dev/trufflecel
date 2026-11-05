@@ -23,7 +23,7 @@ java_library(name = "jmh_benchmarks", testonly = True, srcs = ["SteadyState.java
 java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", runtime_deps = [":jmh_benchmarks", "@cel_java//:org_openjdk_jmh_jmh_core"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
-    deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@maven//:junit_junit"])
+    deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
 java_library(name = "lifecycle_lib", testonly = True, srcs = ["Lifecycle.java", "ImagePrepared.java"], deps = [":engines", ":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
 java_binary(name = "lifecycle", testonly = True, main_class = "dev.trufflecel.Lifecycle", runtime_deps = [":lifecycle_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 native_image(

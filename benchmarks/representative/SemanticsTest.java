@@ -10,6 +10,18 @@ import org.junit.Test;
 /** Negative outcomes are compared by phase/category, never incidental diagnostic wording. */
 public final class SemanticsTest {
   @Test
+  public void optimizerCanRejectAConstantFailureBeforeEvaluation() throws Exception {
+    try (var upstream = new Engines("cel-java-optimized")) {
+      assertThrows(
+          dev.cel.optimizer.CelOptimizationException.class, () -> upstream.prepare("1 / 0"));
+      var program = Cel.newBuilder().build().compile("1 / 0");
+      assertEquals(
+          CelException.Code.DIVIDE_BY_ZERO,
+          assertThrows(CelException.class, () -> program.evaluate(Map.of())).code());
+    }
+  }
+
+  @Test
   public void parserAndCheckerRejectionsAgreeWithBothUpstreamParsers() throws Exception {
     var env = Cel.newBuilder().variable("x", CelType.INT).build();
     for (String engine : new String[] {"cel-java", "cel-java-pratt-optimized"}) {

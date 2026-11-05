@@ -1,9 +1,11 @@
 package dev.trufflecel;
 
 import java.util.*;
+import org.graalvm.nativeimage.ImageInfo;
 
 /** Only checked/optimized ASTs survive image construction; no guest machine code is embedded. */
 final class ImagePrepared {
+  static final boolean BUILT_IN_IMAGE = ImageInfo.inImageBuildtimeCode();
   static final Map<String, Object[]> AST = prepare();
 
   private static Map<String, Object[]> prepare() {
