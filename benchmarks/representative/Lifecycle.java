@@ -31,6 +31,7 @@ public final class Lifecycle {
               ? ImagePrepared.AST.get(engine)[Arrays.asList(Workloads.NAMES).indexOf(workload)]
               : e.prepare(Workloads.source(workload));
       long prepared = System.nanoTime();
+      if (image && mode.endsWith("smoke") && e.ours) ImagePrepared.verifySnapshot(e);
       var evaluation = e.evaluation(workload, ast);
       long planned = System.nanoTime();
       var out = new LinkedHashMap<String, Object>();

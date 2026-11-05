@@ -59,6 +59,22 @@ Preparation has a cost. Reuse avoids repeating it; preparing a fresh activation 
 evaluation is not promised to be faster. Benchmark preparation plus the actual number of uses,
 and include upstream data ingestion when measuring the whole request.
 
+For fixed inputs in Native Image, retain an explicit `static final Activation` in an
+application class initialized at image build time. Create it with `Activation.snapshot`
+in that class's initializer and reuse it at runtime. Configure build-time initialization
+for that holder class, store a `PreparedProgram` alongside it if useful, and call
+`PreparedProgram.instantiate()` at runtime to create the execution target.
+
+[GraalVM's `ImageInfo.inImageBuildtimeCode()`](https://www.graalvm.org/sdk/javadoc/org/graalvm/nativeimage/ImageInfo.html)
+(or the documented
+`org.graalvm.nativeimage.imagecode=buildtime` system property) identifies the execution
+phase, not input immutability or future reuse. TruffleCEL therefore does not automatically
+cache map bindings based on that property. A map created during image construction can
+still be mutated at runtime; ordinary map evaluation must observe its current contents.
+The representative native smoke gate checks that build-time snapshots retain owned
+collections and bytes after the source input changes at runtime, in both interpreter
+and guest-JIT execution. The adapter ownership restrictions above still apply.
+
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
