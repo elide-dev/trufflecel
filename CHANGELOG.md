@@ -1,22 +1,15 @@
 # Changelog
 
-## Unreleased
+## [0.7.0](https://github.com/elide-dev/trufflecel/compare/v0.4.1...v0.7.0) (2026-11-06)
 
-### Breaking changes
+
+### ⚠ BREAKING CHANGES
 
 * Ordinary `Program.evaluate(Map)` / `test(Map)` now borrow inputs. Callers must keep
   bindings and reachable data stable until evaluation returns, including during callbacks.
   Normalization and bounds checks happen when a binding is read; unused bindings are no
   longer eagerly traversed or rejected. Use `Activation.snapshot` for eager validation
   and isolation. See [the input contract](docs/INTEGRATION.md#borrowed-input-bindings).
-
-## [0.7.0](https://github.com/elide-dev/trufflecel/compare/v0.4.1...v0.7.0) (2026-11-06)
-
-
-### ⚠ BREAKING CHANGES
-
-* prepare protobuf evaluation and borrow stable inputs ([#16](https://github.com/elide-dev/trufflecel/issues/16))
-* Map inputs must remain stable until evaluation returns. Normalize bindings on read and keep conversion slots evaluation-local. Use Activation.snapshot for eager validation and isolation; unused map bindings are no longer traversed.
 
 ### Features
 

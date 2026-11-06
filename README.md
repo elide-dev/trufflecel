@@ -95,8 +95,8 @@ does not pull in protobuf, JSON, JDBC drivers or test libraries. The current sou
 **Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.7.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
-for available versions. The example below uses released TruffleCEL `0.4.1`, whose POM pins
-TruffleData `0.6.0`:
+for available versions. The example below uses released TruffleCEL `0.7.0`, whose POM pins
+TruffleData `0.7.0`:
 
 ```kotlin
 repositories {
@@ -105,7 +105,7 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.24")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.4.1")
+    implementation("dev.elide:trufflecel-core:0.7.0")
     // Add trufflecel-protobuf or trufflecel-json as needed.
 }
 ```
