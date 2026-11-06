@@ -1,4 +1,178 @@
-# Continuous simulation benchmarks
+# Benchmark methodology and results
+
+## Representative comparisons
+
+See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
+for measured results, raw data, uncertainty and follow-up priorities.
+
+`//benchmarks/representative` is the response to the methodology gaps in the historical
+three-expression suite. It compares the same CEL sources and four independently checked
+activations across five explicit configurations: TruffleCEL interpreter, TruffleCEL guest
+JIT, cel-java's default planner, planner plus constant folding/CSE, and the optimized planner
+with the opt-in Pratt parser. cel-java remains an isolated test/benchmark dependency.
+
+The six workloads cover a scalar with one binding, the same expression with a 69-binding
+activation (including unrelated maps, lists, and protobuf data), nested protobuf
+presence/wrapper/timestamp/map fields, a 128-item protobuf repeated
+field producing an actual list, maps/regexes, and a policy with repeated subexpressions and
+constant arithmetic. Input activations are not trimmed except in the explicitly named
+single-binding scalar control. Generated protobuf messages and native snapshots contain
+the same data. Evaluation excludes ingestion; `Lifecycle ... ingest` measures wire ingestion
+separately. These are broader fixtures, not a claim to represent every application's workload.
+
+JVM steady-state and compilation measurements use JMH 1.37, three forks, five one-second
+warmup iterations, and five one-second measured iterations. Every result escapes through
+JMH's result consumer. Compilation includes parse/check/optional optimization/program creation
+with reused environment objects. `FrontendStages` separately measures upstream parse, check,
+optimize, and plan on `true` and a small arithmetic expression to investigate fixed overhead.
+Its stage timings are diagnostic and should not be added into a claimed engine speedup.
+
+The dedicated-host driver explicitly disables the JVMCI *host* compiler to select C2 while
+retaining Truffle guest compilation. The pinned GraalVM enables the JVMCI host compiler by
+default; historical JVM results must not be labeled C2 without checking their VM flags.
+Each run preserves effective VM flags, CPU model/affinity, kernel, load, artifact hashes,
+source manifest, exact commands, per-fork samples, and warmup logs. Five warmup iterations
+do not prove peak convergence: inspect trends and rerun longer if performance is still changing.
+Do not run a profiler or another benchmark concurrently with timing.
+
+Fresh processes also measure cumulative preparation plus the first 1, 10, 100, 1,000 and
+10,000 evaluations without forced guest compilation. Fixture preparation precedes that clock;
+VM launch is outside it. Native `image-cold` uses checked/optimized ASTs prepared during image
+construction, while `cold` prepares expressions at runtime. Neither embeds guest machine code.
+Native steady-state uses an explicitly recorded five-window warmup and seven samples; these
+are separate from JMH. Compare cold curves to identify an observed amortization point, and
+report when the sampled range does not show one.
+
+The native comparison registers reflection metadata for the generated protobuf accessors
+used by cel-java. This configuration belongs to the benchmark executable; it adds no
+reflection requirement to TruffleCEL's production adapter. The native correctness gate
+runs every engine/workload pair with both runtime and image-build AST preparation.
+
+```sh
+bazel test --config=local //benchmarks/representative:smoke //benchmarks/representative:semantics
+bazel build --config=local //benchmarks/representative:jmh_deploy.jar //benchmarks/representative:lifecycle_deploy.jar
+bazel build //benchmarks/representative:svm --remote_download_toplevel
+# Run prebuilt artifacts on quiet Linux x86_64; use the pinned GraalVM, not a system JDK:
+python3 tools/bench/representative.py jmh --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/jmh_deploy.jar --source-manifest /path/to/source.json --output /new/results/jmh
+python3 tools/bench/representative.py lifecycle --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/lifecycle_deploy.jar --native /path/to/representative \
+  --source-manifest /path/to/source.json --output /new/results/lifecycle
+```
+
+Existing measurements below are historical evidence. Their raw files are immutable and use
+their original workload definitions, host configuration, and methodology.
+
+### Borrowed map inputs
+
+The [borrowed-input report](benchmarks/borrowed-20261105/README.md) records the current
+stable-input contract and matched JVM comparison with optimized cel-java, plus targeted
+native timings. Ordinary map evaluation borrows bindings and normalizes values when read;
+callers must keep inputs stable until evaluation returns. Explicit activation snapshots
+remain eager and isolated. Earlier reports timed the previous eager map-entry behavior;
+the new result is an intentional API-contract change, not equivalent eager validation made
+faster. All original workload bindings remain present in the comparisons.
+
+### Activation preparation and reuse
+
+See the [all-six-workload snapshot report](benchmarks/activation-suite-20261105/README.md) and
+[initial activation investigation](benchmarks/activation-20261105/README.md) for measured
+preparation/reuse tradeoffs, raw samples and validation.
+
+`ActivationPreparation` separates shallow map copying, value normalization (with every result
+consumed), and complete `Activation.snapshot` preparation. These independent diagnostic stages
+must not be summed to claim an end-to-end cost. `ActivationEvaluation` compares ordinary
+map entry, evaluation of a reusable snapshot, and snapshot preparation plus one evaluation.
+All paths retain the full input and check all four fixture variants before measurement.
+The guest-JIT configurations require last-tier code before and after timing.
+
+```sh
+python3 tools/bench/representative.py activation --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/jmh_deploy.jar --source-manifest /path/to/source.json --output /new/results/activation
+```
+
+The default matrix contains six preparation cells (scalar/full activation) and thirty-six
+evaluation cells (all six representative workloads; interpreter/guest JIT; three entry modes).
+An explicit `--activation-workloads scalar,proto-repeated,optimizer-policy` selection can measure
+a subset; the exact selection is recorded and validated, so partial runs cannot be mistaken for
+complete six-workload results. The original focused report retains its three-workload inventory.
+Each cell runs three forks, five one-second warmups and five one-second samples,
+with C2, a 512 MiB heap and JMH's GC profiler for allocated bytes/op. Preparation is explicitly
+excluded only from the reusable-snapshot evaluation cell. This measures reuse of an existing
+input; ingestion and changed-input preparation remain application costs.
+
+### Structured-data preparation and scaling
+
+The [first prepared-field/owned-collection report](benchmarks/structured-20261105/README.md)
+retains the full activation comparison, matched size/selectivity/preparation
+diagnostics, baseline profiles and native qualification. The
+[nested-field follow-up](benchmarks/nested-20261105/README.md) adds nested/map and
+common well-known reads, empty-input allocation checks, native entry-path measurements
+and natural compilation-payback curves, including selected snapshot cases through
+ten million evaluations.
+
+`StructuredAccess` isolates prepared repeated-field evaluation with a materialized
+filter/map result. Its parameters vary list length and selected percentage. Separate
+methods measure `Environment.prepare` and `PreparedProgram.instantiate`; schema setup,
+ingestion and activation preparation happen in trial setup and are not timed here.
+The fixture is a focused single-request diagnostic, distinct from the four-input,
+full-activation comparison above.
+
+Build the same benchmark sources against reference and candidate runtime revisions.
+The paired driver runs list sizes 0, 16, 128 and 1024 at 50% selection, 128 elements at
+0%/100% selection, and preparation/instantiation for 128 elements. It alternates artifact
+order by scenario, records source/artifact/toolchain identity, and rejects incomplete
+forks or cells. Both artifacts must use the same `Engines`, `Workloads`, `StructuredAccess`
+and benchmark build configuration. Compilation warnings and oversized guest graphs are
+errors in the current representative engine harness.
+
+```sh
+python3 tools/bench/structured.py --java /path/to/pinned-graalvm/bin/java \
+  --reference-jar /path/to/reference.jar --candidate-jar /path/to/candidate.jar \
+  --reference-source /path/to/reference-source.json \
+  --candidate-source /path/to/candidate-source.json --output /new/results/structured
+```
+
+Run this after other timed jobs on the dedicated host have completed. It uses three
+forks, five one-second warmups and five one-second measurements, explicit C2 host
+compilation and JMH's GC profiler. A peak evaluation improvement does not establish
+startup amortization or a complete-request improvement.
+
+### Prepared-input cold curves and native throughput
+
+`PreparedLifecycle` measures ordinary map entry, explicit snapshot reuse and creation
+of a fresh snapshot for every evaluation. Its cold modes include runtime configuration,
+expression preparation/instantiation and creation of four reusable snapshots when that
+entry path is selected. Fixture generation/ingestion and VM launch remain outside the
+timer; this is expression-lifecycle payback in a preloaded process, not application
+startup or whole-request latency. No evaluation warms the expression before the first
+checkpoint, and correctness is checked after timing.
+
+Natural guest compilation is synchronous and unforced for cold curves. Checkpoints
+extend through one million evaluations by default; `--maximum 10000000` allows a
+separate longer investigation. Every checkpoint records whether last-tier guest code
+is valid. Native steady-state measurements separately force and verify guest compilation,
+use five one-second warmups, and retain seven half-second measured windows per process.
+Results always escape through a volatile consumer, including materialized list outputs.
+
+```sh
+bazel build --config=local //benchmarks/representative:prepared_lifecycle_deploy.jar
+bazel test //benchmarks/representative:prepared_native_smoke
+python3 tools/bench/prepared_lifecycle.py all --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/prepared_lifecycle_deploy.jar --native /path/to/prepared-representative \
+  --source-manifest /path/to/source.json --output /new/results/lifecycle
+```
+
+The complete driver runs 228 fresh processes: three forks for all six native steady-state
+workloads across both execution modes and all three entry paths; JVM and native cold
+curves for full-activation scalar, protobuf policy and repeated-field policy across those
+entry paths; and image-build AST cold curves for the two protobuf snapshot workloads.
+Image preparation includes the AST, with activation snapshots still prepared at runtime.
+`cold` and `native` subcommands allow separately retained runs. All processes run sequentially
+on the dedicated host, in a fixed shuffled order, with explicit C2 host compilation for
+JVM runs. The validator rejects missing/duplicate cells, invalid checkpoint/tier states
+and incomplete measurement windows. Report sampled median crossings alongside process
+ranges and cases with no observed payback; peak throughput alone cannot establish one.
 
 Use time/op and allocated heap bytes/op as the primary comparison metrics. Keep compilation,
 interpretation, and guest-JIT evaluation separate, including image-build AST preparation.

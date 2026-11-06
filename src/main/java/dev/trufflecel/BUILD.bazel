@@ -21,6 +21,8 @@ java_plugin(
 java_library(
     name = "trufflecel",
     srcs = [
+        "Activation.java",
+        "BorrowedBindings.java",
         "Bytes.java",
         "Cel.java",
         "CelException.java",
@@ -37,6 +39,7 @@ java_library(
         "EvalContext.java",
         "ExprNode.java",
         "ExtensionFunctions.java",
+        "FieldPlan.java",
         "Functions.java",
         "GuestException.java",
         "GuestValue.java",

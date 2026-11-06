@@ -1,0 +1,1233 @@
+{
+  "source": {
+    "commit": "2bd3e3b5f826c00486d188feb7bbc847158eacbb",
+    "dirty": true,
+    "description": "Guarded scalar field plans and owned collection storage, pilot2 runtime",
+    "files": {
+      "src/main/java/dev/trufflecel/Activation.java": "1416153631d760d9205f17d08b7578a195ec5ad0c655c1ee9b20410ac47a129a",
+      "src/main/java/dev/trufflecel/Bytes.java": "86082bc913a79cbc65b5e38230c619ab157a99561bf7546f1cb22c1f0c4e8720",
+      "src/main/java/dev/trufflecel/CanonicalAst.java": "dceb818aa417fb39e0a711874315f9d3935e402c22214fd4ad70e779fca64121",
+      "src/main/java/dev/trufflecel/Cel.java": "2192bfc84c6daa7d6422e8ddfe83034d2402e44273d3d5d72aec769c5c4f9720",
+      "src/main/java/dev/trufflecel/CelException.java": "13a435fcc7aa2ebbee77bdca0290abdc2f768e1ed195af44f35f467412f8722a",
+      "src/main/java/dev/trufflecel/CelLanguage.java": "56f784bb02c3f5718e91d734558a312b70f03e6967196a2cc6a7e62428f514c7",
+      "src/main/java/dev/trufflecel/CelNode.java": "5e7a39ecacb17adadb7a40cbf9c245fe9bfcf8231c15bc8f5dca6f712ea8b901",
+      "src/main/java/dev/trufflecel/CelNull.java": "b2c140503bc24f3188cb5c8f835160ac2216d3278ab95bde17b57e9d0084b160",
+      "src/main/java/dev/trufflecel/CelType.java": "40f690b9e4862e705931a60adaf90a379b2e760ae2c852bd5b73e96aac677f48",
+      "src/main/java/dev/trufflecel/Checker.java": "c8973b9fde6f657f8214a47cf1fe6d6fb394c56d78deea86f7ded8d8bb09fb8d",
+      "src/main/java/dev/trufflecel/ComprehensionNode.java": "12a1332564d2a439509432043adca5f8481313bde1546b950dda199d2e86229a",
+      "src/main/java/dev/trufflecel/DataType.java": "652dd395786e2873fbfb64eb2df9effd9a5a769e974e4257738b73fcfe97e7b8",
+      "src/main/java/dev/trufflecel/DataValues.java": "ce3df626817e9aa2bee32a925a4dca967b68e1f40585a105aa754a9791139361",
+      "src/main/java/dev/trufflecel/EncoderFunctions.java": "389bdbf98fea6793f84f53432fc0744443c1dd9c8189103542909c1907beb221",
+      "src/main/java/dev/trufflecel/Environment.java": "394a23cdbcce39852bc62d0590ceed110a656fac52db8ba1b4aa4234b3219519",
+      "src/main/java/dev/trufflecel/EvalContext.java": "378f7f4337162b1691a56e539e55d4b8cd537e1c260eaa908c6696076a0a57d9",
+      "src/main/java/dev/trufflecel/ExprNode.java": "0af4a4b9dc6b7cb4781346ce28aa140ac409bed64a3189ef7b1f48e43d390559",
+      "src/main/java/dev/trufflecel/ExtensionFunctions.java": "414829d2bc286137d6d90b400685dd175e3d5a50b8c25041a13c9184065b2b9f",
+      "src/main/java/dev/trufflecel/FieldPlan.java": "62cfde053da7d9f61266268d518e040cd1e3ddca39f5f02c500af9e389a9598d",
+      "src/main/java/dev/trufflecel/Functions.java": "94a15378bb4c9848d482d2b2c5f73458f5454ff6e31b12cabac77a6dd5032f16",
+      "src/main/java/dev/trufflecel/GuestException.java": "ab3f00bda58ba27df0e9468f98ae57d754154cfb422c5765416c950f40c702b5",
+      "src/main/java/dev/trufflecel/GuestValue.java": "2a89fb09ff66ea15f74d39d2c21d0f31c0c464b86d02446313a947da40f2f255",
+      "src/main/java/dev/trufflecel/HostCollections.java": "844ccbed29f299622515fcdbb3c368d43ddbb915aa51037bd2ac799e404cab24",
+      "src/main/java/dev/trufflecel/JsonValues.java": "40662779deb49949666f4be4857ef90d316feff49be1934989bb3d63e7162de9",
+      "src/main/java/dev/trufflecel/NetworkValue.java": "d594b2d8e263eae838b96a085adb41fb420718c258276c77e72aeb129b9a589e",
+      "src/main/java/dev/trufflecel/ObjectType.java": "f1abcda2dad78b76b0a1854f521f43765594f6cad91773d9eaefa4e48b00350e",
+      "src/main/java/dev/trufflecel/OptionalValue.java": "5208cc8ef454b3aba64fc224faef1e8b2cd58daa9adc2c451fc72d699a7bb6bc",
+      "src/main/java/dev/trufflecel/Parser.java": "59baf0f79eba5e4048ebdfd1b61fd51786eeacbdbf1910b2c88d8753e15da053",
+      "src/main/java/dev/trufflecel/PreparedProgram.java": "6fb91d1159c675a6b3199ccd6f34495bc83b35167b87b7ec20b0cec7afb9e0d9",
+      "src/main/java/dev/trufflecel/Program.java": "4f4c1a7b67d55312b98de6354f2d53c9393429cb0de88d3a9fff87e9f8aad19e",
+      "src/main/java/dev/trufflecel/ProtobufType.java": "ab6598ef78766849e0ede36b31046aa75f7cdb4c266b4940c766c83c949697e1",
+      "src/main/java/dev/trufflecel/UInt.java": "87b980a1ef8098f0b1995e5e674b0f55eec70ebea18a8a605d07c271047d216b",
+      "src/main/java/dev/trufflecel/Unknown.java": "962f8216b91f2d7e992fea48a5f5da0229321f60c161d7839cc2ff6f701ed49c",
+      "src/main/java/dev/trufflecel/Values.java": "c4e122d34e6f0fd0e3e8282e0f8ac25c36971e7b12fca566f59e0d441ea1a1e4",
+      "src/main/java/dev/trufflecel/WellKnownTypes.java": "14893ece25d8eb58a7b90deecbae235b28ce1ef893c9e62f0a1c79d8216fee12",
+      "src/main/java/dev/trufflecel/WriteNode.java": "81da070b8af9cc050634a7b8a4bc54a930ec15178944bc213073801c6faff9e2",
+      "benchmarks/representative/ActivationEvaluation.java": "d517c074a8612684004489ccf4256b2ae9f352c5979ca1aa3407b9a7fe8c3cf8",
+      "benchmarks/representative/ActivationPreparation.java": "6a49bba9f7615931904c9251539808ffc359fd7dd7002786baea0892bc12fb40",
+      "benchmarks/representative/Engines.java": "e8fdd43c7b0f388d7b7877808edd2940360adf28cd1b6f77d7059498585de542",
+      "benchmarks/representative/FrontendStages.java": "acfc40e69e14b117840b43dfd7307bc146527ddf45fb87bfa959ee04caef47dd",
+      "benchmarks/representative/ImagePrepared.java": "66546cdcd1a4737895e785f200ace41eebe93e6bb2756bc9381bb70713c14f96",
+      "benchmarks/representative/Lifecycle.java": "ca5ce8b73a4955b902641b921878996e951dd80b8c2f159a931a3ec89ed97b2e",
+      "benchmarks/representative/SemanticsTest.java": "ac6c27240a17e4f06cb4e979960ecd48642a5a5370e8ee1420e5e6b5630395b6",
+      "benchmarks/representative/Smoke.java": "938a14f2205bcb5609f8dc12b9e5b9436393faf38971a7ff4ffb2c3e21fa99d0",
+      "benchmarks/representative/SteadyState.java": "2ac6604dcef0904f6a79b8be71d8db2a7b30333a34ebea9768cf8e23e769a32a",
+      "benchmarks/representative/UpstreamProtobufFeature.java": "8f375dbd1e6c1cd69c307c7f6115c51d68b6a3a3b00e65c172753791e2c3d371",
+      "benchmarks/representative/Workloads.java": "beb04071782f8a54e59105430d2d8d70a9ea70b4105ffdc506d237ed1afcffa2",
+      "tools/bench/representative.py": "3afa5803c279a544c1d2c81b8022cc577c79a6639fc37caa404ed74e2f853168",
+      "src/main/java/dev/trufflecel/BUILD.bazel": "40d387898e08237efd9ff6b15dc86fbb8b8557019aee7eaa8337d268bbdd7b17",
+      "MODULE.bazel": "b81b66367309cc46a7b799712056b93c63532393241b09b78bd53442f2d12d34",
+      "maven_install.json": "7c2fe4ddffdac045374014fe19d5ae8d7f68fa867ff294a240a20eef09358b39"
+    }
+  },
+  "cells": [
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "copyBindings",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          8.80641487264079,
+          8.911947396013897,
+          8.900540967437907
+        ],
+        "median": 8.900540967437907,
+        "min": 8.80641487264079,
+        "max": 8.911947396013897
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          160.00006195635615,
+          160.00006259151388,
+          160.00006262129023
+        ],
+        "median": 160.00006259151388,
+        "min": 160.00006195635615,
+        "max": 160.00006262129023
+      },
+      "jmh_mean_ns": 8.872967745364196,
+      "jmh_error_ns": 0.056000456090470475
+    },
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "copyBindings",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          476.03788360287433,
+          475.1669630463721,
+          472.8288581389735
+        ],
+        "median": 475.1669630463721,
+        "min": 472.8288581389735,
+        "max": 476.03788360287433
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          3280.0033432984874,
+          3280.003337180776,
+          3280.0033207803035
+        ],
+        "median": 3280.003337180776,
+        "min": 3280.0033207803035,
+        "max": 3280.0033432984874
+      },
+      "jmh_mean_ns": 474.67790159607324,
+      "jmh_error_ns": 3.829177876773707
+    },
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "normalizeValues",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          1.0228160546411291,
+          1.0736691803235716,
+          1.0057935607910815
+        ],
+        "median": 1.0228160546411291,
+        "min": 1.0057935607910815,
+        "max": 1.0736691803235716
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          7.126467427048321e-06,
+          7.501151112134567e-06,
+          7.0142714476600015e-06
+        ],
+        "median": 7.126467427048321e-06,
+        "min": 7.0142714476600015e-06,
+        "max": 7.501151112134567e-06
+      },
+      "jmh_mean_ns": 1.034092931918594,
+      "jmh_error_ns": 0.034867125601611905
+    },
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "normalizeValues",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          1454.2575532318876,
+          1481.453810018678,
+          1453.2234252581036
+        ],
+        "median": 1454.2575532318876,
+        "min": 1453.2234252581036,
+        "max": 1481.453810018678
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          4368.010213478288,
+          4368.010452117611,
+          4368.010206228056
+        ],
+        "median": 4368.010213478288,
+        "min": 4368.010206228056,
+        "max": 4368.010452117611
+      },
+      "jmh_mean_ns": 1462.9782628362232,
+      "jmh_error_ns": 16.076918367835695
+    },
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "snapshot",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          13.445736334313587,
+          13.409807834757595,
+          13.516546687670797
+        ],
+        "median": 13.445736334313587,
+        "min": 13.409807834757595,
+        "max": 13.516546687670797
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          200.00009443245347,
+          200.0000944370201,
+          200.0000950176814
+        ],
+        "median": 200.0000944370201,
+        "min": 200.00009443245347,
+        "max": 200.0000950176814
+      },
+      "jmh_mean_ns": 13.457363618913995,
+      "jmh_error_ns": 0.05704542525906753
+    },
+    {
+      "benchmark": "ActivationPreparation",
+      "method": "snapshot",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          2440.558273988861,
+          2427.852251494285,
+          2476.1806893765165
+        ],
+        "median": 2440.558273988861,
+        "min": 2427.852251494285,
+        "max": 2476.1806893765165
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          9704.017140450991,
+          9704.017129366055,
+          9704.017470318679
+        ],
+        "median": 9704.017140450991,
+        "min": 9704.017129366055,
+        "max": 9704.017470318679
+      },
+      "jmh_mean_ns": 2448.1970716198875,
+      "jmh_error_ns": 24.320269038444202
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          18.180403109336897,
+          17.99813273465951,
+          18.01234674984793
+        ],
+        "median": 18.01234674984793,
+        "min": 17.99813273465951,
+        "max": 18.180403109336897
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          112.00091555867277,
+          112.00091135202386,
+          112.00090710297744
+        ],
+        "median": 112.00091135202386,
+        "min": 112.00090710297744,
+        "max": 112.00091555867277
+      },
+      "jmh_mean_ns": 18.063627531281444,
+      "jmh_error_ns": 0.13901282094101175
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          1730.3200356128505,
+          1729.8612208293116,
+          1754.7684542660932
+        ],
+        "median": 1730.3200356128505,
+        "min": 1729.8612208293116,
+        "max": 1754.7684542660932
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          7760.087140458419,
+          7760.086459807648,
+          7760.088009559419
+        ],
+        "median": 7760.087140458419,
+        "min": 7760.086459807648,
+        "max": 7760.088009559419
+      },
+      "jmh_mean_ns": 1738.316570236085,
+      "jmh_error_ns": 14.151891497207236
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          2283.382237423271,
+          2387.0124436221213,
+          2290.7623576328615
+        ],
+        "median": 2290.7623576328615,
+        "min": 2283.382237423271,
+        "max": 2387.0124436221213
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          8944.11536253598,
+          8944.119530446864,
+          8944.116194024038
+        ],
+        "median": 8944.116194024038,
+        "min": 8944.11536253598,
+        "max": 8944.119530446864
+      },
+      "jmh_mean_ns": 2320.385679559418,
+      "jmh_error_ns": 52.77071672311133
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          4371.417205723031,
+          4230.160734817354,
+          4425.56272102323
+        ],
+        "median": 4371.417205723031,
+        "min": 4230.160734817354,
+        "max": 4425.56272102323
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          13012.220984777572,
+          13012.21306751446,
+          13012.223285151702
+        ],
+        "median": 13012.220984777572,
+        "min": 13012.21306751446,
+        "max": 13012.223285151702
+      },
+      "jmh_mean_ns": 4342.380220521205,
+      "jmh_error_ns": 91.9036803302631
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          2500.1084770940206,
+          2637.3830438818172,
+          2485.438538388589
+        ],
+        "median": 2500.1084770940206,
+        "min": 2485.438538388589,
+        "max": 2637.3830438818172
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10370.124431021957,
+          10382.132122202558,
+          10382.12424733054
+        ],
+        "median": 10382.12424733054,
+        "min": 10370.124431021957,
+        "max": 10382.132122202558
+      },
+      "jmh_mean_ns": 2540.976686454809,
+      "jmh_error_ns": 76.31855846323316
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          1918.340208870742,
+          1943.407361555257,
+          1938.8534248532244
+        ],
+        "median": 1938.8534248532244,
+        "min": 1918.340208870742,
+        "max": 1943.407361555257
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          8024.096398691656,
+          8024.095930793721,
+          8024.097572023276
+        ],
+        "median": 8024.096398691656,
+        "min": 8024.095930793721,
+        "max": 8024.097572023276
+      },
+      "jmh_mean_ns": 1933.5336650930742,
+      "jmh_error_ns": 28.076365315549474
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          8.508581579803353,
+          8.917252645499367,
+          8.235162384154814
+        ],
+        "median": 8.508581579803353,
+        "min": 8.235162384154814,
+        "max": 8.917252645499367
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          24.000426139467486,
+          24.000446816897508,
+          24.000413049138828
+        ],
+        "median": 24.000426139467486,
+        "min": 24.000413049138828,
+        "max": 24.000446816897508
+      },
+      "jmh_mean_ns": 8.553665536485846,
+      "jmh_error_ns": 0.31071460623357217
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          1705.612470975732,
+          1717.535118071571,
+          1718.344320792227
+        ],
+        "median": 1717.535118071571,
+        "min": 1705.612470975732,
+        "max": 1718.344320792227
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          7672.086081662819,
+          7672.087666050432,
+          7672.086497716271
+        ],
+        "median": 7672.086497716271,
+        "min": 7672.086081662819,
+        "max": 7672.087666050432
+      },
+      "jmh_mean_ns": 1713.8306366131767,
+      "jmh_error_ns": 13.98233922276296
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          2338.5764282909972,
+          2237.0013268021266,
+          2345.465875649817
+        ],
+        "median": 2338.5764282909972,
+        "min": 2237.0013268021266,
+        "max": 2345.465875649817
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          8920.117958890327,
+          8920.111310883603,
+          8920.117866658911
+        ],
+        "median": 8920.117866658911,
+        "min": 8920.111310883603,
+        "max": 8920.117958890327
+      },
+      "jmh_mean_ns": 2307.0145435809804,
+      "jmh_error_ns": 55.22822632867214
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          2904.357862234613,
+          3091.2066571564937,
+          3103.481514689337
+        ],
+        "median": 3091.2066571564937,
+        "min": 2904.357862234613,
+        "max": 3103.481514689337
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          13028.14576691461,
+          13028.154805284925,
+          13028.15580330292
+        ],
+        "median": 13028.154805284925,
+        "min": 13028.14576691461,
+        "max": 13028.15580330292
+      },
+      "jmh_mean_ns": 3033.0153446934814,
+      "jmh_error_ns": 101.13323263271894
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          2277.454390113583,
+          2269.182285183887,
+          2303.4292525862984
+        ],
+        "median": 2277.454390113583,
+        "min": 2269.182285183887,
+        "max": 2303.4292525862984
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10258.113227899621,
+          10270.113878243108,
+          10258.116217742487
+        ],
+        "median": 10258.116217742487,
+        "min": 10258.113227899621,
+        "max": 10270.113878243108
+      },
+      "jmh_mean_ns": 2283.3553092945895,
+      "jmh_error_ns": 17.57990948811706
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateMap",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          1817.5030408755972,
+          1837.397687854499,
+          1890.9355451615588
+        ],
+        "median": 1837.397687854499,
+        "min": 1817.5030408755972,
+        "max": 1890.9355451615588
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          7984.091362332702,
+          7984.092453585549,
+          7984.094649642684
+        ],
+        "median": 7984.092453585549,
+        "min": 7984.091362332702,
+        "max": 7984.094649642684
+      },
+      "jmh_mean_ns": 1848.6120912972183,
+      "jmh_error_ns": 35.267430190011105
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          15.821438049613553,
+          15.030058660178216,
+          15.316159708976254
+        ],
+        "median": 15.316159708976254,
+        "min": 15.030058660178216,
+        "max": 15.821438049613553
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          112.00079654580573,
+          112.00075413697972,
+          112.00075490388319
+        ],
+        "median": 112.00075490388319,
+        "min": 112.00075413697972,
+        "max": 112.00079654580573
+      },
+      "jmh_mean_ns": 15.389218806256007,
+      "jmh_error_ns": 0.4225973587911892
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          16.696427682980353,
+          16.850411124323777,
+          16.85551643480107
+        ],
+        "median": 16.850411124323777,
+        "min": 16.696427682980353,
+        "max": 16.85551643480107
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          112.00083995881727,
+          112.00084624042144,
+          112.00084396242694
+        ],
+        "median": 112.00084396242694,
+        "min": 112.00083995881727,
+        "max": 112.00084624042144
+      },
+      "jmh_mean_ns": 16.800785080701733,
+      "jmh_error_ns": 0.10972017081188655
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          511.77733192859824,
+          545.8848702582522,
+          527.8446865204913
+        ],
+        "median": 527.8446865204913,
+        "min": 511.77733192859824,
+        "max": 545.8848702582522
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          1296.0261431535123,
+          1296.0274013728479,
+          1296.026042171368
+        ],
+        "median": 1296.0261431535123,
+        "min": 1296.026042171368,
+        "max": 1296.0274013728479
+      },
+      "jmh_mean_ns": 528.5022962357805,
+      "jmh_error_ns": 18.39019398381954
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          2492.5127065669903,
+          2537.342808916035,
+          2485.1338053222235
+        ],
+        "median": 2492.5127065669903,
+        "min": 2485.1338053222235,
+        "max": 2537.342808916035
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          5364.1257300766565,
+          5364.127520758639,
+          5364.125171807083
+        ],
+        "median": 5364.1257300766565,
+        "min": 5364.125171807083,
+        "max": 5364.127520758639
+      },
+      "jmh_mean_ns": 2504.996440268417,
+      "jmh_error_ns": 26.05131697635718
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          725.6646589281497,
+          718.08890868696,
+          708.3318261898872
+        ],
+        "median": 718.08890868696,
+        "min": 708.3318261898872,
+        "max": 725.6646589281497
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          2722.036336930104,
+          2734.0364962433796,
+          2722.035332475648
+        ],
+        "median": 2722.036336930104,
+        "min": 2722.035332475648,
+        "max": 2734.0364962433796
+      },
+      "jmh_mean_ns": 717.361797934999,
+      "jmh_error_ns": 8.418734858787628
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          161.83298001249813,
+          156.16658390498023,
+          166.21827734388864
+        ],
+        "median": 161.83298001249813,
+        "min": 156.16658390498023,
+        "max": 166.21827734388864
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          376.0081237327989,
+          376.00760420194547,
+          376.00830281350346
+        ],
+        "median": 376.0081237327989,
+        "min": 376.00760420194547,
+        "max": 376.00830281350346
+      },
+      "jmh_mean_ns": 161.4059470871223,
+      "jmh_error_ns": 5.092631531304512
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          4.965657134288911,
+          4.9305371576160795,
+          4.966817057161727
+        ],
+        "median": 4.965657134288911,
+        "min": 4.9305371576160795,
+        "max": 4.966817057161727
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          24.00024935991013,
+          24.00024813416928,
+          24.000248960735195
+        ],
+        "median": 24.000248960735195,
+        "min": 24.00024813416928,
+        "max": 24.00024935991013
+      },
+      "jmh_mean_ns": 4.954337116355572,
+      "jmh_error_ns": 0.022778152234199964
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          8.185356664870461,
+          8.110072836115904,
+          7.9925792724216915
+        ],
+        "median": 8.110072836115904,
+        "min": 7.9925792724216915,
+        "max": 8.185356664870461
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          24.00041056308389,
+          24.000407022907172,
+          24.000401198463763
+        ],
+        "median": 24.000407022907172,
+        "min": 24.000401198463763,
+        "max": 24.00041056308389
+      },
+      "jmh_mean_ns": 8.096002924469353,
+      "jmh_error_ns": 0.08815162426034606
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          475.2032595018868,
+          483.9350520137512,
+          473.4477773762406
+        ],
+        "median": 475.2032595018868,
+        "min": 473.4477773762406,
+        "max": 483.9350520137512
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          1272.0237901988644,
+          1272.0241749467452,
+          1272.023764793703
+        ],
+        "median": 1272.0237901988644,
+        "min": 1272.023764793703,
+        "max": 1272.0241749467452
+      },
+      "jmh_mean_ns": 477.52869629729287,
+      "jmh_error_ns": 5.82196798501524
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          1195.6811846124472,
+          1189.0320279627117,
+          1197.3451645285093
+        ],
+        "median": 1195.6811846124472,
+        "min": 1189.0320279627117,
+        "max": 1197.3451645285093
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          5380.059888009417,
+          5380.059758928472,
+          5380.060098778106
+        ],
+        "median": 5380.059888009417,
+        "min": 5380.059758928472,
+        "max": 5380.060098778106
+      },
+      "jmh_mean_ns": 1194.019459034556,
+      "jmh_error_ns": 6.123084197140423
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          515.3765755919999,
+          507.7011961290926,
+          501.3768513652065
+        ],
+        "median": 507.7011961290926,
+        "min": 501.3768513652065,
+        "max": 515.3765755919999
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          2610.0258263878886,
+          2610.0255842482543,
+          2610.025186634261
+        ],
+        "median": 2610.0255842482543,
+        "min": 2610.025186634261,
+        "max": 2610.0258263878886
+      },
+      "jmh_mean_ns": 508.1515410287663,
+      "jmh_error_ns": 6.727974404255394
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "evaluateSnapshot",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          111.87164057459462,
+          119.49307862212567,
+          126.37435579562121
+        ],
+        "median": 119.49307862212567,
+        "min": 111.87164057459462,
+        "max": 126.37435579562121
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          336.00561946784325,
+          336.00598381475584,
+          336.00604275869176
+        ],
+        "median": 336.00598381475584,
+        "min": 336.00561946784325,
+        "max": 336.00604275869176
+      },
+      "jmh_mean_ns": 119.2463583307805,
+      "jmh_error_ns": 6.936648095632144
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          29.668431280089035,
+          29.578592849699596,
+          29.303800718894188
+        ],
+        "median": 29.578592849699596,
+        "min": 29.303800718894188,
+        "max": 29.668431280089035
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          288.00149665974783,
+          288.0014840476475,
+          288.0014718693186
+        ],
+        "median": 288.0014840476475,
+        "min": 288.0014718693186,
+        "max": 288.00149665974783
+      },
+      "jmh_mean_ns": 29.516941616227605,
+      "jmh_error_ns": 0.22410027536444746
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          2330.57929222461,
+          2410.156541674439,
+          2389.7709884617234
+        ],
+        "median": 2389.7709884617234,
+        "min": 2330.57929222461,
+        "max": 2410.156541674439
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          9816.117194633724,
+          9816.120924707782,
+          9816.11787756133
+        ],
+        "median": 9816.11787756133,
+        "min": 9816.117194633724,
+        "max": 9816.120924707782
+      },
+      "jmh_mean_ns": 2376.835607453591,
+      "jmh_error_ns": 46.08769175766795
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          2935.6230277614463,
+          2934.777754573255,
+          2946.3660711516027
+        ],
+        "median": 2935.6230277614463,
+        "min": 2934.777754573255,
+        "max": 2946.3660711516027
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10976.147660339093,
+          10976.148172159987,
+          10976.148779305935
+        ],
+        "median": 10976.148172159987,
+        "min": 10976.147660339093,
+        "max": 10976.148779305935
+      },
+      "jmh_mean_ns": 2938.9222844954343,
+      "jmh_error_ns": 8.218870985659438
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          5028.928361523762,
+          5075.089815960728,
+          5203.299292789091
+        ],
+        "median": 5075.089815960728,
+        "min": 5028.928361523762,
+        "max": 5203.299292789091
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          15044.253054866174,
+          15068.255627027555,
+          15068.26228757273
+        ],
+        "median": 15068.255627027555,
+        "min": 15044.253054866174,
+        "max": 15068.26228757273
+      },
+      "jmh_mean_ns": 5102.43915675786,
+      "jmh_error_ns": 82.13347684437844
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          3106.906674569594,
+          3083.5268785563953,
+          3127.0650849726712
+        ],
+        "median": 3106.906674569594,
+        "min": 3083.5268785563953,
+        "max": 3127.0650849726712
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          12402.156258624356,
+          12402.154857038957,
+          12426.155722146823
+        ],
+        "median": 12402.156258624356,
+        "min": 12402.154857038957,
+        "max": 12426.155722146823
+      },
+      "jmh_mean_ns": 3105.8328793662204,
+      "jmh_error_ns": 21.183776271678095
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          2767.7733775120805,
+          2572.521071691104,
+          2512.1612183002103
+        ],
+        "median": 2572.521071691104,
+        "min": 2512.1612183002103,
+        "max": 2767.7733775120805
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10056.139302355346,
+          10080.129152109303,
+          10056.127023218192
+        ],
+        "median": 10056.139302355346,
+        "min": 10056.127023218192,
+        "max": 10080.129152109303
+      },
+      "jmh_mean_ns": 2617.485222501132,
+      "jmh_error_ns": 121.04066370002487
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "ns_per_op": {
+        "fork_means": [
+          19.076403658718142,
+          18.934538185682293,
+          19.549448694683228
+        ],
+        "median": 19.076403658718142,
+        "min": 18.934538185682293,
+        "max": 19.549448694683228
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          200.0009570929784,
+          200.0009470436642,
+          200.00097986592115
+        ],
+        "median": 200.0009570929784,
+        "min": 200.0009470436642,
+        "max": 200.00097986592115
+      },
+      "jmh_mean_ns": 19.186796846361222,
+      "jmh_error_ns": 0.2961490892370002
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "ns_per_op": {
+        "fork_means": [
+          2316.4875934080183,
+          2308.0960833127674,
+          2307.548547634481
+        ],
+        "median": 2308.0960833127674,
+        "min": 2307.548547634481,
+        "max": 2316.4875934080183
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          9728.114881843367,
+          9728.115187119045,
+          9728.115950461231
+        ],
+        "median": 9728.115187119045,
+        "min": 9728.114881843367,
+        "max": 9728.115950461231
+      },
+      "jmh_mean_ns": 2310.710741451755,
+      "jmh_error_ns": 41.737708520410266
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "ns_per_op": {
+        "fork_means": [
+          3139.2136961810347,
+          3153.252440512831,
+          3104.4838154049535
+        ],
+        "median": 3139.2136961810347,
+        "min": 3104.4838154049535,
+        "max": 3153.252440512831
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10976.158057762586,
+          10976.154860766892,
+          10976.156283370563
+        ],
+        "median": 10976.156283370563,
+        "min": 10976.154860766892,
+        "max": 10976.158057762586
+      },
+      "jmh_mean_ns": 3132.3166506996067,
+      "jmh_error_ns": 43.8234807735987
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "ns_per_op": {
+        "fork_means": [
+          3554.2609761170056,
+          3570.5717926082466,
+          3631.536699901952
+        ],
+        "median": 3570.5717926082466,
+        "min": 3554.2609761170056,
+        "max": 3631.536699901952
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          15084.177985398135,
+          15084.179302715813,
+          15084.181947016328
+        ],
+        "median": 15084.179302715813,
+        "min": 15084.177985398135,
+        "max": 15084.181947016328
+      },
+      "jmh_mean_ns": 3585.4564895424005,
+      "jmh_error_ns": 38.11632129310651
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "ns_per_op": {
+        "fork_means": [
+          3084.178332513806,
+          2929.7841674866345,
+          2929.956584999343
+        ],
+        "median": 2929.956584999343,
+        "min": 2929.7841674866345,
+        "max": 3084.178332513806
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          12314.15460291393,
+          12314.1457127257,
+          12314.147899160067
+        ],
+        "median": 12314.147899160067,
+        "min": 12314.1457127257,
+        "max": 12314.15460291393
+      },
+      "jmh_mean_ns": 2981.306361666595,
+      "jmh_error_ns": 81.380467179274
+    },
+    {
+      "benchmark": "ActivationEvaluation",
+      "method": "snapshotAndEvaluate",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "ns_per_op": {
+        "fork_means": [
+          2605.789370145169,
+          2559.7185591926846,
+          2563.5681960819397
+        ],
+        "median": 2563.5681960819397,
+        "min": 2559.7185591926846,
+        "max": 2605.789370145169
+      },
+      "bytes_per_op": {
+        "fork_means": [
+          10040.131258024896,
+          10040.1281161475,
+          10040.129096255438
+        ],
+        "median": 10040.129096255438,
+        "min": 10040.1281161475,
+        "max": 10040.131258024896
+      },
+      "jmh_mean_ns": 2576.3587084732644,
+      "jmh_error_ns": 24.479759708504336
+    }
+  ],
+  "measurement_drift_over_10_percent": []
+}

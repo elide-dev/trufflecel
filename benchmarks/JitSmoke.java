@@ -89,17 +89,22 @@ public final class JitSmoke {
       Map<String, ?> changed,
       Object changedExpected) {
     Program program = Cel.compile(source);
+    Activation prepared = Activation.snapshot(input);
+    Activation preparedChanged = Activation.snapshot(changed);
     if (!(program.callTarget() instanceof OptimizedCallTarget target))
       throw new AssertionError("Optimizing runtime required");
     for (int i = 0; i < 2000; i++) {
-      if (!expected.equals(program.evaluate(input))) throw new AssertionError(source);
+      if (!expected.equals(i % 2 == 0 ? program.evaluate(input) : program.evaluate(prepared)))
+        throw new AssertionError(source);
     }
     target.compile(true);
     target.waitForCompilation();
     if (!target.isValidLastTier())
       throw new AssertionError("Guest compilation required: " + source);
     if (!expected.equals(program.evaluate(input))
-        || !changedExpected.equals(program.evaluate(changed)))
+        || !changedExpected.equals(program.evaluate(changed))
+        || !expected.equals(program.evaluate(prepared))
+        || !changedExpected.equals(program.evaluate(preparedChanged)))
       throw new AssertionError("Compiled semantics changed: " + source);
     System.out.println("NATIVE COMPILED " + source);
   }

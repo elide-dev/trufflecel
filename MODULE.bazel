@@ -15,10 +15,10 @@ maven.install(
         "org.graalvm.truffle:truffle-runtime:25.5.5-elide.24",
         "org.graalvm.sdk:nativeimage:25.5.5-elide.24",
         "com.google.re2j:re2j:1.8",
-        "dev.elide:truffledata-core:0.6.0",
-        "dev.elide:truffledata-protobuf:0.6.0",
-        "dev.elide:truffledata-protobuf-runtime:0.6.0",
-        "dev.elide:truffledata-jdbc:0.6.0",
+        "dev.elide:truffledata-core:0.7.0",
+        "dev.elide:truffledata-protobuf:0.7.0",
+        "dev.elide:truffledata-protobuf-runtime:0.7.0",
+        "dev.elide:truffledata-jdbc:0.7.0",
         "org.graalvm.shadowed:json:25.5.5-elide.24",
         "com.google.protobuf:protobuf-java:4.36.1",
         "com.h2database:h2:2.3.232",
@@ -42,7 +42,7 @@ use_repo(maven, "maven")
 maven.install(
     name = "cel_java",
     lock_file = "//:cel_java_install.json",
-    artifacts = ["dev.cel:cel:0.15.0"],
+    artifacts = ["dev.cel:cel:0.15.0", "org.openjdk.jmh:jmh-core:1.37", "org.openjdk.jmh:jmh-generator-annprocess:1.37"],
     repositories = ["https://repo.maven.apache.org/maven2"],
     fail_if_repin_required = True,
 )
