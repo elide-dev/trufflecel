@@ -10,6 +10,42 @@
   longer eagerly traversed or rejected. Use `Activation.snapshot` for eager validation
   and isolation. See [the input contract](docs/INTEGRATION.md#borrowed-input-bindings).
 
+## [0.7.0](https://github.com/elide-dev/trufflecel/compare/v0.4.1...v0.7.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* prepare protobuf evaluation and borrow stable inputs ([#16](https://github.com/elide-dev/trufflecel/issues/16))
+* Map inputs must remain stable until evaluation returns. Normalize bindings on read and keep conversion slots evaluation-local. Use Activation.snapshot for eager validation and isolation; unused map bindings are no longer traversed.
+
+### Features
+
+* add reusable activation snapshots with independent evaluation state ([9e28a45](https://github.com/elide-dev/trufflecel/commit/9e28a45b3f7f788f796d12f61bbe5e54d8f3ac8a))
+* prepare protobuf evaluation and borrow stable inputs ([#16](https://github.com/elide-dev/trufflecel/issues/16)) ([995c9cb](https://github.com/elide-dev/trufflecel/commit/995c9cb10b15b222795c2babf1320e50802d69e9))
+
+
+### Bug Fixes
+
+* recognize all numeric wrappers in standard Any payloads ([4fe7b23](https://github.com/elide-dev/trufflecel/commit/4fe7b23c89c39807b2351ba8c586883b9e9b7829))
+* validate production protobuf against the complete CEL corpus ([0746920](https://github.com/elide-dev/trufflecel/commit/07469207f895d7e41971cd41a2aaabbb12e80e54))
+
+
+### Performance Improvements
+
+* add representative CEL comparisons and cold evaluation curves ([b707757](https://github.com/elide-dev/trufflecel/commit/b707757a2901bd45bdf122592ca369bd8efcc7f6))
+* borrow stable input bindings during evaluation ([4b24ef8](https://github.com/elide-dev/trufflecel/commit/4b24ef8883c71e7754c1ddce736f0acea614a8ac))
+* bound native comparison heaps and retain warmup follow-ups ([d4f96c3](https://github.com/elide-dev/trufflecel/commit/d4f96c3685cddf6deeb5229a1bb7d1f906a811de))
+* expand opt-in activation benchmarks to all representative workloads ([e457bf0](https://github.com/elide-dev/trufflecel/commit/e457bf087a5f2e463368368401f1d668bcea2e4e))
+* prepare nested protobuf and well-known field access ([c669099](https://github.com/elide-dev/trufflecel/commit/c6690994d7583eff6b98cd8bed7d79fd47143d06))
+* prepare protobuf scalar reads and own collection storage ([5dd051f](https://github.com/elide-dev/trufflecel/commit/5dd051f9bbe071ff88a6b92b3b1b5a1286e7198b))
+* retain process ranges and validate complete measurement matrices ([aa3b5eb](https://github.com/elide-dev/trufflecel/commit/aa3b5ebe0ae4cb85e85b85d454e8f1ef25589526))
+* reuse exported protobuf messages during CEL equality ([943b7c5](https://github.com/elide-dev/trufflecel/commit/943b7c573b8898871100177c37862007bf634758))
+
+
+### Build System
+
+* upgrade TruffleData to 0.7.0 ([c4f5665](https://github.com/elide-dev/trufflecel/commit/c4f5665892f1c941f88b16cce4c73e7fdc0b91e5))
+
 ## [0.4.1](https://github.com/elide-dev/trufflecel/compare/v0.4.0...v0.4.1) (2026-11-05)
 
 
