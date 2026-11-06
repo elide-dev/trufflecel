@@ -21,12 +21,17 @@ java_library(
     name = "test_support",
     testonly = True,
     srcs = [
+        "ProductionCorpus.java",
         "ProtoSchema.java",
         "TestObjects.java",
     ],
     deps = [
         "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "//third_party/cel-spec/proto:fixtures_java",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
     ],
 )
 
@@ -184,6 +189,48 @@ java_test(
     name = "encoder",
     srcs = ["EncoderTest.java"],
     test_class = "dev.trufflecel.EncoderTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "activation",
+    srcs = ["ActivationTest.java"],
+    test_class = "dev.trufflecel.ActivationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "preparedField",
+    srcs = ["PreparedFieldTest.java"],
+    test_class = "dev.trufflecel.PreparedFieldTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:dev_elide_truffledata_protobuf",
+        "@maven//:dev_elide_truffledata_protobuf_runtime",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "borrowedBindings",
+    srcs = ["BorrowedBindingsTest.java"],
+    test_class = "dev.trufflecel.BorrowedBindingsTest",
     deps = [
         ":test_support",
         "//:trufflecel",

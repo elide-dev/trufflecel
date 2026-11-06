@@ -104,6 +104,7 @@ public final class Environment {
     }
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
+    FieldPlan.prepare(node, this);
     return new PreparedProgram(
         source,
         declarations == variables ? variableNames : declarations.keySet(),

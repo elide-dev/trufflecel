@@ -325,7 +325,7 @@ public class RuntimeTest {
   }
 
   @Test
-  public void singletonActivationsSnapshotInputsOnEveryEvaluation() {
+  public void explicitSingletonSnapshotsIsolateMutationDuringEvaluation() {
     var values = new ArrayList<>(List.of(1L));
     var input = new HashMap<String, Object>();
     input.put("xs", values);
@@ -343,14 +343,14 @@ public class RuntimeTest {
                 })
             .build();
     var program = env.compile("mutate() && xs[0] == 1");
-    assertTrue(program.test(input));
-    assertFalse(program.test(input));
+    assertTrue(program.test(Activation.snapshot(input)));
+    assertFalse(program.test(Activation.snapshot(input)));
     assertEquals(Set.of("one"), Cel.compile("one").variables());
     assertEquals(Set.of("two"), Cel.compile("two").variables());
   }
 
   @Test
-  public void scalarBindingHintsValidateUnmatchedInputs() {
+  public void borrowedBindingsDoNotTraverseUnmatchedInputs() {
     var environment =
         Cel.newBuilder()
             .variable("a", CelType.DYN)
@@ -365,13 +365,13 @@ public class RuntimeTest {
       assertEquals(3L, program.evaluate(Map.of("a", 1L, "b", 2L)));
       assertEquals(3L, program.evaluate(Map.of("a", 1, "b", 2)));
       assertEquals(3L, program.evaluate(Map.of("a", 1L, "b", 2L, "extra", true)));
-      for (String key : List.of("c", "extra"))
+      for (String key : List.of("c", "extra")) {
+        var inputs = Map.of("a", 1L, "b", 2L, key, recursive);
+        assertEquals(3L, program.evaluate(inputs));
         assertEquals(
             CelException.Code.RESOURCE_EXHAUSTED,
-            assertThrows(
-                    CelException.class,
-                    () -> program.evaluate(Map.of("a", 1L, "b", 2L, key, recursive)))
-                .code());
+            assertThrows(CelException.class, () -> Activation.snapshot(inputs)).code());
+      }
       assertEquals(
           CelException.Code.UNDECLARED,
           assertThrows(CelException.class, () -> program.evaluate(Map.of("a", 1L, "extra", 2L)))
@@ -398,8 +398,8 @@ public class RuntimeTest {
                 })
             .build();
     var program = environment.compile("mutate() && a == 1 && b == 2");
-    assertTrue(program.test(input));
-    assertFalse(program.test(input));
+    assertTrue(program.test(Activation.snapshot(input)));
+    assertFalse(program.test(Activation.snapshot(input)));
     assertTrue(
         environment
             .compile("a == 1.5 && b == 'x' && enabled")
@@ -429,9 +429,9 @@ public class RuntimeTest {
     var prepared = env.prepare("mutate() && xs[0] == expected");
     var first = prepared.instantiate();
     var second = prepared.instantiate();
-    assertTrue(first.test(Map.of("xs", values, "expected", 1L)));
-    assertTrue(second.test(Map.of("xs", values, "expected", 2L)));
-    assertFalse(first.test(Map.of("xs", values, "expected", 1L)));
+    assertTrue(first.test(Activation.snapshot(Map.of("xs", values, "expected", 1L))));
+    assertTrue(second.test(Activation.snapshot(Map.of("xs", values, "expected", 2L))));
+    assertFalse(first.test(Activation.snapshot(Map.of("xs", values, "expected", 1L))));
     var input = new LinkedHashMap<String, Object>();
     input.put("a", null);
     input.put("b", 1L);

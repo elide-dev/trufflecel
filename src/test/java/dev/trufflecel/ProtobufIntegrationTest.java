@@ -10,6 +10,73 @@ import java.util.*;
 import org.junit.Test;
 
 public class ProtobufIntegrationTest {
+  @Test
+  public void productionCorpusEdgesKeepBoundsAndCelEquality() throws Exception {
+    var d = descriptor();
+    var limits = new Limits(32, 64, 2048, 1024);
+    var type = new ProtobufType(d, List.of(), limits);
+    assertEquals(limits, type.plan().limits());
+    assertThrows(
+        ContractViolation.class, () -> new ProtobufType(d, List.of(), new Limits(1, 1, 1, 0)));
+    Object floating = type.construct(Map.of("float", Double.NaN));
+    assertFalse(type.equal(floating, floating));
+    Object finite = type.construct(Map.of("float", 1.5));
+    assertTrue(type.equal(finite, finite));
+    assertTrue(type.equal(finite, new ProtobufType(d).construct(Map.of("float", 1.5))));
+    assertFalse(type.equal(finite, 1.5));
+    assertFalse(type.equal(finite, new ProtobufType(descriptor()).construct(Map.of("float", 1.5))));
+
+    var json = new ProtobufType(ListValue.getDescriptor());
+    Object nanList = json.construct(Map.of("values", List.of(Double.NaN)));
+    assertFalse(json.equal(nanList, nanList));
+    Object finiteList = json.construct(Map.of("values", List.of(1.0, "ok")));
+    assertTrue(json.equal(finiteList, finiteList));
+
+    var envelope =
+        DescriptorProto.newBuilder()
+            .setName("Envelope")
+            .addField(
+                FieldDescriptorProto.newBuilder()
+                    .setName("payload")
+                    .setNumber(1)
+                    .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                    .setTypeName(".google.protobuf.Any"));
+    var file =
+        FileDescriptor.buildFrom(
+            FileDescriptorProto.newBuilder()
+                .setName("envelope.proto")
+                .setSyntax("proto3")
+                .addDependency("google/protobuf/any.proto")
+                .addMessageType(envelope)
+                .build(),
+            new FileDescriptor[] {Any.getDescriptor().getFile()});
+    var adapter = new ProtobufType(file.findMessageTypeByName("Envelope"));
+    for (Object value :
+        List.of(
+            java.time.Instant.ofEpochSecond(7),
+            java.time.Duration.ofMillis(-1500),
+            true,
+            7L,
+            new UInt(7),
+            2.5,
+            "text",
+            new Bytes(new byte[] {1, 2}),
+            List.of(1.0),
+            Map.of("x", 1.0),
+            CelNull.INSTANCE)) {
+      Object message = adapter.construct(Map.of("payload", value));
+      assertEquals(value, adapter.get(message, "payload"));
+    }
+    // JSON Value preserves integers outside binary64's exact range as strings.
+    var list =
+        (ProtobufType.Value)
+            json.construct(
+                Map.of("values", List.of(-9007199254740992L, 9007199254740992L, new UInt(-1L))));
+    assertEquals(
+        List.of("-9007199254740992", "9007199254740992", "18446744073709551615"),
+        json.input(list.message()));
+  }
+
   static Descriptor descriptor() throws Exception {
     var message = DescriptorProto.newBuilder().setName("Record");
     var enumeration =
@@ -180,7 +247,17 @@ public class ProtobufIntegrationTest {
             .input(com.google.protobuf.Value.getDefaultInstance()));
     var any = Any.pack(Int64Value.of(7));
     assertEquals(7L, new ProtobufType(Any.getDescriptor(), Int64Value.getDescriptor()).input(any));
-    assertThrows(CelException.class, () -> new ProtobufType(Any.getDescriptor()).input(any));
+    assertEquals(7L, new ProtobufType(Any.getDescriptor()).input(any));
+    var standardAny = new ProtobufType(Any.getDescriptor());
+    assertEquals(-7L, standardAny.input(Any.pack(Int32Value.of(-7))));
+    assertEquals(new UInt(4294967295L), standardAny.input(Any.pack(UInt32Value.of(-1))));
+    assertEquals(1.5, standardAny.input(Any.pack(FloatValue.of(1.5f))));
+    assertThrows(
+        CelException.class,
+        () ->
+            new ProtobufType(Any.getDescriptor())
+                .input(
+                    Any.newBuilder().setTypeUrl("type.googleapis.com/unregistered.Type").build()));
     var type = new ProtobufType(descriptor());
     assertTrue(
         type.input(((ProtobufType.Value) type.construct(Map.of())).message())

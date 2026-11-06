@@ -30,10 +30,11 @@ final class ComprehensionNode extends ExprNode {
     Object range = children[0].execute(frame, ctx);
     if (range instanceof Unknown) return range;
     Object accumulator = children[1].execute(frame, ctx);
-    Object[] items = HostCollections.range(range);
+    Values.OwnedList items = HostCollections.range(range);
     String[] names = (String[]) value;
     long index = 0;
-    for (Object item : items) {
+    for (int position = 0; position < items.size(); position++) {
+      Object item = items.get(position);
       ctx.tick();
       bindings[0].execute(frame, ctx, accumulator);
       bindings[1].execute(

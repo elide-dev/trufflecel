@@ -1,0 +1,5246 @@
+[
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      129171.476,
+      111204.52,
+      110373.717,
+      111646.982,
+      110658.397
+    ],
+    "measurement": [
+      110034.29,
+      110664.607,
+      110042.451,
+      112763.92,
+      112326.725
+    ],
+    "measurement_drift": 0.019899274802447353
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      132536.261,
+      111536.989,
+      108951.757,
+      108833.359,
+      106665.069
+    ],
+    "measurement": [
+      105506.959,
+      107271.723,
+      107429.418,
+      107528.874,
+      106365.451
+    ],
+    "measurement_drift": 0.0052432085278166785
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      121206.008,
+      102983.12,
+      102006.092,
+      102727.72,
+      102318.018
+    ],
+    "measurement": [
+      102929.743,
+      102278.529,
+      104818.33,
+      102827.47,
+      102101.713
+    ],
+    "measurement_drift": -0.001360028020702675
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      135874.474,
+      114666.195,
+      112609.138,
+      112600.991,
+      110745.324
+    ],
+    "measurement": [
+      111967.67,
+      111767.728,
+      111422.915,
+      111949.447,
+      112044.897
+    ],
+    "measurement_drift": 0.0011573760894107998
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      133028.759,
+      108930.725,
+      107281.216,
+      107221.129,
+      108112.961
+    ],
+    "measurement": [
+      106138.155,
+      106150.655,
+      106757.517,
+      108003.327,
+      107486.921
+    ],
+    "measurement_drift": 0.015080578199105465
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      128508.613,
+      107860.824,
+      105069.604,
+      104785.135,
+      104875.415
+    ],
+    "measurement": [
+      105822.306,
+      105793.789,
+      105391.917,
+      105120.34,
+      105070.599
+    ],
+    "measurement_drift": -0.006734629518610036
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      121140.625,
+      102569.28,
+      102325.397,
+      102724.173,
+      102944.887
+    ],
+    "measurement": [
+      102824.115,
+      102960.025,
+      103516.948,
+      103355.194,
+      103155.042
+    ],
+    "measurement_drift": 0.003528435184557921
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      122299.078,
+      103246.054,
+      102220.658,
+      103649.65,
+      102222.808
+    ],
+    "measurement": [
+      103620.724,
+      104376.564,
+      103003.94,
+      103270.894,
+      102328.107
+    ],
+    "measurement_drift": -0.011530376299906386
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      125698.619,
+      109155.307,
+      103055.47,
+      103677.238,
+      102628.02
+    ],
+    "measurement": [
+      104788.768,
+      103172.028,
+      103981.466,
+      103482.248,
+      105076.217
+    ],
+    "measurement_drift": 0.002873950338216691
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      132429.003,
+      108818.699,
+      109281.67,
+      109215.581,
+      108756.037
+    ],
+    "measurement": [
+      107107.787,
+      107088.562,
+      108008.611,
+      107922.474,
+      110623.336
+    ],
+    "measurement_drift": 0.020305953020702594
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      131352.514,
+      106221.543,
+      104678.298,
+      105515.069,
+      105620.641
+    ],
+    "measurement": [
+      106071.665,
+      105283.019,
+      105516.697,
+      105154.519,
+      105778.076
+    ],
+    "measurement_drift": -0.001997064801270265
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.check",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      127826.008,
+      105512.602,
+      106125.08,
+      104788.233,
+      104857.683
+    ],
+    "measurement": [
+      107218.889,
+      104863.859,
+      106339.122,
+      107852.987,
+      105896.553
+    ],
+    "measurement_drift": 0.007859158822291379
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      1249.953,
+      1065.653,
+      1060.26,
+      1057.885,
+      1055.768
+    ],
+    "measurement": [
+      1048.597,
+      1058.238,
+      1061.667,
+      1059.691,
+      1055.433
+    ],
+    "measurement_drift": 0.003934337525245191
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      1262.931,
+      1041.895,
+      1030.096,
+      1036.087,
+      1034.949
+    ],
+    "measurement": [
+      1036.699,
+      1032.046,
+      1031.966,
+      1039.455,
+      1031.697
+    ],
+    "measurement_drift": 0.0011635073438245325
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      1257.839,
+      1059.996,
+      1050.264,
+      1060.623,
+      1054.183
+    ],
+    "measurement": [
+      1060.739,
+      1089.274,
+      1092.538,
+      1094.582,
+      1079.75
+    ],
+    "measurement_drift": 0.011311094398034127
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      4439.99,
+      3509.645,
+      3499.543,
+      3512.137,
+      3507.334
+    ],
+    "measurement": [
+      3488.401,
+      3496.42,
+      3488.101,
+      3495.732,
+      3496.215
+    ],
+    "measurement_drift": 0.0010202122574078931
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      4392.631,
+      3445.923,
+      3441.729,
+      3438.727,
+      3466.25
+    ],
+    "measurement": [
+      3457.807,
+      3456.414,
+      3442.315,
+      3454.946,
+      3438.956
+    ],
+    "measurement_drift": -0.002938725852124069
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      4294.752,
+      3443.302,
+      3435.02,
+      3430.436,
+      3438.211
+    ],
+    "measurement": [
+      3441.982,
+      3429.509,
+      3436.246,
+      3433.018,
+      3478.546
+    ],
+    "measurement_drift": 0.005831776538745448
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      1175.252,
+      1053.227,
+      1018.159,
+      1009.0,
+      1015.931
+    ],
+    "measurement": [
+      1014.925,
+      1017.479,
+      1016.191,
+      1009.697,
+      1007.85
+    ],
+    "measurement_drift": -0.007310062369489501
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      1258.351,
+      1085.962,
+      1084.008,
+      1081.861,
+      1077.237
+    ],
+    "measurement": [
+      1073.995,
+      1060.537,
+      1043.608,
+      1060.037,
+      1087.467
+    ],
+    "measurement_drift": 0.006077210367424701
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      1226.967,
+      1048.923,
+      1051.509,
+      1045.284,
+      1051.265
+    ],
+    "measurement": [
+      1055.438,
+      1048.661,
+      1043.601,
+      1041.384,
+      1053.213
+    ],
+    "measurement_drift": -0.004515947205906423
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      4392.373,
+      3473.504,
+      3459.833,
+      3451.845,
+      3464.579
+    ],
+    "measurement": [
+      3449.291,
+      3446.09,
+      3464.036,
+      3474.581,
+      3456.654
+    ],
+    "measurement_drift": 0.005199712677225632
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      4314.725,
+      3411.482,
+      3393.852,
+      3395.608,
+      3394.929
+    ],
+    "measurement": [
+      3389.868,
+      3408.706,
+      3385.92,
+      3388.599,
+      3398.255
+    ],
+    "measurement_drift": -0.0017238909218315612
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.optimize",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      4357.863,
+      3435.384,
+      3414.202,
+      3436.4,
+      3422.907
+    ],
+    "measurement": [
+      3432.355,
+      3434.495,
+      3444.755,
+      3470.581,
+      3467.243
+    ],
+    "measurement_drift": 0.010335743463159908
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      1316.99,
+      1109.577,
+      1111.841,
+      1102.513,
+      1092.482
+    ],
+    "measurement": [
+      1096.117,
+      1094.821,
+      1121.998,
+      1099.685,
+      1099.242
+    ],
+    "measurement_drift": 0.003646383421164634
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      1328.367,
+      1147.781,
+      1119.03,
+      1125.47,
+      1117.536
+    ],
+    "measurement": [
+      1095.639,
+      1068.011,
+      1066.636,
+      1068.92,
+      1068.61
+    ],
+    "measurement_drift": -0.012072192822314087
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      1363.222,
+      1071.522,
+      1055.901,
+      1055.142,
+      1053.793
+    ],
+    "measurement": [
+      1051.917,
+      1054.227,
+      1050.82,
+      1055.535,
+      1118.219
+    ],
+    "measurement_drift": 0.03210131880821043
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      3070.712,
+      2399.889,
+      2374.578,
+      2384.844,
+      2382.243
+    ],
+    "measurement": [
+      2400.049,
+      2407.702,
+      2517.581,
+      2371.689,
+      2362.788
+    ],
+    "measurement_drift": -0.015240805940241131
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      3155.599,
+      2414.047,
+      2371.33,
+      2383.442,
+      2394.201
+    ],
+    "measurement": [
+      2383.282,
+      2391.36,
+      2389.046,
+      2377.53,
+      2380.93
+    ],
+    "measurement_drift": -0.0033891546214354085
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      3125.456,
+      2577.717,
+      2551.098,
+      2556.181,
+      2556.958
+    ],
+    "measurement": [
+      2452.133,
+      2474.785,
+      2450.85,
+      2438.118,
+      2407.3
+    ],
+    "measurement_drift": -0.016541781292077506
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      86.747,
+      77.391,
+      76.276,
+      76.119,
+      76.332
+    ],
+    "measurement": [
+      76.224,
+      76.401,
+      76.091,
+      76.109,
+      75.953
+    ],
+    "measurement_drift": -0.0036887796887795643
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      86.165,
+      74.589,
+      74.382,
+      75.225,
+      74.629
+    ],
+    "measurement": [
+      74.794,
+      74.852,
+      74.783,
+      74.537,
+      74.826
+    ],
+    "measurement_drift": -0.0018911297328362275
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      85.161,
+      74.68,
+      75.226,
+      75.257,
+      75.225
+    ],
+    "measurement": [
+      75.218,
+      75.219,
+      76.293,
+      75.152,
+      74.977
+    ],
+    "measurement_drift": -0.00204736866595312
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      186.14,
+      163.305,
+      163.37,
+      163.417,
+      163.342
+    ],
+    "measurement": [
+      163.419,
+      163.607,
+      163.16,
+      163.424,
+      155.261
+    ],
+    "measurement_drift": -0.025505617290368376
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      179.123,
+      157.262,
+      156.351,
+      153.441,
+      156.66
+    ],
+    "measurement": [
+      157.759,
+      157.155,
+      156.865,
+      156.366,
+      156.653
+    ],
+    "measurement_drift": -0.006017515893227965
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.parse",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      183.544,
+      154.937,
+      155.252,
+      155.343,
+      154.396
+    ],
+    "measurement": [
+      160.529,
+      160.529,
+      159.725,
+      159.802,
+      159.985
+    ],
+    "measurement_drift": -0.003958786262918124
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      8.645,
+      7.961,
+      7.947,
+      7.967,
+      7.957
+    ],
+    "measurement": [
+      7.959,
+      8.281,
+      8.047,
+      7.959,
+      7.964
+    ],
+    "measurement_drift": -0.01951970443349771
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      8.28,
+      8.181,
+      7.527,
+      7.571,
+      7.532
+    ],
+    "measurement": [
+      7.522,
+      7.518,
+      7.527,
+      7.515,
+      7.502
+    ],
+    "measurement_drift": -0.0015292553191489366
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      8.792,
+      8.007,
+      8.003,
+      8.033,
+      8.031
+    ],
+    "measurement": [
+      8.022,
+      8.037,
+      8.024,
+      8.018,
+      8.029
+    ],
+    "measurement_drift": -0.0007472445357743496
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      90.639,
+      81.133,
+      80.817,
+      80.437,
+      80.712
+    ],
+    "measurement": [
+      82.021,
+      82.014,
+      82.031,
+      80.416,
+      80.23
+    ],
+    "measurement_drift": -0.020660224951991824
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      93.065,
+      81.438,
+      80.918,
+      80.91,
+      80.655
+    ],
+    "measurement": [
+      81.094,
+      80.768,
+      80.832,
+      80.945,
+      81.145
+    ],
+    "measurement_drift": 0.0014086073321717407
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      92.991,
+      82.198,
+      82.038,
+      81.879,
+      81.788
+    ],
+    "measurement": [
+      81.964,
+      81.906,
+      81.94,
+      82.004,
+      82.025
+    ],
+    "measurement_drift": 0.0009702813205589855
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 1,
+    "warmup": [
+      8.649,
+      8.026,
+      7.722,
+      7.742,
+      7.719
+    ],
+    "measurement": [
+      7.689,
+      7.681,
+      7.701,
+      7.696,
+      7.684
+    ],
+    "measurement_drift": 0.0006506180871825862
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 2,
+    "warmup": [
+      8.895,
+      8.305,
+      8.378,
+      8.422,
+      8.395
+    ],
+    "measurement": [
+      8.386,
+      8.132,
+      8.114,
+      8.004,
+      7.987
+    ],
+    "measurement_drift": -0.03190458893328496
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "true"
+    },
+    "fork": 3,
+    "warmup": [
+      8.661,
+      8.423,
+      7.811,
+      7.819,
+      7.688
+    ],
+    "measurement": [
+      7.475,
+      7.476,
+      7.517,
+      7.48,
+      7.508
+    ],
+    "measurement_drift": 0.002474750852785812
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 1,
+    "warmup": [
+      96.611,
+      84.438,
+      83.97,
+      83.959,
+      84.188
+    ],
+    "measurement": [
+      84.133,
+      84.225,
+      84.102,
+      84.051,
+      83.973
+    ],
+    "measurement_drift": -0.0019838677104740965
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 2,
+    "warmup": [
+      91.243,
+      80.827,
+      80.545,
+      80.387,
+      80.471
+    ],
+    "measurement": [
+      81.807,
+      81.994,
+      81.709,
+      80.766,
+      81.119
+    ],
+    "measurement_drift": -0.011697120286200957
+  },
+  {
+    "benchmark": "dev.trufflecel.FrontendStages.plan",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "source": "x * 2 + 1"
+    },
+    "fork": 3,
+    "warmup": [
+      93.518,
+      82.518,
+      81.897,
+      81.967,
+      82.011
+    ],
+    "measurement": [
+      82.3,
+      82.444,
+      82.357,
+      83.091,
+      81.93
+    ],
+    "measurement_drift": 0.0016813965910746909
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      1088.142,
+      956.075,
+      995.699,
+      1013.008,
+      949.355
+    ],
+    "measurement": [
+      1015.046,
+      965.016,
+      1006.093,
+      989.334,
+      1010.488
+    ],
+    "measurement_drift": 0.009979485490858586
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      1041.724,
+      954.581,
+      1009.924,
+      1039.621,
+      958.577
+    ],
+    "measurement": [
+      930.527,
+      979.232,
+      887.052,
+      940.886,
+      970.985
+    ],
+    "measurement_drift": 0.001105898702401742
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      1162.849,
+      1051.566,
+      940.09,
+      913.747,
+      916.164
+    ],
+    "measurement": [
+      905.802,
+      920.858,
+      890.801,
+      964.169,
+      938.035
+    ],
+    "measurement_drift": 0.04135635531516546
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      1122.375,
+      1044.564,
+      1062.947,
+      1004.125,
+      946.998
+    ],
+    "measurement": [
+      979.905,
+      931.67,
+      935.804,
+      954.031,
+      974.846
+    ],
+    "measurement_drift": 0.009051175078142348
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      1159.601,
+      955.795,
+      979.79,
+      974.286,
+      922.009
+    ],
+    "measurement": [
+      967.153,
+      904.8,
+      896.738,
+      994.799,
+      973.227
+    ],
+    "measurement_drift": 0.051322335550091136
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      1081.53,
+      1033.772,
+      922.499,
+      926.514,
+      912.048
+    ],
+    "measurement": [
+      1000.634,
+      905.184,
+      937.408,
+      1007.893,
+      1009.077
+    ],
+    "measurement_drift": 0.058322463110328515
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      5376.964,
+      4756.254,
+      4671.898,
+      4586.392,
+      4498.792
+    ],
+    "measurement": [
+      4381.453,
+      4364.163,
+      4454.704,
+      4460.853,
+      4664.013
+    ],
+    "measurement_drift": 0.04336458403844845
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      5467.874,
+      4418.218,
+      4542.722,
+      4414.92,
+      4468.042
+    ],
+    "measurement": [
+      4768.466,
+      4088.814,
+      3892.992,
+      3905.497,
+      3901.992
+    ],
+    "measurement_drift": -0.1185229551284368
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      5256.615,
+      4523.802,
+      3990.536,
+      3840.525,
+      3844.052
+    ],
+    "measurement": [
+      3843.078,
+      3835.303,
+      3845.293,
+      3850.879,
+      3845.043
+    ],
+    "measurement_drift": 0.0022844659570815384
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      2638.805,
+      2164.817,
+      2165.578,
+      2170.246,
+      2173.401
+    ],
+    "measurement": [
+      2168.232,
+      2154.5,
+      2164.028,
+      2170.819,
+      2178.333
+    ],
+    "measurement_drift": 0.006111875545372625
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      3345.292,
+      2742.092,
+      2645.879,
+      2466.372,
+      2557.211
+    ],
+    "measurement": [
+      2559.406,
+      2479.989,
+      2529.564,
+      2542.038,
+      2478.692
+    ],
+    "measurement_drift": -0.003703817620964611
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      3156.255,
+      2782.664,
+      2792.043,
+      2642.867,
+      2689.267
+    ],
+    "measurement": [
+      2710.997,
+      2823.407,
+      2741.786,
+      2772.844,
+      2770.911
+    ],
+    "measurement_drift": 0.0016896128291319368
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2655.448,
+      2232.899,
+      2206.839,
+      2210.546,
+      2566.626
+    ],
+    "measurement": [
+      2735.208,
+      2813.456,
+      2851.264,
+      2746.398,
+      2762.293
+    ],
+    "measurement_drift": -0.007204076512832613
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      3333.832,
+      2830.733,
+      2826.729,
+      2786.067,
+      2797.574
+    ],
+    "measurement": [
+      2787.79,
+      2848.345,
+      2839.74,
+      2836.548,
+      2815.497
+    ],
+    "measurement_drift": 0.002822856443289501
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      3082.475,
+      2789.701,
+      2807.522,
+      2778.211,
+      2783.249
+    ],
+    "measurement": [
+      2808.265,
+      2826.734,
+      2781.744,
+      2811.524,
+      2862.372
+    ],
+    "measurement_drift": 0.006902751890461634
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      5856.052,
+      4871.371,
+      4717.423,
+      4748.691,
+      4995.242
+    ],
+    "measurement": [
+      4881.028,
+      4885.62,
+      4804.082,
+      4739.649,
+      4855.594
+    ],
+    "measurement_drift": -0.01755003354272633
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      5339.093,
+      4686.797,
+      4588.906,
+      4507.206,
+      4525.307
+    ],
+    "measurement": [
+      4562.754,
+      4635.38,
+      4821.499,
+      4847.009,
+      4880.889
+    ],
+    "measurement_drift": 0.05759472519100073
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      5783.474,
+      4968.731,
+      4785.647,
+      4769.751,
+      4731.427
+    ],
+    "measurement": [
+      4897.398,
+      4841.448,
+      4894.215,
+      4765.299,
+      4870.486
+    ],
+    "measurement_drift": -0.010582465314679101
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      1131.548,
+      964.186,
+      961.37,
+      918.324,
+      954.959
+    ],
+    "measurement": [
+      1017.199,
+      965.056,
+      992.007,
+      985.423,
+      977.076
+    ],
+    "measurement_drift": -0.009966427124663668
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      1175.173,
+      1052.325,
+      1108.13,
+      1030.466,
+      1080.043
+    ],
+    "measurement": [
+      1066.098,
+      1045.926,
+      1044.661,
+      1076.894,
+      998.749
+    ],
+    "measurement_drift": -0.01722565652663033
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      1071.519,
+      905.531,
+      950.657,
+      880.338,
+      914.774
+    ],
+    "measurement": [
+      629.162,
+      621.192,
+      683.025,
+      787.154,
+      685.503
+    ],
+    "measurement_drift": 0.17779204929164072
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      1117.79,
+      920.541,
+      919.533,
+      990.249,
+      989.342
+    ],
+    "measurement": [
+      910.186,
+      923.996,
+      957.138,
+      946.801,
+      1000.13
+    ],
+    "measurement_drift": 0.061470999061161935
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      995.804,
+      933.139,
+      967.837,
+      952.317,
+      960.643
+    ],
+    "measurement": [
+      911.499,
+      934.258,
+      939.77,
+      954.142,
+      954.38
+    ],
+    "measurement_drift": 0.0340050179953264
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      1166.058,
+      1024.251,
+      1028.914,
+      1044.342,
+      1021.805
+    ],
+    "measurement": [
+      1002.254,
+      983.141,
+      1015.054,
+      1047.835,
+      1017.201
+    ],
+    "measurement_drift": 0.040113428310235566
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      5805.696,
+      4918.981,
+      5156.433,
+      5235.539,
+      5232.913
+    ],
+    "measurement": [
+      4274.811,
+      4236.113,
+      4238.685,
+      4237.61,
+      5116.519
+    ],
+    "measurement_drift": 0.09907326161060803
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      5221.811,
+      4539.323,
+      4689.719,
+      4645.323,
+      4774.37
+    ],
+    "measurement": [
+      4979.404,
+      4780.811,
+      4885.982,
+      4611.724,
+      4771.527
+    ],
+    "measurement_drift": -0.038622509852498155
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      4840.402,
+      4034.841,
+      3985.109,
+      4017.562,
+      3979.186
+    ],
+    "measurement": [
+      4017.224,
+      3992.255,
+      4002.896,
+      4038.386,
+      4018.64
+    ],
+    "measurement_drift": 0.005936341177746884
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      3080.216,
+      2594.862,
+      2694.755,
+      2715.533,
+      2619.08
+    ],
+    "measurement": [
+      2654.468,
+      2705.114,
+      2710.73,
+      2701.626,
+      2671.334
+    ],
+    "measurement_drift": 0.0024960901801669433
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      3149.212,
+      2548.738,
+      2610.323,
+      2590.925,
+      2592.15
+    ],
+    "measurement": [
+      2560.535,
+      2582.109,
+      2574.974,
+      2652.412,
+      2663.271
+    ],
+    "measurement_drift": 0.03364786673936582
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      2937.781,
+      2456.957,
+      2457.04,
+      2431.698,
+      2540.745
+    ],
+    "measurement": [
+      2517.267,
+      2554.003,
+      2468.777,
+      2593.785,
+      2564.596
+    ],
+    "measurement_drift": 0.017177353996138844
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2982.62,
+      2756.826,
+      2643.552,
+      2636.347,
+      2609.933
+    ],
+    "measurement": [
+      2759.762,
+      2709.673,
+      2679.963,
+      2677.459,
+      2584.042
+    ],
+    "measurement_drift": -0.03801745518504185
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      3223.32,
+      2761.983,
+      2723.476,
+      2782.829,
+      2884.322
+    ],
+    "measurement": [
+      2822.023,
+      2828.609,
+      2797.208,
+      2866.927,
+      2879.221
+    ],
+    "measurement_drift": 0.0169035959163506
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      3375.035,
+      3063.758,
+      2936.493,
+      2963.64,
+      2957.423
+    ],
+    "measurement": [
+      3042.161,
+      3187.826,
+      3020.958,
+      2966.032,
+      2881.637
+    ],
+    "measurement_drift": -0.06136738327062319
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      5523.531,
+      4574.869,
+      4501.668,
+      4516.738,
+      4396.951
+    ],
+    "measurement": [
+      4222.335,
+      4304.24,
+      4289.208,
+      4240.442,
+      4285.398
+    ],
+    "measurement_drift": -8.620108308443619e-05
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      5359.436,
+      4629.173,
+      4502.534,
+      4434.45,
+      4668.756
+    ],
+    "measurement": [
+      4870.407,
+      4943.202,
+      4646.328,
+      4842.211,
+      4937.228
+    ],
+    "measurement_drift": -0.0034818994724570285
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      5831.414,
+      5028.152,
+      4984.999,
+      4972.683,
+      4938.905
+    ],
+    "measurement": [
+      4975.444,
+      4969.09,
+      4967.452,
+      4954.595,
+      4986.78
+    ],
+    "measurement_drift": -0.0003176619437370576
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      157213.28,
+      113213.918,
+      109720.728,
+      109684.257,
+      110456.466
+    ],
+    "measurement": [
+      109550.678,
+      109333.568,
+      109405.917,
+      109943.695,
+      109877.362
+    ],
+    "measurement_drift": 0.004279937990603555
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      153301.015,
+      111760.493,
+      106823.018,
+      107259.767,
+      107316.273
+    ],
+    "measurement": [
+      107116.645,
+      107921.099,
+      107772.965,
+      107078.725,
+      108893.404
+    ],
+    "measurement_drift": 0.00434521392672349
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      155034.792,
+      115169.953,
+      108827.833,
+      108533.319,
+      108626.506
+    ],
+    "measurement": [
+      108446.528,
+      108767.826,
+      108357.584,
+      108704.146,
+      109007.62
+    ],
+    "measurement_drift": 0.002289959161722921
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      157664.875,
+      118910.097,
+      116196.254,
+      112328.98,
+      110002.059
+    ],
+    "measurement": [
+      110124.506,
+      110338.928,
+      110573.255,
+      110752.964,
+      111800.207
+    ],
+    "measurement_drift": 0.009478837202544943
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      155390.347,
+      113322.107,
+      110730.798,
+      110014.523,
+      109919.71
+    ],
+    "measurement": [
+      110273.849,
+      110296.747,
+      110082.951,
+      110038.295,
+      110517.186
+    ],
+    "measurement_drift": -6.852681306634967e-05
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      152653.131,
+      112278.716,
+      108671.598,
+      108906.6,
+      109102.357
+    ],
+    "measurement": [
+      109950.863,
+      110779.251,
+      110681.341,
+      112166.575,
+      108693.559
+    ],
+    "measurement_drift": 0.0005890451359074067
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      240541.477,
+      142338.619,
+      133721.668,
+      134218.406,
+      135262.804
+    ],
+    "measurement": [
+      133618.343,
+      134383.213,
+      133349.501,
+      133364.422,
+      134789.566
+    ],
+    "measurement_drift": 0.000568772817125085
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      219830.083,
+      140204.35,
+      132608.565,
+      132104.246,
+      131562.949
+    ],
+    "measurement": [
+      131483.778,
+      132420.861,
+      130950.257,
+      132284.082,
+      131311.317
+    ],
+    "measurement_drift": -0.0011717869044355345
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      213851.835,
+      138255.794,
+      132591.594,
+      132317.132,
+      132638.995
+    ],
+    "measurement": [
+      132764.859,
+      131292.218,
+      131690.135,
+      131868.201,
+      131655.627
+    ],
+    "measurement_drift": -0.002019445970009026
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      206868.766,
+      134899.434,
+      126584.323,
+      127426.939,
+      127528.74
+    ],
+    "measurement": [
+      127147.905,
+      129870.589,
+      127551.524,
+      129996.299,
+      127300.93
+    ],
+    "measurement_drift": 0.0010844939430700862
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      197783.073,
+      137332.464,
+      129802.247,
+      130633.397,
+      130719.466
+    ],
+    "measurement": [
+      130293.463,
+      131249.406,
+      124829.444,
+      123957.501,
+      124255.032
+    ],
+    "measurement_drift": -0.050968072847744184
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      209005.447,
+      139857.454,
+      134629.332,
+      134023.94,
+      134285.623
+    ],
+    "measurement": [
+      135743.037,
+      134020.769,
+      134461.992,
+      134958.651,
+      127308.239
+    ],
+    "measurement_drift": -0.02779066662486207
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      201062.756,
+      137161.093,
+      128407.637,
+      129292.683,
+      127833.576
+    ],
+    "measurement": [
+      127562.852,
+      126994.122,
+      127487.683,
+      126724.596,
+      127460.975
+    ],
+    "measurement_drift": -0.0014590171864629076
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      219107.233,
+      140029.793,
+      123437.799,
+      123140.453,
+      123184.469
+    ],
+    "measurement": [
+      123379.484,
+      124446.481,
+      124739.895,
+      125340.279,
+      124608.675
+    ],
+    "measurement_drift": 0.008566451057700819
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      200603.457,
+      130701.781,
+      121611.993,
+      120841.71,
+      120666.266
+    ],
+    "measurement": [
+      121677.374,
+      120412.39,
+      121057.851,
+      121073.021,
+      121108.099
+    ],
+    "measurement_drift": 0.00037736415819722424
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      206943.383,
+      141700.417,
+      131131.599,
+      131818.599,
+      132989.041
+    ],
+    "measurement": [
+      132326.837,
+      131494.174,
+      131422.208,
+      131646.248,
+      131914.587
+    ],
+    "measurement_drift": -0.0009861837729067124
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      212766.726,
+      143043.971,
+      134047.431,
+      133887.588,
+      135135.602
+    ],
+    "measurement": [
+      134426.355,
+      135451.597,
+      135637.448,
+      134187.067,
+      134624.496
+    ],
+    "measurement_drift": -0.00395137502747922
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      215876.154,
+      144929.462,
+      135160.869,
+      135035.21,
+      135328.356
+    ],
+    "measurement": [
+      135756.473,
+      135952.899,
+      135502.193,
+      135916.255,
+      135505.871
+    ],
+    "measurement_drift": -0.0010571810529963477
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      181461.718,
+      122488.909,
+      114955.776,
+      113999.028,
+      113821.719
+    ],
+    "measurement": [
+      114676.46,
+      115487.78,
+      112861.688,
+      114795.409,
+      115885.552
+    ],
+    "measurement_drift": 0.002245009911183482
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      172044.29,
+      121069.285,
+      117643.765,
+      115282.94,
+      114753.527
+    ],
+    "measurement": [
+      114516.52,
+      115684.154,
+      114955.381,
+      113976.098,
+      113739.612
+    ],
+    "measurement_drift": -0.010794772911915995
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      170213.844,
+      124518.34,
+      119368.64,
+      119694.927,
+      115030.34
+    ],
+    "measurement": [
+      115713.863,
+      119302.15,
+      112879.273,
+      115027.794,
+      112180.57
+    ],
+    "measurement_drift": -0.03322177455201736
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      195646.047,
+      125524.274,
+      115009.379,
+      115615.122,
+      115517.718
+    ],
+    "measurement": [
+      116175.206,
+      116226.658,
+      117945.194,
+      115181.368,
+      115478.889
+    ],
+    "measurement_drift": -0.007493945917748879
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      173663.142,
+      120354.808,
+      114992.101,
+      114988.606,
+      114809.509
+    ],
+    "measurement": [
+      114667.398,
+      114808.357,
+      114397.201,
+      114263.638,
+      115317.7
+    ],
+    "measurement_drift": 0.00046010525164197347
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      190022.877,
+      123399.838,
+      118194.53,
+      117260.085,
+      117150.149
+    ],
+    "measurement": [
+      117834.334,
+      117093.751,
+      117554.742,
+      118234.803,
+      117001.689
+    ],
+    "measurement_drift": 0.0013127719489134382
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      965918.446,
+      523802.462,
+      478722.177,
+      466650.42,
+      460609.298
+    ],
+    "measurement": [
+      458103.248,
+      455007.777,
+      458712.576,
+      454779.682,
+      455452.064
+    ],
+    "measurement_drift": -0.0031532627699900617
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      855448.421,
+      502686.309,
+      468011.171,
+      456621.309,
+      452272.092
+    ],
+    "measurement": [
+      448330.108,
+      446545.448,
+      451505.647,
+      449840.1,
+      448090.371
+    ],
+    "measurement_drift": 0.0034137875143835927
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      914773.798,
+      543572.863,
+      497603.098,
+      485913.562,
+      484306.726
+    ],
+    "measurement": [
+      481729.13,
+      478512.674,
+      477500.254,
+      467638.342,
+      452422.465
+    ],
+    "measurement_drift": -0.041844665408880655
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      757411.431,
+      440793.012,
+      406119.741,
+      383141.357,
+      380247.097
+    ],
+    "measurement": [
+      379690.178,
+      380143.8,
+      379514.127,
+      373352.117,
+      372771.756
+    ],
+    "measurement_drift": -0.018043553456357775
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      810769.038,
+      452014.527,
+      396854.037,
+      365043.913,
+      359728.765
+    ],
+    "measurement": [
+      357441.017,
+      357077.717,
+      359487.769,
+      350471.687,
+      354961.283
+    ],
+    "measurement_drift": -0.012715921315507361
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      850322.075,
+      449372.661,
+      400169.761,
+      367516.426,
+      363294.298
+    ],
+    "measurement": [
+      361991.415,
+      355590.728,
+      353351.932,
+      348713.415,
+      352504.068
+    ],
+    "measurement_drift": -0.022805277639134203
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      822863.994,
+      448448.396,
+      395677.871,
+      363780.527,
+      357427.113
+    ],
+    "measurement": [
+      355354.74,
+      354792.517,
+      356398.195,
+      346400.35,
+      344678.205
+    ],
+    "measurement_drift": -0.026851757592580627
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      779207.413,
+      441943.481,
+      384802.69,
+      358583.48,
+      354880.019
+    ],
+    "measurement": [
+      352923.277,
+      352882.074,
+      356121.504,
+      343556.486,
+      344666.81
+    ],
+    "measurement_drift": -0.024910628652913158
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      814251.155,
+      443806.395,
+      380043.539,
+      354783.654,
+      350958.211
+    ],
+    "measurement": [
+      350850.567,
+      351915.657,
+      358003.898,
+      343150.78,
+      336467.235
+    ],
+    "measurement_drift": -0.032938704521462525
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      1909634.111,
+      1189977.497,
+      1088263.727,
+      1053011.172,
+      1036573.481
+    ],
+    "measurement": [
+      1029022.512,
+      1017966.946,
+      1010310.022,
+      1005567.381,
+      1008994.065
+    ],
+    "measurement_drift": -0.01584180703680016
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      1967531.053,
+      1199813.572,
+      1095699.792,
+      1054991.164,
+      1043254.187
+    ],
+    "measurement": [
+      1036165.618,
+      1026016.917,
+      1009595.257,
+      1005434.024,
+      1009952.834
+    ],
+    "measurement_drift": -0.02269230594565197
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      1926900.838,
+      1181215.584,
+      1077478.926,
+      1043085.348,
+      1022391.555
+    ],
+    "measurement": [
+      1026315.244,
+      1012157.778,
+      995005.732,
+      996750.723,
+      996727.18
+    ],
+    "measurement_drift": -0.022072952898760434
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      156998.741,
+      118466.941,
+      114615.513,
+      114794.673,
+      114716.551
+    ],
+    "measurement": [
+      115113.905,
+      116202.628,
+      115310.775,
+      114926.402,
+      115553.597
+    ],
+    "measurement_drift": -0.003616403847795824
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      156374.942,
+      115335.57,
+      111825.717,
+      112245.284,
+      112866.923
+    ],
+    "measurement": [
+      114710.395,
+      111391.07,
+      112376.244,
+      114146.784,
+      115200.526
+    ],
+    "measurement_drift": 0.014355700879691291
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      164316.587,
+      116232.257,
+      111836.735,
+      112031.87,
+      112367.639
+    ],
+    "measurement": [
+      112846.222,
+      112567.831,
+      111961.743,
+      112522.058,
+      111515.007
+    ],
+    "measurement_drift": -0.006108705210140619
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      162003.696,
+      122770.487,
+      118678.69,
+      118228.203,
+      118453.101
+    ],
+    "measurement": [
+      119081.11,
+      119186.135,
+      121200.365,
+      118978.218,
+      119777.308
+    ],
+    "measurement_drift": 0.002049299726448073
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      160828.511,
+      115341.875,
+      110368.539,
+      110658.73,
+      115114.356
+    ],
+    "measurement": [
+      111451.228,
+      112613.823,
+      110939.453,
+      111945.831,
+      110998.905
+    ],
+    "measurement_drift": -0.004999954232041359
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      156103.744,
+      113096.042,
+      110500.779,
+      109737.784,
+      109288.149
+    ],
+    "measurement": [
+      110074.595,
+      110805.838,
+      109967.128,
+      109931.041,
+      109098.339
+    ],
+    "measurement_drift": -0.008380339421011573
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      748573.963,
+      473712.036,
+      450418.463,
+      445529.2,
+      438661.441
+    ],
+    "measurement": [
+      438360.692,
+      437406.183,
+      439174.463,
+      440434.793,
+      438366.429
+    ],
+    "measurement_drift": 0.003464788503219074
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      723835.878,
+      468499.221,
+      446908.726,
+      440882.039,
+      439634.151
+    ],
+    "measurement": [
+      436303.422,
+      435029.857,
+      436550.843,
+      439341.852,
+      436790.707
+    ],
+    "measurement_drift": 0.005507972799464245
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      772910.625,
+      499461.992,
+      453215.748,
+      441703.931,
+      439229.407
+    ],
+    "measurement": [
+      439866.395,
+      447171.292,
+      441119.565,
+      439622.609,
+      439425.853
+    ],
+    "measurement_drift": -0.009006635362945992
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      690985.725,
+      396214.891,
+      355844.569,
+      340336.841,
+      340595.721
+    ],
+    "measurement": [
+      341979.567,
+      341685.126,
+      339157.812,
+      336472.233,
+      335031.321
+    ],
+    "measurement_drift": -0.017788163005223345
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      699145.223,
+      405199.527,
+      367476.598,
+      346656.181,
+      345784.657
+    ],
+    "measurement": [
+      343450.46,
+      341617.079,
+      339429.628,
+      339696.252,
+      340053.739
+    ],
+    "measurement_drift": -0.007762078477345891
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      714987.918,
+      401440.273,
+      364110.448,
+      347750.29,
+      344249.85
+    ],
+    "measurement": [
+      342928.911,
+      347175.305,
+      341901.179,
+      336230.585,
+      336418.196
+    ],
+    "measurement_drift": -0.025293911550310022
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      687607.279,
+      392595.859,
+      353252.593,
+      335139.229,
+      334580.875
+    ],
+    "measurement": [
+      332083.633,
+      331749.613,
+      330272.8,
+      326113.083,
+      326238.046
+    ],
+    "measurement_drift": -0.017296688692810758
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      660818.618,
+      396843.432,
+      356158.326,
+      343292.118,
+      340461.356
+    ],
+    "measurement": [
+      339903.613,
+      339430.89,
+      333542.697,
+      330080.554,
+      330228.05
+    ],
+    "measurement_drift": -0.028006672583211878
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      719874.294,
+      414829.651,
+      351896.447,
+      341566.869,
+      339946.627
+    ],
+    "measurement": [
+      339741.487,
+      339210.901,
+      339540.005,
+      332354.73,
+      330351.079
+    ],
+    "measurement_drift": -0.02392889293438938
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      1731605.945,
+      1114321.259,
+      1027537.64,
+      1008674.45,
+      1003524.358
+    ],
+    "measurement": [
+      993728.6,
+      980550.523,
+      980814.328,
+      973870.587,
+      977766.146
+    ],
+    "measurement_drift": -0.011468687348318851
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      1642991.389,
+      1098153.775,
+      1026535.25,
+      998091.396,
+      994802.429
+    ],
+    "measurement": [
+      985236.552,
+      980523.808,
+      975969.242,
+      978677.359,
+      979453.015
+    ],
+    "measurement_drift": -0.0038814425986287704
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.compile",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      1741022.816,
+      1154280.445,
+      1069883.34,
+      1042899.636,
+      1030368.63
+    ],
+    "measurement": [
+      1041997.774,
+      1028936.475,
+      1020501.491,
+      1019336.554,
+      1018434.47
+    ],
+    "measurement_drift": -0.016013654231665453
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      19.981,
+      18.127,
+      18.267,
+      18.224,
+      18.008
+    ],
+    "measurement": [
+      18.081,
+      18.122,
+      18.167,
+      18.321,
+      18.069
+    ],
+    "measurement_drift": 0.005165317791343105
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      20.133,
+      18.37,
+      18.119,
+      18.212,
+      18.148
+    ],
+    "measurement": [
+      18.218,
+      18.166,
+      18.162,
+      18.157,
+      18.191
+    ],
+    "measurement_drift": -0.0009894459102902653
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      19.918,
+      18.397,
+      18.385,
+      18.351,
+      18.385
+    ],
+    "measurement": [
+      18.358,
+      18.324,
+      18.366,
+      18.348,
+      18.349
+    ],
+    "measurement_drift": 0.00040891990622116126
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      1899.244,
+      1734.912,
+      1735.924,
+      1732.339,
+      1732.252
+    ],
+    "measurement": [
+      1730.818,
+      1727.292,
+      1724.072,
+      1723.607,
+      1726.308
+    ],
+    "measurement_drift": -0.002369791591360526
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      1797.828,
+      1666.07,
+      1666.626,
+      1669.078,
+      1666.374
+    ],
+    "measurement": [
+      1666.165,
+      1665.25,
+      1671.207,
+      1668.318,
+      1668.433
+    ],
+    "measurement_drift": 0.0016017217908907977
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      1867.164,
+      1742.679,
+      1742.302,
+      1743.871,
+      1744.467
+    ],
+    "measurement": [
+      1740.513,
+      1755.289,
+      1752.43,
+      1754.823,
+      1745.327
+    ],
+    "measurement_drift": 0.001243777536599655
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      2809.251,
+      2479.139,
+      2451.997,
+      2465.316,
+      2466.702
+    ],
+    "measurement": [
+      2473.461,
+      2467.41,
+      2456.506,
+      2456.268,
+      2458.386
+    ],
+    "measurement_drift": -0.005306149462311116
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      2716.817,
+      2355.836,
+      2343.047,
+      2352.381,
+      2352.352
+    ],
+    "measurement": [
+      2355.971,
+      2353.519,
+      2360.7,
+      2359.095,
+      2335.896
+    ],
+    "measurement_drift": -0.0030786773090079045
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      2755.303,
+      2430.586,
+      2397.641,
+      2404.552,
+      2411.225
+    ],
+    "measurement": [
+      2410.49,
+      2409.337,
+      2415.494,
+      2413.068,
+      2400.366
+    ],
+    "measurement_drift": -0.0013263961548825032
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      6781.734,
+      6057.749,
+      5971.319,
+      5936.531,
+      5939.661
+    ],
+    "measurement": [
+      5955.592,
+      5955.82,
+      5960.666,
+      5949.912,
+      5931.923
+    ],
+    "measurement_drift": -0.0024830809311273683
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      6775.269,
+      5991.38,
+      5872.074,
+      5869.133,
+      5868.595
+    ],
+    "measurement": [
+      5878.14,
+      5876.549,
+      5900.908,
+      5873.29,
+      5905.024
+    ],
+    "measurement_drift": 0.0020098362449232354
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      7078.949,
+      6315.966,
+      6256.352,
+      6274.652,
+      6286.768
+    ],
+    "measurement": [
+      6250.609,
+      5988.643,
+      5969.162,
+      5970.002,
+      5948.054
+    ],
+    "measurement_drift": -0.02624310701340249
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2859.663,
+      2541.642,
+      2465.132,
+      2452.172,
+      2447.543
+    ],
+    "measurement": [
+      2454.571,
+      2456.678,
+      2446.283,
+      2448.405,
+      2445.508
+    ],
+    "measurement_drift": -0.0035298556436457185
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      2939.062,
+      2631.213,
+      2603.389,
+      2594.556,
+      2615.466
+    ],
+    "measurement": [
+      2601.755,
+      2616.669,
+      2603.125,
+      2609.036,
+      2603.084
+    ],
+    "measurement_drift": -0.0012080275577454058
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      2848.056,
+      2584.512,
+      2474.237,
+      2455.424,
+      2458.553
+    ],
+    "measurement": [
+      2454.986,
+      2454.553,
+      2455.302,
+      2446.102,
+      2455.074
+    ],
+    "measurement_drift": -0.0017034185898106013
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      2159.299,
+      1940.15,
+      1958.524,
+      1949.697,
+      1945.279
+    ],
+    "measurement": [
+      1952.832,
+      1947.897,
+      1940.932,
+      1934.904,
+      1943.531
+    ],
+    "measurement_drift": -0.00571534192711165
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      2167.044,
+      1966.678,
+      1965.327,
+      1961.527,
+      1967.464
+    ],
+    "measurement": [
+      1964.173,
+      1963.011,
+      1949.278,
+      1952.533,
+      1955.68
+    ],
+    "measurement_drift": -0.004830687841466119
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      2144.734,
+      1966.231,
+      1965.297,
+      1959.292,
+      1956.659
+    ],
+    "measurement": [
+      1956.048,
+      1966.489,
+      1966.734,
+      1969.866,
+      1969.268
+    ],
+    "measurement_drift": 0.004231190171054999
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      9.697,
+      9.021,
+      8.905,
+      8.47,
+      8.48
+    ],
+    "measurement": [
+      8.49,
+      8.488,
+      8.492,
+      8.504,
+      8.502
+    ],
+    "measurement_drift": 0.0016491930733890658
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      9.178,
+      8.569,
+      8.606,
+      8.608,
+      8.637
+    ],
+    "measurement": [
+      8.613,
+      8.612,
+      8.619,
+      8.634,
+      8.661
+    ],
+    "measurement_drift": 0.0040638606676342
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      9.687,
+      9.004,
+      9.313,
+      9.304,
+      9.3
+    ],
+    "measurement": [
+      9.306,
+      9.297,
+      9.317,
+      9.37,
+      9.119
+    ],
+    "measurement_drift": -0.006128043863893207
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      1821.934,
+      1708.307,
+      1703.281,
+      1709.03,
+      1706.496
+    ],
+    "measurement": [
+      1702.552,
+      1707.745,
+      1708.918,
+      1706.395,
+      1706.987
+    ],
+    "measurement_drift": 0.0009046132932117867
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      1825.389,
+      1728.179,
+      1717.222,
+      1709.673,
+      1715.511
+    ],
+    "measurement": [
+      1715.53,
+      1721.263,
+      1751.615,
+      1729.695,
+      1728.099
+    ],
+    "measurement_drift": 0.00611063860989014
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      1796.61,
+      1668.908,
+      1660.117,
+      1667.621,
+      1658.055
+    ],
+    "measurement": [
+      1660.753,
+      1662.887,
+      1658.479,
+      1666.335,
+      1649.844
+    ],
+    "measurement_drift": -0.002244827959706708
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      2607.733,
+      2383.118,
+      2397.684,
+      2403.384,
+      2370.672
+    ],
+    "measurement": [
+      2401.626,
+      2401.371,
+      2368.623,
+      2367.238,
+      2378.416
+    ],
+    "measurement_drift": -0.011939003917762148
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      2561.18,
+      2376.552,
+      2352.657,
+      2366.545,
+      2368.79
+    ],
+    "measurement": [
+      2347.408,
+      2259.449,
+      2272.839,
+      2253.395,
+      2260.464
+    ],
+    "measurement_drift": -0.020186864927650205
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      2572.647,
+      2383.861,
+      2374.31,
+      2369.39,
+      2368.744
+    ],
+    "measurement": [
+      2386.261,
+      2385.242,
+      2385.057,
+      2388.257,
+      2400.942
+    ],
+    "measurement_drift": 0.003708684663930928
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      4996.089,
+      4718.273,
+      4647.033,
+      4668.981,
+      4663.027
+    ],
+    "measurement": [
+      4665.034,
+      4665.98,
+      4687.449,
+      4676.872,
+      4677.493
+    ],
+    "measurement_drift": 0.0025025147320540952
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      4911.593,
+      4654.373,
+      4648.774,
+      4653.112,
+      4663.663
+    ],
+    "measurement": [
+      4676.657,
+      4684.104,
+      4687.551,
+      4679.329,
+      4662.084
+    ],
+    "measurement_drift": -0.0020669259689463093
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      4961.754,
+      4651.489,
+      4618.827,
+      4613.628,
+      4633.051
+    ],
+    "measurement": [
+      4623.174,
+      4632.026,
+      4657.71,
+      4636.894,
+      4619.941
+    ],
+    "measurement_drift": 0.00017665744662442862
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2460.248,
+      2266.712,
+      2243.441,
+      2247.002,
+      2248.774
+    ],
+    "measurement": [
+      2247.029,
+      2253.997,
+      2253.009,
+      2254.944,
+      2255.801
+    ],
+    "measurement_drift": 0.0021592854606926615
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      2487.912,
+      2282.243,
+      2281.921,
+      2282.693,
+      2284.697
+    ],
+    "measurement": [
+      2281.957,
+      2286.372,
+      2285.29,
+      2279.69,
+      2298.098
+    ],
+    "measurement_drift": 0.00207056015448992
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      2417.666,
+      2224.538,
+      2223.109,
+      2230.896,
+      2229.678
+    ],
+    "measurement": [
+      2238.006,
+      2237.876,
+      2244.575,
+      2241.393,
+      2237.63
+    ],
+    "measurement_drift": 0.0007017611277511104
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      2021.357,
+      1900.694,
+      1886.112,
+      1884.302,
+      1878.43
+    ],
+    "measurement": [
+      1880.808,
+      1891.917,
+      1892.429,
+      1880.734,
+      1880.568
+    ],
+    "measurement_drift": -0.003027784956497026
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      2045.287,
+      1875.057,
+      1874.575,
+      1873.911,
+      1873.415
+    ],
+    "measurement": [
+      1874.743,
+      1875.76,
+      1870.3,
+      1873.103,
+      1882.536
+    ],
+    "measurement_drift": 0.0013694163156250383
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      2021.805,
+      1867.258,
+      1855.272,
+      1859.759,
+      1860.291
+    ],
+    "measurement": [
+      1867.894,
+      1861.742,
+      1856.836,
+      1869.399,
+      1856.704
+    ],
+    "measurement_drift": -0.0009472774286820584
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      30.404,
+      28.009,
+      27.008,
+      27.059,
+      27.03
+    ],
+    "measurement": [
+      27.023,
+      27.065,
+      26.995,
+      26.99,
+      27.018
+    ],
+    "measurement_drift": -0.0014790711433221304
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      30.619,
+      28.3,
+      27.217,
+      26.923,
+      26.865
+    ],
+    "measurement": [
+      26.958,
+      26.946,
+      26.931,
+      26.922,
+      26.889
+    ],
+    "measurement_drift": -0.0017252894033836785
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      30.387,
+      28.025,
+      26.85,
+      26.797,
+      26.797
+    ],
+    "measurement": [
+      26.837,
+      26.877,
+      26.881,
+      26.845,
+      26.86
+    ],
+    "measurement_drift": -0.00016755408273450012
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      552.645,
+      500.724,
+      504.931,
+      505.662,
+      507.249
+    ],
+    "measurement": [
+      515.625,
+      503.006,
+      498.808,
+      506.007,
+      506.805
+    ],
+    "measurement_drift": -0.0057125691246388
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      521.732,
+      467.321,
+      479.101,
+      470.781,
+      471.963
+    ],
+    "measurement": [
+      471.471,
+      469.051,
+      471.126,
+      477.317,
+      464.923
+    ],
+    "measurement_drift": 0.0018266452034083613
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      569.921,
+      504.879,
+      510.202,
+      519.873,
+      530.951
+    ],
+    "measurement": [
+      519.016,
+      510.987,
+      510.69,
+      509.844,
+      514.115
+    ],
+    "measurement_drift": -0.005867944073949194
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      1420.867,
+      1220.639,
+      1207.021,
+      1206.924,
+      1213.777
+    ],
+    "measurement": [
+      1229.235,
+      1231.234,
+      1217.109,
+      1209.973,
+      1207.089
+    ],
+    "measurement_drift": -0.017641758542781938
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      1474.927,
+      1270.201,
+      1260.612,
+      1262.053,
+      1265.935
+    ],
+    "measurement": [
+      1266.768,
+      1257.967,
+      1246.658,
+      1253.898,
+      1300.271
+    ],
+    "measurement_drift": 0.011658253242419425
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      1327.541,
+      1162.189,
+      1152.319,
+      1143.963,
+      1142.949
+    ],
+    "measurement": [
+      1137.789,
+      1142.444,
+      1144.978,
+      1149.639,
+      1152.014
+    ],
+    "measurement_drift": 0.009393776864030867
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      8222.063,
+      7590.668,
+      7477.166,
+      7477.765,
+      7442.332
+    ],
+    "measurement": [
+      7432.48,
+      7433.655,
+      7449.326,
+      7439.105,
+      7443.504
+    ],
+    "measurement_drift": 0.0011081562221788577
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      8633.884,
+      7849.507,
+      7724.563,
+      7736.625,
+      7715.516
+    ],
+    "measurement": [
+      7719.275,
+      7747.043,
+      7743.548,
+      7750.293,
+      7713.108
+    ],
+    "measurement_drift": -0.0001886033896367767
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      8544.739,
+      7720.86,
+      7624.647,
+      7606.945,
+      7620.852
+    ],
+    "measurement": [
+      7615.785,
+      7618.058,
+      7649.329,
+      7638.185,
+      7616.418
+    ],
+    "measurement_drift": 0.0013627552811197319
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2929.236,
+      2638.991,
+      2637.845,
+      2638.209,
+      2618.227
+    ],
+    "measurement": [
+      2618.735,
+      2617.941,
+      2617.416,
+      2619.436,
+      2623.726
+    ],
+    "measurement_drift": 0.0012385719490761726
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      2857.293,
+      2616.116,
+      2591.699,
+      2596.993,
+      2596.837
+    ],
+    "measurement": [
+      2598.653,
+      2600.827,
+      2601.142,
+      2592.494,
+      2599.325
+    ],
+    "measurement_drift": -0.0014734165724265003
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      2899.096,
+      2608.513,
+      2597.11,
+      2611.135,
+      2596.017
+    ],
+    "measurement": [
+      2582.041,
+      2573.102,
+      2584.37,
+      2586.625,
+      2588.143
+    ],
+    "measurement_drift": 0.0038068779081394943
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      890.562,
+      805.092,
+      787.72,
+      794.59,
+      794.693
+    ],
+    "measurement": [
+      794.987,
+      797.477,
+      801.192,
+      801.262,
+      800.748
+    ],
+    "measurement_drift": 0.005994484019733015
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      880.64,
+      773.165,
+      767.314,
+      764.027,
+      770.947
+    ],
+    "measurement": [
+      771.635,
+      768.822,
+      757.428,
+      769.647,
+      759.792
+    ],
+    "measurement_drift": -0.007152422949812776
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      857.954,
+      772.934,
+      763.05,
+      763.976,
+      763.384
+    ],
+    "measurement": [
+      764.492,
+      765.016,
+      769.722,
+      764.819,
+      766.273
+    ],
+    "measurement_drift": 0.0010356271428462183
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      31.861,
+      29.713,
+      28.758,
+      28.536,
+      28.163
+    ],
+    "measurement": [
+      28.152,
+      28.15,
+      28.34,
+      28.168,
+      28.138
+    ],
+    "measurement_drift": 7.104543355462845e-05
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      30.359,
+      27.815,
+      26.915,
+      26.896,
+      26.893
+    ],
+    "measurement": [
+      26.987,
+      26.92,
+      26.918,
+      26.761,
+      26.949
+    ],
+    "measurement_drift": -0.0036544419092139346
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      31.416,
+      30.035,
+      28.856,
+      28.751,
+      28.952
+    ],
+    "measurement": [
+      28.688,
+      28.816,
+      28.845,
+      28.483,
+      27.543
+    ],
+    "measurement_drift": -0.025702559821925486
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      583.922,
+      520.979,
+      476.322,
+      486.228,
+      480.281
+    ],
+    "measurement": [
+      471.853,
+      477.06,
+      483.864,
+      489.312,
+      486.429
+    ],
+    "measurement_drift": 0.02827234951992441
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      494.716,
+      437.024,
+      434.665,
+      435.467,
+      441.269
+    ],
+    "measurement": [
+      436.636,
+      440.13,
+      440.814,
+      435.989,
+      440.121
+    ],
+    "measurement_drift": -0.0007482041958746244
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      567.186,
+      524.498,
+      525.771,
+      516.545,
+      524.223
+    ],
+    "measurement": [
+      517.854,
+      526.004,
+      519.189,
+      515.795,
+      521.085
+    ],
+    "measurement_drift": -0.006684817283576949
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      1341.586,
+      1151.176,
+      1133.881,
+      1134.447,
+      1139.489
+    ],
+    "measurement": [
+      1139.279,
+      1133.86,
+      1135.201,
+      1132.856,
+      1140.786
+    ],
+    "measurement_drift": 0.0002212799129308607
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      1411.858,
+      1212.382,
+      1202.88,
+      1204.866,
+      1200.289
+    ],
+    "measurement": [
+      1202.556,
+      1206.08,
+      1204.977,
+      1203.69,
+      1208.515
+    ],
+    "measurement_drift": 0.00148175149752805
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      1367.164,
+      1192.724,
+      1168.658,
+      1167.274,
+      1169.342
+    ],
+    "measurement": [
+      1170.45,
+      1168.798,
+      1169.292,
+      1172.444,
+      1172.355
+    ],
+    "measurement_drift": 0.0023729848224727235
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      8398.877,
+      7552.589,
+      7428.607,
+      7407.76,
+      7419.416
+    ],
+    "measurement": [
+      7433.203,
+      7455.796,
+      7443.201,
+      7421.046,
+      7420.384
+    ],
+    "measurement_drift": -0.003194909207798302
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      9141.816,
+      8079.326,
+      7950.053,
+      7893.822,
+      7910.052
+    ],
+    "measurement": [
+      7914.787,
+      7925.181,
+      7934.986,
+      7929.984,
+      7927.707
+    ],
+    "measurement_drift": 0.0011188785229869769
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      8612.627,
+      7780.228,
+      7696.31,
+      7663.42,
+      7667.003
+    ],
+    "measurement": [
+      7674.182,
+      7693.215,
+      7675.329,
+      7683.72,
+      7640.393
+    ],
+    "measurement_drift": -0.0028166123384461006
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2997.76,
+      2686.499,
+      2679.757,
+      2667.662,
+      2680.33
+    ],
+    "measurement": [
+      2661.659,
+      2664.317,
+      2661.182,
+      2656.337,
+      2662.354
+    ],
+    "measurement_drift": -0.0013678244137789175
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      3095.068,
+      2769.369,
+      2771.139,
+      2775.306,
+      2763.96
+    ],
+    "measurement": [
+      2742.249,
+      2736.917,
+      2736.239,
+      2750.385,
+      2750.155
+    ],
+    "measurement_drift": 0.0039009586495466486
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      2960.72,
+      2631.405,
+      2612.849,
+      2628.84,
+      2608.015
+    ],
+    "measurement": [
+      2612.827,
+      2601.511,
+      2606.343,
+      2599.278,
+      2605.415
+    ],
+    "measurement_drift": -0.0018497074796456348
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      819.701,
+      707.703,
+      711.828,
+      716.515,
+      716.785
+    ],
+    "measurement": [
+      715.863,
+      724.436,
+      731.841,
+      714.807,
+      717.018
+    ],
+    "measurement_drift": -0.005883500578699241
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      804.978,
+      712.18,
+      699.571,
+      707.932,
+      701.606
+    ],
+    "measurement": [
+      703.273,
+      696.116,
+      700.729,
+      698.545,
+      701.032
+    ],
+    "measurement_drift": 0.0001343443459966842
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      827.745,
+      739.263,
+      746.775,
+      748.246,
+      746.217
+    ],
+    "measurement": [
+      736.236,
+      740.156,
+      746.755,
+      739.274,
+      738.076
+    ],
+    "measurement_drift": 0.0006488791594645438
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 1,
+    "warmup": [
+      30.272,
+      27.862,
+      27.059,
+      26.958,
+      27.088
+    ],
+    "measurement": [
+      27.082,
+      27.075,
+      27.098,
+      27.072,
+      27.288
+    ],
+    "measurement_drift": 0.0037483612460069704
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 2,
+    "warmup": [
+      29.809,
+      27.816,
+      27.163,
+      27.141,
+      27.154
+    ],
+    "measurement": [
+      27.145,
+      27.164,
+      27.142,
+      27.135,
+      27.202
+    ],
+    "measurement_drift": 0.0005155683220092744
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar"
+    },
+    "fork": 3,
+    "warmup": [
+      29.907,
+      27.763,
+      27.322,
+      27.392,
+      27.39
+    ],
+    "measurement": [
+      27.259,
+      27.254,
+      27.34,
+      27.515,
+      27.422
+    ],
+    "measurement_drift": 0.007777961220259311
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 1,
+    "warmup": [
+      565.371,
+      516.445,
+      504.995,
+      507.138,
+      508.312
+    ],
+    "measurement": [
+      508.608,
+      511.178,
+      512.817,
+      509.418,
+      500.085
+    ],
+    "measurement_drift": -0.0100834881043671
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 2,
+    "warmup": [
+      562.256,
+      543.417,
+      540.46,
+      539.437,
+      545.784
+    ],
+    "measurement": [
+      545.785,
+      549.138,
+      549.435,
+      538.111,
+      541.048
+    ],
+    "measurement_drift": -0.014397359449020541
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "scalar-wide"
+    },
+    "fork": 3,
+    "warmup": [
+      563.074,
+      512.902,
+      520.226,
+      519.499,
+      520.865
+    ],
+    "measurement": [
+      526.555,
+      529.086,
+      527.386,
+      529.528,
+      527.501
+    ],
+    "measurement_drift": 0.0013148409355072666
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      1333.288,
+      1102.099,
+      1085.342,
+      1087.204,
+      1081.808
+    ],
+    "measurement": [
+      1083.965,
+      1078.98,
+      1084.397,
+      1079.517,
+      1078.619
+    ],
+    "measurement_drift": -0.0022233575056229693
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      1348.8,
+      1199.688,
+      1188.94,
+      1177.409,
+      1173.169
+    ],
+    "measurement": [
+      1172.583,
+      1170.016,
+      1172.499,
+      1174.591,
+      1186.528
+    ],
+    "measurement_drift": 0.007905749127357975
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      1248.625,
+      1074.209,
+      1089.938,
+      1084.044,
+      1078.535
+    ],
+    "measurement": [
+      1075.806,
+      1073.165,
+      1071.219,
+      1069.7,
+      1068.826
+    ],
+    "measurement_drift": -0.004860465776411194
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 1,
+    "warmup": [
+      8333.825,
+      7545.146,
+      7408.439,
+      7372.147,
+      7380.324
+    ],
+    "measurement": [
+      7387.54,
+      7428.473,
+      7363.38,
+      7392.849,
+      7352.985
+    ],
+    "measurement_drift": -0.004736699407593692
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 2,
+    "warmup": [
+      8395.71,
+      7569.651,
+      7419.819,
+      7388.599,
+      7389.951
+    ],
+    "measurement": [
+      7364.642,
+      7377.01,
+      7373.761,
+      7371.724,
+      7378.51
+    ],
+    "measurement_drift": 0.0005821599912954056
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "proto-repeated"
+    },
+    "fork": 3,
+    "warmup": [
+      8386.463,
+      7527.04,
+      7441.89,
+      7433.418,
+      7459.439
+    ],
+    "measurement": [
+      7481.079,
+      7426.798,
+      7403.875,
+      7415.606,
+      7393.743
+    ],
+    "measurement_drift": -0.006609123485523782
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 1,
+    "warmup": [
+      2912.046,
+      2604.288,
+      2595.75,
+      2606.802,
+      2591.147
+    ],
+    "measurement": [
+      2589.436,
+      2584.258,
+      2591.96,
+      2587.382,
+      2587.93
+    ],
+    "measurement_drift": 0.00031273592910596726
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 2,
+    "warmup": [
+      2800.817,
+      2550.005,
+      2537.407,
+      2541.419,
+      2528.311
+    ],
+    "measurement": [
+      2531.277,
+      2528.257,
+      2506.252,
+      2509.355,
+      2511.775
+    ],
+    "measurement_drift": -0.00759042235905516
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "map-regex"
+    },
+    "fork": 3,
+    "warmup": [
+      2810.767,
+      2562.137,
+      2555.546,
+      2555.527,
+      2553.72
+    ],
+    "measurement": [
+      2542.352,
+      2538.339,
+      2616.65,
+      2556.907,
+      2561.389
+    ],
+    "measurement_drift": 0.00740155226916972
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 1,
+    "warmup": [
+      726.626,
+      622.157,
+      620.854,
+      620.926,
+      621.889
+    ],
+    "measurement": [
+      621.277,
+      620.753,
+      622.509,
+      620.845,
+      621.698
+    ],
+    "measurement_drift": 0.0004130335016061526
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 2,
+    "warmup": [
+      879.326,
+      776.206,
+      766.745,
+      754.25,
+      753.053
+    ],
+    "measurement": [
+      759.051,
+      753.758,
+      756.434,
+      756.654,
+      756.65
+    ],
+    "measurement_drift": 0.00032720587992263184
+  },
+  {
+    "benchmark": "dev.trufflecel.SteadyState.evaluate",
+    "params": {
+      "engine": "cel-java-pratt-optimized",
+      "workload": "optimizer-policy"
+    },
+    "fork": 3,
+    "warmup": [
+      798.657,
+      706.087,
+      701.067,
+      708.916,
+      712.825
+    ],
+    "measurement": [
+      698.53,
+      707.421,
+      708.993,
+      707.415,
+      703.058
+    ],
+    "measurement_drift": 0.0032163283073165516
+  }
+]

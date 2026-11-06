@@ -31,12 +31,102 @@ A Polyglot integration can instead use language ID `cel`, MIME type `application
 and `context.getBindings("cel")`. Host object access is explicit: proxy objects, arrays,
 and hash entries are copied into CEL values. No Java methods are exposed to expressions.
 
+### Borrowed input bindings
+
+`Program.evaluate(Map)` and `Program.test(Map)` borrow the supplied activation for the
+call. Keep the map and all reachable input data stable until the call returns, including
+inside host functions and adapter callbacks. Mutation during evaluation is unsupported;
+Truffle assumptions cannot detect arbitrary writes to caller-owned Java collections.
+Updates between calls are observed. No input values are cached in the program across calls.
+
+Bindings are normalized when read. Collections and bytes that require conversion are
+snapshotted once per binding within that evaluation; unused bindings are not traversed
+or validated. Per-value depth/size bounds still apply when a binding is read, including
+its nested contents. Short-circuited bindings need not be read. This avoids rebuilding a
+complete activation for each request. Debugger inspection may read additional bindings.
+Public collection and byte results remain owned copies.
+
+This changes the previous eager `evaluate(Map)` behavior: unused invalid inputs no longer
+cause an evaluation error, and callers must not mutate inputs during evaluation. Use
+`Activation.snapshot` before evaluation when eager validation of all bindings or input
+isolation is required. Explicit snapshots retain their existing semantics.
+
+### Reusing input snapshots
+
+When several policies or repeated evaluations use the same input, prepare its bindings once:
+
+```java
+Activation activation = Activation.snapshot(Map.of("user", userData));
+boolean allowed = accessPolicy.test(activation);
+Object classification = classificationPolicy.evaluate(activation);
+```
+
+`Activation.snapshot` normalizes **all** supplied bindings, including unused ones, using the
+same per-value depth and size limits as ordinary map evaluation. Maps, lists, iterables,
+arrays and bytes are copied into owned CEL values. Later mutations of those host collections
+do not change the snapshot; create a new activation to observe new input. Do not mutate input
+while snapshotting. Binding names must be non-null. Null values and missing bindings remain
+distinct. Ordinary map evaluation instead borrows inputs and normalizes bindings on demand.
+
+An activation contains no program, execution scopes or operation budget. It can serve multiple
+programs, with fresh evaluation state on each call. Custom/opaque adapter values retain their
+existing ownership and thread-safety contracts: preparing bindings does not freeze a live
+`DynamicRecord` or make an arbitrary host object thread-safe. Use immutable adapter values
+for concurrent reuse. Source-backed programs retain their Polyglot context requirements and
+instrumentation behavior. Returned bytes and collections retain the ordinary output-copy rules.
+
+Preparation has a cost. Reuse avoids repeating it; preparing a fresh activation for a single
+evaluation is not promised to be faster. Benchmark preparation plus the actual number of uses,
+and include upstream data ingestion when measuring the whole request.
+
+For fixed inputs in Native Image, retain an explicit `static final Activation` in an
+application class initialized at image build time. Create it with `Activation.snapshot`
+in that class's initializer and reuse it at runtime. Configure build-time initialization
+for that holder class, store a `PreparedProgram` alongside it if useful, and call
+`PreparedProgram.instantiate()` at runtime to create the execution target.
+
+[GraalVM's `ImageInfo.inImageBuildtimeCode()`](https://www.graalvm.org/sdk/javadoc/org/graalvm/nativeimage/ImageInfo.html)
+(or the documented
+`org.graalvm.nativeimage.imagecode=buildtime` system property) identifies the execution
+phase, not input immutability or future reuse. TruffleCEL therefore does not automatically
+cache map bindings based on that property. A map created during image construction can
+still be mutated between runtime evaluations; ordinary map evaluation observes the new contents.
+The representative native smoke gate checks that build-time snapshots retain owned
+collections and bytes after the source input changes at runtime, in both interpreter
+and guest-JIT execution. The adapter ownership restrictions above still apply.
+
+### Prepared protobuf field access
+
+`Environment.prepare` builds internal access plans for supported, statically typed
+protobuf scalar fields, nested messages, repeated messages, and maps with qualified
+scalar keys and scalar or ordinary message values. Instantiating the template creates
+independent execution nodes and library caches. Plans retain schema metadata, never
+request values. Reads guard the exact adapter identity; another adapter for the same
+descriptor still follows the generic path. Environments with custom runtime object
+adapters retain generic dispatch to preserve their precedence and callbacks.
+
+Supported repeated scalar fields can be iterated directly over their immutable native
+storage. Internal list results use owned storage transferred between evaluation stages;
+public collection and byte results retain their existing conversion and ownership rules.
+Filter and map still execute as separate stages, preserving callback ordering, errors,
+unknowns and budgets. Nested messages retain their exact native plan; absent defaults
+are constructed only when read. Repeated messages and maps materialize canonical owned
+values once, preserving size bounds and protobuf map semantics without a second
+normalization copy. Empty owned lists share immutable storage.
+
+Singular Bool/Int32/Int64/Float/Double/String wrappers, Timestamp and Duration also
+specialize when their descriptors are the standard protobuf-java descriptor instances.
+These paths reuse the existing wrapper/time validation. Reconstructed or custom
+well-known descriptors use generic conversion. Dynamic access, optional lifting,
+extensions, unsigned/byte conversions, and unqualified map/message representations
+continue through the generic adapter.
+
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.6.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.7.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.24` Elide GraalVM artifacts.
-The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.6.0`,
+The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.7.0`,
 which contains the native plans and codecs split from the protobuf-java bridge.
 No sibling checkout or local Maven cache is required.
 
@@ -84,6 +174,21 @@ CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a l
 `ProtoRow`; it retains no protobuf `Message`. Field reads use native storage, `ProtoRow.has`
 provides protobuf presence independently of readable defaults, and enums retain numeric values.
 Bytes use compact immutable storage; unsigned integers preserve their full width.
+
+Trusted embedders can register larger schemas with the explicit bounded constructor:
+`new ProtobufType(descriptor, extensions, limits, additionalTypes)`, where `limits` is a
+TruffleData `Limits`. Existing constructors retain `Limits.DEFAULT` (256 columns/types).
+The complete upstream all-types fixture uses 512; this does not change application defaults.
+The selected structural/payload budgets also apply to the native plan. Depth (100) and
+wire-size (8 MiB) bounds remain in force.
+
+Wrapper fields retain nullable wrapper types during checking. CEL construction prunes null
+entries from repeated/map message fields where required, preserves JSON `Value` nulls, and
+rejects null aggregate assignments. Primitive and standard well-known `Any` payloads are
+registered automatically when the descriptor graph contains `Any`; application payload
+descriptors still require explicit registration. CEL message equality rejects NaN equality,
+including nested/repeated floating fields, while host `Value.equals` retains protobuf-java's
+equality contract.
 
 Binary decoding and CEL message construction use TruffleData's embedded codec and native
 builders. To reuse a native plan directly:

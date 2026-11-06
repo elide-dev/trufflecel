@@ -22,6 +22,13 @@ extensions, and plumbing in addition to the previously enabled core and extensio
 The plumbing cases execute through the JVM harness. A separate gRPC service is available at
 `//tools/conformance:server`; see `docs/INTERCHANGE.md`. Each corpus case also executes
 through canonical protobuf AST export/import, without replacing the direct frontend check.
+Each path also runs with the shipped `ProtobufType` adapter. The proto2/proto3 files under
+`proto/cel/expr/conformance/` are unmodified copies from the revision above, including their
+copyright notices. Bazel generates test-only Java fixtures using the pinned protoc; these
+classes never enter production artifacts. Expected protobuf messages are constructed with
+protobuf-java, independently of the adapter being checked. The production fixture explicitly
+allows 512 fields/types (the upstream all-types schema exceeds the default 256-field limit).
+The four paths execute 11,084 tests; there remain 2,771 distinct upstream cases.
 
 `proto/` contains unmodified syntax, checked-AST, value, evaluation and conformance-service
 schemas from the same pinned revision and license. Bazel compiles their descriptors and embeds

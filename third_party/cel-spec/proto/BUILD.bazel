@@ -1,5 +1,7 @@
-load("//bazel:proto_schema.bzl", "proto_schema_java")
+load("//bazel:proto_schema.bzl", "proto_schema_java", "java_proto_sources")
+load("@rules_java//java:defs.bzl", "java_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 
 proto_library(
     name = "schema",
@@ -16,3 +18,23 @@ proto_library(
 )
 
 proto_schema_java(name = "schema_java", schema = ":schema", generator = "//tools:embed_schema", visibility = ["//visibility:public"])
+
+# Unmodified upstream fixtures; never included in a production artifact.
+proto_library(
+    name = "fixtures",
+    testonly = True,
+    srcs = glob(["cel/expr/conformance/proto2/*.proto", "cel/expr/conformance/proto3/*.proto"]),
+    strip_import_prefix = "/third_party/cel-spec/proto",
+    deps = ["@protobuf//:any_proto", "@protobuf//:duration_proto", "@protobuf//:empty_proto",
+            "@protobuf//:field_mask_proto", "@protobuf//:struct_proto", "@protobuf//:timestamp_proto",
+            "@protobuf//:wrappers_proto"],
+)
+
+java_proto_library(
+    name = "fixtures_generated",
+    testonly = True,
+    deps = [":fixtures"],
+)
+java_proto_sources(name = "fixture_sources", testonly = True, library = ":fixtures_generated")
+java_library(name = "fixtures_java", testonly = True, srcs = [":fixture_sources"],
+    deps = ["@maven//:com_google_protobuf_protobuf_java"], visibility = ["//visibility:public"])

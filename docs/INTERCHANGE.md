@@ -29,7 +29,8 @@ Expression ids must be positive and unique. Import bounds node count, depth and 
 size (8 MiB); source parsing retains the environment's source/depth limits.
 Opaque host constants that have no canonical CEL literal representation cannot be exported.
 
-All 2,771 pinned cases execute through both the ordinary frontend and canonical interchange.
+All 2,771 pinned cases execute through both the ordinary frontend and canonical interchange,
+with both the independent fixture adapter and the production protobuf adapter.
 Comparison-only tests exchange checked ASTs with cel-java in both directions. cel-java stays
 outside production dependency resolution.
 
