@@ -349,7 +349,13 @@ final class Functions {
 
   @TruffleBoundary
   static boolean matches(String s, String regex) {
-    return Pattern.compile(regex).matcher(s).find();
+    Pattern pattern;
+    try {
+      pattern = Pattern.compile(regex);
+    } catch (com.google.re2j.PatternSyntaxException e) {
+      throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
+    }
+    return pattern.matcher(s).find();
   }
 
   static String doubleString(double d) {

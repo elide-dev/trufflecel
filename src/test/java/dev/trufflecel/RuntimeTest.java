@@ -1015,4 +1015,16 @@ public class RuntimeTest {
     assertThrows(
         CelException.class, () -> Cel.newBuilder().build().parse("contains('x')").evaluate());
   }
+
+  @Test
+  public void invalidRegularExpressionsAreInvalidArguments() {
+    var env = Cel.newBuilder().variable("s", CelType.STRING).build();
+    for (String source : List.of("s.matches('(')", "'abc'.matches(s)"))
+      assertEquals(
+          source,
+          CelException.Code.INVALID_ARGUMENT,
+          assertThrows(CelException.class, () -> env.compile(source).evaluate(Map.of("s", "(")))
+              .code());
+  }
+
 }
