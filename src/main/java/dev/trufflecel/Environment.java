@@ -36,6 +36,19 @@ public final class Environment {
   final Map<String, ObjectType> objectTypes;
   final ObjectType[] runtimeObjectTypes;
   final Map<String, FunctionBinding> functions;
+  final Map<String, List<FunctionOverload>> overloads;
+
+  /** A named signature; receiver signatures include the receiver as argument zero. */
+  public record FunctionOverload(String id, Boolean receiver, FunctionBinding binding) {
+    public FunctionOverload {
+      if (Objects.requireNonNull(id).isEmpty())
+        throw new IllegalArgumentException("empty overload id");
+      Objects.requireNonNull(binding);
+      if (Boolean.TRUE.equals(receiver) && binding.arguments().isEmpty())
+        throw new IllegalArgumentException("receiver overload needs a receiver argument");
+    }
+  }
+
   final String container;
   final boolean inferVariables, macros;
   final long budget;
@@ -53,6 +66,9 @@ public final class Environment {
       if (!b.constructorOnlyTypes.contains(entry.getKey())) runtimeTypes.add(entry.getValue());
     runtimeObjectTypes = runtimeTypes.toArray(ObjectType[]::new);
     functions = Map.copyOf(b.functions);
+    var signatures = new LinkedHashMap<String, List<FunctionOverload>>();
+    b.overloads.forEach((name, values) -> signatures.put(name, List.copyOf(values)));
+    overloads = Map.copyOf(signatures);
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
@@ -182,6 +198,8 @@ public final class Environment {
     private final Map<String, ObjectType> objectTypes = new LinkedHashMap<>();
     private final Set<String> constructorOnlyTypes = new HashSet<>();
     private final Map<String, FunctionBinding> functions = new LinkedHashMap<>();
+    private final Map<String, List<FunctionOverload>> overloads = new LinkedHashMap<>();
+    private final Set<String> overloadIds = new HashSet<>();
     private String container = "";
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
@@ -223,7 +241,51 @@ public final class Environment {
         List<CelType> arguments,
         CelType result,
         Function<List<Object>, Object> implementation) {
-      functions.put(name, new FunctionBinding(arguments, result, implementation));
+      return addFunction(
+          name,
+          name + "#" + overloads.getOrDefault(name, List.of()).size(),
+          null,
+          arguments,
+          result,
+          implementation);
+    }
+
+    /** Register a distinct global or receiver signature, with an ID exported in checked ASTs. */
+    public Builder function(
+        String name,
+        String overloadId,
+        boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation) {
+      return addFunction(name, overloadId, receiver, arguments, result, implementation);
+    }
+
+    private Builder addFunction(
+        String name,
+        String id,
+        Boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation) {
+      Objects.requireNonNull(name);
+      if (Set.of("&&", "||", "?:", "or", "orValue", "@not_strictly_false").contains(name))
+        throw new IllegalArgumentException("cannot overload lazy control function: " + name);
+      var binding = new FunctionBinding(arguments, result, implementation);
+      var signature = new FunctionOverload(id, receiver, binding);
+      if (overloadIds.contains(id))
+        throw new IllegalArgumentException("duplicate overload id: " + id);
+      for (var existing : overloads.getOrDefault(name, List.of())) {
+        if ((receiver == null
+                || existing.receiver() == null
+                || receiver.equals(existing.receiver()))
+            && FunctionOverloads.overlaps(existing.binding().arguments(), arguments))
+          throw new IllegalArgumentException(
+              "ambiguous overloads: " + existing.id() + " and " + id);
+      }
+      overloadIds.add(id);
+      overloads.computeIfAbsent(name, unused -> new ArrayList<>()).add(signature);
+      functions.putIfAbsent(name, binding);
       return this;
     }
 

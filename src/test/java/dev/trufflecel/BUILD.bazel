@@ -268,3 +268,15 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "functionOverload",
+    srcs = ["FunctionOverloadTest.java"],
+    test_class = "dev.trufflecel.FunctionOverloadTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)

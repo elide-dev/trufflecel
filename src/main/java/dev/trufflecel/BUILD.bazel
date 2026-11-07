@@ -40,6 +40,7 @@ java_library(
         "ExprNode.java",
         "ExtensionFunctions.java",
         "FieldPlan.java",
+        "FunctionOverloads.java",
         "Functions.java",
         "GuestException.java",
         "GuestValue.java",

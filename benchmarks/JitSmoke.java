@@ -48,6 +48,26 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        var overloaded =
+            Cel.newBuilder()
+                .variable("x", CelType.DYN)
+                .function(
+                    "label",
+                    "label_int",
+                    false,
+                    List.of(CelType.INT),
+                    CelType.STRING,
+                    a -> "integer")
+                .function(
+                    "label",
+                    "label_string",
+                    false,
+                    List.of(CelType.STRING),
+                    CelType.STRING,
+                    a -> "text")
+                .build()
+                .compile("label(x)");
+        check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text");
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false);
         check(
             "enabled && 10 / x > 1",
@@ -88,7 +108,16 @@ public final class JitSmoke {
       Object expected,
       Map<String, ?> changed,
       Object changedExpected) {
-    Program program = Cel.compile(source);
+    check(Cel.compile(source), input, expected, changed, changedExpected);
+  }
+
+  private static void check(
+      Program program,
+      Map<String, ?> input,
+      Object expected,
+      Map<String, ?> changed,
+      Object changedExpected) {
+    String source = program.source();
     Activation prepared = Activation.snapshot(input);
     Activation preparedChanged = Activation.snapshot(changed);
     if (!(program.callTarget() instanceof OptimizedCallTarget target))

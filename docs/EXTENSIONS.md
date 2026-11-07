@@ -125,3 +125,22 @@ expressions even when their mathematical result would otherwise be valid.
 The baseline is the revision in `third_party/cel-spec/REVISION`, not a claim of every CEL
 extension/version. Canonical protobuf AST interchange and the standalone conformance service are described in
 [interchange and RPC](INTERCHANGE.md).
+
+## Host function overloads
+
+Repeated `Builder.function(name, arguments, result, implementation)` calls retain distinct
+signatures. Identical or overlapping declarations fail at registration instead of replacing
+an earlier implementation. The legacy form continues to accept global and receiver syntax.
+
+Use `function(name, overloadId, receiver, arguments, result, implementation)` to declare
+an explicit call style and stable overload ID. Receiver signatures include the receiver as
+argument zero. IDs are unique across the environment and appear in canonical checked AST
+references. Dynamic arguments retain all candidate IDs and dispatch by runtime type.
+
+Signatures cannot differ only in list/map element types: those types are erased at runtime.
+Nullable wrappers overlap null. Ambiguity is rejected even when result types differ.
+Explicit overloads can add signatures to standard function names; a matching custom signature
+wins, while unmatched built-in signatures retain their normal behavior. Lazy control functions
+(`&&`, `||`, `?:`, `or`, `orValue`, `@not_strictly_false`) cannot be overloaded.
+Host functions remain impure for folding, receive owned normalized arguments, and preserve
+ordinary error/unknown propagation. Prepared and concurrent programs share immutable signatures.

@@ -17,6 +17,8 @@ class ExprNode extends CelNode {
   Optimizer.Fold fold;
   // Plan-time purity and binding depth, packed by Optimizer; avoids per-node analysis maps.
   int analysis;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean customOverloads;
+  List<String> overloadIds = List.of();
   @Child private FieldPlan.ReadNode fieldRead;
 
   void instantiateFieldPlans() {
@@ -138,6 +140,7 @@ class ExprNode extends CelNode {
 
     @Override
     Object execute(VirtualFrame frame, EvalContext ctx) {
+      if (customOverloads) return super.execute(frame, ctx);
       ctx.tick();
       return scalarBinary(frame, ctx);
     }
@@ -210,9 +213,14 @@ class ExprNode extends CelNode {
   ExprNode lowerUninstrumented() {
     // A folded subtree is replaced wholesale; lowering inside it would only be discarded.
     if (fold != null) return this;
+    if (customOverloads) {
+      for (int i = 0; i < children.length; i++) children[i] = children[i].lowerUninstrumented();
+      return this;
+    }
     int count = 0;
     ExprNode leaf = this;
     while (leaf.kind == Kind.CALL
+        && !leaf.customOverloads
         && !Boolean.TRUE.equals(leaf.value)
         && leaf.children.length == 2
         && (leaf.name.equals("+") || leaf.name.equals("-") || leaf.name.equals("*"))
@@ -500,8 +508,10 @@ class ExprNode extends CelNode {
       }
     }
 
-    if ((scalarOperator != 0 || stringPredicate) && children.length == 2 && !extensionCall)
-      return scalarBinary(frame, ctx);
+    if ((scalarOperator != 0 || stringPredicate)
+        && children.length == 2
+        && !extensionCall
+        && !customOverloads) return scalarBinary(frame, ctx);
     if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
     if (optionalFallback && children.length == 2) {
       Object first = children[0].execute(frame, ctx);
@@ -525,6 +535,12 @@ class ExprNode extends CelNode {
     }
     if (unknown != null) return unknown;
     if (error != null) throw error;
+    if (customOverloads) {
+      var binding =
+          FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args);
+      if (binding != null) return FunctionOverloads.invoke(binding, args);
+      if (!FunctionOverloads.standard(name)) throw Values.overload(name);
+    }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);
   }

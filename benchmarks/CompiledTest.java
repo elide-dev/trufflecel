@@ -29,6 +29,26 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        var overloaded =
+            Cel.newBuilder()
+                .variable("x", CelType.DYN)
+                .function(
+                    "label",
+                    "label_int",
+                    false,
+                    List.of(CelType.INT),
+                    CelType.STRING,
+                    a -> "integer")
+                .function(
+                    "label",
+                    "label_string",
+                    false,
+                    List.of(CelType.STRING),
+                    CelType.STRING,
+                    a -> "text")
+                .build()
+                .compile("label(x)");
+        check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text", 512);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",
