@@ -17,6 +17,67 @@ public class ExtensionsTest {
   }
 
   @Test
+  public void optionalListAndSquareRootExtensions() {
+    yes("math.sqrt(9.0) == 3.0 && math.isNaN(math.sqrt(-1.0))");
+    yes("optional.unwrap([optional.of(1), optional.none(), optional.of(2)]) == [1, 2]");
+    yes("optional.unwrap([]) == []");
+    yes("[null].first() == optional.of(null)");
+    yes("[1, 2].first().value() == 1 && [1, 2].last().value() == 2");
+    yes("![].first().hasValue() && ![].last().hasValue()");
+    invalid("optional.unwrap(dyn([1]))");
+    invalid("math.sqrt(dyn(1))");
+    for (String expression : List.of("math.sqrt(1)", "optional.unwrap([1])", "1.first()"))
+      assertThrows(CelException.class, () -> Cel.compile(expression));
+  }
+
+  @Test
+  public void regexReplacementAndExtraction() {
+    yes("regex.replace('ab12cd34', '[0-9]+', 'x') == 'abxcdx'");
+    yes("regex.replace('aaaa', 'a', 'b', 2) == 'bbaa'");
+    yes("regex.replace('aaaa', 'a', 'b', -2) == 'bbbb'");
+    yes("regex.replace('x', '[', 'bad', 0) == 'x'");
+    yes("regex.replace('ab', '(a)(b)', r'\\2\\1-\\0-$1') == 'ba-ab-$1'");
+    yes("regex.replace('b', '(a)?b', r'\\1') == ''");
+    yes("regex.replace('x', 'x', r'\\\\') == '\\\\'");
+    yes("regex.replace('abc', 'z', r'\\q') == 'abc'");
+    yes("regex.replace('ab', '', '-') == '-a-b-'");
+    yes("regex.extract('abc12', '[0-9]+') == optional.of('12')");
+    yes("regex.extract('abc12', '([0-9]+)') == optional.of('12')");
+    yes("!regex.extract('b', '(a)?b').hasValue()");
+    yes("!regex.extract('z', '(a)(b)').hasValue()");
+    yes("regex.extractAll('a1b22', '[0-9]+') == ['1', '22']");
+    yes("regex.extractAll('a1b22', '([0-9]+)') == ['1', '22']");
+    yes("regex.extractAll('bb', '(a)?b') == []");
+    yes("regex.extractAll('ab', '') == ['', '', '']");
+    yes("regex.extractAll('z', 'x') == []");
+    for (String expression :
+        List.of(
+            "regex.replace('x', '[', 'y')",
+            "regex.extract('x', '[')",
+            "regex.replace('x', 'x', r'\\q')",
+            "regex.replace('x', 'x', r'\\2')",
+            "regex.replace('x', 'x', r'\\')",
+            "regex.extract('ab', '(a)(b)')",
+            "regex.extractAll('z', '(a)(b)')")) invalid(expression);
+    assertThrows(
+        CelException.class,
+        () ->
+            Cel.newBuilder()
+                .variable("r", CelType.STRING)
+                .build()
+                .compile("regex.replace('x', 'x', r)")
+                .evaluate(Map.of("r", "\\")));
+    var env = Cel.newBuilder().variable("s", CelType.STRING).evaluationBudget(80).build();
+    var error =
+        assertThrows(
+            CelException.class,
+            () ->
+                env.compile("regex.replace(s, '(x)', r'\\1\\1\\1\\1\\1\\1\\1\\1')")
+                    .evaluate(Map.of("s", "xxxxxxxxxx")));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, error.code());
+  }
+
+  @Test
   public void optionalLazinessPresenceAndLiteralValidation() {
     yes("optional.of(1).or(optional.of(1/0)).value() == 1");
     yes("optional.of(1).orValue(1/0) == 1");

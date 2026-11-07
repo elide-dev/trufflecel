@@ -29,6 +29,20 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        check(
+            "regex.replace(s, '(a)', r'\\1x')",
+            Map.of("s", "aba"),
+            "axbax",
+            Map.of("s", "z"),
+            "z",
+            4096);
+        check(
+            "regex.extractAll(s, '[0-9]+')",
+            Map.of("s", "a1b2"),
+            java.util.List.of("1", "2"),
+            Map.of("s", "z"),
+            java.util.List.of(),
+            4096);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",

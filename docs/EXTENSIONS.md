@@ -125,3 +125,22 @@ expressions even when their mathematical result would otherwise be valid.
 The baseline is the revision in `third_party/cel-spec/REVISION`, not a claim of every CEL
 extension/version. Canonical protobuf AST interchange and the standalone conformance service are described in
 [interchange and RPC](INTERCHANGE.md).
+
+## Additional optional and regex functions
+
+`optional.unwrap(list)` removes empty optionals and unwraps present values. `list.first()`
+and `list.last()` return an optional element, including an empty optional for an empty list.
+`math.sqrt(double)` returns a double; negative inputs produce NaN.
+
+`regex.replace(text, pattern, replacement[, count])` replaces non-overlapping matches.
+Negative counts replace all matches; zero returns the input without compiling the pattern.
+Replacement escapes use a single backslash followed by a group digit (0 is the complete match),
+or two backslashes for a literal backslash. Dollar signs are literal. Invalid replacement
+escapes fail when a match needs replacement.
+
+`regex.extract(text, pattern)` returns the first match as an optional string;
+`regex.extractAll(text, pattern)` returns a list. With one capture group they return that group;
+with none they return the complete match. Unmatched optional captures are omitted. More than
+one capture group is rejected, except that `extract` returns none when there is no match.
+The functions share the RE2 engine seam and bounded dynamic cache with `matches`.
+Input traversal, each match and output expansion consume the evaluation budget.
