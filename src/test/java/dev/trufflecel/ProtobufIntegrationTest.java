@@ -815,6 +815,97 @@ public class ProtobufIntegrationTest {
     assertEquals(
         DynamicMessage.parseFrom(root, message.toByteArray()), plain.snapshot(message).message());
     assertArrayEquals(message.toByteArray(), plain.snapshot(message).toBytes().toByteArray());
+    // MessageSet can be reachable only through a registered extension. The ordinary parent must
+    // still normalize it, while an unregistered extension remains opaque unknown wire data.
+    var outerFile =
+        FileDescriptor.buildFrom(
+            FileDescriptorProto.newBuilder()
+                .setName("outer.proto")
+                .setPackage("outer")
+                .setSyntax("proto2")
+                .addDependency("messageset.proto")
+                .addMessageType(
+                    DescriptorProto.newBuilder()
+                        .setName("Root")
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("child")
+                                .setNumber(1)
+                                .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                .setTypeName(".outer.Root"))
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("group")
+                                .setNumber(2)
+                                .setType(FieldDescriptorProto.Type.TYPE_GROUP)
+                                .setTypeName(".outer.Root.Group"))
+                        .addField(
+                            FieldDescriptorProto.newBuilder()
+                                .setName("scalar")
+                                .setNumber(3)
+                                .setType(FieldDescriptorProto.Type.TYPE_INT32))
+                        .addNestedType(
+                            DescriptorProto.newBuilder()
+                                .setName("Group")
+                                .addField(
+                                    FieldDescriptorProto.newBuilder()
+                                        .setName("set")
+                                        .setNumber(1)
+                                        .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                                        .setTypeName(".ms.Set")))
+                        .addExtensionRange(
+                            DescriptorProto.ExtensionRange.newBuilder().setStart(100).setEnd(200)))
+                .addExtension(
+                    FieldDescriptorProto.newBuilder()
+                        .setName("set")
+                        .setNumber(100)
+                        .setExtendee(".outer.Root")
+                        .setTypeName(".ms.Set")
+                        .setType(FieldDescriptorProto.Type.TYPE_MESSAGE)
+                        .setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL))
+                .build(),
+            new FileDescriptor[] {file});
+    var outer = outerFile.getMessageTypes().get(0);
+    var outerExtension = outerFile.getExtensions().get(0);
+    var outerType = new ProtobufType(outer, List.of(outerExtension, extension));
+    var outerMessage = DynamicMessage.newBuilder(outer).setField(outerExtension, message).build();
+    assertEquals(outerMessage, outerType.snapshot(outerMessage).message());
+    assertEquals(
+        outerMessage,
+        ((ProtobufType.Value) outerType.decode(new Bytes(outerMessage.toByteArray()))).message());
+    var group = outer.getNestedTypes().get(0);
+    var grouped =
+        DynamicMessage.newBuilder(outer)
+            .setField(
+                outer.findFieldByNumber(2),
+                DynamicMessage.newBuilder(group)
+                    .setField(group.findFieldByNumber(1), message)
+                    .build())
+            .setField(outer.findFieldByNumber(3), 7)
+            .build();
+    assertEquals(grouped, outerType.snapshot(grouped).message());
+    assertEquals(
+        grouped,
+        ((ProtobufType.Value) outerType.decode(new Bytes(grouped.toByteArray()))).message());
+    // Unknown groups, including a group carrying a scalar field number, remain opaque.
+    for (byte[] unknown : List.of(new byte[] {27, 28}, new byte[] {35, 36}))
+      assertArrayEquals(
+          unknown,
+          ((ProtobufType.Value) outerType.decode(new Bytes(unknown))).toBytes().toByteArray());
+    byte[] recursive = new byte[0];
+    for (int depth = 0; depth < 102; depth++) {
+      var buffer = new java.io.ByteArrayOutputStream();
+      var output = CodedOutputStream.newInstance(buffer);
+      output.writeByteArray(1, recursive);
+      output.flush();
+      recursive = buffer.toByteArray();
+    }
+    Bytes tooDeep = new Bytes(recursive);
+    assertThrows(CelException.class, () -> outerType.decode(tooDeep));
+    var opaqueType = new ProtobufType(outer);
+    assertEquals(
+        DynamicMessage.parseFrom(outer, outerMessage.toByteArray()),
+        opaqueType.snapshot(outerMessage).message());
   }
 
   @Test
