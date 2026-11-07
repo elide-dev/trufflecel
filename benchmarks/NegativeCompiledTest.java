@@ -2,11 +2,16 @@ package dev.trufflecel;
 
 import static org.junit.Assert.*;
 
+import com.oracle.truffle.api.frame.Frame;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
+import com.oracle.truffle.runtime.OptimizedTruffleRuntime;
+import com.oracle.truffle.runtime.OptimizedTruffleRuntimeListener;
 import dev.trufflecel.NegativeCases.Case;
 import dev.trufflecel.NegativeCases.Outcome;
 import dev.trufflecel.NegativeCases.Phase;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.graalvm.polyglot.Context;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -16,10 +21,39 @@ import org.junit.runners.Parameterized;
 
 /**
  * Every evaluation-phase negative case must produce the same phase and category from last-tier
- * guest-compiled code as from the interpreter, and the compiled code must survive the error path.
+ * guest-compiled code as from the interpreter, and the error path must stay compiled: after a
+ * bounded number of compilations, repeated errors neither deoptimize nor invalidate the target.
  */
 @RunWith(Parameterized.class)
 public final class NegativeCompiledTest {
+  /**
+   * Compilations an error path may need before it settles: the initial compilation plus one
+   * recompilation per distinct {@code @TruffleBoundary} method that raises the error, because each
+   * boundary's no-exception speculation fails at most once per call target. Errors thrown from
+   * inlined code are compiled control flow from the first compilation. No evaluation-phase case
+   * raises errors from more than two boundaries.
+   */
+  private static final int MAX_COMPILATIONS = 3;
+
+  private static final int SUSTAINED_ERRORS = 1_000;
+
+  private static final Map<OptimizedCallTarget, AtomicInteger> invalidations =
+      new ConcurrentHashMap<>();
+  private static final Map<OptimizedCallTarget, AtomicInteger> deoptimizations =
+      new ConcurrentHashMap<>();
+  private static final OptimizedTruffleRuntimeListener listener =
+      new OptimizedTruffleRuntimeListener() {
+        @Override
+        public void onCompilationInvalidated(
+            OptimizedCallTarget target, Object source, CharSequence reason) {
+          invalidations.computeIfAbsent(target, t -> new AtomicInteger()).incrementAndGet();
+        }
+
+        @Override
+        public void onCompilationDeoptimized(OptimizedCallTarget target, Frame frame) {
+          deoptimizations.computeIfAbsent(target, t -> new AtomicInteger()).incrementAndGet();
+        }
+      };
   private static Context context;
 
   @BeforeClass
@@ -41,10 +75,12 @@ public final class NegativeCompiledTest {
             .build();
     context.initialize("cel");
     context.enter();
+    OptimizedTruffleRuntime.getRuntime().addListener(listener);
   }
 
   @AfterClass
   public static void leave() {
+    OptimizedTruffleRuntime.getRuntime().removeListener(listener);
     context.leave();
     context.close();
   }
@@ -72,7 +108,7 @@ public final class NegativeCompiledTest {
   }
 
   @Test
-  public void compiledOutcomeMatchesInterpreter() {
+  public void compiledOutcomeMatchesInterpreterAndStaysCompiled() {
     Environment env = testCase.config().environment(production);
     boolean unchecked = testCase.checked().phase() == Phase.CHECK;
     Outcome expected = unchecked ? testCase.unchecked() : testCase.checked();
@@ -83,13 +119,10 @@ public final class NegativeCompiledTest {
     var target = (OptimizedCallTarget) program.callTarget();
     Outcome interpreted = Outcome.observe(() -> program.evaluate(bindings));
     expected.verify("interpreter", interpreted);
-    // Every compilation must reproduce the interpreter's phase and category. Error paths raised
-    // inside @TruffleBoundary methods settle after one profiling deoptimization; errors thrown from
-    // inlined helpers and exact-arithmetic intrinsics currently deoptimize on each throw, so the
-    // number of compilations is reported rather than asserted (see docs/COVERAGE.md).
+    // Every compilation must reproduce the interpreter's phase and category, and the error path
+    // must settle within MAX_COMPILATIONS.
     int compilations = 0;
-    boolean stable = false;
-    while (!stable && compilations < 3) {
+    while (true) {
       for (int i = 0; i < 100; i++) Outcome.observe(() -> program.evaluate(bindings));
       target.compile(true);
       target.waitForCompilation();
@@ -99,11 +132,37 @@ public final class NegativeCompiledTest {
       Outcome compiled = Outcome.observe(() -> program.evaluate(bindings));
       expected.verify("compiled#" + compilations, compiled);
       assertEquals("category differs between tiers", interpreted.code(), compiled.code());
-      stable = target.isValidLastTier();
+      if (target.isValidLastTier()) break;
+      assertTrue(
+          "error path still invalidates after "
+              + MAX_COMPILATIONS
+              + " compilations: "
+              + testCase.source(),
+          compilations < MAX_COMPILATIONS);
     }
-    System.out.printf(
-        "COMPILED %s: %d compilation(s), %s%n",
-        testCase.id(), compilations, stable ? "stable" : "deoptimizes on each error");
+    // Once settled, errors are handled by the compiled code without any further deoptimization.
+    int invalidated = count(invalidations, target), deoptimized = count(deoptimizations, target);
+    for (int i = 0; i < SUSTAINED_ERRORS; i++) {
+      Outcome compiled = Outcome.observe(() -> program.evaluate(bindings));
+      expected.verify("sustained#" + i, compiled);
+      assertEquals("category differs between tiers", interpreted.code(), compiled.code());
+    }
+    assertEquals(
+        "error path invalidated compiled code: " + testCase.source(),
+        0,
+        count(invalidations, target) - invalidated);
+    assertEquals(
+        "error path deoptimized compiled code: " + testCase.source(),
+        0,
+        count(deoptimizations, target) - deoptimized);
+    assertTrue("error path must stay compiled: " + testCase.source(), target.isValidLastTier());
+    System.out.printf("COMPILED %s: %d compilation(s), stable%n", testCase.id(), compilations);
+  }
+
+  private static int count(
+      Map<OptimizedCallTarget, AtomicInteger> counters, OptimizedCallTarget t) {
+    AtomicInteger counter = counters.get(t);
+    return counter == null ? 0 : counter.get();
   }
 
   private Map<String, Object> bindings() {

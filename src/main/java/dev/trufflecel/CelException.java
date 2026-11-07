@@ -1,7 +1,15 @@
 package dev.trufflecel;
 
-/** A deterministic compile or evaluation failure, with a source offset when available. */
-public final class CelException extends IllegalArgumentException {
+/**
+ * A deterministic compile or evaluation failure, with a source offset when available.
+ *
+ * <p>Evaluation errors are ordinary CEL values that compiled programs raise and absorb on hot
+ * paths, so this type must stay outside the exception hierarchies that the Truffle partial
+ * evaluator treats as slow paths ({@code IllegalArgumentException}, {@code IllegalStateException},
+ * {@code ArithmeticException}, {@code IndexOutOfBoundsException}, {@code ClassCastException}): a
+ * handler for one of those types is compiled as a deoptimization that recurs on every throw.
+ */
+public final class CelException extends RuntimeException {
   public enum Code {
     SYNTAX,
     TYPE,

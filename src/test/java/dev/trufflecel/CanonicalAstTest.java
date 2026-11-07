@@ -363,8 +363,7 @@ public final class CanonicalAstTest {
         IllegalArgumentException.class,
         () -> CanonicalAst.check(env, CanonicalAst.parse(env, "v")));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> CanonicalAst.parse(Cel.newBuilder().build(), "has(xs[0])"));
+        CelException.class, () -> CanonicalAst.parse(Cel.newBuilder().build(), "has(xs[0])"));
     Environment dynamic = Cel.newBuilder().inferVariables(true).build();
     Message ast = CanonicalAst.parse(dynamic, "xs.all(v, true)");
     assertEquals(Unknown.of("xs"), program(dynamic, ast).evaluate(Map.of("xs", Unknown.of("xs"))));

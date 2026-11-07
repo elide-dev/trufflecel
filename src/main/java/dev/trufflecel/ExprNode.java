@@ -303,14 +303,14 @@ class ExprNode extends CelNode {
           try {
             result =
                 switch (operations[i]) {
-                  case '+' -> Math.addExact(result, constants[i]);
-                  case '-' -> Math.subtractExact(result, constants[i]);
-                  default -> Math.multiplyExact(result, constants[i]);
+                  case '+' -> Functions.add(result, constants[i]);
+                  case '-' -> Functions.subtract(result, constants[i]);
+                  default -> Functions.multiply(result, constants[i]);
                 };
-          } catch (ArithmeticException e) {
+          } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
             ctx.charge(operations.length - i - 1);
-            throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+            throw e;
           }
         }
         return result;
@@ -544,36 +544,25 @@ class ExprNode extends CelNode {
     if (error != null) throw error;
     if (stringPredicate) return Functions.stringPredicate(name, left, right);
     if (left instanceof Long x && right instanceof Long y) {
-      try {
-        return switch (scalarOperator) {
-          case '+' -> Math.addExact(x, y);
-          case '-' -> Math.subtractExact(x, y);
-          case '<' -> x < y;
-          case '>' -> x > y;
-          case 'L' -> x <= y;
-          case 'G' -> x >= y;
-          case 'E' ->
-              ctx.environment.runtimeObjectTypes.length == 0
-                  ? x.longValue() == y.longValue()
-                  : Functions.apply(name, new Object[] {left, right}, ctx.environment);
-          case 'N' ->
-              ctx.environment.runtimeObjectTypes.length == 0
-                  ? x.longValue() != y.longValue()
-                  : Functions.apply(name, new Object[] {left, right}, ctx.environment);
-          case '/' -> {
-            if (y == 0) throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
-            if (x == Long.MIN_VALUE && y == -1) throw new ArithmeticException();
-            yield x / y;
-          }
-          case '%' -> {
-            if (y == 0) throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
-            yield x % y;
-          }
-          default -> Math.multiplyExact(x, y);
-        };
-      } catch (ArithmeticException e) {
-        throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
-      }
+      return switch (scalarOperator) {
+        case '+' -> Functions.add(x, y);
+        case '-' -> Functions.subtract(x, y);
+        case '<' -> x < y;
+        case '>' -> x > y;
+        case 'L' -> x <= y;
+        case 'G' -> x >= y;
+        case 'E' ->
+            ctx.environment.runtimeObjectTypes.length == 0
+                ? x.longValue() == y.longValue()
+                : Functions.apply(name, new Object[] {left, right}, ctx.environment);
+        case 'N' ->
+            ctx.environment.runtimeObjectTypes.length == 0
+                ? x.longValue() != y.longValue()
+                : Functions.apply(name, new Object[] {left, right}, ctx.environment);
+        case '/' -> Functions.divide(x, y);
+        case '%' -> Functions.remainder(x, y);
+        default -> Functions.multiply(x, y);
+      };
     }
     return Functions.apply(name, new Object[] {left, right}, ctx.environment);
   }

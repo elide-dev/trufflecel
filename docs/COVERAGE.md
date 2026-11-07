@@ -146,12 +146,20 @@ limit now applies before cloning), parser nesting limits reported as `SYNTAX` ra
 check time for non-nullable scalar fields, host functions invoked with undeclared arities or
 argument types in unchecked programs, and rejection of the grammar's lone trailing comma.
 
-The compiled runner also shows that 101 of the 404 evaluation-phase executions deoptimize
-and invalidate on every error: exceptions thrown from inlined helpers reach invokes whose
-exception edges the partial evaluator omitted, and exact-arithmetic intrinsics trap on
-overflow, whereas errors raised inside `@TruffleBoundary` methods settle after one profiling
-deoptimization. Outcomes are identical in every tier; the runner reports compilation counts
-rather than asserting stability, and this remains a documented performance gap.
+The compiled runner originally showed that 101 of the 404 evaluation-phase executions
+deoptimized and invalidated on every error. The cause was the partial evaluator's slow-path
+exception list: a handler for `IllegalArgumentException`, `ArithmeticException` or a few related
+types is compiled as a deoptimization without a speculation, so it recurs on every throw, and
+`CelException` extended `IllegalArgumentException`; the exact-arithmetic intrinsics guard
+overflow with the same kind of deoptimization. `CelException` now extends `RuntimeException`
+directly and compiled integer arithmetic uses explicit overflow checks, so every error path is
+ordinary compiled control flow. An error raised inside a `@TruffleBoundary` method still
+invalidates the first compilation once, when the boundary's no-exception speculation fails. The
+runner asserts that each case settles within three compilations (one initial compilation plus
+one per distinct boundary that raises the error) and that 1,000 further errors neither
+deoptimize nor invalidate the compiled code: 185 executions settle after one compilation, 218
+after two and one after three. `//benchmarks:compiled` additionally checks that a program which
+has already raised errors keeps the same happy-path allocation budget.
 
 | Metric | Measured after the negative matrix |
 | --- | ---: |
