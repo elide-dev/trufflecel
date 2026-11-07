@@ -59,10 +59,18 @@ final class EvalContext {
   }
 
   void charge(long cost) {
-    EvalContext owner = budgetParent == null ? this : budgetParent;
-    if (cost < 0 || cost > owner.remaining)
+    // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
+    // context with a loaded parent would force escape analysis to materialize the context in every
+    // compiled loop, now that error handlers rejoin the main control flow.
+    EvalContext parent = budgetParent;
+    if (parent == null) chargeOwn(cost);
+    else parent.chargeOwn(cost);
+  }
+
+  private void chargeOwn(long cost) {
+    if (cost < 0 || cost > remaining)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "evaluation budget exceeded");
-    owner.remaining -= cost;
+    remaining -= cost;
   }
 
   // Scoped reads remain opaque to avoid expanding dynamic scope walks in each compiled loop.

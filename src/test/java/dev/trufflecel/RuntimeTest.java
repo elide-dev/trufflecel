@@ -1028,6 +1028,76 @@ public class RuntimeTest {
   }
 
   @Test
+  public void evaluationErrorsStayOutsideCompilerSlowPathHierarchies() {
+    // The Truffle partial evaluator compiles a handler for any of these types as a deoptimization
+    // that recurs on every throw, so an error that is a CEL value must not belong to them (#29).
+    for (Class<?> slowPath :
+        List.of(
+            IllegalArgumentException.class,
+            IllegalStateException.class,
+            ArithmeticException.class,
+            IndexOutOfBoundsException.class,
+            ClassCastException.class))
+      assertFalse(slowPath.getName(), slowPath.isAssignableFrom(CelException.class));
+    assertTrue(RuntimeException.class.isAssignableFrom(CelException.class));
+  }
+
+  @Test
+  public void explicitOverflowChecksMatchExactArithmetic() {
+    long[] samples = {
+      Long.MIN_VALUE,
+      Long.MIN_VALUE + 1,
+      -3037000500L,
+      -3037000499L,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3037000499L,
+      3037000500L,
+      Long.MAX_VALUE - 1,
+      Long.MAX_VALUE
+    };
+    for (long x : samples) {
+      assertArithmetic(x + " neg", () -> Math.negateExact(x), () -> Functions.negate(x));
+      for (long y : samples) {
+        assertArithmetic(x + " + " + y, () -> Math.addExact(x, y), () -> Functions.add(x, y));
+        assertArithmetic(
+            x + " - " + y, () -> Math.subtractExact(x, y), () -> Functions.subtract(x, y));
+        assertArithmetic(
+            x + " * " + y, () -> Math.multiplyExact(x, y), () -> Functions.multiply(x, y));
+        assertArithmetic(x + " / " + y, () -> Math.divideExact(x, y), () -> Functions.divide(x, y));
+        assertArithmetic(x + " % " + y, () -> x % y, () -> Functions.remainder(x, y));
+      }
+    }
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> Functions.divide(1, 0)).code());
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> Functions.remainder(1, 0)).code());
+  }
+
+  private static void assertArithmetic(
+      String operation,
+      java.util.function.LongSupplier exact,
+      java.util.function.LongSupplier checked) {
+    long reference;
+    try {
+      reference = exact.getAsLong();
+    } catch (ArithmeticException e) {
+      CelException error = assertThrows(operation, CelException.class, checked::getAsLong);
+      assertEquals(
+          operation,
+          operation.endsWith(" 0") ? CelException.Code.DIVIDE_BY_ZERO : CelException.Code.OVERFLOW,
+          error.code());
+      return;
+    }
+    assertEquals(operation, reference, checked.getAsLong());
+  }
+
+  @Test
   public void uncheckedHostDispatchMatchesDeclaredOverloads() {
     var env =
         Cel.newBuilder()

@@ -63,7 +63,7 @@ public final class ConformanceServer implements BindableService {
               .setField(parsed.getDescriptorForType().findFieldByName("source_info"), info)
               .build();
       return message(PREFIX + "ParseResponse", "parsed_expr", parsed);
-    } catch (IllegalArgumentException e) {
+    } catch (CelException | IllegalArgumentException e) {
       return issues("ParseResponse", e);
     }
   }
@@ -99,7 +99,7 @@ public final class ConformanceServer implements BindableService {
         checkNoStandardFunctions(nested(parsed, "expr"), declaredFunctions, 0);
       return message(
           PREFIX + "CheckResponse", "checked_expr", CanonicalAst.check(builder.build(), parsed));
-    } catch (IllegalArgumentException e) {
+    } catch (CelException | IllegalArgumentException e) {
       return issues("CheckResponse", e);
     }
   }
@@ -163,7 +163,7 @@ public final class ConformanceServer implements BindableService {
             message("cel.expr.ExprValue", "unknown", message("cel.expr.UnknownSet", "exprs", ids));
       } else output = message("cel.expr.ExprValue", "value", value(result, 0));
       return message(PREFIX + "EvalResponse", "result", output);
-    } catch (IllegalArgumentException e) {
+    } catch (CelException | IllegalArgumentException e) {
       return issues("EvalResponse", e);
     }
   }
@@ -331,11 +331,11 @@ public final class ConformanceServer implements BindableService {
     return message("cel.expr.Value", kind, data);
   }
 
-  private static Message issues(String response, IllegalArgumentException error) {
+  private static Message issues(String response, RuntimeException error) {
     return message(PREFIX + response, "issues", errors(error));
   }
 
-  private static Message errors(IllegalArgumentException error) {
+  private static Message errors(RuntimeException error) {
     int code =
         error instanceof CelException cel && cel.code() == CelException.Code.RESOURCE_EXHAUSTED
             ? 8

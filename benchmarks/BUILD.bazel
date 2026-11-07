@@ -59,7 +59,9 @@ java_test(
     data = ["//third_party/cel-spec:schemas.json"],
     test_class = "dev.trufflecel.NegativeCompiledTest",
     size = "large",
-    jvm_flags = ["-ea", "-Xbatch", "-XX:-UseJVMCICompiler", "--enable-native-access=ALL-UNNAMED"],
+    # The runtime listener's signatures reference compiler types that the named module keeps.
+    jvm_flags = ["-ea", "-Xbatch", "-XX:-UseJVMCICompiler", "--enable-native-access=ALL-UNNAMED",
+                 "--add-exports=org.graalvm.truffle.compiler/com.oracle.truffle.compiler=ALL-UNNAMED"],
     deps = ["//:trufflecel", "//:trufflecel-protobuf", "//src/test/java/dev/trufflecel:test_support",
             "@maven//:junit_junit", "@maven//:org_graalvm_truffle_truffle_api",
             "@maven//:org_graalvm_truffle_truffle_runtime", "@maven//:org_graalvm_polyglot_polyglot"],
