@@ -129,39 +129,36 @@ public final class Environment {
   }
 
   /** Reject trees deeper than the configured limit before any recursive traversal. */
-  void checkDepth(ExprNode node) {
+  long checkDepth(ExprNode node) {
     record Pending(ExprNode node, int depth) {}
     var pending = new ArrayDeque<Pending>();
     pending.push(new Pending(node, 1));
     int count = 0;
+    long nextId = 1;
     while (!pending.isEmpty()) {
       if (++count > maxAstNodes)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST node limit exceeded");
       Pending item = pending.pop();
+      nextId = Math.max(nextId, item.node().canonicalId + 1);
       if (item.depth() > maxDepth)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST depth limit exceeded");
       for (ExprNode child : item.node().children)
         pending.push(new Pending(child, item.depth() + 1));
     }
+    return nextId;
   }
 
-  private static void locateNodes(String source, ExprNode root) {
+  private static void locateNodes(String source, ExprNode root, long nextId) {
     // The tree has already passed checkDepth. Keep the common single-line source path free of
     // traversal collections and boxed offsets; error metadata belongs to nodes, not a side table.
     int count = 1;
-    for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') count++;
+    for (int i = source.indexOf('\n'); i >= 0; i = source.indexOf('\n', i + 1)) count++;
     int[] lines = count == 1 ? null : new int[count];
     if (lines != null) {
       int line = 1;
       for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') lines[line++] = i + 1;
     }
-    locateNodes(root, nextId(root), !source.isEmpty(), lines);
-  }
-
-  private static long nextId(ExprNode node) {
-    long maximum = Math.max(1, node.canonicalId + 1);
-    for (ExprNode child : node.children) maximum = Math.max(maximum, nextId(child));
-    return maximum;
+    locateNodes(root, nextId, !source.isEmpty(), lines);
   }
 
   private static long locateNodes(ExprNode node, long nextId, boolean source, int[] lines) {
@@ -178,7 +175,7 @@ public final class Environment {
   }
 
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
-    checkDepth(node);
+    long nextId = checkDepth(node);
     Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();
@@ -199,7 +196,7 @@ public final class Environment {
           CelException.Code.TYPE,
           "expected result type " + expectedResultType + ", got " + result,
           node.offset);
-    locateNodes(source, node);
+    locateNodes(source, node, nextId);
     FieldPlan.prepare(node, this);
     node = Optimizer.optimize(node, this, source);
     // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
@@ -215,6 +212,7 @@ public final class Environment {
   }
 
   String resolve(String name, Set<String> names) {
+    if (names.isEmpty()) return null;
     if (name.startsWith(".")) return names.contains(name.substring(1)) ? name.substring(1) : null;
     String expanded = expandAlias(name);
     if (!expanded.equals(name)) return names.contains(expanded) ? expanded : null;
