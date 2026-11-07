@@ -474,4 +474,14 @@ public final class CanonicalAstTest {
         IllegalArgumentException.class,
         () -> CanonicalAst.check(qualified, CanonicalAst.parse(qualified, "has(a.b)")));
   }
+
+  @Test
+  public void canonicalParseEnforcesDepthBeforeCloning() {
+    var env = Cel.newBuilder().build();
+    for (String source :
+        List.of("1" + " + 1".repeat(5000), "[".repeat(2000) + "1" + "]".repeat(2000)))
+      assertEquals(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(CelException.class, () -> parse(env, source)).code());
+  }
 }
