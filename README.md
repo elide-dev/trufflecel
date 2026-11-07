@@ -266,9 +266,16 @@ the direct frontend and canonical AST interchange (11,084 executions of 2,771 ca
 The production-adapter path uses unmodified upstream proto2/proto3 schemas and protobuf-java
 fixture construction. This is evidence of compatibility with the pinned corpus, not exhaustive
 specification compliance. Corpus error cases assert an evaluation failure, not its category
-or diagnostic text; separate negative and differential tests check rejection phases and
-selected error categories. Custom functions, limits, concurrency, and unknown propagation
-have separate regression tests.
+or diagnostic text. A separate table of 431 independently specified negative and edge cases
+(malformed input, invalid declarations and types, unknown propagation, resource limits,
+collection, arithmetic, conversion, short-circuit, comprehension, optional and protobuf edge
+cases) records the rejection phase and, where the contract defines one, the `CelException.Code`
+category, never the diagnostic wording. Each case runs through the direct checked and unchecked
+frontends, canonical `ParsedExpr`/`CheckedExpr` interchange with a wire round trip, borrowed and
+snapshot activations, both protobuf adapters for protobuf cases, and forced last-tier guest
+compilation; the 368 cases expressible in cel-java also run against both of its parsers with and
+without AST optimizers, with 26 recorded, explained divergences. Custom functions, limits,
+concurrency, and unknown propagation have separate regression tests.
 See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
 The table describes the current `main` branch against the pinned corpus, not every CEL
