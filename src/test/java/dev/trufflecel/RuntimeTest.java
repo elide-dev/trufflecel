@@ -1015,4 +1015,29 @@ public class RuntimeTest {
     assertThrows(
         CelException.class, () -> Cel.newBuilder().build().parse("contains('x')").evaluate());
   }
+
+  @Test
+  public void invalidRegularExpressionsAreInvalidArguments() {
+    var env = Cel.newBuilder().variable("s", CelType.STRING).build();
+    for (String source : List.of("s.matches('(')", "'abc'.matches(s)"))
+      assertEquals(
+          source,
+          CelException.Code.INVALID_ARGUMENT,
+          assertThrows(CelException.class, () -> env.compile(source).evaluate(Map.of("s", "(")))
+              .code());
+  }
+
+  @Test
+  public void uncheckedHostDispatchMatchesDeclaredOverloads() {
+    var env =
+        Cel.newBuilder()
+            .function("same", List.of(CelType.INT), CelType.INT, args -> args.get(0))
+            .build();
+    assertEquals(1L, env.parse("same(1)").evaluate());
+    for (String source : List.of("same('a')", "same(1, 2)", "same(dyn(1u))", "same()"))
+      assertEquals(
+          source,
+          CelException.Code.NO_OVERLOAD,
+          assertThrows(CelException.class, () -> env.parse(source).evaluate()).code());
+  }
 }

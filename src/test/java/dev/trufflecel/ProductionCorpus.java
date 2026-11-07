@@ -81,6 +81,11 @@ final class ProductionCorpus {
     return value;
   }
 
+  /** The protobuf-java form of a fixture message, for runtimes that consume generated messages. */
+  static Message message(ProtoSchema.Message fixture) {
+    return wireMessage(MESSAGES.get(fixture.typeName()), fixture);
+  }
+
   private static Message wireMessage(Descriptor d, Object value) {
     Map<String, ?> fields;
     if (value instanceof ProtoSchema.Message m && !d.getFullName().equals("google.protobuf.Any"))

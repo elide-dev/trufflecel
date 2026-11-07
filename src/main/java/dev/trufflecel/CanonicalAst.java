@@ -49,6 +49,8 @@ public final class CanonicalAst {
     if (source.length() > environment.maxSourceLength)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
     ExprNode tree = new Parser(source, environment).parse();
+    // Cloning recurses over the tree, so the depth limit applies before the copy.
+    environment.checkDepth(tree);
     environment.prepare(source, NodeUtil.cloneNode(tree), false);
     var writer = new Writer();
     Message expression = writer.expression(tree);

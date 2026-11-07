@@ -82,6 +82,83 @@ remain package-private; no public API, coverage exclusions or thresholds change.
 | Branch hits | 4,329 / 4,333 (99.91%) |
 | Local patch coverage against `main`, counting partial lines as uncovered | 933 / 933 (100%) |
 
+## Negative and error-category matrix
+
+Corpus `eval_error` cases only establish that an error occurred. `NegativeCases` in the test
+support library adds 431 independently specified cases that record the rejection phase
+(parse, check or evaluate) and, where the contract defines one, the stable
+`CelException.Code`; no assertion depends on diagnostic wording. Check-phase cases also record
+the outcome when the checker is bypassed, because dynamic integrations and canonical
+`ParsedExpr` import plan without type checking.
+
+| Area | Cases | What they cover |
+| --- | ---: | --- |
+| Malformed input | 71 | Unterminated literals and aggregates, invalid escapes and code points, literal overflow, reserved words, malformed macros and `has()` arguments, lone and trailing commas |
+| Declarations and types | 69 | Operator and function overload mismatches, undeclared references, unregistered types, host function arity and argument types, disabled macros, container resolution, binding/declaration mismatches |
+| Unknown propagation | 46 | Unknown-over-error precedence, short-circuit absorption, aggregates, comprehensions, optionals, host functions, protobuf fields, budget-over-unknown precedence |
+| Resource limits | 18 | Evaluation budgets (including non-absorption by `exists`, `||` and optional fallbacks), depth, nesting and source-length limits, deep parse trees, extension caps |
+| Collections | 35 | Index and key failures, key type equivalence, invalid map keys, duplicate keys, errors inside literals |
+| Arithmetic | 30 | Signed, unsigned, timestamp and duration overflow, division by zero, invalid regular expressions and time zones |
+| Conversions | 32 | Numeric, string, timestamp and duration conversion failures, well-known type constructor ranges |
+| Short-circuit | 38 | Error absorption by `&&`, `\|\|`, `?:`, `exists`, `all`, optional fallbacks, bindings and blocks |
+| Comprehensions | 18 | Errors inside transforms, filters and nested loops; macro shape errors |
+| Optionals | 18 | Absent `value()`, non-optional entries, type mismatches, lazy fallbacks |
+| Protobuf | 56 | Unknown fields, ill-typed and out-of-range construction, null assignment, wrappers, `Any`, `Value`, `Struct`, maps, enums, proto2 defaults, binding type mismatches |
+
+Every case executes through five paths in `//src/test/java/dev/trufflecel:negativeMatrix`:
+the direct checked frontend, the direct unchecked frontend, canonical `ParsedExpr` import,
+canonical `CheckedExpr` import after a wire round trip, and a snapshot activation. The 60
+protobuf cases run with both the test fixture adapter and the shipped `ProtobufType` adapter
+(2,455 executions). `//benchmarks:negative_compiled` evaluates every evaluation-phase case
+(404 executions) from forced last-tier guest-compiled code and requires the same phase and
+category as the interpreter. `//benchmarks/representative:negative_differential` runs the 368
+cases that cel-java 0.15.0 can express against its default and Pratt parsers, each with and
+without the constant-folding and subexpression optimizers (1,472 executions), asserting the
+recorded upstream phase and `CelErrorCode`.
+
+Optimizer-time failures are encoded explicitly: 41 cases are marked as folded, meaning
+cel-java's optimized configurations reject them with `CelOptimizationException` before
+evaluation while its plain configurations fail at evaluation. TruffleCEL has no constant
+folder, so those expressions always fail at evaluation time with the recorded category.
+
+The table records 26 divergences, each with its reason; none is hidden by a weaker assertion:
+
+- cel-java reports timestamp and duration range failures, enum range failures,
+  `optional.value()` on an absent optional, dynamic field selection on messages and iteration
+  over non-aggregates as `INTERNAL_ERROR`, and string parsing failures as `BAD_FORMAT`.
+- cel-java does not construct well-known types from message literals, rejects double map key
+  literals only at evaluation, accepts duplicate message literal fields, evaluates `cel.bind`
+  initializers lazily, collapses unlimited repeated unary operators, and its duration arithmetic
+  overflows below the protobuf range. Its Pratt parser rejects the lone comma that the grammar
+  (`"[" [ExprList] [","] "]"`) and its default parser accept.
+
+Sixty-three cases are TruffleCEL-only: explicit unknown bindings, configured resource limits,
+inferred declarations, `cel.block` (produced by cel-java's optimizer rather than parsed) and
+unregistered extension lookups. Unchecked construction with an ill-typed field is recorded
+by phase only: the fixture adapter reports `NO_OVERLOAD` and the shipped adapter
+`INVALID_ARGUMENT`, and the contract does not define that category. The matrix does not
+cover cel-java's unknown-tracking API, custom macros, or every extension function.
+
+The matrix found and fixed: an uncaught regular-expression syntax exception escaping
+`matches`, a stack overflow in `CanonicalAst.parse` for 5,000-term operator chains (the depth
+limit now applies before cloning), parser nesting limits reported as `SYNTAX` rather than
+`RESOURCE_EXHAUSTED`, overflow categories lost in protobuf construction, `null` accepted at
+check time for non-nullable scalar fields, host functions invoked with undeclared arities or
+argument types in unchecked programs, and rejection of the grammar's lone trailing comma.
+
+The compiled runner also shows that 101 of the 404 evaluation-phase executions deoptimize
+and invalidate on every error: exceptions thrown from inlined helpers reach invokes whose
+exception edges the partial evaluator omitted, and exact-arithmetic intrinsics trap on
+overflow, whereas errors raised inside `@TruffleBoundary` methods settle after one profiling
+deoptimization. Outcomes are identical in every tier; the runner reports compilation counts
+rather than asserting stability, and this remains a documented performance gap.
+
+| Metric | Measured after the negative matrix |
+| --- | ---: |
+| Line hits | 4,497 / 4,501 (99.91%) |
+| Branch hits | 4,590 / 4,595 (99.89%) |
+| CI minimum, each metric | 99.8% |
+
 ## Remaining paths
 
 Four missed lines remain in defensive paths:
@@ -103,6 +180,8 @@ Four uncovered branch outcomes follow existing invariants:
 - `Parser.string`: `codePointAt` and the checked escape decoder already bound code points
   to the Unicode range. The surrogate rejection is exercised; the additional invalid-range
   check cannot fail for those inputs.
+- `ProtobufType.prepared`: map fields whose value type is a well-known message have no
+  prepared accessor; the corpus and matrix read such maps through the generic path only.
 
 These paths remain visible in coverage. The suite does not use reflection, mocked static
 methods, or corrupted immutable objects to force them. Revisit this list if dependency

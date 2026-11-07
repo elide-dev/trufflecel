@@ -63,7 +63,7 @@ final class Functions {
       if (a.length == 1) return unary(name, a[0], env);
       if (a.length == 2) return binary(name, a[0], a[1], env);
       var f = env.functions.get(name);
-      if (f != null) return Values.in(f.implementation().apply(List.of(a)));
+      if (accepts(f, a)) return Values.in(f.implementation().apply(List.of(a)));
     } catch (CelException e) {
       throw e;
     } catch (ArithmeticException e) {
@@ -203,7 +203,7 @@ final class Functions {
       default:
         if (name.startsWith("get")) return timePart(name, v, "UTC");
         var f = env.functions.get(name);
-        if (f != null) return Values.in(f.implementation().apply(List.of(v)));
+        if (accepts(f, v)) return Values.in(f.implementation().apply(List.of(v)));
     }
     throw Values.overload(name);
   }
@@ -263,7 +263,7 @@ final class Functions {
       default:
         if (name.startsWith("get") && b instanceof String zone) return timePart(name, a, zone);
         var f = env.functions.get(name);
-        if (f != null) return Values.in(f.implementation().apply(List.of(a, b)));
+        if (accepts(f, a, b)) return Values.in(f.implementation().apply(List.of(a, b)));
     }
     throw Values.overload(name);
   }
@@ -349,7 +349,22 @@ final class Functions {
 
   @TruffleBoundary
   static boolean matches(String s, String regex) {
-    return Pattern.compile(regex).matcher(s).find();
+    Pattern pattern;
+    try {
+      pattern = Pattern.compile(regex);
+    } catch (com.google.re2j.PatternSyntaxException e) {
+      throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
+    }
+    return pattern.matcher(s).find();
+  }
+
+  // Unchecked programs dispatch host functions by arity and runtime argument types, like
+  // standard overloads; a declared binding never receives arguments it did not declare.
+  private static boolean accepts(Environment.FunctionBinding f, Object... args) {
+    if (f == null || f.arguments().size() != args.length) return false;
+    for (int i = 0; i < args.length; i++)
+      if (!f.arguments().get(i).accepts(Values.type(args[i]))) return false;
+    return true;
   }
 
   static String doubleString(double d) {

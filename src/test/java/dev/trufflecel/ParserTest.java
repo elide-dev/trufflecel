@@ -99,8 +99,13 @@ public class ParserTest {
             "!".repeat(20) + "true",
             "x" + ".a".repeat(20),
             "1" + "+1".repeat(20)))
-      assertThrows(source, CelException.class, () -> small.parse(source));
-    assertThrows(CelException.class, () -> Cel.compile("1" + "+1".repeat(10000)));
+      assertEquals(
+          source,
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(CelException.class, () -> small.parse(source)).code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> Cel.compile("1" + "+1".repeat(10000))).code());
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxDepth(0));
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxDepth(513));
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxSourceLength(0));
@@ -155,5 +160,19 @@ public class ParserTest {
     for (String source : List.of(".as", "x.`a\rb`", "'\\u", "'\\x", "'\\0aa'", "'\\0AA'"))
       assertThrows(source, CelException.class, () -> Cel.compile(source));
     assertThrows(CelException.class, () -> Cel.newBuilder().build().compile("{'x':1}.has('x')"));
+  }
+
+  @Test
+  public void loneTrailingCommaIsAnEmptyAggregate() {
+    // Primary = "[" [ExprList] [","] "]" | "{" [MapInits] [","] "}" admits a lone comma.
+    assertEquals(List.of(), Cel.compile("[,]").evaluate());
+    assertEquals(Map.of(), Cel.compile("{,}").evaluate());
+    assertEquals(0L, Cel.compile("google.protobuf.Int64Value{,}").evaluate());
+    for (String source :
+        List.of("[,1]", "[1,,]", "{,'a':1}", "google.protobuf.Int64Value{,value:1}"))
+      assertEquals(
+          source,
+          CelException.Code.SYNTAX,
+          assertThrows(CelException.class, () -> Cel.compile(source)).code());
   }
 }
