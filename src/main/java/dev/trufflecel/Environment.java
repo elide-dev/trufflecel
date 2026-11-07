@@ -78,7 +78,8 @@ public final class Environment {
     return prepare(source, new Parser(source, this).parse(), check);
   }
 
-  PreparedProgram prepare(String source, ExprNode node, boolean check) {
+  /** Reject trees deeper than the configured limit before any recursive traversal. */
+  void checkDepth(ExprNode node) {
     record Pending(ExprNode node, int depth) {}
     var pending = new ArrayDeque<Pending>();
     pending.push(new Pending(node, 1));
@@ -89,6 +90,10 @@ public final class Environment {
       for (ExprNode child : item.node().children)
         pending.push(new Pending(child, item.depth() + 1));
     }
+  }
+
+  PreparedProgram prepare(String source, ExprNode node, boolean check) {
+    checkDepth(node);
     Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();

@@ -51,6 +51,20 @@ java_test(
             "@maven//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_shadowed_json"],
 )
 
+# Every evaluation-phase negative case through forced last-tier guest compilation.
+java_test(
+    name = "negative_compiled",
+    exec_properties = {"EstimatedCPU": "2", "EstimatedMemory": "4GB"},
+    srcs = ["NegativeCompiledTest.java"],
+    data = ["//third_party/cel-spec:schemas.json"],
+    test_class = "dev.trufflecel.NegativeCompiledTest",
+    size = "large",
+    jvm_flags = ["-ea", "-Xbatch", "-XX:-UseJVMCICompiler", "--enable-native-access=ALL-UNNAMED"],
+    deps = ["//:trufflecel", "//:trufflecel-protobuf", "//src/test/java/dev/trufflecel:test_support",
+            "@maven//:junit_junit", "@maven//:org_graalvm_truffle_truffle_api",
+            "@maven//:org_graalvm_truffle_truffle_runtime", "@maven//:org_graalvm_polyglot_polyglot"],
+)
+
 # The simulation remains deterministic AOT; this independent gate includes the guest compiler.
 java_library(
     name = "jit_support",

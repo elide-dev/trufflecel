@@ -97,7 +97,7 @@ public record CelType(String name, List<CelType> parameters) {
     return DYN;
   }
 
-  private boolean nullable() {
+  boolean nullable() {
     return name.equals("wrapper")
         || name.equals("optional_type")
         || name.contains(".")

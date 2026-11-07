@@ -654,10 +654,12 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
         } else builder.set(ordinals.get(f), toProto(value, f));
       }
       return new Value(this, builder.build());
-    } catch (IllegalArgumentException
-        | IllegalStateException
-        | ArithmeticException
-        | ClassCastException e) {
+    } catch (CelException e) {
+      // Nested well-known constructors and range checks already carry their category.
+      throw e;
+    } catch (ArithmeticException e) {
+      throw Values.error(CelException.Code.OVERFLOW, "Protobuf field overflow");
+    } catch (IllegalArgumentException | IllegalStateException | ClassCastException e) {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT, "Invalid protobuf construction: " + e.getMessage());
     }
@@ -805,7 +807,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   private static int unsigned32(UInt value) {
     if (Long.compareUnsigned(value.bits(), 0xffffffffL) > 0)
-      throw new IllegalArgumentException("uint32 overflow");
+      throw Values.error(CelException.Code.OVERFLOW, "uint32 overflow");
     return (int) value.bits();
   }
 
