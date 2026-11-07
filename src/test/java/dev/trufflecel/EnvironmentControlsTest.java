@@ -6,6 +6,32 @@ import org.junit.Test;
 
 public class EnvironmentControlsTest {
   @Test
+  public void regexLimitsApplyToConstantsDynamicPatternsAndCachedPatterns() {
+    var small = Cel.newBuilder().maxRegexProgramSize(4).variable("p", CelType.STRING).build();
+    assertEquals(true, small.compile("'a'.matches('a')").evaluate());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> small.compile("'abc'.matches('a{20}')")).code());
+    var large = Cel.newBuilder().variable("p", CelType.STRING).build();
+    assertEquals(false, large.compile("'abc'.matches(p)").evaluate(Map.of("p", "a{20}")));
+    for (String expression :
+        List.of(
+            "'abc'.matches(p)",
+            "regex.extract('abc',p)",
+            "regex.extractAll('abc',p)",
+            "regex.replace('abc',p,'x')"))
+      assertEquals(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(
+                  CelException.class,
+                  () -> small.compile(expression).evaluate(Map.of("p", "a{20}")))
+              .code());
+    assertEquals(
+        "abc", small.compile("regex.replace('abc',p,'x',0)").evaluate(Map.of("p", "a{20}")));
+    assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxRegexProgramSize(0));
+  }
+
+  @Test
   public void aliasesResolveBeforeContainersAndPreserveAbsoluteNames() {
     var builder =
         Cel.newBuilder()

@@ -232,8 +232,10 @@ final class Optimizer {
         && n.children[1].kind == ExprNode.Kind.CONSTANT
         && n.children[1].value instanceof String pattern) {
       try {
-        n = new MatchesNode(n, Regex.compile(pattern), null);
+        n = new MatchesNode(n, Regex.compile(pattern, env.maxRegexProgramSize), null);
       } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED)
+          throw new CelException(e.code(), e.issues().get(0).message(), n.children[1].offset);
         if (strict) issue(e.code(), e.getMessage(), n.children[1].offset);
         n = new MatchesNode(n, null, e);
       }

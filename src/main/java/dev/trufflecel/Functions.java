@@ -293,7 +293,8 @@ final class Functions {
       case "contains", "startsWith", "endsWith":
         return stringPredicate(name, a, b);
       case "matches":
-        if (a instanceof String x && b instanceof String y) return matches(x, y);
+        if (a instanceof String x && b instanceof String y)
+          return matches(x, y, env.maxRegexProgramSize);
         break;
       default:
         if (name.startsWith("get") && b instanceof String zone) return timePart(name, a, zone);
@@ -379,8 +380,8 @@ final class Functions {
 
   /** Dynamic patterns; constant patterns are precompiled into the call node at plan time. */
   @TruffleBoundary
-  static boolean matches(String s, String regex) {
-    return Regex.cached(regex).find(s);
+  static boolean matches(String s, String regex, int limit) {
+    return Regex.cached(regex, limit).find(s);
   }
 
   // Unchecked programs dispatch host functions by arity and runtime argument types, like

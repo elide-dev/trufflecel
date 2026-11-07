@@ -52,7 +52,7 @@ public final class Environment {
   final LibraryPolicy libraryPolicy;
   final Map<String, String> aliases;
   final CelType expectedResultType;
-  final int maxAstNodes;
+  final int maxAstNodes, maxRegexProgramSize;
   final String container;
   final boolean inferVariables, macros;
   final long budget;
@@ -77,6 +77,7 @@ public final class Environment {
     aliases = Map.copyOf(b.aliases);
     expectedResultType = b.expectedResultType;
     maxAstNodes = b.maxAstNodes;
+    maxRegexProgramSize = b.maxRegexProgramSize;
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
@@ -257,7 +258,7 @@ public final class Environment {
     private Set<String> allowedFunctions;
     private final Map<String, String> aliases = new LinkedHashMap<>();
     private CelType expectedResultType;
-    private int maxAstNodes = 100_000;
+    private int maxAstNodes = 100_000, maxRegexProgramSize = 10_000;
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
@@ -389,6 +390,14 @@ public final class Environment {
     public Builder maxAstNodes(int count) {
       if (count <= 0) throw new IllegalArgumentException("node count must be positive");
       maxAstNodes = count;
+      return this;
+    }
+
+    /** Bound the compiled RE2 instruction count for both constant and dynamic patterns. */
+    public Builder maxRegexProgramSize(int instructions) {
+      if (instructions <= 0)
+        throw new IllegalArgumentException("regex program size must be positive");
+      maxRegexProgramSize = instructions;
       return this;
     }
 

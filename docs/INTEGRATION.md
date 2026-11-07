@@ -302,3 +302,9 @@ canonical `SourceInfo` uses CEL's code-point positions; absent position metadata
 `-1` while the expression ID is still available. Budget exhaustion identifies the policy
 root because optimized evaluation can charge multiple original visits together. Arbitrary
 exceptions outside CEL's normalized callback errors retain their existing propagation.
+
+`maxRegexProgramSize(instructions)` caps the compiled RE2 program size, with a default of
+10,000. Oversized constant `matches` patterns are rejected during preparation; dynamic
+patterns and regex extension calls are checked before matching. Cached patterns are rechecked
+against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXHAUSTED`.
+A zero-count regex replacement still returns its input without compiling the pattern.

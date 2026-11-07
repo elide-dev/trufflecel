@@ -17,6 +17,8 @@ final class Regex {
   interface Compiled {
     boolean find(String text);
 
+    int programSize();
+
     Object apply(String name, Object[] arguments, EvalContext context);
   }
 
@@ -26,15 +28,26 @@ final class Regex {
 
   /** Compile an RE2 pattern, reporting syntax failures as {@code INVALID_ARGUMENT}. */
   @TruffleBoundary
-  static Compiled compile(String pattern) {
+  static Compiled compile(String pattern, int limit) {
     try {
-      return new Re2(Pattern.compile(pattern));
+      return bounded(new Re2(Pattern.compile(pattern)), limit);
     } catch (PatternSyntaxException e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
     }
   }
 
+  private static Compiled bounded(Compiled compiled, int limit) {
+    if (compiled.programSize() > limit)
+      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "regex program size limit exceeded");
+    return compiled;
+  }
+
   private record Re2(Pattern pattern) implements Compiled {
+    @Override
+    public int programSize() {
+      return pattern.programSize();
+    }
+
     @Override
     @TruffleBoundary
     public boolean find(String text) {
@@ -105,15 +118,15 @@ final class Regex {
 
   /** Compile a pattern that is not known until evaluation, reusing recent compilations. */
   @TruffleBoundary
-  static Compiled cached(String pattern) {
-    if (pattern.length() > CACHE_KEY_LENGTH) return compile(pattern);
+  static Compiled cached(String pattern, int limit) {
+    if (pattern.length() > CACHE_KEY_LENGTH) return compile(pattern, limit);
     Compiled compiled = CACHE.get(pattern);
     if (compiled == null) {
-      compiled = compile(pattern);
+      compiled = compile(pattern, limit);
       if (CACHE.size() >= CACHE_ENTRIES) CACHE.clear();
       CACHE.put(pattern, compiled);
     }
-    return compiled;
+    return bounded(compiled, limit);
   }
 
   /** The number of cached dynamic patterns, for tests of the cache bound. */
