@@ -16,7 +16,8 @@ import org.junit.runners.Parameterized;
  * Every negative case must report the same phase and category through the direct frontend, the
  * canonical ParsedExpr/CheckedExpr interchange (including a wire round trip), borrowed-map and
  * snapshot activations, and, for protobuf cases, both the test fixture adapter and the shipped
- * adapter. Guest compilation runs separately in {@code //benchmarks:negative_compiled}.
+ * adapter. The strict-validation path records which evaluation failures move to compile time. Guest
+ * compilation runs separately in {@code //benchmarks:negative_compiled}.
  */
 @RunWith(Parameterized.class)
 public class NegativeMatrixTest {
@@ -42,6 +43,12 @@ public class NegativeMatrixTest {
   public void directChecked() {
     Environment env = testCase.config().environment(production);
     check("direct", testCase.checked(), () -> env.compile(testCase.source()));
+  }
+
+  @Test
+  public void strictChecked() {
+    Environment env = testCase.config().environment(production, true);
+    check("strict", testCase.strict(), () -> env.compile(testCase.source()));
   }
 
   @Test

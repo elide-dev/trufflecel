@@ -62,6 +62,13 @@ public final class CompiledTest {
             65536);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
         check(
+            "s.matches('^[a-z]+@[a-z]+[.]com$')",
+            Map.of("s", "person@example.com"),
+            true,
+            Map.of("s", "person@example.org"),
+            false,
+            4096);
+        check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),
             true,

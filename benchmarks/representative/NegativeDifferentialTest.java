@@ -233,14 +233,32 @@ public final class NegativeDifferentialTest {
                 CelExtensions.sets(options),
                 CelExtensions.comprehensions())
             .setContainer(CelContainer.ofName(config.container()));
+    // Well-known types are always registered, as TruffleCEL always constructs them; the test
+    // messages only when the configuration declares them.
+    var descriptors =
+        new ArrayList<>(
+            List.of(
+                com.google.protobuf.Int32Value.getDescriptor(),
+                com.google.protobuf.UInt32Value.getDescriptor(),
+                com.google.protobuf.Int64Value.getDescriptor(),
+                com.google.protobuf.UInt64Value.getDescriptor(),
+                com.google.protobuf.FloatValue.getDescriptor(),
+                com.google.protobuf.DoubleValue.getDescriptor(),
+                com.google.protobuf.BoolValue.getDescriptor(),
+                com.google.protobuf.StringValue.getDescriptor(),
+                com.google.protobuf.BytesValue.getDescriptor(),
+                com.google.protobuf.Duration.getDescriptor(),
+                com.google.protobuf.Timestamp.getDescriptor(),
+                com.google.protobuf.Any.getDescriptor(),
+                com.google.protobuf.Struct.getDescriptor(),
+                com.google.protobuf.Value.getDescriptor(),
+                com.google.protobuf.ListValue.getDescriptor()));
     if (config.protobuf()) {
-      var descriptors =
-          List.of(
-              dev.cel.expr.conformance.proto3.TestAllTypes.getDescriptor(),
-              dev.cel.expr.conformance.proto2.TestAllTypes.getDescriptor());
-      compiler.addMessageTypes(descriptors);
-      runtime.addMessageTypes(descriptors);
+      descriptors.add(dev.cel.expr.conformance.proto3.TestAllTypes.getDescriptor());
+      descriptors.add(dev.cel.expr.conformance.proto2.TestAllTypes.getDescriptor());
     }
+    compiler.addMessageTypes(descriptors);
+    runtime.addMessageTypes(descriptors);
     for (var declaration : config.variables())
       compiler.addVar(declaration.name(), type(declaration.type()));
     for (var fn : config.functions()) {

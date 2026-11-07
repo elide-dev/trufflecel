@@ -88,9 +88,10 @@ public final class NegativeCases {
    * Recorded behavior of cel-java 0.15.0 for the checked source. {@code folds} marks an intentional
    * constant-evaluation failure: cel-java's optimized configuration rejects the expression at
    * optimization time, while its plain configurations fail at evaluation with {@code code}.
-   * TruffleCEL has no constant folder, so the same expression always fails at evaluation time.
-   * {@code pratt} overrides the expectation for cel-java's Pratt parser when the two upstream
-   * parsers disagree.
+   * TruffleCEL's deferred policy raises the same failure at evaluation, and every folded case also
+   * records that strict validation rejects it at compile time ({@link Case#strict()}). {@code
+   * pratt} overrides the expectation for cel-java's Pratt parser when the two upstream parsers
+   * disagree.
    */
   public record Upstream(
       Kind kind, Phase phase, String code, boolean folds, String note, Upstream pratt) {
@@ -289,7 +290,13 @@ public final class NegativeCases {
      * Build the TruffleCEL environment with the fixture adapter or the shipped protobuf adapter.
      */
     public Environment environment(boolean productionAdapter) {
+      return environment(productionAdapter, false);
+    }
+
+    /** The same environment with strict compile-time validation. */
+    public Environment environment(boolean productionAdapter, boolean strict) {
       var builder = Cel.newBuilder();
+      if (strict) builder.validation(Environment.Validation.STRICT);
       if (protobuf) {
         if (productionAdapter) ProductionCorpus.register(builder);
         else TestObjects.register(builder);
@@ -398,7 +405,10 @@ public final class NegativeCases {
 
   /**
    * One case. {@code unchecked} describes the outcome when the checker is bypassed (dynamic
-   * integrations and canonical ParsedExpr import); null means it matches {@code checked}.
+   * integrations and canonical ParsedExpr import); null means it matches {@code checked}. {@code
+   * strict} is the outcome under {@link Environment.Validation#STRICT}: a failure that occurs on
+   * every evaluation path moves to the check phase with its evaluation category, and everything
+   * else is unchanged.
    */
   public record Case(
       String id,
@@ -408,9 +418,15 @@ public final class NegativeCases {
       Map<String, Object> bindings,
       Outcome checked,
       Outcome unchecked,
+      Outcome strict,
       Upstream upstream) {
     public Outcome unchecked() {
       return unchecked == null ? checked : unchecked;
+    }
+
+    /** Whether strict validation rejects at compile time what the deferred policy raises later. */
+    public boolean strictRejects() {
+      return checked.phase() == Phase.EVALUATE && strict.phase() == Phase.CHECK;
     }
 
     @Override
@@ -427,6 +443,7 @@ public final class NegativeCases {
     Map<String, Object> bindings;
     Outcome checked;
     Outcome unchecked;
+    Outcome strict;
     Upstream upstream;
 
     Builder(String id, String source) {
@@ -464,12 +481,21 @@ public final class NegativeCases {
       return this;
     }
 
+    /** Strict validation rejects the expression at compile time with this category. */
+    Builder strict(CelException.Code code) {
+      strict = Outcome.error(Phase.CHECK, code);
+      return this;
+    }
+
     void add(Outcome outcome) {
       checked = outcome;
       if (bindings == null) bindings = defaultBindings(config);
       Objects.requireNonNull(upstream, id + " needs an upstream expectation");
       if (checked.phase() == Phase.CHECK)
         Objects.requireNonNull(unchecked, id + " needs unchecked");
+      if (strict == null) strict = checked;
+      if (upstream.folds() && strict.phase() != Phase.CHECK)
+        throw new IllegalStateException(id + " folds upstream; record its strict outcome");
       if (!CASES.add(id)) throw new IllegalStateException("duplicate case " + id);
       ALL.add(
           new Case(
@@ -480,6 +506,7 @@ public final class NegativeCases {
               Collections.unmodifiableMap(bindings),
               checked,
               unchecked,
+              strict,
               upstream));
     }
 
@@ -551,10 +578,10 @@ public final class NegativeCases {
   // by the adapter (NO_OVERLOAD for the fixture, INVALID_ARGUMENT for the shipped adapter).
   private static final Outcome ILL_TYPED_CONSTRUCTION = Outcome.error(Phase.EVALUATE, null);
   private static final Upstream LIMIT = Upstream.notApplicable("TruffleCEL resource limit");
-  private static final Upstream NO_WKT_LITERALS =
+  private static final Upstream WKT_UNVALIDATED =
       Upstream.diverges(
-          Upstream.rejects(Phase.CHECK),
-          "cel-java treats well-known type names as CEL types, not constructible messages");
+          Upstream.accepts(),
+          "cel-java does not validate Duration and Timestamp ranges in message literals");
   private static final String TIME_RANGE =
       "cel-java reports timestamp and duration range failures as INTERNAL_ERROR";
   private static final String OPTIONAL_VALUE =
@@ -713,6 +740,7 @@ public final class NegativeCases {
     c("function-argument-type", "same('a')").type(CelException.Code.NO_OVERLOAD);
     c("function-uint-argument", "same(dyn(1u))")
         .upstream(Upstream.folds("OVERLOAD_NOT_FOUND"))
+        .strict(CelException.Code.NO_OVERLOAD)
         .error(CelException.Code.NO_OVERLOAD);
     c("comprehension-variable-escapes", "[1].map(v, v)[0] + v").type(CelException.Code.UNDECLARED);
     c("binding-variable-escapes", "cel.bind(v, 1, v) + v").type(CelException.Code.UNDECLARED);
@@ -730,6 +758,7 @@ public final class NegativeCases {
     c("unregistered-message-literal", "no.such.Type{}").staticType();
     c("dyn-plus-string", "dyn(1) + 'a'")
         .upstream(Upstream.folds("OVERLOAD_NOT_FOUND"))
+        .strict(CelException.Code.NO_OVERLOAD)
         .error(CelException.Code.NO_OVERLOAD);
     c("dyn-select-on-int", "dynv.foo.bar")
         .error(CelException.Code.NO_OVERLOAD, "ATTRIBUTE_NOT_FOUND");
@@ -737,6 +766,7 @@ public final class NegativeCases {
         .error(CelException.Code.NO_OVERLOAD, "INTERNAL_ERROR");
     c("string-of-dyn-list", "string(dyn([1]))")
         .upstream(Upstream.folds("OVERLOAD_NOT_FOUND"))
+        .strict(CelException.Code.NO_OVERLOAD)
         .error(CelException.Code.NO_OVERLOAD);
     c("binding-type-mismatch", "x + 1")
         .bind("x", "not an int")
@@ -882,6 +912,7 @@ public final class NegativeCases {
     c("flatten-limit", "lists.range(1000000).map(i, [i]).flatten()").limit();
     c("range-cap", "lists.range(1000001)")
         .upstream(Upstream.notApplicable("TruffleCEL extension cap"))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
   }
 
@@ -896,6 +927,7 @@ public final class NegativeCases {
     c("index-double", "xs[1.5]").type(CelException.Code.INDEX);
     c("index-empty-list", "[][0]")
         .upstream(Upstream.folds("INDEX_OUT_OF_BOUNDS"))
+        .strict(CelException.Code.INDEX)
         .error(CelException.Code.INDEX);
     c("missing-key", "m['missing']").error(CelException.Code.NO_SUCH_KEY, "ATTRIBUTE_NOT_FOUND");
     c("missing-field-on-map", "m.missing")
@@ -906,8 +938,10 @@ public final class NegativeCases {
     c("map-key-type", "{'a': 1}[1]").type(CelException.Code.NO_SUCH_KEY);
     c("numeric-key-equivalence", "{1: 'a'}[1.0]").type(Outcome.value("a"));
     c("numeric-key-inexact", "{1: 'a'}[1.5]").type(CelException.Code.NO_SUCH_KEY);
+    // Strict validation rechecks after folding, so the dyn-erased index becomes a type error.
     c("dyn-string-list-index", "xs[dyn('a')]")
         .upstream(Upstream.folds("OVERLOAD_NOT_FOUND"))
+        .strict(CelException.Code.TYPE)
         .error(CelException.Code.NO_OVERLOAD);
     c("double-map-key-literal", "{1.5: 1}")
         .upstream(
@@ -916,20 +950,25 @@ public final class NegativeCases {
                 "cel-java defers map key type validation to evaluation"))
         .type(CelException.Code.INVALID_ARGUMENT);
     c("dyn-double-map-key", "{dyn(1.5): 1}")
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT, "INVALID_ARGUMENT");
     c("dyn-null-map-key", "{dyn(null): 1}")
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT, "INVALID_ARGUMENT");
     c("duplicate-map-key-literal", "{'a': 1, 'a': 2}")
         .upstream(Upstream.rejects(Phase.EVALUATE))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("duplicate-map-key-variable", "{s: 1, 'a': 2}")
         .upstream(Upstream.rejects(Phase.EVALUATE))
         .error(CelException.Code.INVALID_ARGUMENT);
     c("nested-missing-key", "{'a': {'b': 1}}.a.c")
         .upstream(Upstream.folds("ATTRIBUTE_NOT_FOUND"))
+        .strict(CelException.Code.NO_SUCH_KEY)
         .error(CelException.Code.NO_SUCH_KEY);
     c("nested-index-past-end", "{'a': [1]}.a[1]")
         .upstream(Upstream.folds("INDEX_OUT_OF_BOUNDS"))
+        .strict(CelException.Code.INDEX)
         .error(CelException.Code.INDEX);
     c("index-into-int", "{'a': 1}['a']['b']").type(CelException.Code.NO_OVERLOAD);
     c("deep-index-into-int", "[[1]][0][0][0]").type(CelException.Code.NO_OVERLOAD);
@@ -944,19 +983,24 @@ public final class NegativeCases {
     c("dyn-index-on-int", "dynv[0]").error(CelException.Code.NO_OVERLOAD, "OVERLOAD_NOT_FOUND");
     c("dyn-list-select", "dyn([1]).size")
         .upstream(Upstream.folds("ATTRIBUTE_NOT_FOUND"))
+        .strict(CelException.Code.NO_OVERLOAD)
         .error(CelException.Code.NO_OVERLOAD);
     c("list-index-uint", "xs[1u]").type(Outcome.value(2L));
     c("map-of-list-missing", "{'a': [1, 2]}['b'][0]")
         .upstream(Upstream.folds("ATTRIBUTE_NOT_FOUND"))
+        .strict(CelException.Code.NO_SUCH_KEY)
         .error(CelException.Code.NO_SUCH_KEY);
     c("error-inside-list-literal", "[1 / 0].size()")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("error-inside-map-literal", "has({'a': 1 / 0}.a)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("error-inside-size", "size([1 / 0, 2])")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
   }
 
@@ -964,6 +1008,7 @@ public final class NegativeCases {
     current = Area.ARITHMETIC;
     c("int-add-overflow", "9223372036854775807 + 1")
         .upstream(Upstream.folds("NUMERIC_OVERFLOW"))
+        .strict(CelException.Code.OVERFLOW)
         .error(CelException.Code.OVERFLOW);
     c("int-add-overflow-variable", "x + 1")
         .bind("x", Long.MAX_VALUE)
@@ -983,9 +1028,11 @@ public final class NegativeCases {
     c("int-min-modulo", "x % -1").bind("x", Long.MIN_VALUE).value(0L);
     c("uint-add-overflow", "18446744073709551615u + 1u")
         .upstream(Upstream.folds("NUMERIC_OVERFLOW"))
+        .strict(CelException.Code.OVERFLOW)
         .error(CelException.Code.OVERFLOW);
     c("uint-subtract-underflow", "0u - 1u")
         .upstream(Upstream.folds("NUMERIC_OVERFLOW"))
+        .strict(CelException.Code.OVERFLOW)
         .error(CelException.Code.OVERFLOW);
     c("uint-multiply-overflow", "u * 2u")
         .bind("u", new UInt(-1L))
@@ -995,9 +1042,11 @@ public final class NegativeCases {
     c("int-modulo-by-zero", "x % 0").error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
     c("constant-divide-by-zero", "1 / 0")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("constant-modulo-by-zero", "1 % 0")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("uint-divide-by-zero", "u / 0u").error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
     c("uint-modulo-by-zero", "u % 0u").error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
@@ -1027,11 +1076,14 @@ public final class NegativeCases {
         .error(CelException.Code.OVERFLOW);
     c("constant-timestamp-overflow", "timestamp('9999-12-31T23:59:59Z') + duration('1s')")
         .upstream(Upstream.diverges(Upstream.folds("INTERNAL_ERROR"), TIME_RANGE))
+        .strict(CelException.Code.OVERFLOW)
         .error(CelException.Code.OVERFLOW);
     c("invalid-regex", "'abc'.matches('(')")
         .upstream(Upstream.folds("INVALID_ARGUMENT"))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("invalid-regex-variable", "s.matches('(')")
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT, "INVALID_ARGUMENT");
     c("invalid-time-zone", "t.getFullYear('Not/AZone')")
         .error(CelException.Code.INVALID_ARGUMENT, "BAD_FORMAT");
@@ -1048,6 +1100,7 @@ public final class NegativeCases {
     current = Area.CONVERSIONS;
     c("int-of-huge-double", "int(1e300)")
         .upstream(Upstream.folds("NUMERIC_OVERFLOW"))
+        .strict(CelException.Code.OVERFLOW)
         .error(CelException.Code.OVERFLOW);
     c("int-of-huge-double-variable", "int(d)")
         .bind("d", 1e300)
@@ -1123,30 +1176,27 @@ public final class NegativeCases {
         .error(CelException.Code.INVALID_ARGUMENT, "BAD_FORMAT");
     c("constant-invalid-int-string", "int('abc')")
         .upstream(Upstream.folds("BAD_FORMAT"))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("constant-invalid-timestamp", "timestamp('abc')")
         .upstream(Upstream.rejects("BAD_FORMAT"))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("int32-wrapper-overflow", "google.protobuf.Int32Value{value: 2147483648}")
-        .upstream(NO_WKT_LITERALS)
-        .error(CelException.Code.OVERFLOW);
+        .error(CelException.Code.OVERFLOW, "NUMERIC_OVERFLOW");
     c("uint32-wrapper-overflow", "google.protobuf.UInt32Value{value: 4294967296u}")
-        .upstream(NO_WKT_LITERALS)
-        .error(CelException.Code.OVERFLOW);
+        .error(CelException.Code.OVERFLOW, "NUMERIC_OVERFLOW");
     c("duration-message-out-of-range", "google.protobuf.Duration{seconds: 999999999999}")
-        .upstream(NO_WKT_LITERALS)
+        .upstream(WKT_UNVALIDATED)
         .error(CelException.Code.OVERFLOW);
     c("duration-message-sign-mismatch", "google.protobuf.Duration{seconds: 1, nanos: -1}")
-        .upstream(NO_WKT_LITERALS)
+        .upstream(WKT_UNVALIDATED)
         .error(CelException.Code.OVERFLOW);
     c("timestamp-message-negative-nanos", "google.protobuf.Timestamp{nanos: -1}")
-        .upstream(NO_WKT_LITERALS)
+        .upstream(WKT_UNVALIDATED)
         .error(CelException.Code.OVERFLOW);
-    c("wrapper-unknown-field", "google.protobuf.Int32Value{no: 1}")
-        .upstream(NO_WKT_LITERALS)
-        .staticType();
+    c("wrapper-unknown-field", "google.protobuf.Int32Value{no: 1}").staticType();
     c("wrapper-field-type", "google.protobuf.Int32Value{value: 'a'}")
-        .upstream(NO_WKT_LITERALS)
         .type(CelException.Code.NO_OVERLOAD);
   }
 
@@ -1175,25 +1225,32 @@ public final class NegativeCases {
     c("exists-absorbs-error", "[1, 2].exists(i, 1 / (i - 1) == 1)").value(true);
     c("exists-propagates-error", "[1, 3].exists(i, 1 / (i - 1) == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("all-propagates-error", "[1, 2].all(i, 1 / (i - 1) == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("all-false-before-error", "[1, 2].all(i, 1 / (i - 2) == 1)").value(false);
     c("all-error-after-true", "[2, 1].all(i, 1 / (i - 1) == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("all-error-with-false-disjunct", "[1, 0].all(i, i / 0 == 0 || false)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("exists-one-propagates-error", "[1, 2].exists_one(i, 1 / (i - 1) == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("filter-propagates-error", "[1, 2].filter(i, 1 / (i - 1) == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("map-propagates-error", "[1, 2].map(i, 1 / (i - 1))")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("variable-all-propagates-error", "xs.all(i, 1 / (i - 1) == 1)")
         .bind("xs", List.of(1L, 2L))
@@ -1205,9 +1262,11 @@ public final class NegativeCases {
     c("optional-fallback-skipped", "optional.of(1).orValue(1 / 0)").value(1L);
     c("optional-fallback-evaluated", "optional.none().orValue(1 / 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("optional-chain-fallback-evaluated", "{'a': 1}.?b.orValue(1 / 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("variable-optional-fallback-evaluated", "m.?missing.orValue(string(x / 0))")
         .error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
@@ -1217,6 +1276,7 @@ public final class NegativeCases {
                 Upstream.accepts(),
                 "cel-java evaluates cel.bind initializers lazily; the standard comprehension"
                     + " expansion evaluates the accumulator initializer eagerly"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("block-unused-slot-error", "cel.block([1 / 0], true)")
         .upstream(
@@ -1236,6 +1296,7 @@ public final class NegativeCases {
     current = Area.COMPREHENSIONS;
     c("map-division-by-zero", "[1, 2, 3].map(i, i / (i - 2))")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("filter-missing-key", "xs.filter(i, m[string(i)] == 'a')")
         .error(CelException.Code.NO_SUCH_KEY, "ATTRIBUTE_NOT_FOUND");
@@ -1243,18 +1304,22 @@ public final class NegativeCases {
     c("macro-extra-argument", "[1].all(i, true, false)").syntax();
     c("mixed-list-element-arithmetic", "[[1], ['a']].map(l, l[0] + 1)")
         .upstream(Upstream.folds("OVERLOAD_NOT_FOUND"))
+        .strict(CelException.Code.NO_OVERLOAD)
         .error(CelException.Code.NO_OVERLOAD);
     c("exists-one-division", "[1, 2, 3].exists_one(i, i / 0 == 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("transform-map-division", "{'a': 1}.transformMap(k, v, v / 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("variable-transform-map-division", "m.transformMap(k, v, x / 0)")
         .error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
     c("map-filter-form-undeclared", "{'a': 1}.map(k, v, v / 0)").type(CelException.Code.UNDECLARED);
     c("mapped-index-past-end", "[1].map(i, i)[1]")
         .upstream(Upstream.folds("INDEX_OUT_OF_BOUNDS"))
+        .strict(CelException.Code.INDEX)
         .error(CelException.Code.INDEX);
     c("filter-then-index", "xs.filter(i, i > 10)[0]")
         .error(CelException.Code.INDEX, "INDEX_OUT_OF_BOUNDS");
@@ -1270,6 +1335,7 @@ public final class NegativeCases {
     c("string-range", "s.all(i, true)").type(CelException.Code.NO_OVERLOAD);
     c("exists-error-no-true", "[0, 0].exists(i, 1 / i == 1)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
   }
 
@@ -1277,9 +1343,11 @@ public final class NegativeCases {
     current = Area.OPTIONALS;
     c("none-value", "optional.none().value()")
         .upstream(Upstream.diverges(Upstream.folds("INTERNAL_ERROR"), OPTIONAL_VALUE))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("missing-key-optional-value", "{'a': 1}.?b.value()")
         .upstream(Upstream.diverges(Upstream.folds("INTERNAL_ERROR"), OPTIONAL_VALUE))
+        .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT);
     c("optional-index-past-end-value", "xs[?5].value()")
         .upstream(Upstream.diverges(Upstream.rejects("INTERNAL_ERROR"), OPTIONAL_VALUE))
@@ -1291,14 +1359,17 @@ public final class NegativeCases {
     c("optional-plus-int", "optional.none() + 1").type(CelException.Code.NO_OVERLOAD);
     c("of-non-zero-error", "optional.ofNonZeroValue(1 / 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("optional-select-on-int", "x.?y").type(CelException.Code.NO_OVERLOAD);
     c("has-value-on-int", "x.hasValue()").type(CelException.Code.NO_OVERLOAD);
     c("optional-value-division", "optional.of(1).value() / 0")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("optional-of-error", "optional.of(1 / 0)")
         .upstream(Upstream.folds("DIVIDE_BY_ZERO"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("optional-none-select-propagates", "optional.none().foo.hasValue()").value(false);
     c("optional-chain-absent-value", "m.?missing.value()")
