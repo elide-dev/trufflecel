@@ -292,6 +292,9 @@ final class Checker {
     var custom = n.customOverloads ? null : env.functions.get(n.name);
     if (custom != null) {
       n.overloadIds = List.of(signatures.get(0).id());
+      // New optional list helpers must not take over existing global host functions.
+      if ((n.name.equals("first") || n.name.equals("last")) && !Boolean.TRUE.equals(n.value))
+        n.extensionCall = false;
       require(n, types.size() == custom.arguments().size(), "incorrect argument count");
       var bindings = new HashMap<String, CelType>();
       if (types.size() == custom.arguments().size())

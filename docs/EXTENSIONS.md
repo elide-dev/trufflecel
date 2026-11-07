@@ -144,3 +144,22 @@ wins, while unmatched built-in signatures retain their normal behavior. Lazy con
 (`&&`, `||`, `?:`, `or`, `orValue`, `@not_strictly_false`) cannot be overloaded.
 Host functions remain impure for folding, receive owned normalized arguments, and preserve
 ordinary error/unknown propagation. Prepared and concurrent programs share immutable signatures.
+
+## Additional optional and regex functions
+
+`optional.unwrap(list)` removes empty optionals and unwraps present values. `list.first()`
+and `list.last()` return an optional element, including an empty optional for an empty list.
+`math.sqrt(double)` returns a double; negative inputs produce NaN.
+
+`regex.replace(text, pattern, replacement[, count])` replaces non-overlapping matches.
+Negative counts replace all matches; zero returns the input without compiling the pattern.
+Replacement escapes use a single backslash followed by a group digit (0 is the complete match),
+or two backslashes for a literal backslash. Dollar signs are literal. Invalid replacement
+escapes fail when a match needs replacement.
+
+`regex.extract(text, pattern)` returns the first match as an optional string;
+`regex.extractAll(text, pattern)` returns a list. With one capture group they return that group;
+with none they return the complete match. Unmatched optional captures are omitted. More than
+one capture group is rejected, except that `extract` returns none when there is no match.
+The functions share the RE2 engine seam and bounded dynamic cache with `matches`.
+Input traversal, each match and output expansion consume the evaluation budget.

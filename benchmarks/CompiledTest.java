@@ -29,6 +29,20 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        check(
+            "regex.replace(s, '(a)', r'\\1x')",
+            Map.of("s", "aba"),
+            "axbax",
+            Map.of("s", "z"),
+            "z",
+            4096);
+        check(
+            "regex.extractAll(s, '[0-9]+')",
+            Map.of("s", "a1b2"),
+            java.util.List.of("1", "2"),
+            Map.of("s", "z"),
+            java.util.List.of(),
+            4096);
         var overloaded =
             Cel.newBuilder()
                 .variable("x", CelType.DYN)

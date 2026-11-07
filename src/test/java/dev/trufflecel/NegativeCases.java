@@ -1085,6 +1085,30 @@ public final class NegativeCases {
     c("invalid-regex-variable", "s.matches('(')")
         .strict(CelException.Code.INVALID_ARGUMENT)
         .error(CelException.Code.INVALID_ARGUMENT, "INVALID_ARGUMENT");
+    c("regex-replacement-invalid-group", "regex.replace(s, '(.)', r'\\2')")
+        .bind("s", "a")
+        .upstream(
+            Upstream.diverges(
+                Upstream.rejects("INTERNAL_ERROR"),
+                "cel-java reports regex extension validation failures as INTERNAL_ERROR"))
+        .error(CelException.Code.INVALID_ARGUMENT);
+    c("regex-extract-too-many-groups", "regex.extract(s, '(a)(b)')")
+        .bind("s", "ab")
+        .upstream(
+            Upstream.diverges(
+                Upstream.rejects("INTERNAL_ERROR"),
+                "cel-java reports regex extension validation failures as INTERNAL_ERROR"))
+        .error(CelException.Code.INVALID_ARGUMENT);
+    c("regex-extract-all-too-many-groups", "regex.extractAll(s, '(a)(b)')")
+        .bind("s", "z")
+        .upstream(
+            Upstream.diverges(
+                Upstream.rejects("INTERNAL_ERROR"),
+                "cel-java reports regex extension validation failures as INTERNAL_ERROR"))
+        .error(CelException.Code.INVALID_ARGUMENT);
+    c("regex-zero-count-invalid-pattern", "regex.replace(s, '[', 'x', 0)")
+        .bind("s", "a")
+        .value("a");
     c("invalid-time-zone", "t.getFullYear('Not/AZone')")
         .error(CelException.Code.INVALID_ARGUMENT, "BAD_FORMAT");
     c("overflow-absorbed-by-or", "true || x + 1 > 0").bind("x", Long.MAX_VALUE).value(true);

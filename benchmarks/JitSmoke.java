@@ -48,6 +48,20 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        check(
+            "regex.replace(s, '(a)', r'\\1x')", Map.of("s", "aba"), "axbax", Map.of("s", "z"), "z");
+        check(
+            "regex.extractAll(s, '[0-9]+')",
+            Map.of("s", "a1b2"),
+            java.util.List.of("1", "2"),
+            Map.of("s", "z"),
+            java.util.List.of());
+        check(
+            "optional.unwrap([optional.of(x), optional.none()]).last().value() == math.sqrt(9.0)",
+            Map.of("x", 3.0),
+            true,
+            Map.of("x", 2.0),
+            false);
         var overloaded =
             Cel.newBuilder()
                 .variable("x", CelType.DYN)

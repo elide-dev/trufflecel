@@ -217,6 +217,7 @@ public final class NegativeDifferentialTest {
                 CelExtensions.optional(),
                 CelExtensions.lists(),
                 CelExtensions.strings(),
+                CelExtensions.regex(),
                 CelExtensions.math(options),
                 CelExtensions.sets(options),
                 CelExtensions.comprehensions(),
@@ -229,6 +230,7 @@ public final class NegativeDifferentialTest {
                 CelExtensions.optional(),
                 CelExtensions.lists(),
                 CelExtensions.strings(),
+                CelExtensions.regex(),
                 CelExtensions.math(options),
                 CelExtensions.sets(options),
                 CelExtensions.comprehensions())
