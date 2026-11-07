@@ -21,10 +21,12 @@ java_library(
     name = "test_support",
     testonly = True,
     srcs = [
+        "NegativeCases.java",
         "ProductionCorpus.java",
         "ProtoSchema.java",
         "TestObjects.java",
     ],
+    visibility = ["//benchmarks:__subpackages__"],
     deps = [
         "//:trufflecel",
         "//:trufflecel-protobuf",
@@ -225,6 +227,21 @@ java_test(
         "@maven//:junit_junit",
         "@maven//:org_graalvm_polyglot_polyglot",
         "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "negativeMatrix",
+    size = "large",
+    srcs = ["NegativeMatrixTest.java"],
+    data = ["//third_party/cel-spec:schemas.json"],
+    test_class = "dev.trufflecel.NegativeMatrixTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
     ],
 )
 

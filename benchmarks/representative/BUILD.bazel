@@ -24,6 +24,13 @@ java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", 
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
+# The shared negative table against both cel-java parsers, with and without AST optimizers.
+java_test(name = "negative_differential", testonly = True, size = "large", srcs = ["NegativeDifferentialTest.java"],
+    test_class = "dev.trufflecel.NegativeDifferentialTest", data = ["//third_party/cel-spec:schemas.json"],
+    deps = ["//:trufflecel", "//:trufflecel-protobuf", "//src/test/java/dev/trufflecel:test_support",
+            "//third_party/cel-spec/proto:fixtures_java", "@cel_java//:com_google_protobuf_protobuf_java",
+            "@cel_java//:com_google_guava_guava", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler",
+            "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
 java_library(name = "lifecycle_lib", testonly = True, srcs = ["Lifecycle.java", "ImagePrepared.java", "PreparedLifecycle.java"], deps = [":engines", ":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
 java_binary(name = "lifecycle", testonly = True, main_class = "dev.trufflecel.Lifecycle", runtime_deps = [":lifecycle_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_library(name = "native_config", testonly = True, srcs = ["UpstreamProtobufFeature.java"], deps = [":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_sdk_nativeimage"])
