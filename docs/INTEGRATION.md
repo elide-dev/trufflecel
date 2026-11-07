@@ -270,3 +270,21 @@ embedder. Dedicated JVM compilation/allocation and native guest-JIT gates enforc
 contracts described in [benchmark details](BENCHMARKS.md). Production image size, peak
 allocation across arbitrary inputs, and compiled throughput in Elide still need qualification. The embedder must provide the matching Truffle runtime and
 its Native Image integration. No speculative reflection/resource configuration is shipped.
+
+## Names, result types and AST size
+
+`Builder.alias("short", "package.QualifiedName")` resolves a leading identifier before
+container lookup; `abbreviations("package.QualifiedName")` uses the final identifier as
+the alias. Aliases apply to declared variables, constants, object types, host functions
+and extension function namespaces. Absolute names beginning with `.` bypass aliases.
+Invalid, duplicate and built-in type aliases are rejected. Environments copy the builder's
+alias table, and runtime bindings continue to use their declared qualified names.
+
+`expectedResultType(CelType.BOOL)` constrains the static result of source preparation and
+canonical imports, including unchecked planning. Dynamic results remain assignable under
+CEL's gradual typing rules; use `Program.test` to require a boolean value at evaluation.
+
+`maxAstNodes(count)` limits parser node allocations and imported AST size independently
+of `maxDepth`. The default is 100,000. Parser accounting includes temporary nodes used
+while recognizing macros and namespaces; input length limits still apply. Canonical input
+retains its existing source-length-derived node cap as well as the explicit node limit.

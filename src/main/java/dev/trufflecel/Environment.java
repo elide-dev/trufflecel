@@ -50,6 +50,9 @@ public final class Environment {
   }
 
   final LibraryPolicy libraryPolicy;
+  final Map<String, String> aliases;
+  final CelType expectedResultType;
+  final int maxAstNodes;
   final String container;
   final boolean inferVariables, macros;
   final long budget;
@@ -71,6 +74,9 @@ public final class Environment {
     var signatures = new LinkedHashMap<String, List<FunctionOverload>>();
     b.overloads.forEach((name, values) -> signatures.put(name, List.copyOf(values)));
     overloads = Map.copyOf(signatures);
+    aliases = Map.copyOf(b.aliases);
+    expectedResultType = b.expectedResultType;
+    maxAstNodes = b.maxAstNodes;
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
@@ -126,7 +132,10 @@ public final class Environment {
     record Pending(ExprNode node, int depth) {}
     var pending = new ArrayDeque<Pending>();
     pending.push(new Pending(node, 1));
+    int count = 0;
     while (!pending.isEmpty()) {
+      if (++count > maxAstNodes)
+        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST node limit exceeded");
       Pending item = pending.pop();
       if (item.depth() > maxDepth)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST depth limit exceeded");
@@ -152,6 +161,11 @@ public final class Environment {
     }
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
+    if (expectedResultType != null && !expectedResultType.accepts(result))
+      throw new CelException(
+          CelException.Code.TYPE,
+          "expected result type " + expectedResultType + ", got " + result,
+          node.offset);
     FieldPlan.prepare(node, this);
     node = Optimizer.optimize(node, this, source);
     // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
@@ -168,6 +182,8 @@ public final class Environment {
 
   String resolve(String name, Set<String> names) {
     if (name.startsWith(".")) return names.contains(name.substring(1)) ? name.substring(1) : null;
+    String expanded = expandAlias(name);
+    if (!expanded.equals(name)) return names.contains(expanded) ? expanded : null;
     String prefix = container;
     while (!prefix.isEmpty()) {
       String candidate = prefix + "." + name;
@@ -176,6 +192,13 @@ public final class Environment {
       prefix = dot < 0 ? "" : prefix.substring(0, dot);
     }
     return names.contains(name) ? name : null;
+  }
+
+  String expandAlias(String name) {
+    int dot = name.indexOf('.');
+    String root = dot < 0 ? name : name.substring(0, dot);
+    String target = aliases.get(root);
+    return target == null ? name : target + (dot < 0 ? "" : name.substring(dot));
   }
 
   static CelType builtinType(String name) {
@@ -205,6 +228,9 @@ public final class Environment {
     private String container = "";
     private Map<String, Integer> libraries = LibraryPolicy.LATEST;
     private Set<String> allowedFunctions;
+    private final Map<String, String> aliases = new LinkedHashMap<>();
+    private CelType expectedResultType;
+    private int maxAstNodes = 100_000;
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
@@ -304,6 +330,38 @@ public final class Environment {
      */
     public Builder allowedFunctions(Set<String> names) {
       allowedFunctions = Set.copyOf(names);
+      return this;
+    }
+
+    /** Resolve the leading identifier through a qualified name before container lookup. */
+    public Builder alias(String alias, String qualifiedName) {
+      Objects.requireNonNull(alias);
+      Objects.requireNonNull(qualifiedName);
+      if (!alias.matches("[A-Za-z_][A-Za-z_0-9]*")
+          || builtinType(alias) != null
+          || !qualifiedName.matches("[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*")
+          || aliases.containsKey(alias))
+        throw new IllegalArgumentException("invalid or duplicate alias: " + alias);
+      aliases.put(alias, qualifiedName);
+      return this;
+    }
+
+    /** Use each qualified name's last identifier as its alias. */
+    public Builder abbreviations(String... qualifiedNames) {
+      for (String name : qualifiedNames) alias(name.substring(name.lastIndexOf('.') + 1), name);
+      return this;
+    }
+
+    /** Require the checked expression's static result to be assignable to this type. */
+    public Builder expectedResultType(CelType type) {
+      expectedResultType = Objects.requireNonNull(type);
+      return this;
+    }
+
+    /** Bound parser allocations and imported AST nodes, independently of nesting depth. */
+    public Builder maxAstNodes(int count) {
+      if (count <= 0) throw new IllegalArgumentException("node count must be positive");
+      maxAstNodes = count;
       return this;
     }
 

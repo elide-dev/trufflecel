@@ -43,6 +43,22 @@ final class Parser {
     return result;
   }
 
+  private int nodeCount;
+
+  private ExprNode created(ExprNode node) {
+    if (++nodeCount > env.maxAstNodes) throw limit("AST node limit exceeded");
+    return node;
+  }
+
+  private ExprNode node(
+      ExprNode.Kind kind, String name, Object value, int offset, ExprNode... children) {
+    return created(new ExprNode(kind, name, value, offset, children));
+  }
+
+  private ExprNode constant(Object value, int offset) {
+    return created(ExprNode.constant(value, offset));
+  }
+
   private ExprNode expression(int min) {
     if (++depth > env.maxDepth) throw limit("expression nesting limit exceeded");
     try {
@@ -52,7 +68,7 @@ final class Parser {
         int prec = precedence(op.kind);
         ExprNode right = expression(prec + 1);
         left =
-            ExprNode.binary(op.kind, op.offset, left, right)
+            created(ExprNode.binary(op.kind, op.offset, left, right))
                 .sourceRange(left.sourceStart, right.sourceEnd);
       }
       if (min == 0 && accept("?")) {
@@ -62,7 +78,7 @@ final class Parser {
         yes.statement = true;
         no.statement = true;
         left =
-            new ExprNode(ExprNode.Kind.CONDITIONAL, "", null, left.offset, left, yes, no)
+            node(ExprNode.Kind.CONDITIONAL, "", null, left.offset, left, yes, no)
                 .sourceRange(left.sourceStart, no.sourceEnd);
       }
       return left;
@@ -101,8 +117,7 @@ final class Parser {
       ExprNode child = primary();
       child = postfix(child);
       if (count % 2 == 0) return child;
-      return new ExprNode(
-          ExprNode.Kind.CALL, op.kind.equals("-") ? "neg" : "!", false, op.offset, child);
+      return node(ExprNode.Kind.CALL, op.kind.equals("-") ? "neg" : "!", false, op.offset, child);
     }
     return postfix(primary());
   }
@@ -118,13 +133,13 @@ final class Parser {
       case "NUMBER":
         return number(t, false);
       case "VALUE":
-        return ExprNode.constant(t.value, t.offset);
+        return constant(t.value, t.offset);
       case "IDENT", ".":
         {
           String name = t.kind.equals(".") ? "." + identifier(false) : t.text;
           if (RESERVED.contains(name)) throw error("reserved identifier: " + name);
           if (accept("(")) return call(name, false, t.offset, arguments(")"));
-          return new ExprNode(ExprNode.Kind.IDENT, name, null, t.offset);
+          return node(ExprNode.Kind.IDENT, name, null, t.offset);
         }
       case "(":
         {
@@ -133,7 +148,7 @@ final class Parser {
           return child;
         }
       case "[":
-        return new ExprNode(
+        return node(
             ExprNode.Kind.LIST, "", null, t.offset, aggregate("]").toArray(ExprNode[]::new));
       case "{":
         {
@@ -151,8 +166,7 @@ final class Parser {
               expect(",");
               if (accept("}")) break;
             } while (true);
-          return new ExprNode(
-              ExprNode.Kind.MAP, "", null, t.offset, entries.toArray(ExprNode[]::new));
+          return node(ExprNode.Kind.MAP, "", null, t.offset, entries.toArray(ExprNode[]::new));
         }
       default:
         throw error("expected expression, found " + t.text);
@@ -171,12 +185,12 @@ final class Parser {
           var args = arguments(")");
           args.add(0, node);
           node = call(name, true, node.offset, args);
-        } else node = new ExprNode(ExprNode.Kind.SELECT, name, optional, node.offset, node);
+        } else node = node(ExprNode.Kind.SELECT, name, optional, node.offset, node);
       } else if (accept("[")) {
         boolean optional = accept("?");
         ExprNode index = expression(0);
         expect("]");
-        node = new ExprNode(ExprNode.Kind.INDEX, "", optional, node.offset, node, index);
+        node = node(ExprNode.Kind.INDEX, "", optional, node.offset, node, index);
       } else if (token.kind.equals("{") && node.qualifiedName() != null) {
         take();
         String name = node.qualifiedName();
@@ -198,7 +212,7 @@ final class Parser {
             if (accept("}")) break;
           } while (true);
         node =
-            new ExprNode(
+            node(
                 ExprNode.Kind.OBJECT,
                 name,
                 names.toArray(String[]::new),
@@ -224,8 +238,8 @@ final class Parser {
             id += ":" + number;
           }
           return name.equals("index")
-              ? new ExprNode(ExprNode.Kind.BLOCK_INDEX, "cel.index", args.get(1).value, offset)
-              : new ExprNode(ExprNode.Kind.IDENT, id, null, offset);
+              ? node(ExprNode.Kind.BLOCK_INDEX, "cel.index", args.get(1).value, offset)
+              : node(ExprNode.Kind.IDENT, id, null, offset);
         }
         if (name.equals("block")) {
           if (args.size() != 3 || args.get(1).kind != ExprNode.Kind.LIST)
@@ -234,7 +248,7 @@ final class Parser {
           for (ExprNode slot : slots) if (slot.optionalEntry) throw error("optional block slot");
           ExprNode[] children = Arrays.copyOf(slots, slots.length + 1);
           children[slots.length] = args.get(2);
-          return new ExprNode(ExprNode.Kind.BLOCK, "cel.block", null, offset, children);
+          return node(ExprNode.Kind.BLOCK, "cel.block", null, offset, children);
         }
         if (name.equals("bind")) {
           if (args.size() != 4
@@ -242,7 +256,7 @@ final class Parser {
               || args.get(1).name.contains(".")) throw error("invalid cel.bind arguments");
           ExprNode variable = args.get(1);
           ExprNode node =
-              new ExprNode(
+              node(
                   ExprNode.Kind.MACRO,
                   "bind",
                   new String[] {variable.name},
@@ -263,15 +277,15 @@ final class Parser {
         if (args.size() != 3 || args.get(2).qualifiedName() == null)
           throw error("protobuf extension requires a qualified name");
         String field = args.get(2).qualifiedName();
-        ExprNode select = new ExprNode(ExprNode.Kind.SELECT, field, false, offset, args.get(1));
+        ExprNode select = node(ExprNode.Kind.SELECT, field, false, offset, args.get(1));
         select.extensionSelect = true;
         return name.equals("getExt")
             ? select
-            : new ExprNode(ExprNode.Kind.MACRO, "has", null, offset, select);
+            : node(ExprNode.Kind.MACRO, "has", null, offset, select);
       }
       if (name.equals("has") && !receiver && args.size() == 1) {
         if (args.get(0).kind != ExprNode.Kind.SELECT) throw error("has requires a field selection");
-        return new ExprNode(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));
+        return node(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));
       }
       if (receiver
           && Set.of(
@@ -308,13 +322,13 @@ final class Parser {
         }
         if (two && names[0].equals(names[1])) throw error("macro variables must differ");
         ExprNode macro =
-            new ExprNode(ExprNode.Kind.MACRO, name, names, offset, args.toArray(ExprNode[]::new));
+            node(ExprNode.Kind.MACRO, name, names, offset, args.toArray(ExprNode[]::new));
         macro.bindings = bindings;
         for (int i = 1; i < macro.children.length; i++) macro.children[i].statement = true;
         return macro;
       }
     }
-    return new ExprNode(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
+    return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
   }
 
   private ArrayList<ExprNode> arguments(String end) {
@@ -358,13 +372,13 @@ final class Parser {
         if (unsigned) throw error("floating point uint literal");
         double d = Double.parseDouble((negative ? "-" : "") + s);
         if (!Double.isFinite(d)) throw error("floating point literal out of range");
-        return ExprNode.constant(d, t.offset);
+        return constant(d, t.offset);
       }
       if (unsigned && negative) throw error("negative unsigned literal");
       int base = hex ? 16 : 10;
       if (hex) s = s.substring(2);
-      if (unsigned) return ExprNode.constant(new UInt(Long.parseUnsignedLong(s, base)), t.offset);
-      return ExprNode.constant(Long.parseLong((negative ? "-" : "") + s, base), t.offset);
+      if (unsigned) return constant(new UInt(Long.parseUnsignedLong(s, base)), t.offset);
+      return constant(Long.parseLong((negative ? "-" : "") + s, base), t.offset);
     } catch (NumberFormatException e) {
       throw new CelException(
           CelException.Code.SYNTAX, "invalid or out-of-range number: " + t.text, t.offset);

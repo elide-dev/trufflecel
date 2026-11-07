@@ -56,6 +56,12 @@ public class LibraryPolicyTest {
         assertThrows(CelException.class, () -> protos.parse("proto.getExt({}, missing)").evaluate())
             .code());
     disabled(Cel.newBuilder().allowedFunctions(Set.of()).build(), "proto.hasExt({}, missing)");
+    var hasOnly = Cel.newBuilder().allowedFunctions(Set.of("proto.hasExt")).build();
+    assertEquals(
+        CelException.Code.NO_OVERLOAD,
+        assertThrows(
+                CelException.class, () -> hasOnly.parse("proto.hasExt({}, missing)").evaluate())
+            .code());
   }
 
   @Test

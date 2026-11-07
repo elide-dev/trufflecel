@@ -293,7 +293,8 @@ public final class CanonicalAst {
     }
 
     ExprNode expression(Message expr, int depth) {
-      if (++count > environment.maxSourceLength || depth > environment.maxDepth)
+      if (++count > Math.min(environment.maxAstNodes, environment.maxSourceLength)
+          || depth > environment.maxDepth)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST size/depth limit exceeded");
       long id = (Long) field(expr, "id");
       if (id <= 0 || !ids.add(id))

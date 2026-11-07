@@ -292,3 +292,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "environmentControls",
+    srcs = ["EnvironmentControlsTest.java"],
+    test_class = "dev.trufflecel.EnvironmentControlsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)

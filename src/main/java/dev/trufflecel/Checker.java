@@ -183,7 +183,10 @@ final class Checker {
         yield CelType.join(yes, no);
       }
       case MACRO -> {
-        String function = n.name.equals("bind") ? "cel.bind" : n.name;
+        String function =
+            n.name.equals("bind")
+                ? "cel.bind"
+                : n.name.equals("has") && n.children[0].extensionSelect ? "proto.hasExt" : n.name;
         env.libraryPolicy.name(function, n.offset);
         env.libraryPolicy.library(function, CelType.DYN, n.offset);
         if (n.value instanceof String[] names && names.length == 2)
@@ -263,6 +266,7 @@ final class Checker {
       String prefix = n.children[0].qualifiedName();
       if (prefix != null && prefix.startsWith(".")) prefix = prefix.substring(1);
       boolean namespace = prefix != null && !boundPrefix(prefix, locals);
+      if (namespace) prefix = env.expandAlias(prefix);
       if (namespace
           && (ExtensionFunctions.namespaced(prefix, n.name)
               || "optional".equals(prefix)
