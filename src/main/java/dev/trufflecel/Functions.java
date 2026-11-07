@@ -27,13 +27,7 @@ final class Functions {
     // Primitive scalar operations stay in the guest graph; generic libraries are host calls.
     if (a.length == 1) {
       if (name.equals("!") && a[0] instanceof Boolean b) return !b;
-      if (name.equals("neg") && a[0] instanceof Long l) {
-        try {
-          return Math.negateExact(l);
-        } catch (ArithmeticException e) {
-          throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
-        }
-      }
+      if (name.equals("neg") && a[0] instanceof Long l) return negate(l);
     }
     if (a.length == 2 && a[0] instanceof Long x && a[1] instanceof Long y) {
       switch (name) {
@@ -46,14 +40,56 @@ final class Functions {
         case ">=":
           return x >= y;
         case "+", "-", "*", "/", "%":
-          try {
-            return arithmetic(name, x, y);
-          } catch (ArithmeticException e) {
-            throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
-          }
+          return arithmetic(name, x, y);
       }
     }
     return applyHost(name, a, env);
+  }
+
+  // Signed 64-bit arithmetic with explicit overflow checks. The Math.*Exact intrinsics guard their
+  // overflow branch with a speculation-free deoptimization, so compiled code that reached them
+  // deoptimized on every overflow; these checks are plain control flow in guest code.
+  static long add(long x, long y) {
+    long result = x + y;
+    if (((x ^ result) & (y ^ result)) < 0) throw overflow();
+    return result;
+  }
+
+  static long subtract(long x, long y) {
+    long result = x - y;
+    if (((x ^ y) & (x ^ result)) < 0) throw overflow();
+    return result;
+  }
+
+  static long multiply(long x, long y) {
+    long result = x * y;
+    // The 128-bit product fits in 64 signed bits exactly when its high word sign-extends the low.
+    if (Math.multiplyHigh(x, y) != (result >> 63)) throw overflow();
+    return result;
+  }
+
+  static long negate(long x) {
+    if (x == Long.MIN_VALUE) throw overflow();
+    return -x;
+  }
+
+  static long divide(long x, long y) {
+    if (y == 0) throw divideByZero();
+    if (x == Long.MIN_VALUE && y == -1) throw overflow();
+    return x / y;
+  }
+
+  static long remainder(long x, long y) {
+    if (y == 0) throw divideByZero();
+    return x % y;
+  }
+
+  static CelException overflow() {
+    return Values.error(CelException.Code.OVERFLOW, "numeric overflow");
+  }
+
+  static CelException divideByZero() {
+    return Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
   }
 
   @TruffleBoundary
@@ -270,17 +306,12 @@ final class Functions {
 
   static Object arithmetic(String op, Object a, Object b) {
     if (a instanceof Long x && b instanceof Long y) {
-      if ((op.equals("/") || op.equals("%")) && y == 0)
-        throw Values.error(CelException.Code.DIVIDE_BY_ZERO, "division by zero");
       return switch (op) {
-        case "+" -> Math.addExact(x, y);
-        case "-" -> Math.subtractExact(x, y);
-        case "*" -> Math.multiplyExact(x, y);
-        case "/" -> {
-          if (x == Long.MIN_VALUE && y == -1) throw new ArithmeticException();
-          yield x / y;
-        }
-        default -> x % y;
+        case "+" -> add(x, y);
+        case "-" -> subtract(x, y);
+        case "*" -> multiply(x, y);
+        case "/" -> divide(x, y);
+        default -> remainder(x, y);
       };
     }
     if (a instanceof UInt x && b instanceof UInt y) {

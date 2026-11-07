@@ -138,6 +138,21 @@ public final class CompiledTest {
                 "j", JsonValues.from(new org.graalvm.shadowed.org.json.JSONObject("{\"id\":0}"))),
             false,
             1024);
+        // A program that has already raised errors (so its compiled code carries real exception
+        // paths) must keep the same happy-path budgets as a program that never has.
+        Program recovered = Cel.compile("xs.all(x, 10 / x > 0)");
+        assertEquals(
+            CelException.Code.DIVIDE_BY_ZERO,
+            assertThrows(
+                    CelException.class, () -> recovered.evaluate(Map.of("xs", List.of(0L, 1L))))
+                .code());
+        check(
+            recovered,
+            Map.of("xs", List.of(1L, 2L, 3L)),
+            true,
+            Map.of("xs", List.of(1L, -2L)),
+            false,
+            160);
         Program limited =
             Cel.newBuilder()
                 .variable("enabled", CelType.BOOL)
