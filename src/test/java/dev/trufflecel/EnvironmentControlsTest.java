@@ -49,6 +49,7 @@ public class EnvironmentControlsTest {
     var input = Map.<String, Object>of("example.value", -3L, "other.v", 9L);
     assertEquals(true, env.compile("m.abs(v) < limit").evaluate(input));
     assertEquals(-6L, env.compile("api.doubleIt(v)").evaluate(input));
+    assertEquals(-3L, env.compile("api.value").evaluate(input));
     assertEquals(9L, env.compile(".other.v").evaluate(input));
     assertThrows(CelException.class, () -> env.compile("api.missing()"));
     builder.alias("later", "example.value");

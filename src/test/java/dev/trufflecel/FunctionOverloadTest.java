@@ -6,6 +6,25 @@ import org.junit.Test;
 
 public class FunctionOverloadTest {
   @Test
+  public void arithmeticLoweringPreservesCustomCallAtChainBase() {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var env =
+        Cel.newBuilder()
+            .function(
+                "value",
+                "custom_value",
+                false,
+                List.of(),
+                CelType.INT,
+                args -> (long) calls.incrementAndGet())
+            .build();
+    var program = env.compile("value() + 1 + 2");
+    assertEquals(4L, program.evaluate());
+    assertEquals(5L, program.evaluate());
+    assertEquals(2, calls.get());
+  }
+
+  @Test
   public void signaturesDispatchStaticallyAndDynamicallyWithoutOverwriting() {
     var builder =
         Cel.newBuilder()

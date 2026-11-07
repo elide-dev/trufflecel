@@ -39,7 +39,7 @@ final class LibraryPolicy {
   }
 
   void name(String name, int offset) {
-    if (functions != null && !functions.contains(name)) reject(name, offset);
+    if (functions != null && !functions.contains(name)) throw rejection(name, offset);
   }
 
   void library(String name, CelType receiver, int offset) {
@@ -58,7 +58,7 @@ final class LibraryPolicy {
               Set.of("first", "last").contains(name) ? 2 : name.equals("optFlatMap") ? 1 : 0;
           default -> 0;
         };
-    if (version < required) reject(name, offset);
+    if (version < required) throw rejection(name, offset);
   }
 
   private String library(String name, CelType receiver) {
@@ -99,7 +99,7 @@ final class LibraryPolicy {
     return null;
   }
 
-  private static void reject(String name, int offset) {
-    throw new CelException(CelException.Code.UNDECLARED, "function is disabled: " + name, offset);
+  private static CelException rejection(String name, int offset) {
+    return new CelException(CelException.Code.UNDECLARED, "function is disabled: " + name, offset);
   }
 }
