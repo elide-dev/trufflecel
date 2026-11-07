@@ -146,29 +146,35 @@ public final class Environment {
   }
 
   private static void locateNodes(String source, ExprNode root) {
-    var nodes = new ArrayList<ExprNode>();
-    var pending = new ArrayDeque<ExprNode>();
-    pending.add(root);
-    long nextId = 1;
-    while (!pending.isEmpty()) {
-      ExprNode node = pending.removeFirst();
-      nodes.add(node);
-      nextId = Math.max(nextId, node.canonicalId + 1);
-      Collections.addAll(pending, node.children);
+    // The tree has already passed checkDepth. Keep the common single-line source path free of
+    // traversal collections and boxed offsets; error metadata belongs to nodes, not a side table.
+    int count = 1;
+    for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') count++;
+    int[] lines = count == 1 ? null : new int[count];
+    if (lines != null) {
+      int line = 1;
+      for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') lines[line++] = i + 1;
     }
-    var lines = new ArrayList<Integer>();
-    lines.add(0);
-    for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') lines.add(i + 1);
-    for (ExprNode node : nodes) {
-      if (node.canonicalId == 0) node.canonicalId = nextId++;
-      if (!source.isEmpty()) {
-        node.errorOffset = node.offset;
-        int line = Collections.binarySearch(lines, node.offset);
-        if (line < 0) line = -line - 2;
-        node.errorLine = line + 1;
-        node.errorColumn = node.offset - lines.get(line) + 1;
-      }
+    locateNodes(root, nextId(root), !source.isEmpty(), lines);
+  }
+
+  private static long nextId(ExprNode node) {
+    long maximum = Math.max(1, node.canonicalId + 1);
+    for (ExprNode child : node.children) maximum = Math.max(maximum, nextId(child));
+    return maximum;
+  }
+
+  private static long locateNodes(ExprNode node, long nextId, boolean source, int[] lines) {
+    if (node.canonicalId == 0) node.canonicalId = nextId++;
+    if (source) {
+      node.errorOffset = node.offset;
+      int line = lines == null ? 0 : Arrays.binarySearch(lines, node.offset);
+      if (line < 0) line = -line - 2;
+      node.errorLine = line + 1;
+      node.errorColumn = node.offset - (lines == null ? 0 : lines[line]) + 1;
     }
+    for (ExprNode child : node.children) nextId = locateNodes(child, nextId, source, lines);
+    return nextId;
   }
 
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
@@ -223,6 +229,7 @@ public final class Environment {
   }
 
   String expandAlias(String name) {
+    if (aliases.isEmpty()) return name;
     int dot = name.indexOf('.');
     String root = dot < 0 ? name : name.substring(0, dot);
     String target = aliases.get(root);
