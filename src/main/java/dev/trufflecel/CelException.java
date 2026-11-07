@@ -59,6 +59,7 @@ public final class CelException extends RuntimeException {
 
   // The first issue's fields are plain finals: compiled error handlers read the code on hot paths,
   // and an interface call into the issue list would not partially evaluate.
+  private final long expressionId;
   private final Code code;
   private final int offset, line, column;
   private final List<Issue> issues;
@@ -73,7 +74,12 @@ public final class CelException extends RuntimeException {
 
   /** Report one or more issues; the first issue provides the code and offset. */
   public CelException(List<Issue> issues) {
+    this(issues, -1);
+  }
+
+  private CelException(List<Issue> issues, long expressionId) {
     super(describe(issues));
+    this.expressionId = expressionId;
     this.issues = List.copyOf(issues);
     Issue first = issues.get(0);
     code = first.code();
@@ -87,6 +93,18 @@ public final class CelException extends RuntimeException {
     var text = new StringBuilder(issues.get(0).toString());
     for (int i = 1; i < issues.size(); i++) text.append("; ").append(issues.get(i));
     return text.toString();
+  }
+
+  /** Stable expression ID within the program, or -1 for an unlocated failure. */
+  public long expressionId() {
+    return expressionId;
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  CelException at(int offset, long id, int line, int column) {
+    if (expressionId >= 0) return this;
+    Issue issue = issues.get(0);
+    return new CelException(List.of(new Issue(code, issue.message(), offset, line, column)), id);
   }
 
   public Code code() {
@@ -115,7 +133,8 @@ public final class CelException extends RuntimeException {
   /** This failure with line and column resolved against {@code source}. */
   CelException locate(String source) {
     if (line >= 0 || offset < 0) return this;
-    return new CelException(issues.stream().map(issue -> issue.locate(source)).toList());
+    return new CelException(
+        issues.stream().map(issue -> issue.locate(source)).toList(), expressionId);
   }
 
   @Override

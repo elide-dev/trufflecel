@@ -200,7 +200,9 @@ public final class ValidationTest {
     CelException e =
         assertThrows(CelException.class, () -> env.compile("'abc'.matches('(')").evaluate());
     assertEquals(CelException.Code.INVALID_ARGUMENT, e.code());
-    assertEquals("invalid regular expression", e.getMessage());
+    assertEquals("invalid regular expression", e.issues().get(0).message());
+    assertTrue(e.expressionId() > 0);
+    assertEquals(1, e.line());
     assertEquals(
         CelException.Code.NO_OVERLOAD,
         assertThrows(CelException.class, () -> env.compile("same(dyn(1u))").evaluate()).code());

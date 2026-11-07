@@ -288,3 +288,17 @@ CEL's gradual typing rules; use `Program.test` to require a boolean value at eva
 of `maxDepth`. The default is 100,000. Parser accounting includes temporary nodes used
 while recognizing macros and namespaces; input length limits still apply. Canonical input
 retains its existing source-length-derived node cap as well as the explicit node limit.
+
+## Runtime error locations
+
+`CelException` exposes `expressionId()`, `offset()`, `line()` and `column()` for runtime
+failures as well as compile-time diagnostics. Runtime IDs are stable within a prepared
+program; canonical imports preserve supplied expression IDs. The innermost failing
+operation retains its location through folding, arithmetic lowering and error propagation.
+Exception instances supplied by host callbacks are never mutated.
+
+For source programs, offsets count Java chars and line/column are one-based. Imported
+canonical `SourceInfo` uses CEL's code-point positions; absent position metadata remains
+`-1` while the expression ID is still available. Budget exhaustion identifies the policy
+root because optimized evaluation can charge multiple original visits together. Arbitrary
+exceptions outside CEL's normalized callback errors retain their existing propagation.

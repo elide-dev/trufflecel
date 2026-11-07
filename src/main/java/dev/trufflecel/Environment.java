@@ -144,6 +144,32 @@ public final class Environment {
     }
   }
 
+  private static void locateNodes(String source, ExprNode root) {
+    var nodes = new ArrayList<ExprNode>();
+    var pending = new ArrayDeque<ExprNode>();
+    pending.add(root);
+    long nextId = 1;
+    while (!pending.isEmpty()) {
+      ExprNode node = pending.removeFirst();
+      nodes.add(node);
+      nextId = Math.max(nextId, node.canonicalId + 1);
+      Collections.addAll(pending, node.children);
+    }
+    var lines = new ArrayList<Integer>();
+    lines.add(0);
+    for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') lines.add(i + 1);
+    for (ExprNode node : nodes) {
+      if (node.canonicalId == 0) node.canonicalId = nextId++;
+      if (!source.isEmpty()) {
+        node.errorOffset = node.offset;
+        int line = Collections.binarySearch(lines, node.offset);
+        if (line < 0) line = -line - 2;
+        node.errorLine = line + 1;
+        node.errorColumn = node.offset - lines.get(line) + 1;
+      }
+    }
+  }
+
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
     checkDepth(node);
     Map<String, CelType> declarations = variables;
@@ -166,6 +192,7 @@ public final class Environment {
           CelException.Code.TYPE,
           "expected result type " + expectedResultType + ", got " + result,
           node.offset);
+    locateNodes(source, node);
     FieldPlan.prepare(node, this);
     node = Optimizer.optimize(node, this, source);
     // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped

@@ -357,7 +357,7 @@ final class Optimizer {
     CelException error = n.fold.error();
     // The literal validators already reported this pattern or conversion.
     if (n instanceof MatchesNode matches && matches.error == error || literalConversion(n)) return;
-    if (strictPath) issue(error.code(), error.getMessage(), n.offset);
+    if (strictPath) issue(error.code(), error.issues().get(0).message(), n.offset);
   }
 
   /** {@code timestamp('...')} and {@code duration('...')} are validated regardless of position. */
@@ -430,6 +430,7 @@ final class Optimizer {
     Folded(ExprNode original) {
       super(Kind.CONSTANT, "", original.fold.value(), original.offset);
       sourceRange(original.sourceStart, original.sourceEnd);
+      copyLocation(original);
       optionalEntry = original.optionalEntry;
       statement = original.statement;
       checkedType = original.checkedType;
@@ -438,7 +439,7 @@ final class Optimizer {
     }
 
     @Override
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.charge(cost);
       // A CEL error is ordinary compiled control flow; the prebuilt exception needs no boundary.
       if (error != null) throw error;
@@ -454,16 +455,18 @@ final class Optimizer {
     MatchesNode(ExprNode original, Regex.Compiled pattern, CelException error) {
       super(Kind.CALL, original.name, original.value, original.offset, original.children);
       sourceRange(original.sourceStart, original.sourceEnd);
+      copyLocation(original);
       optionalEntry = original.optionalEntry;
       statement = original.statement;
       checkedType = original.checkedType;
       canonicalId = original.canonicalId;
       this.pattern = pattern;
-      this.error = error;
+      this.error =
+          error == null ? null : error.at(errorOffset, canonicalId, errorLine, errorColumn);
     }
 
     @Override
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       Object text = null;
       CelException failure = null;

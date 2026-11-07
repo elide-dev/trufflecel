@@ -304,3 +304,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "errorLocation",
+    srcs = ["ErrorLocationTest.java"],
+    test_class = "dev.trufflecel.ErrorLocationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)

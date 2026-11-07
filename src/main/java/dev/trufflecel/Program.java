@@ -193,7 +193,12 @@ public final class Program {
           contextInArguments
               ? (EvalContext) frame.getArguments()[0]
               : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
-      return body.execute(frame, context);
+      try {
+        return body.execute(frame, context);
+      } catch (CelException e) {
+        // Budget accounting may aggregate lowered visits; attribute exhaustion to the policy root.
+        throw e.at(body.errorOffset, body.canonicalId, body.errorLine, body.errorColumn);
+      }
     }
 
     @Override
