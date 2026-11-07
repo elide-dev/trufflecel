@@ -334,7 +334,7 @@
     "@@rules_graalvm+//:extensions.bzl%graalvm": {
       "general": {
         "bzlTransitiveDigest": "QqS+aQ+aVVrlufL91vIYvIHSI69Ei5Zbu7pmx8A2IOI=",
-        "usagesDigest": "9w7TkuMI60fhHdNvLPtBS/8xNby3W2wvKAzJ5Jaum6I=",
+        "usagesDigest": "sasy+vmJFBBqRueNQJMPib37cDmu1yj5B/Cd3qSTkFE=",
         "recordedInputs": [
           "REPO_MAPPING:rules_graalvm+,bazel_skylib bazel_skylib+"
         ],
@@ -348,7 +348,7 @@
           "graalvm_linux_amd64": {
             "repoRuleId": "@@rules_graalvm+//internal:graalvm_bindist.bzl%_graalvm_bindist_repository",
             "attributes": {
-              "version": "25.5.5-elide.24",
+              "version": "25.5.5-elide.27",
               "java_version": "25",
               "distribution": "ce",
               "components": [],
@@ -356,13 +356,13 @@
               "enable_toolchain": true,
               "toolchain_config": "graalvm_linux_amd64_toolchains",
               "urls": {
-                "linux-x64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.24/dist/graalvm-ce-25.5.5-elide.24-linux-amd64.tar.gz"
+                "linux-x64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.27/dist/graalvm-ce-25.5.5-elide.27-linux-amd64.tar.gz"
               },
               "sha256s": {
-                "linux-x64": "83bd7b3b78e76de00bb3879eeae79a8b439f9356fefd3bf3b84d2818af8961e7"
+                "linux-x64": "b6d316ed0b81354949704afe632e1e2a1551d637736df5b6b03088cc5b09c852"
               },
               "strip_prefixes": {
-                "linux-x64": "graalvm-ce-25.5.5-elide.24-linux-amd64"
+                "linux-x64": "graalvm-ce-25.5.5-elide.27-linux-amd64"
               },
               "platform": "linux-x64"
             }
@@ -376,7 +376,7 @@
           "graalvm_macos_aarch64": {
             "repoRuleId": "@@rules_graalvm+//internal:graalvm_bindist.bzl%_graalvm_bindist_repository",
             "attributes": {
-              "version": "25.5.5-elide.24",
+              "version": "25.5.5-elide.27",
               "java_version": "25",
               "distribution": "ce",
               "components": [],
@@ -384,13 +384,13 @@
               "enable_toolchain": true,
               "toolchain_config": "graalvm_macos_aarch64_toolchains",
               "urls": {
-                "macos-aarch64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.24/dist/graalvm-ce-25.5.5-elide.24-macos-aarch64.tar.gz"
+                "macos-aarch64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.27/dist/graalvm-ce-25.5.5-elide.27-macos-aarch64.tar.gz"
               },
               "sha256s": {
-                "macos-aarch64": "8b03207cb35ab5b9bec6422b4266178315f7a056ae88e90f57cc22b2362c44a6"
+                "macos-aarch64": "e8ece6d4c8f3f1bc582d447ec36e7ade69d9cf4fc0e30c58bc40af39a9541f0c"
               },
               "strip_prefixes": {
-                "macos-aarch64": "graalvm-ce-25.5.5-elide.24-macos-aarch64"
+                "macos-aarch64": "graalvm-ce-25.5.5-elide.27-macos-aarch64"
               },
               "platform": "macos-aarch64"
             }
