@@ -936,4 +936,19 @@ public class ProtobufIntegrationTest {
               .test(Map.of("m", value)));
     }
   }
+
+  @Test
+  public void constructionRangeFailuresKeepTheOverflowCategory() throws Exception {
+    var type = new ProtobufType(descriptor());
+    for (Map<String, Object> fields :
+        List.<Map<String, Object>>of(
+            Map.of("int32", 2147483648L),
+            Map.of("sint32", -2147483649L),
+            Map.of("uint32", new UInt(4294967296L)),
+            Map.of("fixed32", new UInt(4294967296L))))
+      assertEquals(
+          fields.toString(),
+          CelException.Code.OVERFLOW,
+          assertThrows(CelException.class, () -> type.construct(fields)).code());
+  }
 }
