@@ -163,3 +163,27 @@ with none they return the complete match. Unmatched optional captures are omitte
 one capture group is rejected, except that `extract` returns none when there is no match.
 The functions share the RE2 engine seam and bounded dynamic cache with `matches`.
 Input traversal, each match and output expansion consume the evaluation budget.
+
+## Library and function restrictions
+
+`Builder.libraries(Map<String, Integer>)` replaces the enabled extension libraries.
+The default enables every implemented library at its latest supported version; an empty
+map disables them all. `Builder.allowedFunctions(Set<String>)` independently restricts
+callable names, including registered host functions and macros. Both inputs are copied.
+For example, `libraries(Map.of("math", 1)).allowedFunctions(Set.of("math.abs"))` exposes
+only `math.abs` among callable functions. Core literals, selection, types and conditional
+syntax remain available. Restrictions apply before folding, to unchecked programs and
+when canonical ASTs are imported; dynamic extension dispatch rechecks library membership.
+
+Supported library versions: `math`, `lists`, `optional` 0–2; `strings`, `regex`, `sets`,
+`encoders`, `json`, `yaml`, `net`, `bindings`, `protos`, `comprehensions` 0. Unknown libraries
+and versions fail at registration. Math 0 exposes extrema, 1 adds the other numeric and
+bit functions, and 2 adds sqrt. Lists 0 exposes slice, 1 adds flatten, and 2 adds the
+remaining list helpers. Optional 1 adds optFlatMap and 2 adds first/last. Host functions
+are explicitly supplied capabilities and are not removed by library version restrictions;
+the function allow-list still applies to them.
+
+Declared variables, constants and lexical variables take precedence over extension
+namespaces such as `math`. A dynamic `reverse` call checks the actual receiver so a
+strings-only environment cannot use the list implementation. Canonical comprehensions
+remain core AST syntax: restricting a macro does not prohibit equivalent explicit CEL.

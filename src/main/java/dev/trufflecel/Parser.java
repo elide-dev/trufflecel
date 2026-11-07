@@ -259,6 +259,7 @@ final class Parser {
       }
       if (("proto".equals(prefix) || ".proto".equals(prefix))
           && (name.equals("getExt") || name.equals("hasExt"))) {
+        env.libraryPolicy.name("proto." + name, offset);
         if (args.size() != 3 || args.get(2).qualifiedName() == null)
           throw error("protobuf extension requires a qualified name");
         String field = args.get(2).qualifiedName();

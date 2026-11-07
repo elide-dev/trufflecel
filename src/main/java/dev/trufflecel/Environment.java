@@ -49,6 +49,7 @@ public final class Environment {
     }
   }
 
+  final LibraryPolicy libraryPolicy;
   final String container;
   final boolean inferVariables, macros;
   final long budget;
@@ -57,6 +58,7 @@ public final class Environment {
   final boolean homogeneousLiterals;
 
   private Environment(Builder b) {
+    libraryPolicy = new LibraryPolicy(b.libraries, b.allowedFunctions);
     variables = Map.copyOf(b.variables);
     variableNames = Set.copyOf(variables.keySet());
     constants = Map.copyOf(b.constants);
@@ -201,6 +203,8 @@ public final class Environment {
     private final Map<String, List<FunctionOverload>> overloads = new LinkedHashMap<>();
     private final Set<String> overloadIds = new HashSet<>();
     private String container = "";
+    private Map<String, Integer> libraries = LibraryPolicy.LATEST;
+    private Set<String> allowedFunctions;
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
@@ -286,6 +290,20 @@ public final class Environment {
       overloadIds.add(id);
       overloads.computeIfAbsent(name, unused -> new ArrayList<>()).add(signature);
       functions.putIfAbsent(name, binding);
+      return this;
+    }
+
+    /** Replace the enabled extension libraries. An empty map disables every extension library. */
+    public Builder libraries(Map<String, Integer> libraries) {
+      this.libraries = new LibraryPolicy(libraries, null).libraries;
+      return this;
+    }
+
+    /**
+     * Restrict callable names, including host functions. Core syntax and types remain available.
+     */
+    public Builder allowedFunctions(Set<String> names) {
+      allowedFunctions = Set.copyOf(names);
       return this;
     }
 

@@ -299,6 +299,8 @@ final class ExtensionFunctions {
   static Object apply(String name, Object[] args, EvalContext ctx) {
     // Runtime validation remains mandatory for dyn and unchecked programs.
     try {
+      ctx.environment.libraryPolicy.library(
+          name, args.length == 0 ? CelType.DYN : Values.type(args[0]), -1);
       for (Object arg : args) {
         if (arg instanceof String str) ctx.charge(str.length());
         if (arg instanceof List<?> list) ctx.charge(list.size());

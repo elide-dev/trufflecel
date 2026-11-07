@@ -280,3 +280,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "libraryPolicy",
+    srcs = ["LibraryPolicyTest.java"],
+    test_class = "dev.trufflecel.LibraryPolicyTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)

@@ -45,6 +45,7 @@ java_library(
         "GuestException.java",
         "GuestValue.java",
         "HostCollections.java",
+        "LibraryPolicy.java",
         "NetworkValue.java",
         "ObjectType.java",
         "Optimizer.java",
