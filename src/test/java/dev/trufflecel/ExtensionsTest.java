@@ -17,6 +17,18 @@ public class ExtensionsTest {
   }
 
   @Test
+  public void legacyListHelperNamesRetainTheirImplementations() {
+    for (String name : List.of("first", "last")) {
+      var env =
+          Cel.newBuilder()
+              .function(name, List.of(CelType.list(CelType.STRING)), CelType.STRING, a -> "host")
+              .build();
+      assertEquals("host", env.compile(name + "(['x'])").evaluate());
+      assertEquals("host", env.compile("['x']." + name + "()").evaluate());
+    }
+  }
+
+  @Test
   public void optionalListAndSquareRootExtensions() {
     yes("math.sqrt(9.0) == 3.0 && math.isNaN(math.sqrt(-1.0))");
     yes("optional.unwrap([optional.of(1), optional.none(), optional.of(2)]) == [1, 2]");

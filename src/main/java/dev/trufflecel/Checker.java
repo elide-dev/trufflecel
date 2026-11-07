@@ -272,9 +272,8 @@ final class Checker {
     for (ExprNode child : n.children) types.add(check(child, locals));
     var custom = env.functions.get(n.name);
     if (custom != null) {
-      // New optional list helpers must not take over existing global host functions.
-      if ((n.name.equals("first") || n.name.equals("last")) && !Boolean.TRUE.equals(n.value))
-        n.extensionCall = false;
+      // New optional list helpers must not take over existing host functions.
+      if (n.name.equals("first") || n.name.equals("last")) n.extensionCall = false;
       require(n, types.size() == custom.arguments().size(), "incorrect argument count");
       var bindings = new HashMap<String, CelType>();
       if (types.size() == custom.arguments().size())
