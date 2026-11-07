@@ -18,6 +18,7 @@ public final class Program {
   private final Environment environment;
   private final boolean contextInArguments;
   private final RootCallTarget target;
+  private volatile RootCallTarget controlledTarget;
 
   Program(
       String source,
@@ -101,6 +102,57 @@ public final class Program {
   /** Evaluate a reusable snapshot with fresh scopes and an independent operation budget. */
   public Object evaluate(Activation activation) {
     return Values.out(target.call(null, arguments(activation.binding, activation.value)));
+  }
+
+  /** Evaluate borrowed bindings with an independent per-call budget and cancellation controls. */
+  public Object evaluate(Map<String, ?> variables, EvaluationOptions options) {
+    return evaluateWithDetails(variables, options).value();
+  }
+
+  public Object evaluate(Activation activation, EvaluationOptions options) {
+    return evaluateWithDetails(activation, options).value();
+  }
+
+  public EvaluationResult evaluateWithDetails(Map<String, ?> variables, EvaluationOptions options) {
+    return evaluateWithDetails(
+        new EvalContext(environment, new BorrowedBindings(variables, bindingLayout)), options);
+  }
+
+  public EvaluationResult evaluateWithDetails(Activation activation, EvaluationOptions options) {
+    return evaluateWithDetails(context(environment, activation.binding, activation.value), options);
+  }
+
+  private EvaluationResult evaluateWithDetails(EvalContext context, EvaluationOptions options) {
+    context.configure(Objects.requireNonNull(options));
+    Object value = null;
+    CelException error = null;
+    try {
+      value = Values.out(controlledTarget().call(null, new Object[] {context}));
+    } catch (CelException failure) {
+      error = failure;
+    }
+    return new EvaluationResult(value, error, context.charged());
+  }
+
+  // The ordinary entry keeps its existing virtual context and allocation behavior. Observable
+  // execution uses an independent target whose caller owns the context, including its cost.
+  synchronized RootCallTarget controlledTarget() {
+    if (controlledTarget == null) {
+      if (contextInArguments) controlledTarget = target;
+      else {
+        var original = (ExpressionRoot) target.getRootNode();
+        ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body);
+        body.accept(
+            node -> {
+              if (node instanceof ExprNode expression) expression.boundaryReads = true;
+              return true;
+            });
+        controlledTarget =
+            new ExpressionRoot(body, environment, true, null, null, original.getFrameDescriptor())
+                .getCallTarget();
+      }
+    }
+    return controlledTarget;
   }
 
   RootCallTarget callTarget() {
@@ -194,7 +246,9 @@ public final class Program {
               ? (EvalContext) frame.getArguments()[0]
               : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
       try {
-        return body.execute(frame, context);
+        Object result = body.execute(frame, context);
+        context.checkControl();
+        return result;
       } catch (CelException e) {
         // Budget accounting may aggregate lowered visits; attribute exhaustion to the policy root.
         throw e.at(body.errorOffset, body.canonicalId, body.errorLine, body.errorColumn);

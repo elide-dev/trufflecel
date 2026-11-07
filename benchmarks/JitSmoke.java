@@ -62,6 +62,30 @@ public final class JitSmoke {
             true,
             Map.of("x", 2.0),
             false);
+        var controlled = Cel.newBuilder().variable("x", CelType.INT).build().compile("x + 1");
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        var controls = EvaluationOptions.newBuilder().budget(10).cancelled(cancelled::get).build();
+        var input = Activation.snapshot(Map.of("x", 2L));
+        for (int i = 0; i < 2000; i++) {
+          cancelled.set(i % 2 == 0);
+          var result = controlled.evaluateWithDetails(input, controls);
+          if ((result.error() != null) != cancelled.get())
+            throw new AssertionError("cancellation outcome");
+        }
+        var controlledTarget = (OptimizedCallTarget) controlled.controlledTarget();
+        controlledTarget.compile(true);
+        controlledTarget.waitForCompilation();
+        for (int i = 0; i < 1000; i++) {
+          cancelled.set(i % 2 == 0);
+          var result = controlled.evaluateWithDetails(input, controls);
+          if (cancelled.get()) {
+            if (result.error().code() != CelException.Code.RESOURCE_EXHAUSTED)
+              throw new AssertionError("cancel code");
+          } else if (!result.value().equals(3L) || result.actualCost() != 3)
+            throw new AssertionError("controlled result/cost");
+        }
+        if (!controlledTarget.isValidLastTier())
+          throw new AssertionError("controlled target must remain compiled");
         var overloaded =
             Cel.newBuilder()
                 .variable("x", CelType.DYN)

@@ -37,6 +37,8 @@ java_library(
         "EncoderFunctions.java",
         "Environment.java",
         "EvalContext.java",
+        "EvaluationOptions.java",
+        "EvaluationResult.java",
         "ExprNode.java",
         "ExtensionFunctions.java",
         "FieldPlan.java",

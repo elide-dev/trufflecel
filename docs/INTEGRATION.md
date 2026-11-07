@@ -308,3 +308,22 @@ exceptions outside CEL's normalized callback errors retain their existing propag
 patterns and regex extension calls are checked before matching. Cached patterns are rechecked
 against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXHAUSTED`.
 A zero-count regex replacement still returns its input without compiling the pattern.
+
+## Per-evaluation controls and cost
+
+`EvaluationOptions.newBuilder()` configures a per-call `budget(long)`, `timeout(Duration)`,
+absolute `deadline(Instant)`, or `cancelled(BooleanSupplier)` hook. Pass the immutable options
+to `Program.evaluate(bindings, options)` or the corresponding `Activation` overload. An omitted
+budget uses the environment's budget; a supplied budget replaces it for that call only.
+Timeouts begin at evaluation entry, and the earlier timeout/deadline wins.
+
+`evaluateWithDetails(bindings, options)` returns an `EvaluationResult` containing `actualCost()`
+and a nullable `error()`. Its `value()` method returns the owned value or throws the original
+located CEL error. Cost counts successfully charged CEL operations, including those before a
+failure; an operation rejected for exceeding the remaining budget is not charged. Folded work
+retains its recorded cost. Concurrent calls never share counters or scopes.
+
+Cancellation and deadline checks run at CEL cost steps and before returning the result. They
+report `RESOURCE_EXHAUSTED`; they do not interrupt arbitrary host callback code. Cancellation
+predicates execute on the evaluating thread. Ordinary evaluation retains its existing call
+target and allocation behavior; calls with observable controls use a separate compiled target.
