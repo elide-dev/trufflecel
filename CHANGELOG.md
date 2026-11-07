@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/elide-dev/trufflecel/compare/v0.7.0...v0.8.0) (2026-11-07)
+
+
+### Build System
+
+* upgrade TruffleData to 0.8.0 and refresh dependencies ([#21](https://github.com/elide-dev/trufflecel/issues/21)) ([0cf2b4d](https://github.com/elide-dev/trufflecel/commit/0cf2b4d46ab817c423008d30aa4b8e62ea97d6f0))
+
 ## [0.7.0](https://github.com/elide-dev/trufflecel/compare/v0.4.1...v0.7.0) (2026-11-06)
 
 
