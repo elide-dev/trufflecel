@@ -49,8 +49,9 @@ public final class Program {
     this.resultType = resultType;
     this.environment = environment;
     body.instantiateFieldPlans();
-    // Tooling receives the complete source tree, including every literal and operator event.
-    if (truffleSource == null) body = body.lowerUninstrumented();
+    // Tooling receives the complete source tree, including every literal and operator event;
+    // plain targets replace folded subtrees with their prebuilt values and failures.
+    if (truffleSource == null) body = Optimizer.rewrite(body.lowerUninstrumented());
     body.resolveBlocks(null);
     boolean hasBindings = body.hasBindings();
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();

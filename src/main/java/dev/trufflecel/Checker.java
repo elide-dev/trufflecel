@@ -15,7 +15,11 @@ final class Checker {
   }
 
   CelType check(ExprNode n, Map<String, CelType> locals) {
-    CelType result = checkNode(n, locals);
+    // Strict validation rechecks after folding: a folded value has a precise type and no subtree.
+    CelType result =
+        n.fold != null && n.fold.error() == null
+            ? Values.type(n.fold.value())
+            : checkNode(n, locals);
     n.checkedType = result;
     return result;
   }

@@ -1,6 +1,5 @@
 package dev.trufflecel;
 
-import com.google.re2j.Pattern;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import java.math.*;
 import java.nio.ByteBuffer;
@@ -378,15 +377,10 @@ final class Functions {
     return Boolean.compare(x.hasNext(), y.hasNext());
   }
 
+  /** Dynamic patterns; constant patterns are precompiled into the call node at plan time. */
   @TruffleBoundary
   static boolean matches(String s, String regex) {
-    Pattern pattern;
-    try {
-      pattern = Pattern.compile(regex);
-    } catch (com.google.re2j.PatternSyntaxException e) {
-      throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
-    }
-    return pattern.matcher(s).find();
+    return Regex.cached(regex).find(s);
   }
 
   // Unchecked programs dispatch host functions by arity and runtime argument types, like
@@ -405,20 +399,39 @@ final class Functions {
     return Double.toString(d).replace("E", "e");
   }
 
+  // Units in match order: two-letter units precede the single letters they start with.
+  private static final String[] DURATION_UNITS = {"h", "ms", "us", "µs", "μs", "ns", "m", "s"};
+
+  /** Parse {@code ([0-9]+(\.[0-9]*)?|\.[0-9]+)unit} segments without a regular expression. */
   @TruffleBoundary
   static Duration duration(String text) {
     if (text.equals("0")) return Duration.ZERO;
     boolean neg = text.startsWith("-");
     String s = (neg || text.startsWith("+")) ? text.substring(1) : text;
-    var matcher =
-        Pattern.compile("([0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(h|ms|us|µs|μs|ns|m|s)").matcher(s);
     BigDecimal nanos = BigDecimal.ZERO;
-    int end = 0;
-    while (matcher.find()) {
-      if (matcher.start() != end) throw new IllegalArgumentException("invalid duration");
+    int i = 0;
+    if (s.isEmpty()) throw new IllegalArgumentException("invalid duration");
+    while (i < s.length()) {
+      int start = i;
+      while (i < s.length() && digit(s.charAt(i))) i++;
+      boolean whole = i > start;
+      if (i < s.length() && s.charAt(i) == '.') {
+        int fraction = ++i;
+        while (i < s.length() && digit(s.charAt(i))) i++;
+        if (!whole && i == fraction) throw new IllegalArgumentException("invalid duration");
+      } else if (!whole) throw new IllegalArgumentException("invalid duration");
+      String number = s.substring(start, i);
+      String unit = null;
+      for (String candidate : DURATION_UNITS)
+        if (s.startsWith(candidate, i)) {
+          unit = candidate;
+          break;
+        }
+      if (unit == null) throw new IllegalArgumentException("invalid duration");
+      i += unit.length();
       BigDecimal factor =
           new BigDecimal(
-              switch (matcher.group(2)) {
+              switch (unit) {
                 case "h" -> "3600000000000";
                 case "m" -> "60000000000";
                 case "s" -> "1000000000";
@@ -426,10 +439,8 @@ final class Functions {
                 case "us", "µs", "μs" -> "1000";
                 default -> "1";
               });
-      nanos = nanos.add(new BigDecimal(matcher.group(1)).multiply(factor));
-      end = matcher.end();
+      nanos = nanos.add(new BigDecimal(number).multiply(factor));
     }
-    if (end == 0 || end != s.length()) throw new IllegalArgumentException("invalid duration");
     BigInteger n = nanos.toBigInteger();
     if (neg) n = n.negate();
     BigInteger[] pair = n.divideAndRemainder(BigInteger.valueOf(1000000000));
@@ -447,6 +458,20 @@ final class Functions {
     if (t.getEpochSecond() < -62135596800L || t.getEpochSecond() > 253402300799L)
       throw new ArithmeticException();
     return t;
+  }
+
+  /** An {@code hh:mm} time zone without a sign, which {@link ZoneId} needs prefixed with '+'. */
+  private static boolean unsignedOffset(String zone) {
+    return zone.length() == 5
+        && zone.charAt(2) == ':'
+        && digit(zone.charAt(0))
+        && digit(zone.charAt(1))
+        && digit(zone.charAt(3))
+        && digit(zone.charAt(4));
+  }
+
+  private static boolean digit(char c) {
+    return c >= '0' && c <= '9';
   }
 
   static String durationString(Duration d) {
@@ -471,7 +496,7 @@ final class Functions {
       };
     }
     if (!(value instanceof Instant t)) throw Values.overload(name);
-    ZonedDateTime z = t.atZone(ZoneId.of(zone.matches("[0-9]{2}:[0-9]{2}") ? "+" + zone : zone));
+    ZonedDateTime z = t.atZone(ZoneId.of(unsignedOffset(zone) ? "+" + zone : zone));
     return switch (name) {
       case "getFullYear" -> (long) z.getYear();
       case "getMonth" -> (long) z.getMonthValue() - 1;

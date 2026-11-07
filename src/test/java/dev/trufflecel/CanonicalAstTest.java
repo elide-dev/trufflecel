@@ -301,6 +301,74 @@ public final class CanonicalAstTest {
   }
 
   @Test
+  public void strictValidationOfCanonicalComprehensionsAndUnchangedExport() {
+    Environment env = Cel.newBuilder().inferVariables(true).build();
+    Environment strict =
+        Cel.newBuilder().inferVariables(true).validation(Environment.Validation.STRICT).build();
+    Message range = expr("ident_expr", message("cel.expr.Expr.Ident", "name", "xs"));
+    Message lazy =
+        expr(
+            "comprehension_expr",
+            message(
+                "cel.expr.Expr.Comprehension",
+                "iter_var",
+                "i",
+                "accu_var",
+                "a",
+                "iter_range",
+                range,
+                "accu_init",
+                lit(0L),
+                "loop_condition",
+                call("_==_", call("_/_", lit(1L), lit(0L)), lit(0L)),
+                "loop_step",
+                call("_/_", lit(1L), lit(0L)),
+                "result",
+                expr("ident_expr", message("cel.expr.Expr.Ident", "name", "a"))));
+    assertEquals(0L, program(strict, ast(lazy)).evaluate(Map.of("xs", List.of())));
+    Message eager =
+        expr(
+            "comprehension_expr",
+            message(
+                "cel.expr.Expr.Comprehension",
+                "iter_var",
+                "i",
+                "accu_var",
+                "a",
+                "iter_range",
+                range,
+                "accu_init",
+                lit(0L),
+                "loop_condition",
+                lit(false),
+                "loop_step",
+                lit(1L),
+                "result",
+                call("_/_", lit(1L), lit(0L))));
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> program(strict, ast(eager))).code());
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> CanonicalAst.check(strict, ast(eager))).code());
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(
+                CelException.class,
+                () -> program(env, ast(eager)).evaluate(Map.of("xs", List.of())))
+            .code());
+    // Export always describes the source tree; folds and precompiled patterns are invisible.
+    Message parsed = CanonicalAst.parse(env, "1 + 2 > 2 && 'a'.matches('a')");
+    Message checked = CanonicalAst.check(env, parsed);
+    assertEquals(parsed, CanonicalAst.parse(env, "1 + 2 > 2 && 'a'.matches('a')"));
+    Message and = child(child(checked, "expr"), "call_expr");
+    Message greater = child(messages(and, "args").get(0), "call_expr");
+    assertEquals("_+_", string(child(messages(greater, "args").get(0), "call_expr"), "function"));
+    assertEquals(9, ((List<?>) field(checked, "type_map")).size());
+    assertEquals(true, program(env, checked).evaluate());
+  }
+
+  @Test
   public void generalLoopConditionsAndLegacyConstants() {
     Environment env = Cel.newBuilder().inferVariables(true).build();
     Message range =

@@ -58,6 +58,11 @@ final class EvalContext {
     charge(1);
   }
 
+  /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
+  long charged() {
+    return environment.budget - remaining;
+  }
+
   void charge(long cost) {
     // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
     // context with a loaded parent would force escape analysis to materialize the context in every

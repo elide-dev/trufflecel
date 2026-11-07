@@ -5,6 +5,22 @@ import java.util.function.Function;
 
 /** Immutable compiler configuration; contains no per-evaluation mutable state. */
 public final class Environment {
+  /**
+   * When certain failures are reported. Analysis, constant folding and regular-expression
+   * precompilation always run at compile time; the policy only decides whether a subexpression that
+   * fails on every evaluation path is rejected by {@code compile} or raised, with the same category
+   * and budget cost, by {@code evaluate}.
+   */
+  public enum Validation {
+    /** Keep CEL evaluation semantics: constant failures are raised when evaluated. */
+    DEFERRED,
+    /**
+     * Reject at compile time every failure that no evaluation can avoid, together with invalid
+     * regular-expression, timestamp and duration literals; all findings are reported together.
+     */
+    STRICT
+  }
+
   public record FunctionBinding(
       List<CelType> arguments, CelType result, Function<List<Object>, Object> implementation) {
     public FunctionBinding {
@@ -23,7 +39,9 @@ public final class Environment {
   final String container;
   final boolean inferVariables, macros;
   final long budget;
-  final int maxSourceLength, maxDepth;
+  final int maxSourceLength, maxDepth, comprehensionNesting;
+  final Validation validation;
+  final boolean homogeneousLiterals;
 
   private Environment(Builder b) {
     variables = Map.copyOf(b.variables);
@@ -41,6 +59,9 @@ public final class Environment {
     budget = b.budget;
     maxSourceLength = b.maxSourceLength;
     maxDepth = b.maxDepth;
+    comprehensionNesting = b.comprehensionNesting;
+    validation = b.validation;
+    homogeneousLiterals = b.homogeneousLiterals;
   }
 
   /**
@@ -75,7 +96,11 @@ public final class Environment {
     Objects.requireNonNull(source);
     if (source.length() > maxSourceLength)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
-    return prepare(source, new Parser(source, this).parse(), check);
+    try {
+      return prepare(source, new Parser(source, this).parse(), check);
+    } catch (CelException e) {
+      throw e.locate(source);
+    }
   }
 
   /** Reject trees deeper than the configured limit before any recursive traversal. */
@@ -110,6 +135,11 @@ public final class Environment {
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
     FieldPlan.prepare(node, this);
+    node = Optimizer.optimize(node, this, source);
+    // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
+    // string used as a list index) become type findings once the folds are known.
+    if (check && validation == Validation.STRICT)
+      new Checker(this, declarations, true).check(node, Map.of());
     return new PreparedProgram(
         source,
         declarations == variables ? variableNames : declarations.keySet(),
@@ -155,7 +185,9 @@ public final class Environment {
     private String container = "";
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
-    private int maxSourceLength = 100_000, maxDepth = 256;
+    private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
+    private Validation validation = Validation.DEFERRED;
+    private boolean homogeneousLiterals;
 
     public Builder() {
       WellKnownTypes.register(this);
@@ -225,6 +257,31 @@ public final class Environment {
     public Builder maxDepth(int depth) {
       if (depth <= 0 || depth > 512) throw new IllegalArgumentException("depth must be in [1,512]");
       maxDepth = depth;
+      return this;
+    }
+
+    /** Report certain failures at compile time ({@link Validation#STRICT}) or at evaluation. */
+    public Builder validation(Validation policy) {
+      validation = Objects.requireNonNull(policy);
+      return this;
+    }
+
+    /**
+     * Reject list literals whose elements, and map literals whose keys or values, have different
+     * static types. Elements of type {@code dyn} are exempt. Reported under either policy.
+     */
+    public Builder homogeneousLiterals(boolean enabled) {
+      homogeneousLiterals = enabled;
+      return this;
+    }
+
+    /**
+     * Reject comprehension macros (including {@code cel.bind}) and canonical comprehensions nested
+     * deeper than {@code depth}. Unlimited by default; reported under either policy.
+     */
+    public Builder maxComprehensionNesting(int depth) {
+      if (depth <= 0) throw new IllegalArgumentException("depth must be positive");
+      comprehensionNesting = depth;
       return this;
     }
 

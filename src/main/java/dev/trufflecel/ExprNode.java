@@ -13,6 +13,8 @@ class ExprNode extends CelNode {
   long canonicalId;
   CelType checkedType;
   FieldPlan fieldPlan;
+  // Plan-time constant fold; uninstrumented targets replace the subtree with its prebuilt result.
+  Optimizer.Fold fold;
   @Child private FieldPlan.ReadNode fieldRead;
 
   void instantiateFieldPlans() {
@@ -204,6 +206,8 @@ class ExprNode extends CelNode {
   }
 
   ExprNode lowerUninstrumented() {
+    // A folded subtree is replaced wholesale; lowering inside it would only be discarded.
+    if (fold != null) return this;
     int count = 0;
     ExprNode leaf = this;
     while (leaf.kind == Kind.CALL
