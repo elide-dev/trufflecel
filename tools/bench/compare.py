@@ -183,7 +183,7 @@ def measure(args):
             "dirty": bool(run(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip()),
             "sources_sha256": before, "host": {"system": platform.system(), "machine": platform.machine(),
             "cpu": cpu, "kernel": platform.release(), "logical_cpus": os.cpu_count()},
-            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.24"},
+            "versions": {"cel-java": "0.15.0", "graalvm": "25.5.5-elide.27"},
             "svm_binary_sha256": hashlib.sha256(paths["svm"].read_bytes()).hexdigest(),
             "memory_measurement": {"method": "GNU time %M", "unit": "KiB",
                                    "scope": "whole process lifetime", "native_image_layout": "shared two-engine harness",

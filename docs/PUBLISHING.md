@@ -10,7 +10,7 @@ upload convention. It produces three thin Maven artifacts under `dev.elide`:
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 
 Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
-required. Publications built from the current source tree pin TruffleData `0.6.0` and Elide GraalVM `25.5.5-elide.24`,
+required. Publications built from the current source tree pin TruffleData `0.8.0` and Elide GraalVM `25.5.5-elide.27`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 
@@ -77,7 +77,7 @@ manual recovery. No external CI secrets or bucket settings are modified by this 
 repositories {
     mavenCentral()
     maven("https://maven.elide.dev")
-    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.24")
+    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.27")
 }
 dependencies {
     implementation("dev.elide:trufflecel-core:<published-version>")

@@ -10,8 +10,8 @@ release_version(
 
 DEPENDENCIES = {
     "core": [
-        "org.graalvm.polyglot:polyglot:25.5.5-elide.24",
-        "org.graalvm.truffle:truffle-api:25.5.5-elide.24",
+        "org.graalvm.polyglot:polyglot:25.5.5-elide.27",
+        "org.graalvm.truffle:truffle-api:25.5.5-elide.27",
         "dev.elide:truffledata-core:0.8.0",
         "com.google.re2j:re2j:1.8",
         "com.google.code.gson:gson:2.15.0",
@@ -19,7 +19,7 @@ DEPENDENCIES = {
     ],
     "protobuf": [
         "dev.elide:trufflecel-core:{version}",
-        "org.graalvm.truffle:truffle-api:25.5.5-elide.24",
+        "org.graalvm.truffle:truffle-api:25.5.5-elide.27",
         "dev.elide:truffledata-core:0.8.0",
         "dev.elide:truffledata-protobuf:0.8.0",
         "dev.elide:truffledata-protobuf-runtime:0.8.0",
@@ -27,7 +27,7 @@ DEPENDENCIES = {
     ],
     "json": [
         "dev.elide:trufflecel-core:{version}",
-        "org.graalvm.shadowed:json:25.5.5-elide.24",
+        "org.graalvm.shadowed:json:25.5.5-elide.27",
     ],
 }
 
