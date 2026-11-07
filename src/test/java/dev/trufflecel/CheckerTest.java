@@ -214,4 +214,24 @@ public class CheckerTest {
             .build();
     assertEquals(CelType.INT, custom.parse("f()").resultType());
   }
+
+  @Test
+  public void nullIsOnlyAssignableToNullableMessageFields() {
+    var builder = Cel.newBuilder();
+    TestObjects.register(builder);
+    var env = builder.build();
+    String type = "cel.expr.conformance.proto3.TestAllTypes";
+    for (String field :
+        List.of(
+            "single_int32_wrapper", "single_nested_message", "single_timestamp", "single_value"))
+      env.compile(type + "{" + field + ": null}");
+    for (String field :
+        List.of("single_int32", "single_string", "standalone_enum", "repeated_int32"))
+      assertEquals(
+          field,
+          CelException.Code.TYPE,
+          assertThrows(CelException.class, () -> env.compile(type + "{" + field + ": null}"))
+              .code());
+    assertThrows(CelException.class, () -> env.parse(type + "{single_int32: null}").evaluate());
+  }
 }

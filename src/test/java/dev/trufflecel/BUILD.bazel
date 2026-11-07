@@ -38,6 +38,7 @@ java_library(
 java_test(
     name = "checker",
     srcs = ["CheckerTest.java"],
+    data = ["//third_party/cel-spec:schemas.json"],
     test_class = "dev.trufflecel.CheckerTest",
     deps = [
         ":test_support",

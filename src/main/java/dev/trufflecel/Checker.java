@@ -165,7 +165,7 @@ final class Checker {
           if (expected == null) throw failure(n, "undefined field: " + fields[i]);
           require(
               n,
-              expected.accepts(actual) || actual.equals(CelType.NULL),
+              expected.accepts(actual) || actual.equals(CelType.NULL) && expected.nullable(),
               "field type mismatch: " + fields[i]);
         }
         yield WellKnownTypes.mapped(name);
