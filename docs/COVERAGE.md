@@ -166,9 +166,9 @@ ordinary compiled control flow. An error raised inside a `@TruffleBoundary` meth
 invalidates the first compilation once, when the boundary's no-exception speculation fails. The
 runner asserts that each case settles within three compilations (one initial compilation plus
 one per distinct boundary that raises the error) and that 1,000 further errors neither
-deoptimize nor invalidate the compiled code: 148 executions settle after one compilation, 255
-after two and one after three (folded constant failures raise from a boundary, so most of them
-take the second compilation). `//benchmarks:compiled` additionally checks that a program which
+deoptimize nor invalidate the compiled code: 248 executions settle after one compilation, 155
+after two and one after three (a folded constant failure throws its prebuilt exception as
+ordinary control flow, so it settles in the first compilation). `//benchmarks:compiled` additionally checks that a program which
 has already raised errors keeps the same happy-path allocation budget.
 
 | Metric | Measured after the negative matrix |
@@ -195,8 +195,8 @@ dropped from 3,904 to 96 bytes per evaluation (its ceiling is 192).
 
 | Metric | Measured after compile-time validation |
 | --- | ---: |
-| Line hits | 4,806 / 4,810 (99.92%) |
-| Branch hits | 4,888 / 4,895 (99.86%) |
+| Line hits | 4,828 / 4,832 (99.92%) |
+| Branch hits | 4,912 / 4,917 (99.90%) |
 | CI minimum, each metric | 99.8% |
 
 ## Remaining paths
@@ -222,11 +222,6 @@ Four uncovered branch outcomes follow existing invariants:
   check cannot fail for those inputs.
 - `ProtobufType.prepared`: map fields whose value type is a well-known message have no
   prepared accessor; the corpus and matrix read such maps through the generic path only.
-
-Two further branch outcomes are exercised but invisible to JaCoCo: the folded error node and
-the precompiled `matches` node raise their stored failure inside a `@TruffleBoundary` method
-that never returns, and JaCoCo places the branch probe after that call. The negative matrix,
-the compiled-negative gate and `ValidationTest` assert the categories those branches raise.
 
 These paths remain visible in coverage. The suite does not use reflection, mocked static
 methods, or corrupted immutable objects to force them. Revisit this list if dependency

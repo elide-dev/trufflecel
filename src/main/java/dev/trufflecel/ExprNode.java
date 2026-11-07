@@ -15,6 +15,8 @@ class ExprNode extends CelNode {
   FieldPlan fieldPlan;
   // Plan-time constant fold; uninstrumented targets replace the subtree with its prebuilt result.
   Optimizer.Fold fold;
+  // Plan-time purity and binding depth, packed by Optimizer; avoids per-node analysis maps.
+  int analysis;
   @Child private FieldPlan.ReadNode fieldRead;
 
   void instantiateFieldPlans() {

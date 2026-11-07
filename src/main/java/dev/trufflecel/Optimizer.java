@@ -1,6 +1,5 @@
 package dev.trufflecel;
 
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import java.util.*;
 
@@ -17,6 +16,11 @@ import java.util.*;
  * {@code compile}; laziness ({@code &&}, {@code ||}, {@code ?:}, macro bodies, optional fallbacks,
  * lazy block slots) and unknown precedence (a sibling that may be unknown wins over an error) are
  * respected, so a reported failure is one that no activation can avoid.
+ *
+ * <p>Analysis is one allocation-free traversal that records each node's purity and the depth of the
+ * innermost binder any identifier in its subtree refers to; a subtree is closed when every
+ * identifier it reads is bound inside it. The folding traversal runs only when some closed pure
+ * subtree or host function call exists, so programs with nothing to fold pay almost nothing.
  */
 final class Optimizer {
   /** A folded subtree: its value or its certain failure, and the budget the subtree consumed. */
@@ -25,6 +29,10 @@ final class Optimizer {
   // Folded aggregates live in the AST (and the image heap), so their size is capped separately
   // from the evaluation budget that bounds the work of producing them.
   static final int MAX_WEIGHT = 4096;
+
+  // Packed per-node analysis: bit 0 is purity, the rest is the binding depth plus two, so that an
+  // unbound identifier (-1) and the "no identifiers" sentinel both fit.
+  private static final int NO_IDENTIFIERS = 1 << 28, UNBOUND = -1;
 
   // Names with standard or extension overloads dispatch before a host binding of the same name,
   // so a static argument check against the host declaration would not describe evaluation.
@@ -82,9 +90,16 @@ final class Optimizer {
   private final Environment env;
   private final String source;
   private final boolean strict;
-  private final Map<ExprNode, Set<String>> free = new IdentityHashMap<>();
-  private final Map<ExprNode, Boolean> pure = new IdentityHashMap<>();
-  private final List<CelException.Issue> issues = new ArrayList<>();
+  private List<CelException.Issue> issues;
+  // Lexical scope of binder variables and the depth that bound them; only binders allocate it.
+  private String[] scopeNames;
+  private int[] scopeDepths;
+  private int scopeSize;
+  // Results of the most recent analyze call, read by the caller before analyzing a sibling.
+  private int minDepth;
+  private boolean pure;
+  // Whether any closed pure subtree or host function call makes the folding traversal necessary.
+  private boolean candidates;
   // Total plan-time evaluation work, so that nested retries cannot multiply the budget.
   private long allowance;
 
@@ -98,10 +113,12 @@ final class Optimizer {
   /** Validate and fold a checked tree in place; the root may be replaced. */
   static ExprNode optimize(ExprNode root, Environment env, String source) {
     var optimizer = new Optimizer(env, source);
-    ExprNode result = optimizer.validate(root, 0);
-    optimizer.analyze(result);
-    optimizer.fold(result, true);
-    optimizer.finish();
+    ExprNode result = optimizer.analyze(root, 0, 0);
+    if (optimizer.candidates) optimizer.fold(result, 0, true);
+    if (optimizer.issues != null) {
+      optimizer.issues.sort(Comparator.comparingInt(CelException.Issue::offset));
+      throw new CelException(optimizer.issues);
+    }
     return result;
   }
 
@@ -112,13 +129,8 @@ final class Optimizer {
     return node;
   }
 
-  private void finish() {
-    if (issues.isEmpty()) return;
-    issues.sort(Comparator.comparingInt(CelException.Issue::offset));
-    throw new CelException(issues);
-  }
-
   private void issue(CelException.Code code, String message, int offset) {
+    if (issues == null) issues = new ArrayList<>();
     issues.add(new CelException.Issue(code, message, offset, -1, -1).locate(source));
   }
 
@@ -127,9 +139,23 @@ final class Optimizer {
     return n.kind == ExprNode.Kind.IDENT || n.kind == ExprNode.Kind.CONSTANT;
   }
 
-  // Validators: comprehension nesting, homogeneous literals and constant regular expressions.
-  private ExprNode validate(ExprNode n, int nesting) {
-    if (leaf(n)) return n;
+  private static int pack(int minDepth, boolean pure) {
+    return (minDepth + 2) << 1 | (pure ? 1 : 0);
+  }
+
+  private static boolean foldable(ExprNode n, int depth) {
+    return (n.analysis & 1) != 0 && (n.analysis >>> 1) - 2 > depth;
+  }
+
+  /**
+   * Validators, analysis and constant-pattern precompilation in one post-order traversal. {@code
+   * depth} counts the binders enclosing {@code n}; the result is left in {@link #minDepth} and
+   * {@link #pure} and packed into the node.
+   */
+  private ExprNode analyze(ExprNode n, int depth, int nesting) {
+    if (n.kind == ExprNode.Kind.IDENT) return record(n, binding(n.name), true, depth);
+    if (n.kind == ExprNode.Kind.CONSTANT)
+      return record(n, NO_IDENTIFIERS, !(n.value instanceof Unknown), depth);
     if (n.kind == ExprNode.Kind.COMPREHENSION
         || n.kind == ExprNode.Kind.MACRO && NESTING.contains(n.name)) {
       nesting++;
@@ -144,7 +170,54 @@ final class Optimizer {
         uniform(n.children, 1, 2, "map value");
       }
     }
-    for (int i = 0; i < n.children.length; i++) n.children[i] = validate(n.children[i], nesting);
+    int min = NO_IDENTIFIERS;
+    boolean clean = true;
+    switch (n.kind) {
+      case BLOCK_INDEX -> clean = false;
+      case MACRO -> {
+        if (n.name.equals("has")) {
+          min = children(n, 0, 1, depth, nesting);
+          clean = pure;
+        } else {
+          min = children(n, 0, 1, depth, nesting);
+          clean = pure;
+          String[] variables = (String[]) n.value;
+          int outer = scopeSize;
+          for (String variable : variables) bind(variable, depth + 1);
+          min = Math.min(min, children(n, 1, n.children.length, depth + 1, nesting));
+          clean &= pure;
+          scopeSize = outer;
+        }
+      }
+      case COMPREHENSION -> {
+        String[] variables = (String[]) n.value;
+        min = children(n, 0, 2, depth, nesting);
+        clean = pure;
+        int outer = scopeSize;
+        for (String variable : variables) if (!variable.isEmpty()) bind(variable, depth + 1);
+        min = Math.min(min, children(n, 2, 4, depth + 1, nesting));
+        clean &= pure;
+        scopeSize = outer;
+        bind(variables[0], depth + 1);
+        min = Math.min(min, children(n, 4, 5, depth + 1, nesting));
+        clean &= pure;
+        scopeSize = outer;
+      }
+      default -> {
+        min = children(n, 0, n.children.length, depth, nesting);
+        clean = pure;
+      }
+    }
+    switch (n.kind) {
+      case BLOCK, OBJECT -> clean = false;
+      case SELECT -> clean &= !n.extensionSelect && n.fieldPlan == null;
+      case CALL -> {
+        boolean host = env.functions.containsKey(n.name);
+        if (host) candidates = true;
+        clean &= !host;
+      }
+      default -> {}
+    }
     if (strict && literalConversion(n)) {
       try {
         Functions.apply(n.name, new Object[] {n.children[0].value}, env);
@@ -158,13 +231,54 @@ final class Optimizer {
         && n.children[1].kind == ExprNode.Kind.CONSTANT
         && n.children[1].value instanceof String pattern) {
       try {
-        return new MatchesNode(n, Regex.compile(pattern), null);
+        n = new MatchesNode(n, Regex.compile(pattern), null);
       } catch (CelException e) {
         if (strict) issue(e.code(), e.getMessage(), n.children[1].offset);
-        return new MatchesNode(n, null, e);
+        n = new MatchesNode(n, null, e);
       }
     }
+    if (clean && min > depth) candidates = true;
+    return record(n, min, clean, depth);
+  }
+
+  /**
+   * Analyze children {@code [from, to)} at {@code depth}; leaves the conjunction in {@link #pure}.
+   */
+  private int children(ExprNode n, int from, int to, int depth, int nesting) {
+    int min = NO_IDENTIFIERS;
+    boolean clean = true;
+    for (int i = from; i < to; i++) {
+      n.children[i] = analyze(n.children[i], depth, nesting);
+      min = Math.min(min, minDepth);
+      clean &= pure;
+    }
+    pure = clean;
+    return min;
+  }
+
+  private ExprNode record(ExprNode n, int min, boolean clean, int depth) {
+    n.analysis = pack(min, clean);
+    minDepth = min;
+    pure = clean;
     return n;
+  }
+
+  private void bind(String name, int depth) {
+    if (scopeNames == null) {
+      scopeNames = new String[8];
+      scopeDepths = new int[8];
+    } else if (scopeSize == scopeNames.length) {
+      scopeNames = Arrays.copyOf(scopeNames, scopeSize * 2);
+      scopeDepths = Arrays.copyOf(scopeDepths, scopeSize * 2);
+    }
+    scopeNames[scopeSize] = name;
+    scopeDepths[scopeSize++] = depth;
+  }
+
+  /** The depth of the innermost binder of {@code name}, or {@link #UNBOUND} for a free variable. */
+  private int binding(String name) {
+    for (int i = scopeSize - 1; i >= 0; i--) if (scopeNames[i].equals(name)) return scopeDepths[i];
+    return UNBOUND;
   }
 
   private void uniform(ExprNode[] children, int start, int step, String what) {
@@ -184,80 +298,25 @@ final class Optimizer {
     }
   }
 
-  // Purity and free identifiers, so that only closed, side-effect-free subtrees are evaluated.
-  private void analyze(ExprNode n) {
-    var names = new HashSet<String>();
-    boolean clean;
-    switch (n.kind) {
-      case CONSTANT -> clean = !(n.value instanceof Unknown);
-      case IDENT -> {
-        names.add(n.name);
-        clean = true;
-      }
-      case BLOCK_INDEX -> clean = false;
-      case BLOCK, OBJECT -> clean = children(n, names) && false;
-      case SELECT -> clean = children(n, names) && !n.extensionSelect && n.fieldPlan == null;
-      case CALL -> clean = children(n, names) && !env.functions.containsKey(n.name);
-      case MACRO -> {
-        if (n.name.equals("has")) clean = children(n, names);
-        else {
-          analyze(n.children[0]);
-          names.addAll(free.get(n.children[0]));
-          clean = pure.get(n.children[0]);
-          for (int i = 1; i < n.children.length; i++)
-            clean &= scoped(n.children[i], (String[]) n.value, names);
-        }
-      }
-      case COMPREHENSION -> {
-        String[] variables = (String[]) n.value;
-        clean = true;
-        for (int i = 0; i < 2; i++) {
-          analyze(n.children[i]);
-          names.addAll(free.get(n.children[i]));
-          clean &= pure.get(n.children[i]);
-        }
-        clean &= scoped(n.children[2], variables, names);
-        clean &= scoped(n.children[3], variables, names);
-        clean &= scoped(n.children[4], new String[] {variables[0]}, names);
-      }
-      default -> clean = children(n, names);
-    }
-    free.put(n, names);
-    pure.put(n, clean);
-  }
-
-  private boolean children(ExprNode n, Set<String> names) {
-    boolean clean = true;
-    for (ExprNode child : n.children) {
-      analyze(child);
-      names.addAll(free.get(child));
-      clean &= pure.get(child);
-    }
-    return clean;
-  }
-
-  private boolean scoped(ExprNode body, String[] bound, Set<String> names) {
-    analyze(body);
-    var inner = new HashSet<>(free.get(body));
-    inner.removeAll(Arrays.asList(bound));
-    names.addAll(inner);
-    return pure.get(body);
-  }
-
-  private boolean foldable(ExprNode n) {
-    return pure.get(n) && free.get(n).isEmpty();
-  }
-
   // Fold the outermost closed subtrees; report certain failures on strictly evaluated paths.
-  private void fold(ExprNode n, boolean strictPath) {
+  private void fold(ExprNode n, int depth, boolean strictPath) {
     if (leaf(n)) return;
-    if (foldable(n) && attempt(n)) {
+    if (foldable(n, depth) && attempt(n)) {
       if (n.fold.error() != null) report(n, strictPath);
       return;
     }
     for (int i = 0; i < n.children.length; i++)
-      fold(n.children[i], strictPath && strictPosition(n, i));
+      fold(n.children[i], childDepth(n, i, depth), strictPath && strictPosition(n, i, depth));
     if (n.kind == ExprNode.Kind.CALL && n.children.length > 0) hostOverload(n, strictPath);
+  }
+
+  /** Binder bodies sit one binder deeper than the binder's range ({@code has} has only one). */
+  private static int childDepth(ExprNode n, int i, int depth) {
+    return switch (n.kind) {
+      case MACRO -> i == 0 ? depth : depth + 1;
+      case COMPREHENSION -> i < 2 ? depth : depth + 1;
+      default -> depth;
+    };
   }
 
   private boolean attempt(ExprNode n) {
@@ -310,13 +369,13 @@ final class Optimizer {
   }
 
   /** Whether an error in child {@code i} propagates from {@code n} whatever its siblings yield. */
-  private boolean strictPosition(ExprNode n, int i) {
+  private boolean strictPosition(ExprNode n, int i, int depth) {
     return switch (n.kind) {
       case CALL ->
           switch (n.name) {
             case "&&", "||", "@not_strictly_false" -> false;
             case "or", "orValue" -> i == 0;
-            default -> siblingsConstant(n, i);
+            default -> siblingsConstant(n, i, depth);
           };
       case CONDITIONAL -> i == 0;
       case MACRO -> n.name.equals("has") || n.name.equals("bind") || i == 0;
@@ -327,9 +386,9 @@ final class Optimizer {
   }
 
   // Call arguments are evaluated together and an unknown sibling wins over an error.
-  private boolean siblingsConstant(ExprNode n, int i) {
+  private static boolean siblingsConstant(ExprNode n, int i, int depth) {
     for (int j = 0; j < n.children.length; j++)
-      if (j != i && !foldable(n.children[j])) return false;
+      if (j != i && !foldable(n.children[j], depth)) return false;
     return true;
   }
 
@@ -380,14 +439,10 @@ final class Optimizer {
     @Override
     Object execute(VirtualFrame frame, EvalContext ctx) {
       ctx.charge(cost);
-      if (error != null) raise(error);
+      // A CEL error is ordinary compiled control flow; the prebuilt exception needs no boundary.
+      if (error != null) throw error;
       return value;
     }
-  }
-
-  @TruffleBoundary
-  private static void raise(CelException error) {
-    throw error;
   }
 
   /** {@code matches} with a constant pattern compiled once; the operands are still evaluated. */
@@ -422,7 +477,7 @@ final class Optimizer {
       if (text instanceof Unknown) return text;
       if (failure != null) throw failure;
       if (!(text instanceof String s)) throw Values.overload("matches");
-      if (error != null) raise(error);
+      if (error != null) throw error;
       return pattern.find(s);
     }
   }

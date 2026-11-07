@@ -495,6 +495,12 @@ public final class ValidationTest {
             "[x].sortBy(i, i)"))
       assertNotNull(source, env.compile(source).evaluate(Map.of("x", 1L)));
     assertEquals(true, Cel.compile("[1].all(i, [2].all(j, [3].all(k, k > j)))").evaluate());
+    // More than eight simultaneously bound variables grow the analysis scope.
+    String chain = "a + b + c + d + e + f + g + h + i";
+    for (String name : List.of("i", "h", "g", "f", "e", "d", "c", "b", "a"))
+      chain = "cel.bind(" + name + ", x, " + chain + ")";
+    assertEquals(9L, Cel.compile(chain).evaluate(Map.of("x", 1L)));
+    assertEquals(9L, Cel.compile(chain.replace("x,", "1,")).evaluate());
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxComprehensionNesting(0));
     assertThrows(NullPointerException.class, () -> Cel.newBuilder().validation(null));
   }
