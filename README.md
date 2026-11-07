@@ -92,7 +92,7 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
-**Java 25**, **Elide GraalVM `25.5.5-elide.24`**, and **TruffleData `0.8.0`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.27`**, and **TruffleData `0.8.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
 for available versions. The example below uses released TruffleCEL `0.8.0`, whose POM pins
