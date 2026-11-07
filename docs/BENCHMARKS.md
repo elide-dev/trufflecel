@@ -205,9 +205,12 @@ JVM and Native Image gates below; simulation must not be read as guest-JIT throu
 | list-sort | Sort by a computed key and select the first item |
 | math-extrema | Find the maximum of a numeric list |
 | network-cidr | Parse a numeric CIDR/IP and test containment |
+| folded-constant | Evaluate a constant comprehension that compile-time folding reduced to its value |
 
-Each case executes 256 operations. Checksums in `benchmarks/cases.json` are checked after
-the measurement; a volatile result prevents dead-code elimination. Preparation and 16 warmup
+Each case executes 256 operations and reads its inputs from an activation prepared outside the
+measured region, so that compile-time constant folding cannot turn a case into a lookup;
+`folded-constant` is the one deliberately constant case. Checksums in `benchmarks/cases.json`
+are checked after the measurement; a volatile result prevents dead-code elimination. Preparation and 16 warmup
 operations run outside each region. Native-AOT is the only measured tier; no JVM/JIT claim
 is made from these results.
 

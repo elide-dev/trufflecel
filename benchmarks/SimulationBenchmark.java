@@ -10,7 +10,12 @@ import java.util.function.LongSupplier;
 import org.graalvm.nativeimage.ImageInfo;
 import org.graalvm.shadowed.org.json.JSONObject;
 
-/** Deterministic native-AOT workloads; setup/warmup/assertions stay outside measured regions. */
+/**
+ * Deterministic native-AOT workloads; setup/warmup/assertions stay outside measured regions. Every
+ * case reads its data from an activation built here, so the measured operation evaluates the
+ * workload rather than a constant that the optimizer folded at compile time; {@code
+ * folded-constant} is the one deliberately constant case.
+ */
 public final class SimulationBenchmark {
   private static volatile long sink;
 
@@ -20,7 +25,9 @@ public final class SimulationBenchmark {
     var activation = Map.<String, Object>of("x", 42L);
     var scalar = Cel.compile("x * 2 + 1");
     var logic = Cel.compile("x == 42 || (1 / 0 == 0)");
-    var list = Cel.compile("[1,2,3,4,5,6,7,8].filter(x,x % 2 == 0).map(x,x * x).size()");
+    var list = Cel.compile("xs.filter(x,x % 2 == 0).map(x,x * x).size()");
+    var listInput = Map.<String, Object>of("xs", List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+    var folded = Cel.compile("[1,2,3,4,5,6,7,8].filter(x,x % 2 == 0).map(x,x * x).size()");
     var regex = Cel.compile("s.matches('^[a-z]+@[a-z]+[.]com$')");
     var regexInput = Map.<String, Object>of("s", "person@example.com");
     var schema = Schema.of(Field.requiredLong("id"));
@@ -67,23 +74,29 @@ public final class SimulationBenchmark {
             "j", JsonValues.from(new JSONObject("{\"id\":42,\"tags\":[\"user\",\"admin\"]}")));
     var optional = Cel.compile("m.?payload.value.orValue(0)");
     var optionalInput = Map.<String, Object>of("m", Map.of("payload", Map.of("value", 42L)));
-    var transform = Cel.compile("[1,2,3,4].transformList(i,v,i+v).size()");
-    var format = Cel.compile("'%.2f %s'.format([3.5,'CEL']).size()");
-    var sort = Cel.compile("[4,2,3,1].sortBy(v,-v)[0]");
-    var extrema = Cel.compile("math.greatest([3,1,4,2])");
-    var network = Cel.compile("cidr('192.168.0.0/24').containsIP('192.168.0.42')");
+    var transform = Cel.compile("xs.transformList(i,v,i+v).size()");
+    var transformInput = Map.<String, Object>of("xs", List.of(1L, 2L, 3L, 4L));
+    var format = Cel.compile("'%.2f %s'.format([d, s]).size()");
+    var formatInput = Map.<String, Object>of("d", 3.5, "s", "CEL");
+    var sort = Cel.compile("xs.sortBy(v,-v)[0]");
+    var sortInput = Map.<String, Object>of("xs", List.of(4L, 2L, 3L, 1L));
+    var extrema = Cel.compile("math.greatest(xs)");
+    var extremaInput = Map.<String, Object>of("xs", List.of(3L, 1L, 4L, 2L));
+    var network = Cel.compile("cidr(net).containsIP(ip)");
+    var networkInput = Map.<String, Object>of("net", "192.168.0.0/24", "ip", "192.168.0.42");
     return List.of(
         new Case("optional-chain", () -> (Long) optional.evaluate(optionalInput), 42),
-        new Case("two-variable-transform", () -> (Long) transform.evaluate(), 4),
-        new Case("string-format", () -> (Long) format.evaluate(), 8),
-        new Case("list-sort", () -> (Long) sort.evaluate(), 4),
-        new Case("math-extrema", () -> (Long) extrema.evaluate(), 4),
-        new Case("network-cidr", () -> network.test() ? 1 : 0, 1),
+        new Case("two-variable-transform", () -> (Long) transform.evaluate(transformInput), 4),
+        new Case("string-format", () -> (Long) format.evaluate(formatInput), 8),
+        new Case("list-sort", () -> (Long) sort.evaluate(sortInput), 4),
+        new Case("math-extrema", () -> (Long) extrema.evaluate(extremaInput), 4),
+        new Case("network-cidr", () -> network.test(networkInput) ? 1 : 0, 1),
         new Case(
             "compile-evaluate", () -> (Long) Cel.compile("x * 2 + 1").evaluate(activation), 85),
         new Case("evaluate-scalar", () -> (Long) scalar.evaluate(activation), 85),
         new Case("short-circuit", () -> logic.test(activation) ? 1 : 0, 1),
-        new Case("comprehension", () -> (Long) list.evaluate(), 4),
+        new Case("comprehension", () -> (Long) list.evaluate(listInput), 4),
+        new Case("folded-constant", () -> (Long) folded.evaluate(), 4),
         new Case("regex", () -> regex.test(regexInput) ? 1 : 0, 1),
         new Case("native-row", () -> (Long) rowProgram.evaluate(rowInput), 84),
         new Case("protobuf", () -> protoProgram.test(protoInput) ? 1 : 0, 1),
