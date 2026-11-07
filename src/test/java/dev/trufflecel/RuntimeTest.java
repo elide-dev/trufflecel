@@ -1027,4 +1027,17 @@ public class RuntimeTest {
               .code());
   }
 
+  @Test
+  public void uncheckedHostDispatchMatchesDeclaredOverloads() {
+    var env =
+        Cel.newBuilder()
+            .function("same", List.of(CelType.INT), CelType.INT, args -> args.get(0))
+            .build();
+    assertEquals(1L, env.parse("same(1)").evaluate());
+    for (String source : List.of("same('a')", "same(1, 2)", "same(dyn(1u))", "same()"))
+      assertEquals(
+          source,
+          CelException.Code.NO_OVERLOAD,
+          assertThrows(CelException.class, () -> env.parse(source).evaluate()).code());
+  }
 }
