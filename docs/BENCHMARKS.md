@@ -180,7 +180,7 @@ Use CodSpeed to locate CPU regressions and existing allocation budgets to enforc
 use fixed-work peak RSS as a secondary process-footprint diagnostic. A lower allocation
 rate does not imply a smaller resident process, especially when guest compilation is enabled.
 
-CodSpeed measures 14 fixed native-AOT cases on every PR and main push. The integration
+CodSpeed measures 21 fixed native-AOT cases on every PR and main push. The integration
 uses the same pinned CodSpeed action and instrument-hooks implementation as Komodo and
 TruffleData. It counts instructions within explicit C callback regions; it does not time
 Java startup, fixture creation, compilation warmup or shutdown.
@@ -207,10 +207,15 @@ JVM and Native Image gates below; simulation must not be read as guest-JIT throu
 | network-cidr | Parse a numeric CIDR/IP and test containment |
 | folded-constant | Evaluate a constant comprehension that compile-time folding reduced to its value |
 
-Each case executes 256 operations and reads its inputs from an activation prepared outside the
-measured region, so that compile-time constant folding cannot turn a case into a lookup;
-`folded-constant` is the one deliberately constant case. Checksums in `benchmarks/cases.json`
-are checked after the measurement; a volatile result prevents dead-code elimination. Preparation and 16 warmup
+Each case executes 256 operations. The historical literal fixtures keep their original
+expressions and benchmark names; constant folding may legitimately reduce their runtime work.
+The six `-input` variants of comprehension, two-variable-transform, string-format, list-sort,
+math-extrema and network-cidr read activations prepared outside the measured region. These
+have distinct benchmark identities because host binding lookup and normalization change the
+measured work. Never compare a literal fixture's history with its runtime-input variant.
+`folded-constant` explicitly exercises folding. Checksums in `benchmarks/cases.json` are
+checked after measurement; a volatile result prevents dead-code elimination. Preparation and
+16 warmup
 operations run outside each region. Native-AOT is the only measured tier; no JVM/JIT claim
 is made from these results.
 

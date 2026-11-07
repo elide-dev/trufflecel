@@ -169,8 +169,8 @@ var program = env.compile("has(message.owner) && message.count > 0u");
 Object result = program.evaluate(Map.of("message", type.input(myMessage)));
 ```
 
-`input(Message)` snapshots through TruffleData's bound `ProtoCompiler.Source` and applies
-CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a lossless
+`input(Message)` serializes the supplied message, normalizes MessageSet wire data,
+and decodes through TruffleData's native plan before applying CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a lossless
 `ProtoRow`; it retains no protobuf `Message`. Field reads use native storage, `ProtoRow.has`
 provides protobuf presence independently of readable defaults, and enums retain numeric values.
 Bytes use compact immutable storage; unsigned integers preserve their full width.
