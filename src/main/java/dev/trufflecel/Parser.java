@@ -44,7 +44,7 @@ final class Parser {
   }
 
   private ExprNode expression(int min) {
-    if (++depth > env.maxDepth) throw error("expression nesting limit exceeded");
+    if (++depth > env.maxDepth) throw limit("expression nesting limit exceeded");
     try {
       ExprNode left = unary();
       while (precedence(token.kind) >= min && precedence(token.kind) > 0) {
@@ -92,7 +92,7 @@ final class Parser {
       Token op = take();
       int count = 1;
       while (accept(op.kind)) {
-        if (++count > env.maxDepth) throw error("unary nesting limit exceeded");
+        if (++count > env.maxDepth) throw limit("unary nesting limit exceeded");
       }
       if (op.kind.equals("-") && count % 2 == 1 && token.kind.equals("NUMBER")) {
         Token number = take();
@@ -162,7 +162,7 @@ final class Parser {
     int chain = 0;
     int start = node.sourceStart;
     while (true) {
-      if (++chain > env.maxDepth) throw error("selection nesting limit exceeded");
+      if (++chain > env.maxDepth) throw limit("selection nesting limit exceeded");
       if (accept(".")) {
         boolean optional = accept("?");
         String name = identifier(true);
@@ -389,6 +389,12 @@ final class Parser {
   private CelException error(String message) {
     return new CelException(
         CelException.Code.SYNTAX, message, token == null ? cursor : token.offset);
+  }
+
+  // Nesting limits are resource controls, categorized like the other configured limits. They are
+  // only reached while a token is current.
+  private CelException limit(String message) {
+    return new CelException(CelException.Code.RESOURCE_EXHAUSTED, message, token.offset);
   }
 
   private Token next() {

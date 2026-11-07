@@ -99,8 +99,13 @@ public class ParserTest {
             "!".repeat(20) + "true",
             "x" + ".a".repeat(20),
             "1" + "+1".repeat(20)))
-      assertThrows(source, CelException.class, () -> small.parse(source));
-    assertThrows(CelException.class, () -> Cel.compile("1" + "+1".repeat(10000)));
+      assertEquals(
+          source,
+          CelException.Code.RESOURCE_EXHAUSTED,
+          assertThrows(CelException.class, () -> small.parse(source)).code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> Cel.compile("1" + "+1".repeat(10000))).code());
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxDepth(0));
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxDepth(513));
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxSourceLength(0));
@@ -156,4 +161,5 @@ public class ParserTest {
       assertThrows(source, CelException.class, () -> Cel.compile(source));
     assertThrows(CelException.class, () -> Cel.newBuilder().build().compile("{'x':1}.has('x')"));
   }
+
 }
