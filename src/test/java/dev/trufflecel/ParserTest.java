@@ -162,4 +162,17 @@ public class ParserTest {
     assertThrows(CelException.class, () -> Cel.newBuilder().build().compile("{'x':1}.has('x')"));
   }
 
+  @Test
+  public void loneTrailingCommaIsAnEmptyAggregate() {
+    // Primary = "[" [ExprList] [","] "]" | "{" [MapInits] [","] "}" admits a lone comma.
+    assertEquals(List.of(), Cel.compile("[,]").evaluate());
+    assertEquals(Map.of(), Cel.compile("{,}").evaluate());
+    assertEquals(0L, Cel.compile("google.protobuf.Int64Value{,}").evaluate());
+    for (String source :
+        List.of("[,1]", "[1,,]", "{,'a':1}", "google.protobuf.Int64Value{,value:1}"))
+      assertEquals(
+          source,
+          CelException.Code.SYNTAX,
+          assertThrows(CelException.class, () -> Cel.compile(source)).code());
+  }
 }

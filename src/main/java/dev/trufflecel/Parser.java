@@ -138,7 +138,8 @@ final class Parser {
       case "{":
         {
           var entries = new ArrayList<ExprNode>();
-          if (!accept("}"))
+          if (accept(",")) expect("}");
+          else if (!accept("}"))
             do {
               boolean optional = accept("?");
               entries.add(expression(0));
@@ -181,7 +182,8 @@ final class Parser {
         String name = node.qualifiedName();
         var names = new ArrayList<String>();
         var values = new ArrayList<ExprNode>();
-        if (!accept("}"))
+        if (accept(",")) expect("}");
+        else if (!accept("}"))
           do {
             boolean optional = accept("?");
             String field = identifier(true);
@@ -327,6 +329,11 @@ final class Parser {
 
   private ArrayList<ExprNode> aggregate(String end) {
     var result = new ArrayList<ExprNode>();
+    // The grammar admits a lone trailing comma: "[" [ExprList] [","] "]".
+    if (accept(",")) {
+      expect(end);
+      return result;
+    }
     if (!accept(end))
       do {
         boolean optional = accept("?");
