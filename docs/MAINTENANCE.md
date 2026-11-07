@@ -18,7 +18,7 @@ Maintainers should review these remaining pins monthly and before releases:
 
 | Dependency | Update and validation |
 | --- | --- |
-| Maven libraries, including TruffleData | Update MODULE.bazel; run `REPIN=1 bazel run --config=local @maven//:pin`; update publication POM dependencies in `bazel/maven.bzl` where applicable |
+| Maven libraries, including TruffleData | Update MODULE.bazel; run `REPIN=1 bazel run --config=local @maven//:pin`; update publication POM dependencies in `tools/release/BUILD.bazel` |
 | Comparison-only cel-java | Update its isolated Maven installation; run `REPIN=1 bazel run --config=local @cel_java//:pin`; rerun comparisons |
 | GraalVM and rules_graalvm fork | Update matching Maven versions, repositories, archive URLs, checksums and fork commit together; run native JIT/blocklist and allocation gates |
 | Bazel, Go SDK, CodSpeed hooks, downloaded CI tools | Review upstream releases, update versions and verified digests, regenerate Bazel lockfile, run affected tooling |
