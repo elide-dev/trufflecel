@@ -31,6 +31,18 @@ public class ErrorLocationTest {
   }
 
   @Test
+  public void logicalLoweringPreservesUtf16SourcePositions() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    String source = "true &&\n ('😀' == '' || 10 / x == 0)";
+    var error = failure(env.compile(source), Map.of("x", 0L));
+    assertEquals(CelException.Code.DIVIDE_BY_ZERO, error.code());
+    assertEquals(source.indexOf('/'), error.offset());
+    assertEquals(2, error.line());
+    assertEquals(source.indexOf('/') - source.indexOf('\n'), error.column());
+    assertTrue(error.expressionId() > 0);
+  }
+
+  @Test
   public void callbackExceptionsAreNotMutatedAcrossConcurrentPrograms() throws Exception {
     var original = new CelException(CelException.Code.INDEX, "host failure");
     var env =

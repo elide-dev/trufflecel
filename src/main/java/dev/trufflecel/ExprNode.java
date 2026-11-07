@@ -232,6 +232,7 @@ class ExprNode extends CelNode {
     }
     if (count >= 2) return new ArithmeticChain(this, count, leaf.lowerUninstrumented());
     for (int i = 0; i < children.length; i++) children[i] = children[i].lowerUninstrumented();
+    if (kind == Kind.CALL && (name.equals("&&") || name.equals("||"))) return new LogicalNode(this);
     if (kind == Kind.CALL && name.equals("size") && !extensionCall && children.length == 1) {
       ExprNode range = children[0];
       if (range.kind == Kind.MACRO
@@ -243,6 +244,26 @@ class ExprNode extends CelNode {
       }
     }
     return this;
+  }
+
+  /** Logical operators keep their error/unknown precedence without general function dispatch. */
+  private static final class LogicalNode extends ExprNode {
+    private final boolean decisive;
+
+    LogicalNode(ExprNode original) {
+      super(Kind.CALL, original.name, original.value, original.offset, original.children);
+      decisive = original.name.equals("||");
+      sourceRange(original.sourceStart, original.sourceEnd);
+      copyLocation(original);
+      optionalEntry = original.optionalEntry;
+      statement = original.statement;
+    }
+
+    @Override
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
+      ctx.tick();
+      return logical(frame, ctx, decisive);
+    }
   }
 
   /** Counts results without retaining them; mapper visits, errors and budgets are unchanged. */
@@ -548,7 +569,7 @@ class ExprNode extends CelNode {
         && children.length == 2
         && !extensionCall
         && !customOverloads) return scalarBinary(frame, ctx);
-    if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
+    if (name.equals("&&") || name.equals("||")) return logical(frame, ctx, name.equals("||"));
     if (optionalFallback && children.length == 2) {
       Object first = children[0].execute(frame, ctx);
       if (first instanceof Unknown) return first;
@@ -626,8 +647,7 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object logical(VirtualFrame frame, EvalContext ctx) {
-    boolean decisive = name.equals("||");
+  final Object logical(VirtualFrame frame, EvalContext ctx, boolean decisive) {
     CelException error = null;
     Unknown unknown = null;
     for (ExprNode child : children) {
