@@ -698,7 +698,12 @@ public final class CanonicalAst {
       if (node.kind == ExprNode.Kind.CALL)
         references.put(
             id,
-            message("cel.expr.Reference", "name", OPERATORS.getOrDefault(node.name, node.name)));
+            message(
+                "cel.expr.Reference",
+                "name",
+                OPERATORS.getOrDefault(node.name, node.name),
+                "overload_id",
+                node.overloadIds));
       return result;
     }
 

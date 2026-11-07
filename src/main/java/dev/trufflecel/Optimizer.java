@@ -226,6 +226,7 @@ final class Optimizer {
       }
     }
     if (n.kind == ExprNode.Kind.CALL
+        && !n.customOverloads
         && n.name.equals("matches")
         && n.children.length == 2
         && n.children[1].kind == ExprNode.Kind.CONSTANT
@@ -413,9 +414,9 @@ final class Optimizer {
       } else return;
       types.add(Values.type(value));
     }
-    boolean accepted = binding.arguments().size() == types.size();
-    for (int i = 0; accepted && i < types.size(); i++)
-      accepted = binding.arguments().get(i).accepts(types.get(i));
+    boolean accepted = false;
+    for (var signature : env.overloads.get(n.name))
+      accepted |= FunctionOverloads.matches(signature, Boolean.TRUE.equals(n.value), types);
     if (accepted) return;
     n.fold = new Fold(null, Values.overload(n.name), cost);
     report(n, strictPath);

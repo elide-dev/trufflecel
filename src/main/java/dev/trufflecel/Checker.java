@@ -270,8 +270,28 @@ final class Checker {
         n.name.equals("contains") || n.name.equals("startsWith") || n.name.equals("endsWith");
     var types = new ArrayList<CelType>();
     for (ExprNode child : n.children) types.add(check(child, locals));
-    var custom = env.functions.get(n.name);
+    var signatures = env.overloads.get(n.name);
+    n.customOverloads =
+        signatures != null && (signatures.size() > 1 || signatures.get(0).receiver() != null);
+    if (n.customOverloads) {
+      CelType result = null;
+      var ids = new ArrayList<String>();
+      for (var signature : signatures) {
+        if (!FunctionOverloads.matches(signature, Boolean.TRUE.equals(n.value), types)) continue;
+        var bindings = new HashMap<String, CelType>();
+        for (int i = 0; i < types.size(); i++)
+          bind(n, signature.binding().arguments().get(i), types.get(i), bindings);
+        CelType next = substitute(signature.binding().result(), bindings);
+        result = result == null ? next : CelType.join(result, next);
+        ids.add(signature.id());
+      }
+      n.overloadIds = List.copyOf(ids);
+      if (result != null) return result;
+      require(n, FunctionOverloads.standard(n.name), "no matching overload: " + n.name);
+    }
+    var custom = n.customOverloads ? null : env.functions.get(n.name);
     if (custom != null) {
+      n.overloadIds = List.of(signatures.get(0).id());
       require(n, types.size() == custom.arguments().size(), "incorrect argument count");
       var bindings = new HashMap<String, CelType>();
       if (types.size() == custom.arguments().size())
