@@ -45,18 +45,18 @@ final class RegexQualification {
 
   // Only these four probe methods differ in the candidate overlay. Timed loops are identical.
   private static String backend() {
-    return "re2j";
+    return "truffle-regex-re2";
   }
 
   private static int expectedMatches() {
-    return 0;
+    return 1;
   }
 
   private static boolean isMatch(Node node) {
-    return node.getClass().getName().equals("dev.trufflecel.Regex$MatchNode");
+    return node instanceof Regex.MatchNode;
   }
 
   private static boolean isAccelerated(Node node) {
-    return false;
+    return ((Regex.MatchNode) node).isAccelerated();
   }
 }
