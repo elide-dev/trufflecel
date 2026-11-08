@@ -169,3 +169,63 @@ bazel run --config=local //benchmarks/representative:ingestion_profile -- profil
 Use `run-timing.py` with the preserved JMH deploy artifacts for the separate
 unprofiled comparison. Preserve any new measurements in a new location rather
 than overwriting this evidence.
+
+## Native Image allocation follow-up
+
+A separate allocation-only entry reuses the same fixture operations and validation.
+It does not call the JFR recording path. Two Linux amd64 Native Images use the pinned
+GraalVM, Serial GC, optimization level 3, and `-Xmx512m`. Both builds retain Truffle
+blocklist and never-part-of-compilation validation. Each image runs three fresh
+processes per fixture on RBE, with the same warmup and seven fixed-work windows as
+the JVM diagnostic. The per-thread allocation counter must be supported and must
+pass an independent escaping 4 KiB-array check before measurement begins.
+
+The [baseline action](https://app.buildbuddy.io/invocation/e2359482-fc93-416e-9e83-2dfbd9e40a4a)
+and [candidate action](https://app.buildbuddy.io/invocation/9e6371b3-9f45-4dd3-9eeb-c3166893a12e)
+both passed. Every value below is identical in all 21 windows for its cell.
+
+| Fixture / operation | Baseline B/op | Candidate B/op | Change |
+| --- | ---: | ---: | ---: |
+| Ordinary CEL decode | 4,834 | 4,628 | −206 |
+| Ordinary decode plus CEL evaluation | 9,352 | 9,146 | −206 |
+| 64 KiB unknown CEL decode | 201,574 | 135,828 | −65,746 |
+| 64 KiB unknown decode plus CEL evaluation | 271,632 | 205,886 | −65,746 |
+| MessageSet CEL decode | 4,840 | 4,824 | −16 |
+
+Native allocation controls, unchanged between revisions:
+
+| Operation | Ordinary B/op | 64 KiB unknown B/op |
+| --- | ---: | ---: |
+| Direct native-plan decode | 4,612 | 135,812 |
+| Generated protobuf parse | 4,076 | 70,052 |
+| CEL generated-message snapshot | 5,062 | 201,802 |
+| Bound generated-message snapshot | 5,568 | 136,952 |
+| Generated parse plus optimized cel-java evaluation | 11,554 | 77,530 |
+
+Unlike the JVM/C2 result, the ordinary bound snapshot allocates more than the
+ordinary CEL snapshot in this native configuration. That reinforces the need to
+qualify ingestion choices separately for each runtime and input shape. Adding the
+unknown payload raises direct native-plan allocation by 131,200 B/op, consistent
+with the JVM finding of approximately two payload-sized arrays plus bookkeeping.
+The decode change saves one input clone on both runtimes; their object layouts
+and absolute allocation figures differ.
+
+The runs measure current-thread allocated bytes, not elapsed time, retained heap,
+RSS, or deployment footprint. The artifacts include both engines for the controls;
+their combined image size is not a per-library deployment comparison. The RBE
+actions may use different workers, so no timing comparison is inferred from them.
+All raw windows, binary hashes, observed CPU/kernel details, and source provenance
+are retained under [native/](native/), with aggregates in
+[native/summary.json](native/summary.json).
+
+The allocation-only harness extension is commit `662ecba`; baseline artifact source
+is `3b61f11`, and candidate artifact source is `662ecba`. For exact reconstruction,
+apply `profile-harness.patch` then [native/harness.patch](native/harness.patch) to
+`4c5df30`, then optionally `production.patch`. Run:
+
+```sh
+bazel test //benchmarks/representative:ingestion_native_allocation
+```
+
+The test writes each fresh process's output and its binary digest to Bazel's
+undeclared outputs. No local system JDK or profiling-enabled Native Image is used.
