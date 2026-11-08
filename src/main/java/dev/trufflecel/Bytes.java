@@ -14,6 +14,12 @@ public final class Bytes implements Comparable<Bytes> {
     return value.clone();
   }
 
+  // Trusted internal codecs may read this owned array during a call. Never mutate it,
+  // expose it to host code, or use it with a decoder that retains borrowed storage.
+  byte[] arrayForRead() {
+    return value;
+  }
+
   public int size() {
     return value.length;
   }

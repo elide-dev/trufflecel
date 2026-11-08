@@ -11,6 +11,50 @@ import org.junit.Test;
 
 public class ProtobufIntegrationTest {
   @Test
+  public void concurrentWireDecodesPreserveOwnedInputsAndIndependentExports() throws Exception {
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor);
+    var payload = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
+    var message =
+        DynamicMessage.newBuilder(descriptor)
+            .setField(descriptor.findFieldByName("bytes"), payload)
+            .setField(descriptor.findFieldByName("string"), "owned")
+            .setUnknownFields(
+                UnknownFieldSet.newBuilder()
+                    .addField(
+                        100, UnknownFieldSet.Field.newBuilder().addLengthDelimited(payload).build())
+                    .build())
+            .build();
+    byte[] wire = message.toByteArray();
+    var input = new Bytes(wire);
+    Arrays.fill(wire, (byte) 0);
+    int hash = input.hashCode();
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
+      var jobs = new ArrayList<java.util.concurrent.Callable<Object>>();
+      for (int i = 0; i < 100; i++)
+        jobs.add(
+            () -> {
+              var value = (ProtobufType.Value) type.decode(input);
+              Arrays.fill(value.toBytes().toByteArray(), (byte) 0);
+              Arrays.fill(((Bytes) type.get(value, "bytes")).toByteArray(), (byte) 0);
+              Arrays.fill(value.row().unknownFieldBytes(), (byte) 0);
+              assertEquals(message, value.message());
+              return type.get(value, "bytes");
+            });
+      for (var job : executor.invokeAll(jobs))
+        assertEquals(new Bytes(payload.toByteArray()), job.get());
+    }
+    assertEquals(hash, input.hashCode());
+    assertArrayEquals(message.toByteArray(), input.toByteArray());
+    var invalid = new Bytes(new byte[] {-1});
+    for (int i = 0; i < 2; i++)
+      assertEquals(
+          CelException.Code.INVALID_ARGUMENT,
+          assertThrows(CelException.class, () -> type.decode(invalid)).code());
+    assertArrayEquals(new byte[] {-1}, invalid.toByteArray());
+  }
+
+  @Test
   public void protobufContextExposesDefaultsAndRetainsNativeSnapshots() throws Exception {
     var descriptor = descriptor();
     var type = new ProtobufType(descriptor);

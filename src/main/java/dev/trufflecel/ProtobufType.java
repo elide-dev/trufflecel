@@ -1034,7 +1034,9 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   public Object decode(Bytes bytes) {
     try {
-      return new Value(this, plan.decode(wire(bytes.toByteArray(), true, 0)));
+      // Bytes already owns its immutable input. Both normalization and the native codec
+      // only read it, and the decoded row owns its strings, bytes and unknown fields.
+      return new Value(this, plan.decode(wire(bytes.arrayForRead(), true, 0)));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
     }
