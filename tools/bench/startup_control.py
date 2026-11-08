@@ -54,6 +54,12 @@ def validate_results(rows):
         raise ValueError('Incomplete paired startup-control matrix')
 
 
+def driver_provenance():
+    observer = Path(startup.__file__)
+    return dict(driver_sha256=sha(Path(__file__)), observer_driver_sha256=sha(observer),
+                shared_driver_sha256=sha(observer.with_name('representative.py')))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--java', type=Path, required=True)
@@ -95,8 +101,7 @@ def main():
                   load_start=os.getloadavg(), java_version=java_version, java_sha256=java_hash,
                   java_home_release=(java_home / 'release').read_text(), runtime_sha256=runtime_hashes,
                   vm_flags=capture([str(java), *FLAGS, '-XX:+PrintFlagsFinal', '-version']),
-                  driver_sha256=sha(__file__), observer_driver_sha256=sha(Path(startup.__file__)),
-                  shared_driver_sha256=sha(Path(startup.__file__).with_name('representative.py')),
+                  **driver_provenance(),
                   forks=FORKS, input_indices=list(range(FORKS)), bindings_per_input=69,
                   jvm_flags=FLAGS, native_flags=NATIVE_FLAGS,
                   clock='existing startup.observe: before Popen through flushed independently verified first result',
