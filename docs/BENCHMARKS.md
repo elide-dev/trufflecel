@@ -89,9 +89,15 @@ increases by 6 and 4 B/op respectively. Current JIT RSS rises 10.28% on JVM and
 16.54% on native. Interpreter allocation also increases; native interpreter time has
 overlapping fork ranges and a 1.14% higher point estimate. Scalar-wide allocation
 is unchanged, but its timing point estimates rise 1.96–4.24%, with disjoint native-JIT
-ranges. The combined native benchmark executable grows about 9.4 MiB. These results
+ranges. The combined native benchmark executables grow 9.3–9.6 MiB. These results
 describe a speed/footprint tradeoff, not a memory optimization or a new ranking
 against cel-java. The report preserves all controls and costs.
+
+A [separate cached-dispatch experiment](benchmarks/regex-dispatch-20261108/README.md)
+was rejected. All eight timing-pair ranges overlap; native regex JIT RSS rises
+7.11% despite small JIT allocation savings. The prototype and its extra dispatch
+root were removed. Its complete negative evidence is preserved, and the simpler
+initial adapter remains the selected implementation.
 
 The [November 5 report](benchmarks/representative-20261105/README.md) remains historical
 evidence with its original dependencies, raw data and methodology.

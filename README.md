@@ -212,13 +212,16 @@ JVM and 3,504 to 120 B/op on native, with substantially lower evaluation time.
 Caller-side preparation is excluded. The ordinary-map counts do not establish an
 advantage over every embedding path.
 
-The [paired TruffleRegex RE2 candidate](docs/benchmarks/regex-re2-20261108/README.md)
+The [selected TruffleRegex RE2 adapter](docs/benchmarks/regex-re2-20261108/README.md)
 reduces the regex workload's guest-JIT time by 10.9% on JVM and 11.2% on native,
 but increases allocation and current process RSS. JIT RSS rises from 486.83 to
 536.88 MiB on JVM and 192.54 to 224.39 MiB on native; the combined native benchmark
-binary also grows about 9.4 MiB. This candidate is a speed/footprint tradeoff and
+binaries grow 9.3–9.6 MiB. This is a speed/footprint tradeoff and
 does not close the memory gap. The report retains the unrelated scalar control,
 startup observations and exact backend proofs.
+A [cached-dispatch follow-up](docs/benchmarks/regex-dispatch-20261108/README.md)
+showed no demonstrated throughput gain and increased native regex JIT RSS another
+7.11%; that prototype was removed. The simpler adapter remains selected.
 
 [Startup and natural-JIT payback](docs/benchmarks/startup-payback-20261108/README.md)
 remain separate tradeoffs, including slower JVM scalar startup and no sampled
