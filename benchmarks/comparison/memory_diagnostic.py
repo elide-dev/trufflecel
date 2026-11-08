@@ -85,6 +85,7 @@ def run_profile(command, directory):
                         raise ValueError("unexpected phase: " + line)
                     value.update(snapshot(process.pid, directory, expected))
                     phases.append(value)
+                    (directory / "phases.json").write_text(json.dumps(phases, indent=2) + "\n")
                     process.stdin.write("\n")
                     process.stdin.flush()
             stdout, _ = process.communicate(timeout=180)
