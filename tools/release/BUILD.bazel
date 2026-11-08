@@ -81,4 +81,4 @@ java_test(
     ],
 )
 
-exports_files(["maven_repo.py"])
+exports_files(["maven_repo.py", "dependency_gate.py"])
