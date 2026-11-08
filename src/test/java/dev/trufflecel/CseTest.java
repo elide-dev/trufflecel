@@ -29,6 +29,39 @@ public final class CseTest {
     }
   }
 
+  private static Object outcome(java.util.function.Supplier<Object> evaluation) {
+    try {
+      return evaluation.get();
+    } catch (CelException failure) {
+      return List.of(failure.code(), failure.offset(), failure.expressionId());
+    }
+  }
+
+  @Test
+  public void environmentBudgetsPreserveOrdinaryMapAndSnapshotFailureLocations() {
+    String source = "(x + 1) * (x + 1)";
+    var bindings = Map.of("x", 2L);
+    var snapshot = Activation.snapshot(bindings);
+    for (int budget = 1; budget <= 12; budget++) {
+      var plain = environment(false).toBuilder().evaluationBudget(budget).build().compile(source);
+      var optimized =
+          environment(true).toBuilder().evaluationBudget(budget).build().compile(source);
+      assertEquals(
+          "map budget " + budget,
+          outcome(() -> plain.evaluate(bindings)),
+          outcome(() -> optimized.evaluate(bindings)));
+      assertEquals(
+          "snapshot budget " + budget,
+          outcome(() -> plain.evaluate(snapshot)),
+          outcome(() -> optimized.evaluate(snapshot)));
+      var controls = EvaluationOptions.newBuilder().build();
+      assertEquals(
+          "cost budget " + budget,
+          plain.evaluateWithDetails(bindings, controls).actualCost(),
+          optimized.evaluateWithDetails(bindings, controls).actualCost());
+    }
+  }
+
   @Test
   public void repeatedPureExpressionsKeepValuesErrorsUnknownsAndCosts() {
     for (long x : new long[] {-10, 0, 2, Long.MAX_VALUE}) {
