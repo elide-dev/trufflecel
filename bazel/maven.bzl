@@ -19,7 +19,7 @@ def _publication_impl(ctx):
     graalvm_version = ctx.attr.graalvm_version
     for coordinate in ctx.attr.dependencies:
         group, name, dep_version = coordinate.split(":")
-        dependencies.append("<dependency><groupId>%s</groupId><artifactId>%s</artifactId><version>%s</version><scope>compile</scope></dependency>" % (group, name, dep_version.replace("{version}", version)))
+        dependencies.append("<dependency><groupId>%s</groupId><artifactId>%s</artifactId><version>%s</version><scope>compile</scope>%s</dependency>" % (group, name, dep_version.replace("{version}", version), "<optional>true</optional>" if coordinate in ctx.attr.optional_dependencies else ""))
     pom = ctx.actions.declare_file(prefix + ".pom")
     ctx.actions.write(pom, """<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -60,6 +60,7 @@ maven_publication = rule(
         "library": attr.label(providers = [JavaInfo], mandatory = True),
         "module": attr.string(mandatory = True),
         "dependencies": attr.string_list(),
+        "optional_dependencies": attr.string_list(),
         "graalvm_version": attr.string(default = "25.5.5-elide.27"),
         "_singlejar": attr.label(default = "@bazel_tools//tools/jdk:singlejar", executable = True, cfg = "exec"),
         "_legal": attr.label_list(default = ["//:LICENSE", "//:LICENSE-MIT", "//:LICENSE-APACHE", "//:NOTICE"], allow_files = True),

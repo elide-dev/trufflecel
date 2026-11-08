@@ -45,6 +45,7 @@ class PublicationTest(unittest.TestCase):
                     coordinate = get('groupId') + ':' + get('artifactId')
                     actual.add(coordinate)
                     self.assertEqual(get('scope'), 'compile')
+                    self.assertEqual(get('optional'), 'true' if coordinate == 'com.google.re2j:re2j' else None)
                     self.assertEqual(get('version'), version if coordinate == 'dev.elide:trufflecel-core' else lock['artifacts'][coordinate]['version'])
                 self.assertEqual(actual, expected)
                 with zipfile.ZipFile(str(prefix) + '.jar') as jar:

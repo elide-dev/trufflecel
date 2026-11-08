@@ -1,4 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_import", "java_plugin", "java_test")
+load("@rules_java//java:defs.bzl", "java_import", "java_plugin", "java_test", "java_library")
+load("@rules_graalvm//graalvm:defs.bzl", "native_image")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//bazel:maven.bzl", "maven_publication", "release_version")
 
@@ -36,6 +37,7 @@ DEPENDENCIES = {
 [maven_publication(
     name = module,
     dependencies = dependencies,
+    optional_dependencies = ["com.google.re2j:re2j:1.8"] if module == "core" else [],
     library = "//:trufflecel" + ("" if module == "core" else "-" + module),
     module = module,
 ) for module, dependencies in DEPENDENCIES.items()]
@@ -91,3 +93,21 @@ java_test(
 )
 
 exports_files(["maven_repo.py", "dependency_gate.py"])
+
+# Reconstruct the published consumer classpath without the optional compatibility JAR.
+java_import(
+    name = "core_without_re2j",
+    jars = [":core_binary"],
+    deps = ["@maven//:" + c.split(":")[0].replace(".", "_").replace("-", "_") + "_" + c.split(":")[1].replace("-", "_") for c in DEPENDENCIES["core"] if not c.startswith("com.google.re2j:")],
+)
+java_library(name = "no_re2j_consumer_lib", testonly = True, srcs = ["NoRe2jConsumer.java"],
+    deps = [":core_without_re2j", "@maven//:org_graalvm_polyglot_polyglot", "@maven//:org_graalvm_truffle_truffle_runtime"])
+java_test(name = "no_re2j_consumer", testonly = True, main_class = "dev.trufflecel.NoRe2jConsumer", use_testrunner = False,
+    runtime_deps = [":no_re2j_consumer_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler"])
+native_image(name = "no_re2j_native", testonly = True, main_class = "dev.trufflecel.NoRe2jConsumer", executable_name = "no-re2j",
+    deps = [":no_re2j_consumer_lib"], graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    extra_args = ["--gc=serial", "-J-Xmx4g", "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--parallelism=4", "-march=compatibility", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata", "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],
+    exec_properties = {"EstimatedCPU":"8", "EstimatedMemory":"24GB"}, optimization_mode = "3", workspace_tmp = True,
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"], tags=["manual"])
+
+sh_test(name = "no_re2j_native_smoke", srcs = ["no_re2j_native_smoke.sh"], args = ["$(rootpath :no_re2j_native)"], data = [":no_re2j_native"], tags=["manual"], size="large", target_compatible_with=["@platforms//os:linux", "@platforms//cpu:x86_64"])
