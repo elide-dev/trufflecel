@@ -752,8 +752,12 @@ public final class CanonicalAst {
         data =
             message(
                 "google.protobuf.Timestamp", "seconds", t.getEpochSecond(), "nanos", t.getNano());
-      } else if (value instanceof CelType t) return ident(t.name());
-      else throw new IllegalArgumentException("Unsupported canonical constant");
+      } else if (value instanceof CelType t) {
+        if (!t.parameters().isEmpty())
+          throw new IllegalArgumentException(
+              "Parameterized type values have no canonical Expr constant");
+        return ident(t.name());
+      } else throw new IllegalArgumentException("Unsupported canonical constant");
       return wrap("const_expr", message("cel.expr.Constant", field, data));
     }
 

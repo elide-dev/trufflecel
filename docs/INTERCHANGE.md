@@ -105,7 +105,10 @@ macro calls are exported in canonical `SourceInfo.macro_calls`.
 `Ast.unparse()` and `CanonicalAst.unparse(environment, message)` reconstruct CEL
 source, including optional entries, quoted fields and original macro calls.
 Imported comprehensions without original macro metadata have no general CEL
-surface spelling and are rejected explicitly. Nested id-only macro references
+surface spelling and are rejected explicitly. Parameterized runtime type constants
+also have no source literal or canonical `Expr` constant; exporting them fails
+instead of dropping their parameters. Type declarations remain supported by the
+canonical `Type` conversion APIs. Nested id-only macro references
 are resolved with size/depth limits and cycle rejection. Source metadata can
 change reconstructed source text; it never changes evaluation of the supplied
 canonical expression. `CanonicalAst.ast` imports editable trees and `parsed`

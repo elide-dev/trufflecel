@@ -20,7 +20,7 @@ public final class Unparser {
       case IDENT -> identifier(node.name());
       case SELECT ->
           node.extensionSelect()
-              ? "proto.getExt(" + expression(children.get(0)) + ", " + node.name() + ")"
+              ? "proto.getExt(" + expression(children.get(0)) + ", " + identifier(node.name()) + ")"
               : "("
                   + expression(children.get(0))
                   + ")."
@@ -63,7 +63,7 @@ public final class Unparser {
                   + field((String) fields.get(i))
                   + ": "
                   + expression(children.get(i)));
-        yield node.name() + "{" + String.join(", ", entries) + "}";
+        yield identifier(node.name()) + "{" + String.join(", ", entries) + "}";
       }
       case BLOCK_INDEX -> "cel.index(" + node.value() + ")";
       case BLOCK ->
@@ -146,13 +146,23 @@ public final class Unparser {
   private static String identifier(String name) {
     if (name.startsWith("$iter:")) {
       String[] parts = name.split(":");
-      if (parts.length == 3) return "cel.iterVar(" + parts[1] + ", " + parts[2] + ")";
+      if (parts.length == 3 && iterationIndex(parts[1]) && iterationIndex(parts[2]))
+        return "cel.iterVar(" + parts[1] + ", " + parts[2] + ")";
     }
     String spelling = name.startsWith(".") ? name.substring(1) : name;
     for (String part : spelling.split("\\.", -1))
       if (!part.matches("[a-zA-Z_][a-zA-Z_0-9]*") || keyword(part))
         throw new IllegalArgumentException("Identifier has no CEL source spelling: " + name);
     return name;
+  }
+
+  private static boolean iterationIndex(String text) {
+    try {
+      int index = Integer.parseInt(text);
+      return index >= 0 && text.equals(Integer.toString(index));
+    } catch (NumberFormatException malformed) {
+      return false;
+    }
   }
 
   private static String literal(Object value) {
@@ -170,7 +180,11 @@ public final class Unparser {
     if (value instanceof Instant instant) return "timestamp(" + quote(instant.toString()) + ")";
     if (value instanceof Duration duration)
       return "duration(" + quote(Functions.durationString(duration)) + ")";
-    if (value instanceof CelType type) return type.name();
+    if (value instanceof CelType type) {
+      if (!type.parameters().isEmpty())
+        throw new IllegalArgumentException("Parameterized type values have no CEL source literal");
+      return identifier(type.name());
+    }
     return value.toString();
   }
 
