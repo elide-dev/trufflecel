@@ -588,14 +588,18 @@ class ExprNode extends CelNode {
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
         error = e;
+        args[i] = e;
       }
     }
+    Environment.FunctionOverload binding =
+        customOverloads
+            ? FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args)
+            : null;
+    if (binding != null && binding.nonStrict()) return ctx.invoke(binding, args);
     if (unknown != null) return unknown;
     if (error != null) throw error;
     if (customOverloads) {
-      var binding =
-          FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args);
-      if (binding != null) return FunctionOverloads.invoke(binding, args);
+      if (binding != null) return ctx.invoke(binding, args);
       if (!FunctionOverloads.standard(name)) throw Values.overload(name);
     }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);

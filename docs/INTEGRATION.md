@@ -334,3 +334,20 @@ Repeated unary `!` or `-` tokens are scanned iteratively and collapsed by parity
 as in CEL's parser semantics. Long runs are bounded by `maxSourceLength`; they do
 not consume AST depth merely because they contain many tokens. The resulting
 expression still obeys `maxDepth`, `maxAstNodes` and evaluation-budget limits.
+
+
+## Per-evaluation host functions
+
+Declare `lateFunction(name, overloadId, receiver, arguments, result)` on the environment,
+then supply `EvaluationOptions.newBuilder().function(overloadId, implementation)` for each
+call. The implementation receives the same normalized CEL arguments as an ordinary registered
+function. Options are immutable; concurrent calls may bind the same overload differently.
+An undeclared or non-late-bound ID is rejected before evaluation. A reached, unbound overload
+raises `UNDECLARED`; type checking still uses its declared signature.
+
+`nonStrictFunction(...)` registers a callback that may receive `CelException` or `Unknown`
+arguments. `lateFunction(..., true)` declares the same behavior for a late-bound overload.
+Errors and unknowns match any parameter type, but ambiguous overloads are never guessed.
+Ordinary strict calls retain CEL unknown/error propagation. Resource exhaustion and cancellation
+always abort before host dispatch. A callback may return an unknown or return/throw a CEL error;
+returned CEL errors propagate as failures rather than successful host values.

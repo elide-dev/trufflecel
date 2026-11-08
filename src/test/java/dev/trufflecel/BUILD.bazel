@@ -340,3 +340,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "lateFunction",
+    srcs = ["LateFunctionTest.java"],
+    test_class = "dev.trufflecel.LateFunctionTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
