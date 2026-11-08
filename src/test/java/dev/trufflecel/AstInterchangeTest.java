@@ -185,6 +185,35 @@ public final class AstInterchangeTest {
   }
 
   @Test
+  public void canonicalCheckerDeduplicatesOnlyIndistinguishableFindings() {
+    Environment env = Cel.newBuilder().build();
+    Message parsed = CanonicalAst.parse(env, "[missing, missing]");
+    CelException located = assertThrows(CelException.class, () -> check(env, parsed));
+    assertEquals(2, located.issues().size());
+    assertNotEquals(located.issues().get(0).offset(), located.issues().get(1).offset());
+    Message absent =
+        parsed.toBuilder()
+            .clearField(parsed.getDescriptorForType().findFieldByName("source_info"))
+            .build();
+    var positions = new LinkedHashMap<Long, Integer>();
+    for (Message entry : messages(child(parsed, "source_info"), "positions"))
+      positions.put((Long) field(entry, "key"), 1);
+    Message shared =
+        parsed.toBuilder()
+            .setField(
+                parsed.getDescriptorForType().findFieldByName("source_info"),
+                message("cel.expr.SourceInfo", "positions", positions))
+            .build();
+    // Generated canonical trees can omit locations or map several nodes to one source token.
+    for (Message input : List.of(absent, shared, toV1Alpha1(absent), toV1Alpha1(shared))) {
+      CelException failure = assertThrows(CelException.class, () -> check(env, input));
+      assertEquals(1, failure.issues().size());
+      assertEquals("undeclared reference: missing", failure.issues().getFirst().message());
+      assertEquals(CelException.OffsetEncoding.CODE_POINT, failure.offsetEncoding());
+    }
+  }
+
+  @Test
   public void canonicalCheckerAndValidatorFindingsUseImportedPositions() {
     Environment env = Cel.newBuilder().build();
     String source = "// 😀\n['😀', missing, true + 1]";
