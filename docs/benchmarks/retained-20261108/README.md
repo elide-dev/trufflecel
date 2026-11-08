@@ -104,6 +104,29 @@ Programs rather than 10,000 distinct Environments or retained input objects.
 | 69 | distinct | 2370.3 | 2266.6 | 1107.7 | 53.3% |
 | 69 | template | 2211.4 | 2123.4 | 963.8 | 56.4% |
 
+### Combined production follow-up
+
+The final production combination `b81fa2f`, measured at head `a0b28c9`, also compacts
+ordinary evaluation contexts and sizes conversion caches by referenced roots. The
+same host, pinned runtime, harness and collection procedure were used for two additional
+fresh JVMs. These observations are separate from the earlier AST/layout variants;
+[combined-summary.json](combined-summary.json),
+[combined-manifest.json](combined-manifest.json), and the `combined-*.log` raw files
+preserve them without replacing earlier measurements.
+
+| Declarations | Source sharing | Baseline bytes/Program | Combined bytes/Program | Reduction |
+| ---: | --- | ---: | ---: | ---: |
+| 69 | distinct | 2370.3 | 1139.7 | 51.9% |
+| 69 | template | 2211.4 | 963.8 | 56.4% |
+
+The compact per-expression layout adds 32 bytes to a distinct scalar Program compared
+with the preceding fully shared Environment layout. It avoids sizing per-evaluation
+conversion arrays for all 69 declarations. A shared PreparedProgram already owns that
+compact layout before the baseline, so repeated instantiation has no additional
+per-Program cost. The final distinct-source cache retains about 10.87 MiB for 10,000
+Programs; the shared-template cache remains about 9.19 MiB. Evaluation allocations and
+native RSS require their separate diagnostics.
+
 ## Implementation and limits
 
 Runtime-owned copies release `fold`, `checkedType`, and custom `macroCall` planning
