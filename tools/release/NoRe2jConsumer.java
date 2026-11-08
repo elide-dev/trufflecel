@@ -20,11 +20,14 @@ public final class NoRe2jConsumer {
     try (Context context =
         Context.newBuilder("cel")
             .allowExperimentalOptions(true)
+            .option("cel.TruffleRegexOnly", "true")
             .option("engine.BackgroundCompilation", "false")
             .option("engine.CompilationFailureAction", "Throw")
             .option("compiler.TreatPerformanceWarningsAsErrors", "all")
             .build()) {
       context.initialize("cel");
+      if (!context.eval("cel", "'abc'.matches('[a-z]+')").asBoolean())
+        throw new AssertionError("Polyglot-only matching");
       context.enter();
       try {
         var environment =

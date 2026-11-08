@@ -8,6 +8,7 @@ import com.oracle.truffle.api.interop.*;
 import com.oracle.truffle.api.library.*;
 import java.util.*;
 import org.graalvm.polyglot.Context;
+import org.graalvm.options.*;
 
 /** Polyglot registration; the direct Java API does not require a Polyglot Context. */
 @TruffleLanguage.Registration(
@@ -27,6 +28,32 @@ import org.graalvm.polyglot.Context;
   StandardTags.WriteVariableTag.class
 })
 public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
+  @Option(
+      name = "TruffleRegexOnly",
+      help = "Use TruffleRegex without RE2/J compatibility fallback.",
+      category = OptionCategory.USER,
+      stability = OptionStability.EXPERIMENTAL)
+  static final OptionKey<Boolean> TRUFFLE_REGEX_ONLY = new OptionKey<>(false);
+
+  @Option(
+      name = "RegexParserTreeLimit",
+      help = "Parser-tree node bound in TruffleRegex-only mode.",
+      category = OptionCategory.USER,
+      stability = OptionStability.EXPERIMENTAL)
+  static final OptionKey<Integer> REGEX_PARSER_TREE_LIMIT = new OptionKey<>(10000);
+
+  @Override
+  protected OptionDescriptors getOptionDescriptors() {
+    return new CelLanguageOptionDescriptors();
+  }
+
+  @Override
+  protected boolean areOptionsCompatible(OptionValues first, OptionValues second) {
+    if (!first.get(TRUFFLE_REGEX_ONLY).equals(second.get(TRUFFLE_REGEX_ONLY))) return false;
+    return !first.get(TRUFFLE_REGEX_ONLY)
+        || first.get(REGEX_PARSER_TREE_LIMIT).equals(second.get(REGEX_PARSER_TREE_LIMIT));
+  }
+
   private static final LanguageReference<CelLanguage> LANGUAGE =
       LanguageReference.create(CelLanguage.class);
 
@@ -70,9 +97,12 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     final String sourceName = request.getSource().getName();
     final Program program;
     try {
+      var builder = Cel.newBuilder().inferVariables(true);
+      var scope = CONTEXT.get(null);
+      if (scope.env.getOptions().get(TRUFFLE_REGEX_ONLY))
+        builder.truffleRegexOnly(scope.env.getOptions().get(REGEX_PARSER_TREE_LIMIT));
       program =
-          Cel.newBuilder()
-              .inferVariables(true)
+          builder
               .build()
               .prepare(request.getSource().getCharacters().toString())
               .adopt(this, request.getSource());

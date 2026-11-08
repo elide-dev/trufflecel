@@ -18,6 +18,12 @@ java_plugin(
     deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
 )
 
+java_plugin(
+    name = "options_processor",
+    processor_class = "com.oracle.truffle.dsl.processor.OptionProcessor",
+    deps = ["@maven//:org_graalvm_truffle_truffle_dsl_processor"],
+)
+
 java_library(
     name = "trufflecel",
     srcs = [
@@ -89,6 +95,7 @@ java_library(
         ":truffle_processor",
         ":language_processor",
         ":instrumentable_processor",
+        ":options_processor",
     ],
     visibility = ["//visibility:public"],
     deps = [

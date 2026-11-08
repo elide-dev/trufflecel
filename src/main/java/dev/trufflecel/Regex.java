@@ -53,13 +53,17 @@ final class Regex {
   static Compiled compile(String pattern, Environment environment) {
     if (environment.regexParserTreeLimit == 0)
       return compile(pattern, environment.maxRegexProgramSize);
+    var compiled = only(pattern, environment);
+    compiled.handle(); // Validate constants during preparation, under the caller's policy.
+    return compiled;
+  }
+
+  private static TruffleOnly only(String pattern, Environment environment) {
     if (pattern.length() > CACHE_KEY_LENGTH)
       throw Values.error(
           CelException.Code.RESOURCE_EXHAUSTED,
           "TruffleRegex-only pattern length exceeds 4096 UTF-16 code units");
-    var compiled = new TruffleOnly(pattern, environment.regexParserTreeLimit);
-    compiled.handle(); // Validate syntax/capability and the parser bound during preparation.
-    return compiled;
+    return new TruffleOnly(pattern, environment.regexParserTreeLimit);
   }
 
   private record TruffleOnly(String source, int parserLimit) implements Compiled {
@@ -96,7 +100,7 @@ final class Regex {
   static Compiled cached(String pattern, Environment environment) {
     return environment.regexParserTreeLimit == 0
         ? cached(pattern, environment.maxRegexProgramSize)
-        : compile(pattern, environment);
+        : only(pattern, environment);
   }
 
   private static Compiled bounded(Compiled compiled, int limit) {
@@ -193,11 +197,6 @@ final class Regex {
         throw CompilerDirectives.shouldNotReachHere(failure);
       }
     }
-  }
-
-  @TruffleBoundary
-  static Handle accelerate(TruffleLanguage.Env env, Object token, String pattern) {
-    return accelerate(env, token, pattern, 100000, false);
   }
 
   @TruffleBoundary
