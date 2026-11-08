@@ -158,6 +158,8 @@ jobs:
             build/reports/
             bazel-testlogs/benchmarks/jit_smoke/test.log
             bazel-testlogs/benchmarks/jit_smoke/test.xml
+            bazel-testlogs/tools/release/no_re2j_native_smoke/test.log
+            bazel-testlogs/tools/release/no_re2j_native_smoke/test.xml
             bazel-testlogs/benchmarks/representative/native_smoke/test.log
             bazel-testlogs/benchmarks/representative/native_smoke/test.xml
             bazel-testlogs/benchmarks/representative/startup_native_runtime_smoke/test.log

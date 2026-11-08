@@ -590,7 +590,6 @@ public final class Environment {
       return this;
     }
 
-    /** Bound the compiled RE2 instruction count for both constant and dynamic patterns. */
     /**
      * Use TruffleRegex alone, bounded by parser-tree nodes rather than RE2 instructions.
      * Preparation and evaluation require an entered CEL context. Unsupported patterns and
@@ -606,6 +605,7 @@ public final class Environment {
       return this;
     }
 
+    /** Bound the compiled RE2 instruction count for both constant and dynamic patterns. */
     public Builder maxRegexProgramSize(int instructions) {
       if (regexParserTreeLimit != 0)
         throw new IllegalArgumentException(
