@@ -54,6 +54,9 @@ public final class AstInterchangeTest {
 
   @Test
   public void editedTreesExportAndCustomMacrosRetainSource() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> CanonicalAst.parsed(Ast.of(Ast.Node.literal(CelType.list(CelType.INT)))));
     Environment env =
         Cel.newBuilder()
             .inferVariables(true)

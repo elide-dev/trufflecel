@@ -127,7 +127,18 @@ public final class AstValidationTest {
       assertThrows(
           IllegalArgumentException.class,
           () -> Ast.of(Ast.Node.select(ONE, field, false)).unparse());
-    for (String name : List.of("@internal", "as", "$iter:a", ".null", "a..b"))
+    for (String name :
+        List.of(
+            "@internal",
+            "as",
+            "$iter:a",
+            "$iter:a:2",
+            "$iter:1:a",
+            "$iter:-1:2",
+            "$iter:+1:2",
+            "$iter:2147483648:2",
+            ".null",
+            "a..b"))
       assertThrows(
           IllegalArgumentException.class, () -> Ast.of(Ast.Node.identifier(name)).unparse());
     assertEquals(".a.b", Ast.of(Ast.Node.identifier(".a.b")).unparse());
@@ -156,5 +167,19 @@ public final class AstValidationTest {
     assertEquals("(1)[0]", Ast.of(Ast.Node.index(ONE, Ast.Node.literal(0), false)).unparse());
     assertThrows(IllegalArgumentException.class, () -> Ast.of(Ast.Node.call("+", ONE)).unparse());
     assertThrows(IllegalArgumentException.class, () -> Ast.of(Ast.Node.call("!")).unparse());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Ast.of(Ast.Node.object("bad type", Map.of())).unparse());
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            Ast.of(
+                    new Ast.Node(
+                        0, Ast.Kind.SELECT, "bad type", false, List.of(ONE), false, -1, true, null))
+                .unparse());
+    Ast parameterized = Ast.of(Ast.Node.literal(CelType.list(CelType.INT)));
+    assertEquals(
+        CelType.list(CelType.INT), parameterized.compile(Cel.newBuilder().build()).evaluate());
+    assertThrows(IllegalArgumentException.class, parameterized::unparse);
   }
 }
