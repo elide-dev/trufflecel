@@ -17,16 +17,30 @@ public final class TypeSyntax {
   }
 
   public static String format(CelType type) {
-    return format(type, 0);
+    var output = new StringBuilder();
+    format(type, 0, output);
+    String spelling = output.toString();
+    parse(spelling); // Reject malformed host-created types instead of exporting unreadable data.
+    return spelling;
   }
 
-  private static String format(CelType type, int depth) {
+  private static void format(CelType type, int depth, StringBuilder output) {
     if (depth > 64) throw new IllegalArgumentException("type nesting limit exceeded");
     String name = type.name().equals("optional_type") ? "optional" : type.name();
-    if (type.parameters().isEmpty()) return name;
-    var parameters = new ArrayList<String>();
-    for (CelType parameter : type.parameters()) parameters.add(format(parameter, depth + 1));
-    return name + "<" + String.join(", ", parameters) + ">";
+    append(output, name);
+    if (type.parameters().isEmpty()) return;
+    append(output, "<");
+    for (int i = 0; i < type.parameters().size(); i++) {
+      if (i > 0) append(output, ", ");
+      format(type.parameters().get(i), depth + 1, output);
+    }
+    append(output, ">");
+  }
+
+  private static void append(StringBuilder output, String text) {
+    if (text.length() > 4096 - output.length())
+      throw new IllegalArgumentException("type declaration is too long");
+    output.append(text);
   }
 
   private static final class Reader {

@@ -7,6 +7,28 @@ import org.junit.Test;
 
 public class EnvironmentYamlTest {
   @Test
+  public void sourceLimitsCountCodePointsAcrossFrontendApis() {
+    var env = EnvironmentYaml.read("limits: [{name: cel.limit.expression_code_points, value: 3}]");
+    String source = "'😀'";
+    assertEquals(4, source.length());
+    assertEquals("😀", env.compile(source).evaluate());
+    assertEquals("😀", env.parse(source).evaluate());
+    assertEquals("😀", Ast.parse(env, source).compile(env).evaluate());
+    assertTrue(CostEstimator.estimate(env, source).maximum().isPresent());
+    for (Environment limited : List.of(env, Cel.newBuilder().maxSourceLength(2).build())) {
+      String tooLong = limited == env ? "'ab'" : source;
+      for (Runnable action :
+          List.<Runnable>of(
+              () -> limited.compile(tooLong),
+              () -> Ast.parse(limited, tooLong),
+              () -> CostEstimator.estimate(limited, tooLong)))
+        assertEquals(
+            CelException.Code.RESOURCE_EXHAUSTED,
+            assertThrows(CelException.class, action::run).code());
+    }
+  }
+
+  @Test
   public void extendedConfigurationRoundTripsWithoutLosingRestrictions() {
     var env =
         Cel.newBuilder()
@@ -45,6 +67,23 @@ public class EnvironmentYamlTest {
     var limited = EnvironmentYaml.read("stdlib: {disable_macros: true}");
     assertThrows(CelException.class, () -> limited.compile("[1].all(x, true)"));
     assertEquals(2L, limited.compile("cel.bind(x, 1, x+1)").evaluate(Map.of()));
+    var dormant = Cel.newBuilder().macros(false).standardMacros(Set.of("has", "cel.bind")).build();
+    var dormantCopy = EnvironmentYaml.read(EnvironmentYaml.write(dormant));
+    assertFalse(dormantCopy.macros);
+    assertEquals(dormant.standardMacros, dormantCopy.standardMacros);
+    assertTrue(
+        dormantCopy.toBuilder().macros(true).build().compile("has({'x':1}.x)").test(Map.of()));
+    for (long budget : List.of(1L, 9007199254740993L, Long.MAX_VALUE - 1, Long.MAX_VALUE)) {
+      String yaml = EnvironmentYaml.write(Cel.newBuilder().evaluationBudget(budget).build());
+      assertEquals(budget, EnvironmentYaml.read(yaml).budget);
+    }
+    CelException limit =
+        assertThrows(
+            CelException.class,
+            () ->
+                EnvironmentYaml.write(
+                    Cel.newBuilder().variable("a".repeat(600000), CelType.INT).build()));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, limit.code());
   }
 
   @Test
@@ -57,7 +96,14 @@ public class EnvironmentYamlTest {
     assertEquals(CelType.TYPE, TypeSyntax.parse("type"));
     assertEquals(CelType.type(CelType.INT), TypeSyntax.parse("type<int>"));
     assertEquals(CelType.wrapper(CelType.BOOL), TypeSyntax.parse("wrapper<bool>"));
-    for (String text : List.of("int", "$T", "custom.Record", "map<string, optional<list<int>>>"))
+    for (String text :
+        List.of(
+            "int",
+            "$T",
+            "custom.Record",
+            "map",
+            "_custom._Record",
+            "map<string, optional<list<int>>>"))
       assertEquals(
           TypeSyntax.parse(text), TypeSyntax.parse(TypeSyntax.format(TypeSyntax.parse(text))));
     var env =
@@ -89,6 +135,7 @@ public class EnvironmentYamlTest {
             """
         functions:
           - name: twice
+            description: doubles an integer
             overloads:
               - id: twice_int
                 args: [int]
@@ -177,6 +224,81 @@ public class EnvironmentYamlTest {
         EnvironmentYaml.read("stdlib: {include_macros: [has, exists], exclude_macros: [exists]}");
     assertTrue(selected.compile("has({'a':1}.a)").test(Map.of()));
     assertThrows(CelException.class, () -> selected.compile("[1].exists(x, true)"));
+    var disabled = EnvironmentYaml.read("stdlib: {disabled: true}");
+    assertThrows(CelException.class, () -> disabled.compile("1+1"));
+    var excluded = EnvironmentYaml.read("stdlib: {exclude_macros: [has]}");
+    assertThrows(CelException.class, () -> excluded.compile("has({'x':1}.x)"));
+    assertTrue(excluded.compile("[1].all(x,true)").test(Map.of()));
+  }
+
+  @Test
+  public void canonicalOperatorNamesSelectTheirSourceOperations() {
+    var sources =
+        Map.ofEntries(
+            Map.entry("_-_", "3-2"),
+            Map.entry("_*_", "1*1"),
+            Map.entry("_/_", "2/2"),
+            Map.entry("_%_", "3%2"),
+            Map.entry("_==_", "1==1"),
+            Map.entry("_!=_", "1!=2"),
+            Map.entry("_<_", "1<2"),
+            Map.entry("_<=_", "1<=2"),
+            Map.entry("_>_", "2>1"),
+            Map.entry("_>=_", "2>=1"),
+            Map.entry("_&&_", "true&&true"),
+            Map.entry("_||_", "true||false"),
+            Map.entry("!_", "!false"),
+            Map.entry("-_", "-x"),
+            Map.entry("_?_:_", "true ? 1 : 2"),
+            Map.entry("@in", "1 in [1]"));
+    for (var entry : sources.entrySet()) {
+      Environment env =
+          EnvironmentYaml.read(
+              "variables: [{name: x, type: int}]\nstdlib: {include_functions: [{name: '"
+                  + entry.getKey()
+                  + "'}]}");
+      Object result = env.compile(entry.getValue()).evaluate(Map.of("x", -1));
+      assertTrue(entry.toString(), Boolean.TRUE.equals(result) || Long.valueOf(1).equals(result));
+    }
+  }
+
+  @Test
+  public void contextFieldsHaveDistinctValidatedDeclarations() {
+    ObjectType record =
+        new ObjectType() {
+          public String name() {
+            return "example.Context";
+          }
+
+          public Map<String, CelType> fields() {
+            return Map.of("value", CelType.INT);
+          }
+
+          public Object construct(Map<String, Object> fields) {
+            return fields;
+          }
+
+          public Object get(Object value, String field) {
+            return ((Map<?, ?>) value).get(field);
+          }
+
+          public boolean has(Object value, String field) {
+            return ((Map<?, ?>) value).containsKey(field);
+          }
+
+          public boolean accepts(Object value) {
+            return value instanceof Map<?, ?>;
+          }
+        };
+    String yaml =
+        "context_variable: {type_name: example.Context}\nvariables: [{name: extra, type: int, description: independent}]";
+    var env = EnvironmentYaml.read(yaml, Cel.newBuilder().objectType(record));
+    assertEquals(3L, env.compile("value + extra").evaluate(Map.of("value", 1, "extra", 2)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            EnvironmentYaml.read(
+                yaml.replace("name: extra", "name: value"), Cel.newBuilder().objectType(record)));
   }
 
   @Test
@@ -193,10 +315,18 @@ public class EnvironmentYamlTest {
             "variables: [1]",
             "variables: [{name: x, type: int}, {name: x, type: int}]",
             "variables: [{name: x, type: int, type_name: int}]",
+            "variables: [{name: x, type: int, params: []}]",
+            "variables: [{name: x, type: int, is_type_param: false}]",
+            "variables: [{name: x, description: false, type: int}]",
+            "variables: [{name: x, type: {type_name: int, ignored: true}}]",
+            "result_type: {type_name: int, ignored: true}",
+            "result_type: {type: int, ignored: true}",
+            "result_type: {type_name: list, params: [{type_name: int, ignored: true}]}",
             "variables: [{name: x, type_name: T, is_type_param: yes}]",
             "variables: [{name: x, type_name: T, is_type_param: true, params: [{type_name: int}]}]",
             "variables: [{name: x, type_name: 'bad.name', is_type_param: true}]",
             "functions: [{name: f}]",
+            "functions: [{name: f, description: false}]",
             "functions: [{name: f, overloads: [{id: x, args: [int], return: int, extra: 1}]}]",
             "extensions: [{name: unknown, version: latest}]",
             "extensions: [{name: math}, {name: math}]",
@@ -208,6 +338,7 @@ public class EnvironmentYamlTest {
             "features: [{name: cel.feature.macro_call_tracking, enabled: false}]",
             "limits: [{name: unknown, value: 2}]",
             "stdlib: {disabled: 'true'}",
+            "stdlib: {exclude_macros: [missing]}",
             "container: {aliases: [{alias: a, qualified_name: bad-name}]}"))
       assertThrows(yaml, IllegalArgumentException.class, () -> EnvironmentYaml.read(yaml));
     for (String type :
@@ -232,6 +363,14 @@ public class EnvironmentYamlTest {
     for (int i = 0; i < 66; i++) type = CelType.list(type);
     CelType deep = type;
     assertThrows(IllegalArgumentException.class, () -> TypeSyntax.format(deep));
+    assertThrows(
+        IllegalArgumentException.class, () -> TypeSyntax.format(CelType.of("x".repeat(4097))));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> TypeSyntax.format(new CelType("Box", Collections.nCopies(2000, CelType.INT))));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> TypeSyntax.format(new CelType("list", List.of(CelType.INT, CelType.INT))));
     assertThrows(IllegalArgumentException.class, () -> EnvironmentYaml.read(" ".repeat(1_000_001)));
   }
 }

@@ -132,14 +132,20 @@ public final class Environment {
   }
 
   private PreparedProgram prepare(String source, boolean check) {
-    Objects.requireNonNull(source);
-    if (source.length() > maxSourceLength)
-      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
+    checkSource(source);
     try {
       return prepare(source, new Parser(source, this).parse(), check);
     } catch (CelException e) {
       throw e.locate(source);
     }
+  }
+
+  /** CEL length limits count Unicode code points; diagnostic offsets remain UTF-16 offsets. */
+  void checkSource(String source) {
+    Objects.requireNonNull(source);
+    if (source.length() > maxSourceLength
+        && source.codePointCount(0, source.length()) > maxSourceLength)
+      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
   }
 
   /** Reject trees deeper than the configured limit before any recursive traversal. */
