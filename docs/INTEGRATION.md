@@ -419,3 +419,28 @@ and fresh lazy scopes. Host callbacks may therefore run again. Results expose
 `isComplete()`, `unknownAttributes()`, `error()` and `actualCost()`; a failed result's
 `value()` throws its CEL error. Partial execution uses the same lazily restored
 source target as tracing, preserving source semantics through optimization.
+
+A protobuf message can also supply the entire evaluation context:
+
+```java
+var type = new ProtobufType(Request.getDescriptor());
+var environment = type.registerContext(Cel.newBuilder()).build();
+var program = environment.compile("region == 'us' && approved");
+var result = program.evaluate(type.context(request));
+```
+
+`context(Message)` snapshots before evaluation; `context(ProtobufType.Value)` reuses
+an existing native snapshot. Every declared root field is bound, including protobuf
+defaults. The message wrapper is not retained.
+
+`type.mask(FieldMask)` creates a typed projection. Register it and snapshot through
+that view, or use its `registerContext` and `context` methods. Selected singular
+message subpaths receive distinct projected CEL types; hidden fields fail both
+static checking and dynamic selection. Repeated fields, maps and automatically
+mapped well-known messages can be selected as whole fields but cannot be traversed
+by a mask. Empty masks expose no fields; `*` exposes every field. Masks use protobuf
+field names. Use `mask("DistinctViewName", mask)` when several views share one
+environment. Projection equality compares visible fields and their presence;
+projection values retain native rows, not host messages. Field masks govern CEL
+field visibility; they do not redact the original host message or its serialized
+bytes.
