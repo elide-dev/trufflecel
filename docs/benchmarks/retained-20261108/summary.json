@@ -1,0 +1,705 @@
+[
+  {
+    "file": "ast-chain-default-distinct-2.log",
+    "variant": "ast",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 1187.7287999999999,
+    "rounds": [
+      1188.8872,
+      1186.5704
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "695b4cfb6bc38421cf38ccf7f108dc2ad929d7d838b12aab71e67fe308f76eaf"
+  },
+  {
+    "file": "ast-chain-default-distinct-69.log",
+    "variant": "ast",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 2266.6355999999996,
+    "rounds": [
+      2269.6544,
+      2263.6168
+    ],
+    "postReleaseDriftPerProgram": [
+      9.7384,
+      3.7008
+    ],
+    "sha256": "6800c1350be003afffca4732d13067e80d4c9fb8d865257903cbda7d935f75f9"
+  },
+  {
+    "file": "ast-chain-default-template-69.log",
+    "variant": "ast",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "template",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 2123.3592,
+    "rounds": [
+      2126.2488,
+      2120.4696
+    ],
+    "postReleaseDriftPerProgram": [
+      10.2528,
+      4.4736
+    ],
+    "sha256": "94b701516926e86a279211b59dac4c2a5d7630ac196a69d137a688cbe54ea5ec"
+  },
+  {
+    "file": "ast-chain-partial-distinct-2.log",
+    "variant": "ast",
+    "case": "chain",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2438.9992,
+    "rounds": [
+      2445.1944,
+      2432.804
+    ],
+    "postReleaseDriftPerProgram": [
+      9.2784,
+      -3.112
+    ],
+    "sha256": "9d694d1da6bb14a1fae98a6f43a5c4006bd02a2b37de3dd3350f95c38400273e"
+  },
+  {
+    "file": "ast-chain-trace-distinct-2.log",
+    "variant": "ast",
+    "case": "chain",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2438.9992,
+    "rounds": [
+      2445.1944,
+      2432.804
+    ],
+    "postReleaseDriftPerProgram": [
+      9.2784,
+      -3.112
+    ],
+    "sha256": "eeef4f23b320e8e69ba83a7b48005b9cf57fdf1ecedad6c74c089fbe719b3586"
+  },
+  {
+    "file": "ast-comprehension-default-distinct-2.log",
+    "variant": "ast",
+    "case": "comprehension",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2858.7192,
+    "rounds": [
+      2859.8152,
+      2857.6232
+    ],
+    "postReleaseDriftPerProgram": [
+      0.6192,
+      -1.5728
+    ],
+    "sha256": "cdf3e634df9aa43d4e7bf0f77ee8f66a87a78818b90cc373912f67be85fb5826"
+  },
+  {
+    "file": "ast-comprehension-partial-distinct-2.log",
+    "variant": "ast",
+    "case": "comprehension",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 4883.397199999999,
+    "rounds": [
+      4890.6776,
+      4876.1168
+    ],
+    "postReleaseDriftPerProgram": [
+      15.4816,
+      0.9208
+    ],
+    "sha256": "ca847461f7e9a734b6b43769bd1c32d8c9bf41202b83fed24b71dcc0d853c33b"
+  },
+  {
+    "file": "ast-comprehension-trace-distinct-2.log",
+    "variant": "ast",
+    "case": "comprehension",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 4883.202,
+    "rounds": [
+      4890.5432,
+      4875.8608
+    ],
+    "postReleaseDriftPerProgram": [
+      15.3472,
+      0.6648
+    ],
+    "sha256": "c37255999dda147ab9b8ff75a5832f16fc6f6b00070d648ed672086b14ab0bf9"
+  },
+  {
+    "file": "ast-cse-default-distinct-2.log",
+    "variant": "ast",
+    "case": "cse",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6761.314399999999,
+    "rounds": [
+      6763.172,
+      6759.4568
+    ],
+    "postReleaseDriftPerProgram": [
+      7.256,
+      3.5408
+    ],
+    "sha256": "894dfde99a00f2b4e7473dbffa8e0c6a74d7e3933c72a91b0d18268104909034"
+  },
+  {
+    "file": "ast-cse-partial-distinct-2.log",
+    "variant": "ast",
+    "case": "cse",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 9393.722399999999,
+    "rounds": [
+      9402.6992,
+      9384.7456
+    ],
+    "postReleaseDriftPerProgram": [
+      14.7832,
+      -3.1704
+    ],
+    "sha256": "8487e4fd779d5ddcfe25a0c2726bec2202cb4634f1a860d0d631c419f60db131"
+  },
+  {
+    "file": "ast-cse-trace-distinct-2.log",
+    "variant": "ast",
+    "case": "cse",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 9395.628,
+    "rounds": [
+      9402.8048,
+      9388.4512
+    ],
+    "postReleaseDriftPerProgram": [
+      14.8888,
+      0.5352
+    ],
+    "sha256": "e72e7e531b8eee181864ee25ce14fd80b214cd4f4d892b171b386ae160879464"
+  },
+  {
+    "file": "ast-folded-default-distinct-2.log",
+    "variant": "ast",
+    "case": "folded",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3402.6472,
+    "rounds": [
+      3403.8352,
+      3401.4592
+    ],
+    "postReleaseDriftPerProgram": [
+      -0.1528,
+      -2.5288
+    ],
+    "sha256": "397670d48b4556282cfd186ba3dfd7846e9b28c9a9ab7dba337cc3c5c7589ba4"
+  },
+  {
+    "file": "ast-folded-partial-distinct-2.log",
+    "variant": "ast",
+    "case": "folded",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6005.6903999999995,
+    "rounds": [
+      6012.6632,
+      5998.7176
+    ],
+    "postReleaseDriftPerProgram": [
+      16.6752,
+      2.7296
+    ],
+    "sha256": "9c8895a6fd8a34d8dae03e8243187a8ddf50e40432c69a595458ab4a959c9694"
+  },
+  {
+    "file": "ast-folded-trace-distinct-2.log",
+    "variant": "ast",
+    "case": "folded",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6004.5868,
+    "rounds": [
+      6011.0272,
+      5998.1464
+    ],
+    "postReleaseDriftPerProgram": [
+      15.0392,
+      2.1584
+    ],
+    "sha256": "8de95d3faa8205f81e617abda9f8d88db3e3010a3e4e9bcff34567f67df58f52"
+  },
+  {
+    "file": "ast-macro-default-distinct-2.log",
+    "variant": "ast",
+    "case": "macro",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 1732.1556,
+    "rounds": [
+      1734.0672,
+      1730.244
+    ],
+    "postReleaseDriftPerProgram": [
+      2.0712,
+      -1.752
+    ],
+    "sha256": "cc1b9a3ffd499886a6745533f1b36ee9dfe98050f7b44f95e71ffea177b60515"
+  },
+  {
+    "file": "ast-macro-partial-distinct-2.log",
+    "variant": "ast",
+    "case": "macro",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3189.0868,
+    "rounds": [
+      3197.0584,
+      3181.1152
+    ],
+    "postReleaseDriftPerProgram": [
+      17.0624,
+      1.1192
+    ],
+    "sha256": "435595f812a11c69839ef835304c67e80f750297a956cfbc376f55fffdc757b1"
+  },
+  {
+    "file": "ast-macro-trace-distinct-2.log",
+    "variant": "ast",
+    "case": "macro",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3189.428,
+    "rounds": [
+      3197.4552,
+      3181.4008
+    ],
+    "postReleaseDriftPerProgram": [
+      17.4592,
+      1.4048
+    ],
+    "sha256": "f6864470a5fd104d143b5a643ce73b98c62a8b82ec8cbe4a31e8c2ee2d3c78f2"
+  },
+  {
+    "file": "baseline-chain-default-distinct-2.log",
+    "variant": "baseline",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 1291.7287999999999,
+    "rounds": [
+      1292.8872,
+      1290.5704
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "e268adb230496cfe947b107478d9d6913267ed7faffb468717ec4ff8f73659cb"
+  },
+  {
+    "file": "baseline-chain-default-distinct-69.log",
+    "variant": "baseline",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 2370.3376,
+    "rounds": [
+      2373.1888,
+      2367.4864
+    ],
+    "postReleaseDriftPerProgram": [
+      9.2728,
+      3.5704
+    ],
+    "sha256": "e38518826525db874c20d96ad0f72475af36bb69c2a123163423e78f503c3754"
+  },
+  {
+    "file": "baseline-chain-default-template-69.log",
+    "variant": "baseline",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "template",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 2211.4232,
+    "rounds": [
+      2214.444,
+      2208.4024
+    ],
+    "postReleaseDriftPerProgram": [
+      10.448,
+      4.4064
+    ],
+    "sha256": "4fdeb5b6a9dd617ccb734b721d2f1bb37a3f771ec2cea2225e2075970c08ae19"
+  },
+  {
+    "file": "baseline-chain-partial-distinct-2.log",
+    "variant": "baseline",
+    "case": "chain",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2574.9992,
+    "rounds": [
+      2581.1944,
+      2568.804
+    ],
+    "postReleaseDriftPerProgram": [
+      9.2784,
+      -3.112
+    ],
+    "sha256": "c08694b4a88a6cb8f493c4115cea525ec5626f5ea57f91751b06254e5a533f52"
+  },
+  {
+    "file": "baseline-chain-trace-distinct-2.log",
+    "variant": "baseline",
+    "case": "chain",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2574.9992,
+    "rounds": [
+      2581.1944,
+      2568.804
+    ],
+    "postReleaseDriftPerProgram": [
+      9.2784,
+      -3.112
+    ],
+    "sha256": "d8d0a5988ebac82ec41c078ed979a54e5e5322fef0a48d50354a4e5e028e3359"
+  },
+  {
+    "file": "baseline-comprehension-default-distinct-2.log",
+    "variant": "baseline",
+    "case": "comprehension",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3035.7364,
+    "rounds": [
+      3037.3808,
+      3034.092
+    ],
+    "postReleaseDriftPerProgram": [
+      2.1848,
+      -1.104
+    ],
+    "sha256": "3dcd58c4d33c4126935d8a98b3976eca43ab5913b534530e8f4b23fd9c7b07e8"
+  },
+  {
+    "file": "baseline-comprehension-partial-distinct-2.log",
+    "variant": "baseline",
+    "case": "comprehension",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 5059.7208,
+    "rounds": [
+      5067.0728,
+      5052.3688
+    ],
+    "postReleaseDriftPerProgram": [
+      15.8768,
+      1.1728
+    ],
+    "sha256": "31c3b44a62d378368f8cddfb1db91a881a329b3406765a5a2e5af263937e20cc"
+  },
+  {
+    "file": "baseline-comprehension-trace-distinct-2.log",
+    "variant": "baseline",
+    "case": "comprehension",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 5060.132799999999,
+    "rounds": [
+      5067.9064,
+      5052.3592
+    ],
+    "postReleaseDriftPerProgram": [
+      16.7104,
+      1.1632
+    ],
+    "sha256": "dc9efa7a3e5fcce1505f344df586e14c7930ff85d1f072c0ba7a77d823f76020"
+  },
+  {
+    "file": "baseline-cse-default-distinct-2.log",
+    "variant": "baseline",
+    "case": "cse",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6921.544400000001,
+    "rounds": [
+      6924.0128,
+      6919.076
+    ],
+    "postReleaseDriftPerProgram": [
+      8.0968,
+      3.16
+    ],
+    "sha256": "ace2481ae526373ca2b7861a0da9919e970691dafd4babe056fc6ef267a0e95b"
+  },
+  {
+    "file": "baseline-cse-partial-distinct-2.log",
+    "variant": "baseline",
+    "case": "cse",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 9555.501199999999,
+    "rounds": [
+      9562.7712,
+      9548.2312
+    ],
+    "postReleaseDriftPerProgram": [
+      14.8552,
+      0.3152
+    ],
+    "sha256": "8959d965adb0ce0727fb119ade996e6b4c62f29fae561d7c155fee6f4c3a0991"
+  },
+  {
+    "file": "baseline-cse-trace-distinct-2.log",
+    "variant": "baseline",
+    "case": "cse",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 9554.9216,
+    "rounds": [
+      9561.9488,
+      9547.8944
+    ],
+    "postReleaseDriftPerProgram": [
+      14.0328,
+      -0.0216
+    ],
+    "sha256": "df3a484102965cc31b3ba89c0e37146ffcf2dd023abe6c0b59bacb5a33839517"
+  },
+  {
+    "file": "baseline-folded-default-distinct-2.log",
+    "variant": "baseline",
+    "case": "folded",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3723.6072000000004,
+    "rounds": [
+      3724.7928,
+      3722.4216
+    ],
+    "postReleaseDriftPerProgram": [
+      0.8048,
+      -1.5664
+    ],
+    "sha256": "148d868a766a69977855c796f083b2ab5c9282c177d99f6d00081d9fb124e737"
+  },
+  {
+    "file": "baseline-folded-partial-distinct-2.log",
+    "variant": "baseline",
+    "case": "folded",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6323.74,
+    "rounds": [
+      6331.1784,
+      6316.3016
+    ],
+    "postReleaseDriftPerProgram": [
+      15.1904,
+      0.3136
+    ],
+    "sha256": "0414e49fa553df56b9181043691c1837ab42fb3067d7f04fb15d0e0016b7d45b"
+  },
+  {
+    "file": "baseline-folded-trace-distinct-2.log",
+    "variant": "baseline",
+    "case": "folded",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 6323.972,
+    "rounds": [
+      6331.5024,
+      6316.4416
+    ],
+    "postReleaseDriftPerProgram": [
+      15.5144,
+      0.4536
+    ],
+    "sha256": "806ca627fef84db69e04c02e83e9a732412082829714f7e1ad75e539d78c484d"
+  },
+  {
+    "file": "baseline-macro-default-distinct-2.log",
+    "variant": "baseline",
+    "case": "macro",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 2147.9816,
+    "rounds": [
+      2149.436,
+      2146.5272
+    ],
+    "postReleaseDriftPerProgram": [
+      1.44,
+      -1.4688
+    ],
+    "sha256": "4d9a834ff938dfa4825f260d868440cd82503856dd74b86e9f8fdafde550b642"
+  },
+  {
+    "file": "baseline-macro-partial-distinct-2.log",
+    "variant": "baseline",
+    "case": "macro",
+    "mode": "partial",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3605.7696,
+    "rounds": [
+      3612.2808,
+      3599.2584
+    ],
+    "postReleaseDriftPerProgram": [
+      16.2848,
+      3.2624
+    ],
+    "sha256": "9b881f37164051a0e18540a734dfa7370f69263ec9a7830a3bc1dde2ead50bd0"
+  },
+  {
+    "file": "baseline-macro-trace-distinct-2.log",
+    "variant": "baseline",
+    "case": "macro",
+    "mode": "trace",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 3605.5456,
+    "rounds": [
+      3613.8376,
+      3597.2536
+    ],
+    "postReleaseDriftPerProgram": [
+      17.8416,
+      1.2576
+    ],
+    "sha256": "88cfdafad6f976a077c3547570f08fd11e4ae631350360e85683ab742aafd974"
+  },
+  {
+    "file": "shared-chain-default-distinct-2.log",
+    "variant": "shared",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 2,
+    "count": 10000,
+    "bytesPerProgram": 1107.7287999999999,
+    "rounds": [
+      1108.8872,
+      1106.5704
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "761d27f528799b77be1564a55cb065088fc490322b0cf74949deba622e3043fc"
+  },
+  {
+    "file": "shared-chain-default-distinct-69.log",
+    "variant": "shared",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 1107.7287999999999,
+    "rounds": [
+      1108.8872,
+      1106.5704
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "f9c5912f5608593bcafc9da839afcd20d223a00dd3ff010dfb3083428cee3c53"
+  },
+  {
+    "file": "shared-chain-default-template-69.log",
+    "variant": "shared",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "template",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 963.8088,
+    "rounds": [
+      964.9672,
+      962.6504
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "b7d4405483b69ef63599eff80709eaf27ec94000f8d703039ce4e8d37d28b012"
+  }
+]

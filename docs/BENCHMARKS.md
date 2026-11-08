@@ -1,5 +1,10 @@
 # Benchmark methodology and results
 
+The [November 8 retained Program heap diagnostic](benchmarks/retained-20261108/README.md)
+measures 10,000 cached Programs, including distinct sources, shared prepared templates,
+tracing, partial evaluation and CSE. It separates Java live-heap reductions from RSS
+and runtime compilation costs.
+
 ## Representative comparisons
 
 See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
