@@ -53,4 +53,9 @@ public final class PreparedProgram {
   Program adopt() {
     return new Program(source, variables, result, expression, environment);
   }
+
+  // Compiler validation inspects the optimized template before it is exposed to callers.
+  ExprNode expression() {
+    return expression;
+  }
 }

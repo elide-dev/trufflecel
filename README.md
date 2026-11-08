@@ -325,6 +325,7 @@ and [benchmark methodology](docs/BENCHMARKS.md) for the detailed contracts.
 | [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, complete corpus, and reproducible import |
 | [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
 | [Compile-time validation](docs/VALIDATION.md) | Validation policies, constant folding bounds, strict every-path rules, and diagnostics |
+| [Configuration and policy tooling](docs/TOOLING.md) | Environment YAML, CEL Policy compilation, static cost bounds and coverage-guided fuzzing |
 | [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
 | [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
 | [Benchmark methodology](docs/BENCHMARKS.md) | Paired cel-java timings, SVG results, CodSpeed simulation, and guest-JIT qualification |
