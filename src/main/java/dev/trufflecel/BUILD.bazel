@@ -66,6 +66,7 @@ java_library(
         "UInt.java",
         "Unknown.java",
         "Unparser.java",
+        "Validator.java",
         "Values.java",
         "WellKnownTypes.java",
         "WriteNode.java",

@@ -67,6 +67,7 @@ public final class Environment {
   final int maxSourceLength, maxDepth, comprehensionNesting;
   final Validation validation;
   final boolean homogeneousLiterals;
+  final List<Validator> validators;
 
   private Environment(Builder b) {
     libraryPolicy = new LibraryPolicy(b.libraries, b.allowedFunctions);
@@ -98,6 +99,7 @@ public final class Environment {
     comprehensionNesting = b.comprehensionNesting;
     validation = b.validation;
     homogeneousLiterals = b.homogeneousLiterals;
+    validators = List.copyOf(b.validators);
   }
 
   /**
@@ -192,6 +194,8 @@ public final class Environment {
 
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
     long nextId = checkDepth(node, source);
+    if (source.isEmpty()) assignMissingIds(node, nextId);
+    Ast.Node validationTree = validators.isEmpty() ? null : Ast.snapshot(node);
     Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();
@@ -219,20 +223,55 @@ public final class Environment {
           CelException.Code.TYPE,
           "expected result type " + expectedResultType + ", got " + result,
           node.offset);
-    if (source.isEmpty()) assignMissingIds(node, nextId);
+    Validator.Context context =
+        validationTree == null
+            ? null
+            : new Validator.Context(source, validationTree, result, checkedTypes(node));
     FieldPlan.prepare(node, this);
     node.resolveLazyBindings(Map.of());
-    node = Optimizer.optimize(node, this, source);
-    // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
-    // string used as a list index) become type findings once the folds are known.
-    if (check && validation == Validation.STRICT)
-      new Checker(this, declarations, true).check(node, Map.of());
+    List<CelException.Issue> findings = context == null ? null : new ArrayList<>();
+    try {
+      node = Optimizer.optimize(node, this, source);
+      // Folded values can reveal type mismatches hidden behind dyn.
+      if (check && validation == Validation.STRICT)
+        new Checker(this, declarations, true).check(node, Map.of());
+    } catch (CelException failure) {
+      if (context == null
+          || failure.issues().stream()
+              .anyMatch(issue -> issue.code() == CelException.Code.RESOURCE_EXHAUSTED))
+        throw failure;
+      findings.addAll(failure.issues());
+    }
+    if (context != null) {
+      for (Validator validator : validators) {
+        for (var issue : Objects.requireNonNull(validator.validate(context))) {
+          if (findings.size() == CelException.MAX_ISSUES) break;
+          findings.add(Objects.requireNonNull(issue).locate(source));
+        }
+      }
+      if (!findings.isEmpty()) {
+        findings.sort(Comparator.comparingInt(CelException.Issue::offset));
+        throw new CelException(findings);
+      }
+    }
     return new PreparedProgram(
         source,
         declarations == variables ? variableNames : declarations.keySet(),
         result,
         node,
         this);
+  }
+
+  private static Map<Long, CelType> checkedTypes(ExprNode root) {
+    var result = new LinkedHashMap<Long, CelType>();
+    var pending = new ArrayDeque<ExprNode>();
+    pending.push(root);
+    while (!pending.isEmpty()) {
+      ExprNode node = pending.pop();
+      if (node.checkedType != null) result.put(node.canonicalId, node.checkedType.finish());
+      for (ExprNode child : node.children) pending.push(child);
+    }
+    return result;
   }
 
   String resolve(String name, Set<String> names) {
@@ -300,6 +339,7 @@ public final class Environment {
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
     private Validation validation = Validation.DEFERRED;
     private boolean homogeneousLiterals;
+    private final List<Validator> validators = new ArrayList<>();
 
     public Builder() {
       WellKnownTypes.register(this);
@@ -327,12 +367,15 @@ public final class Environment {
       maxRegexProgramSize = environment.maxRegexProgramSize;
       inferVariables = environment.inferVariables;
       macros = environment.macros;
+      customMacros.addAll(environment.customMacros);
+      standardMacros = environment.standardMacros;
       budget = environment.budget;
       maxSourceLength = environment.maxSourceLength;
       maxDepth = environment.maxDepth;
       comprehensionNesting = environment.comprehensionNesting;
       validation = environment.validation;
       homogeneousLiterals = environment.homogeneousLiterals;
+      validators.addAll(environment.validators);
     }
 
     public Builder variable(String name, CelType type) {
@@ -597,6 +640,14 @@ public final class Environment {
     public Builder maxComprehensionNesting(int depth) {
       if (depth <= 0) throw new IllegalArgumentException("depth must be positive");
       comprehensionNesting = depth;
+      return this;
+    }
+
+    /**
+     * Add a trusted compile-time validator. Findings are enforced under either validation policy.
+     */
+    public Builder validator(Validator validator) {
+      validators.add(Objects.requireNonNull(validator));
       return this;
     }
 

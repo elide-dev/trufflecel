@@ -131,7 +131,8 @@ final class Optimizer {
 
   private void issue(CelException.Code code, String message, int offset) {
     if (issues == null) issues = new ArrayList<>();
-    issues.add(new CelException.Issue(code, message, offset, -1, -1).locate(source));
+    if (issues.size() < CelException.MAX_ISSUES)
+      issues.add(new CelException.Issue(code, message, offset, -1, -1).locate(source));
   }
 
   // Qualified names resolved to identifiers or constants keep parsed children that never execute.
