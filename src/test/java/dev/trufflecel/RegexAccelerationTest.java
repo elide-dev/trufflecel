@@ -139,6 +139,11 @@ public class RegexAccelerationTest {
             CelException.Code.INVALID_ARGUMENT,
             assertThrows(CelException.class, () -> Regex.compile("[", 10000)).code());
         assertEquals(1, CelLanguage.currentScope().regexCount());
+        // Backend parser failures disable acceleration; the public preflight above still rejects
+        // invalid CEL patterns. Cache the backend rejection rather than retrying compilation.
+        assertNull(CelLanguage.currentScope().regex("["));
+        assertNull(CelLanguage.currentScope().regex("["));
+        assertEquals(2, CelLanguage.currentScope().regexCount());
       } finally {
         context.leave();
       }
