@@ -8,6 +8,17 @@ import org.junit.Test;
 
 public class LateFunctionTest {
   @Test
+  public void builtinFallbackIsPlannedEvenWhenDynamicArgumentsCanMatchLateFunctions() {
+    var env = Cel.newBuilder().variable("x", CelType.DYN)
+        .lateFunction("size", "size_int", false, List.of(CelType.INT), CelType.INT).build();
+    var program = env.compile("size(x)");
+    var options = EvaluationOptions.newBuilder().function("size_int", args -> (Long) args.getFirst() + 100).build();
+    assertEquals(3L, program.evaluate(Map.of("x", "abc"), options));
+    assertEquals(3L, program.evaluate(Map.of("x", "abc")));
+    assertEquals(101L, program.evaluate(Map.of("x", 1L), options));
+  }
+
+  @Test
   public void returnedErrorsAndLegacyDeclarationsRetainTheirContract() {
     var binding =
         new Environment.FunctionBinding(List.of(CelType.INT), CelType.INT, args -> args.getFirst());
