@@ -22,7 +22,14 @@ jobs:
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check release dependency gate
+        id: dependencies
+        run: python3 tools/release/dependency_gate.py --next --github-output "$GITHUB_OUTPUT"
       - name: Release Please
+        if: steps.dependencies.outputs.ready == 'true'
         id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:

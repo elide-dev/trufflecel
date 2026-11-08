@@ -81,3 +81,22 @@ secrets. Reports are also retained under `build/reports/` in the existing CI art
 See [Maintenance](MAINTENANCE.md) for Dependabot, CodeQL, dependency review,
 Scorecard publication and dependency automation limits. Security workflows have
 job-scoped SARIF write permission; only the Scorecard job receives OIDC for publication.
+
+## TruffleData gate for the 0.10.0 wave
+
+`tools/release/dependency_gate.json` holds the next release at TruffleCEL 0.10.0
+until stable TruffleData 0.10.0 is published and adopted. The gate verifies the
+four TruffleData coordinates in MODULE.bazel and the Maven lock, and the three
+published adapter dependencies (JDBC remains test/integration-only). It also
+checks the upstream GitHub release is published, non-draft and non-prerelease.
+
+Release Please is skipped while this gate is held, including automatic release
+PR creation and updates. Ordinary development checks and staging remain available.
+The local/CI `publish.sh --publish` path independently enforces the gate before
+any R2 access, including for manually created tags. Existing 0.9.x publication
+recovery is unaffected. Network failures do not open the gate.
+
+Once TruffleData ships, update all pins and repin normally, then run the full
+conformance, coverage, packaged-consumer, allocation and native/JIT gates. Do not
+change the gate just to unblock publication. Future dependency waves must update
+the policy explicitly.

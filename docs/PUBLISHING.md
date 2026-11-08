@@ -97,3 +97,9 @@ Release PRs maintain `VERSION`, `.release-please-manifest.json` and `CHANGELOG.m
 reusable publisher checks out and verifies the exact release tag before calling the uploader
 with its version. All modules release together. The explicit local `--publish` command
 remains available; coordinate manual publishes with CI to avoid concurrent metadata writes.
+
+The 0.10.0 release wave is gated on adopting published TruffleData 0.10.0; see
+[the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). Staging is still
+available before adoption, but a staged development build is not release-qualified.
+The staging script resolves Bazel's physical configuration output directory rather
+than following the mutable `bazel-bin` symlink while copying publication files.
