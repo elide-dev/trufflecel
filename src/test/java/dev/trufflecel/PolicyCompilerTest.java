@@ -11,10 +11,14 @@ public class PolicyCompilerTest {
   public void staticRegexConditionsRemainValidatedAfterNodeSpecialization() {
     for (String condition : List.of("'a'.matches('z')", "'a'.matches('a')")) {
       String fallback = condition.contains("'z'") ? "" : ", {output: '2'}";
-      String yaml = "name: regex\nrule:\n  match:\n    - condition: >\n        " + condition + "\n      output: '1'\n";
+      String yaml =
+          "name: regex\nrule:\n  match:\n    - condition: >\n        "
+              + condition
+              + "\n      output: '1'\n";
       if (!fallback.isEmpty()) yaml += "    - output: '2'\n";
       String invalid = yaml;
-      assertThrows(CelException.class, () -> PolicyCompiler.compile(Cel.newBuilder().build(), invalid));
+      assertThrows(
+          CelException.class, () -> PolicyCompiler.compile(Cel.newBuilder().build(), invalid));
     }
   }
 
