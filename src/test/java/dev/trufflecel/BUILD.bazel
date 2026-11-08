@@ -329,3 +329,14 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "mapSnapshot",
+    srcs = ["MapSnapshotTest.java"],
+    test_class = "dev.trufflecel.MapSnapshotTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
