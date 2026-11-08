@@ -384,3 +384,25 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "environmentYaml",
+    srcs = ["EnvironmentYamlTest.java"],
+    test_class = "dev.trufflecel.EnvironmentYamlTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "policyCompiler",
+    srcs = ["PolicyCompilerTest.java"],
+    test_class = "dev.trufflecel.PolicyCompilerTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
