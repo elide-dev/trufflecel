@@ -1,5 +1,6 @@
 package dev.trufflecel;
 
+import com.google.common.collect.ImmutableMap;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.oracle.truffle.runtime.OptimizedRuntimeOptions;
 import dev.cel.common.CelOptions;
@@ -52,8 +53,14 @@ final class Engines implements AutoCloseable {
             "truffle-jit",
             "cel-java",
             "cel-java-optimized",
+            "cel-java-prepared-map",
+            "cel-java-optimized-prepared-map",
+            "cel-java-immutable",
+            "cel-java-optimized-immutable",
             "cel-java-pratt-optimized")
         .contains(engine)) throw new IllegalArgumentException(engine);
+    if (imagePrepared && (engine.endsWith("-immutable") || engine.endsWith("-prepared-map")))
+      throw new IllegalArgumentException("Input control requires runtime preparation");
     if (ours) {
       context =
           !enterContext
@@ -140,6 +147,25 @@ final class Engines implements AutoCloseable {
       return i -> truffle.evaluate(Workloads.input(workload, true, i));
     }
     var program = runtime.createProgram((CelAbstractSyntaxTree) ast);
+    if (engine.endsWith("-immutable") || engine.endsWith("-prepared-map")) {
+      // Caller input preparation is outside steady-state timing and allocation intervals.
+      // Preserve every binding and value; do not trim inputs to referenced variables.
+      boolean immutable = engine.endsWith("-immutable");
+      @SuppressWarnings("unchecked")
+      Map<String, Object>[] inputs = (Map<String, Object>[]) new Map<?, ?>[4];
+      for (int i = 0; i < 4; i++) {
+        Map<String, Object> original = Workloads.input(workload, false, i);
+        Map<String, Object> prepared = immutable ? ImmutableMap.copyOf(original) : original;
+        if ((prepared instanceof ImmutableMap) != immutable
+            || prepared.size() != 69
+            || !prepared.equals(original)) throw new AssertionError("Changed prepared bindings");
+        for (var entry : original.entrySet())
+          if (prepared.get(entry.getKey()) != entry.getValue())
+            throw new AssertionError("Prepared input changed a bound value");
+        inputs[i] = prepared;
+      }
+      return i -> program.eval(inputs[i & 3]);
+    }
     return i -> program.eval(Workloads.input(workload, false, i));
   }
 

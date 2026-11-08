@@ -14,6 +14,7 @@ java_library(
     name = "engines", testonly = True,
     srcs = ["Engines.java", "Workloads.java"],
     deps = [":policy_java", "//:trufflecel", "//:trufflecel-protobuf",
+            "@cel_java//:com_google_guava_guava",
             "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_polyglot_polyglot",
             "@maven//:org_graalvm_truffle_truffle_runtime",
             "@cel_java//:dev_cel_cel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime"],
@@ -62,6 +63,13 @@ java_library(name = "evaluation_memory_lib", testonly = True, srcs = ["Evaluatio
     deps = [":engines", "//:trufflecel", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:org_graalvm_truffle_truffle_runtime"])
 java_binary(name = "evaluation_memory", testonly = True, main_class = "dev.trufflecel.EvaluationMemory",
     runtime_deps = [":evaluation_memory_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+sh_test(name = "input_control_smoke", srcs = ["input_control_smoke.sh"],
+    args = ["$(rootpath :lifecycle)", "$(rootpath :evaluation_memory)"],
+    data = [":lifecycle", ":evaluation_memory"], size = "large")
+sh_test(name = "input_control_native_smoke", srcs = ["input_control_smoke.sh"],
+    args = ["$(rootpath :svm)", "$(rootpath :evaluation_memory_svm)"],
+    data = [":svm", ":evaluation_memory_svm"], tags = ["manual"], size = "large",
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
 java_test(name = "evaluation_memory_smoke", testonly = True, main_class = "dev.trufflecel.EvaluationMemory", use_testrunner = False,
     args = ["truffle-interpreter", "proto-repeated", "smoke"], runtime_deps = [":evaluation_memory_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_library(name = "native_config", testonly = True, srcs = ["UpstreamProtobufFeature.java"], deps = [":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_sdk_nativeimage"])
