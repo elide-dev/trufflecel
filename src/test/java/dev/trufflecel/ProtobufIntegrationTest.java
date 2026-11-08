@@ -205,6 +205,9 @@ public class ProtobufIntegrationTest {
                 .build(),
             new FileDescriptor[] {Any.getDescriptor().getFile()});
     var adapter = new ProtobufType(file.findMessageTypeByName("Envelope"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> adapter.mask(FieldMask.newBuilder().addPaths("payload.type_url").build()));
     for (Object value :
         List.of(
             java.time.Instant.ofEpochSecond(7),
@@ -826,6 +829,26 @@ public class ProtobufIntegrationTest {
       message.setField(field, field.isRepeated() ? List.of(scalar) : scalar);
     }
     ProtobufType.Value value = type.snapshot(message.build());
+    var visible = type.mask(FieldMask.newBuilder().addPaths("*").build());
+    assertEquals(type.extensions(), visible.extensions());
+    assertTrue(type.mask(FieldMask.getDefaultInstance()).extensions().isEmpty());
+    var visibleEnv =
+        visible
+            .register(Cel.newBuilder().container("ext"))
+            .variable("m", CelType.of(visible.name()))
+            .build();
+    Object projection = visible.snapshot(message.build());
+    for (FieldDescriptor field : extensions) {
+      assertTrue(
+          visibleEnv
+              .compile("proto.hasExt(m, " + field.getName() + ")")
+              .test(Map.of("m", projection)));
+      assertEquals(
+          type.get(value, field.getFullName()),
+          visibleEnv
+              .compile("proto.getExt(m, " + field.getName() + ")")
+              .evaluateInternal(Map.of("m", projection)));
+    }
     assertEquals(message.build(), value.message());
     var decoded = (ProtobufType.Value) type.decode(value.toBytes());
     assertEquals(value, decoded);
