@@ -28,8 +28,8 @@ of its findings together, for example:
 division by zero at offset 7 (line 2, column 4); division by zero at offset 14 (line 2, column 11)
 ```
 
-Parser and checker failures keep their single-issue message format. Evaluation failures carry
-no position.
+Parser and checker failures keep their single-issue message format. Evaluation failures also
+carry expression IDs and source locations when available; see [integration](INTEGRATION.md).
 
 ## What is folded
 
