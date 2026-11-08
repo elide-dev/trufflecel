@@ -48,10 +48,12 @@ public class PolicyConformanceTest {
     String yaml = Files.readString(policy);
     if (policy.toString().contains("/compile_errors/")) {
       var error = assertThrows(CelException.class, () -> PolicyCompiler.prepare(configured, yaml));
-      assertNotEquals(
-          "compile failures must not be an exhausted limit",
-          CelException.Code.RESOURCE_EXHAUSTED,
-          error.code());
+      expectedFailure(policy.getParent().getFileName().toString()).check(error);
+      if (error.code() == CelException.Code.SYNTAX) {
+        // This fixture's first malformed expression omits the space in "l in resource.labels".
+        // Assert the offending token's location, independently of this parser's diagnostic text.
+        assertEquals(yaml.indexOf("resource.labels"), error.offset());
+      }
       return;
     }
     Program program = PolicyCompiler.compile(configured, fixturePolicy(yaml));
@@ -100,6 +102,64 @@ public class PolicyConformanceTest {
       }
     }
     assertTrue("fixture must execute its cases", count > 0);
+  }
+
+  /** Semantic expectations come from each upstream fixture, not its engine-specific wording. */
+  private enum Failure {
+    SYNTAX(CelException.Code.SYNTAX),
+    UNDECLARED(CelException.Code.TYPE, "undeclared", "spec"),
+    DUPLICATE_VARIABLE(CelException.Code.TYPE, "duplicate", "variable", "want"),
+    IMPORT(CelException.Code.TYPE, "import"),
+    OUTPUT_TYPES(CelException.Code.TYPE, "incompatible", "output", "types"),
+    FALSE_CONDITION(CelException.Code.TYPE, "condition", "false"),
+    NESTED_AGGREGATE(CelException.Code.TYPE, "nested", "aggregate"),
+    UNREACHABLE(CelException.Code.TYPE, "unreachable");
+
+    private final CelException.Code code;
+    private final List<String> concepts;
+
+    Failure(CelException.Code code, String... concepts) {
+      this.code = code;
+      this.concepts = List.of(concepts);
+    }
+
+    void check(CelException error) {
+      assertEquals(error.getMessage(), code, error.code());
+      String message = error.getMessage().toLowerCase(Locale.ROOT);
+      // Nested first-match outputs compose through an optional fallback. Its type checker can
+      // reject incompatible outputs before the policy-level output compatibility pass runs.
+      if (this == OUTPUT_TYPES
+          && message.contains("fallback")
+          && message.contains("type")
+          && message.contains("mismatch")) return;
+      for (String concept : concepts)
+        assertTrue(
+            "expected " + name() + " (" + concept + "), got: " + error, message.contains(concept));
+    }
+  }
+
+  private static Failure expectedFailure(String fixture) {
+    return switch (fixture) {
+      case "syntax" -> Failure.SYNTAX;
+      case "undeclared_reference" -> Failure.UNDECLARED;
+      case "duplicate_variable" -> Failure.DUPLICATE_VARIABLE;
+      case "import" -> Failure.IMPORT;
+      case "aggregate_errors",
+          "aggregate_list_errors",
+          "aggregate_heterogeneous_outputs",
+          "aggregate_subrule_heterogeneous_outputs",
+          "compose_conflicting_output",
+          "compose_conflicting_subrule",
+          "incompatible_outputs" ->
+          Failure.OUTPUT_TYPES;
+      case "aggregate_false_condition" -> Failure.FALSE_CONDITION;
+      case "aggregate_nested_mixed_semantics" -> Failure.NESTED_AGGREGATE;
+      case "aggregate_unreachable_in_nested_first_match",
+          "unreachable",
+          "unreachable_under_unconditional_aggregate_subrule" ->
+          Failure.UNREACHABLE;
+      default -> throw new AssertionError("missing expected failure category for " + fixture);
+    };
   }
 
   private static Object value(Environment environment, Object entry) {

@@ -279,6 +279,18 @@ public final class PolicyCompiler {
     }
 
     void validate(ExprNode optimized) {
+      // Report incompatible outputs even when a condition also makes an alternative unreachable.
+      // Output compatibility is a declaration constraint, independent of static control flow.
+      for (List<Outcome> alternatives : outputs) {
+        CelType expected = null;
+        for (Outcome outcome : alternatives) {
+          CelType type = outcome.expression.checkedType;
+          if (outcome.unwrap) type = Checker.parameter(type, 0);
+          if (expected != null && !expected.accepts(type))
+            throw failure("incompatible policy output types: " + expected + " and " + type);
+          expected = expected == null ? type : CelType.join(expected, type);
+        }
+      }
       var nodes = new HashMap<Long, ExprNode>();
       var pending = new ArrayDeque<ExprNode>();
       pending.push(optimized);
@@ -306,16 +318,6 @@ public final class PolicyCompiler {
       for (ExprNode explanation : explanations)
         if (!CelType.STRING.accepts(explanation.checkedType))
           throw failure("policy explanation must be string");
-      for (List<Outcome> alternatives : outputs) {
-        CelType expected = null;
-        for (Outcome outcome : alternatives) {
-          CelType type = outcome.expression.checkedType;
-          if (outcome.unwrap) type = Checker.parameter(type, 0);
-          if (expected != null && !expected.accepts(type))
-            throw failure("incompatible policy output types: " + expected + " and " + type);
-          expected = expected == null ? type : CelType.join(expected, type);
-        }
-      }
     }
   }
 
