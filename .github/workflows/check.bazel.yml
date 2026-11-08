@@ -84,7 +84,7 @@ jobs:
           fail_ci_if_error: true
           cleanup: true
       - name: Build library JARs and Maven publications
-        run: bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json //tools/release:publications
+        run: bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json //:trufflecel-processor //tools/release:publications
       - name: Upload JAR and reports
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
@@ -94,9 +94,11 @@ jobs:
             bazel-bin/src/main/java/dev/trufflecel/libtrufflecel.jar
             bazel-bin/src/main/java/dev/trufflecel/libprotobuf.jar
             bazel-bin/src/main/java/dev/trufflecel/libjson.jar
+            bazel-bin/src/main/java/dev/trufflecel/processor/libprocessor.jar
             bazel-bin/tools/release/core/dev/elide/**
             bazel-bin/tools/release/protobuf/dev/elide/**
             bazel-bin/tools/release/json/dev/elide/**
+            bazel-bin/tools/release/processor/dev/elide/**
             build/reports/
             bazel-out/_coverage/_coverage_report.dat
             bazel-testlogs/**/test.xml
