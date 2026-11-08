@@ -28,13 +28,21 @@ final class Parser {
           "while");
   private final String source;
   private final Environment env;
+  private final int baseOffset;
   private int cursor, depth, consumedEnd;
   private Token token;
   private final List<CelException.Issue> issues = new ArrayList<>();
 
   Parser(String source, Environment env) {
+    this(source, env, 0);
+  }
+
+  Parser(String source, Environment env, int baseOffset) {
+    if (baseOffset < 0 || baseOffset > Integer.MAX_VALUE - source.length())
+      throw new IllegalArgumentException("invalid source base offset");
     this.source = source;
     this.env = env;
+    this.baseOffset = baseOffset;
     token = next();
   }
 
@@ -512,14 +520,14 @@ final class Parser {
 
   private Token take() {
     Token result = token;
-    consumedEnd = cursor;
+    consumedEnd = cursor + baseOffset;
     token = next();
     return result;
   }
 
   private CelException error(String message) {
     return new CelException(
-        CelException.Code.SYNTAX, message, token == null ? cursor : token.offset);
+        CelException.Code.SYNTAX, message, token == null ? cursor + baseOffset : token.offset);
   }
 
   // Nesting limits are resource controls, categorized like the other configured limits. They are
@@ -529,6 +537,11 @@ final class Parser {
   }
 
   private Token next() {
+    Token next = nextRaw();
+    return new Token(next.kind, next.text, next.value, next.offset + baseOffset);
+  }
+
+  private Token nextRaw() {
     while (cursor < source.length()) {
       char c = source.charAt(cursor);
       if (" \t\r\n\f".indexOf(c) >= 0) {
@@ -643,7 +656,8 @@ final class Parser {
       cursor += op.length();
       return new Token(op, op, null, start);
     }
-    throw new CelException(CelException.Code.SYNTAX, "unexpected character: " + c, cursor);
+    throw new CelException(
+        CelException.Code.SYNTAX, "unexpected character: " + c, cursor + baseOffset);
   }
 
   private boolean followedBy(char expected) {
