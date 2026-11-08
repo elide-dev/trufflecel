@@ -262,6 +262,21 @@ public final class ValidationTest {
   }
 
   @Test
+  public void ordinaryCallsRetainNestedValidationAndBindingDependencies() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).constant("u", Unknown.of("u")).build();
+    var program = env.compile("cel.bind(v,x,[1,2].map(i,i+v)).size()");
+    assertEquals(2L, program.evaluate(Map.of("x", 1L)));
+    assertEquals(
+        CelException.Code.OVERFLOW,
+        assertThrows(CelException.class, () -> program.evaluate(Map.of("x", Long.MAX_VALUE)))
+            .code());
+    assertEquals(Unknown.of("u"), env.compile("optional.of(u + 1).hasValue()").evaluate());
+    assertEquals(
+        CelException.Code.TYPE,
+        rejects(Cel.newBuilder().homogeneousLiterals(true).build(), "size([1, 'a'])").code());
+  }
+
+  @Test
   public void foldedSubtreesChargeTheOriginalBudget() throws Exception {
     try (Context context = Context.newBuilder("cel").build()) {
       context.enter();

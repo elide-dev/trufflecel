@@ -156,6 +156,17 @@ final class Optimizer {
     if (n.kind == ExprNode.Kind.IDENT) return record(n, binding(n.name), true, depth);
     if (n.kind == ExprNode.Kind.CONSTANT)
       return record(n, NO_IDENTIFIERS, !(n.value instanceof Unknown), depth);
+    // Ordinary calls introduce no binders or aggregate validators. With no host bindings or
+    // strict literal checks, only matches needs preparation beyond its children's analysis.
+    if (n.kind == ExprNode.Kind.CALL
+        && !strict
+        && env.functions.isEmpty()
+        && !n.name.equals("matches")) {
+      int min = children(n, 0, n.children.length, depth, nesting);
+      boolean clean = pure;
+      if (clean && min > depth) candidates = true;
+      return record(n, min, clean, depth);
+    }
     if (n.kind == ExprNode.Kind.COMPREHENSION
         || n.kind == ExprNode.Kind.MACRO && NESTING.contains(n.name)) {
       nesting++;
