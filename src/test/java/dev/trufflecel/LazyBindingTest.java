@@ -9,6 +9,22 @@ import org.junit.Test;
 
 public class LazyBindingTest {
   @Test
+  public void initializerScopesCannotOverwriteActiveBodySlots() {
+    var program =
+        Cel.compile(
+            "cel.bind(a, cel.bind(tmp, input, tmp + 1), cel.bind(b, input + 2, a + a + b))");
+    assertEquals(7L, program.evaluate(Map.of("input", 1L)));
+    assertEquals(7L, program.evaluate(Map.of("input", 1L), EvaluationOptions.newBuilder().build()));
+    var list = Cel.compile("cel.bind(a, xs.map(x, x + 1), a + a)");
+    assertEquals(List.of(2L, 3L, 2L, 3L), list.evaluate(Map.of("xs", List.of(1L, 2L))));
+    assertEquals(
+        List.of(2L, 3L, 2L, 3L),
+        list.evaluate(Map.of("xs", List.of(1L, 2L)), EvaluationOptions.newBuilder().build()));
+    var events = new ArrayList<TraceEvent>();
+    assertEquals(7L, program.trace(events::add).evaluate(Map.of("input", 1L)));
+  }
+
+  @Test
   public void unusedInitializersHaveNoEffectsAndReadsMemoize() {
     var calls = new AtomicInteger();
     var env =
