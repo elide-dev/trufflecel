@@ -79,7 +79,6 @@ public final class ValidationTest {
             "[[1, 2][5], x]",
             "[{'a': 1}.b, x]",
             "xs[1 / 0]",
-            "cel.bind(v, 1 / 0, x)",
             "cel.bind(v, x, 1 / 0)",
             "cel.block([x], 1 / 0)",
             "same(1 / 0)",

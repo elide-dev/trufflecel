@@ -84,7 +84,8 @@ could yield an unknown that would win over the error:
 | `?:` | the condition |
 | `or`, `orValue` | the receiver |
 | other calls, including host functions | an argument whose other arguments are all constant (an unknown sibling wins over an error) |
-| `has`, `cel.bind` | all |
+| `has` | all |
+| `cel.bind` | the body; initializer is lazy |
 | other macros | the range; bodies may never run |
 | canonical comprehensions | range, accumulator initializer and result |
 | `cel.block` | the result; slots are lazy |
@@ -98,8 +99,8 @@ types, so a mismatch hidden by `dyn` (for example `xs[dyn('a')]` on a list) is a
 finding, as it is for cel-java's optimizer.
 
 Against the negative matrix in `NegativeCases`, strict validation rejects at compile time all
-41 cases that cel-java's constant-folding optimizer rejects, plus seven more (an invalid
-constant pattern with a variable receiver, an invalid timestamp literal, a `cel.bind`
-initializer failure, constant duplicate and invalid map keys, and the range cap). A failing
+41 cases that cel-java's constant-folding optimizer rejects, plus six more (an invalid
+constant pattern with a variable receiver, an invalid timestamp literal, constant duplicate
+and invalid map keys, and the range cap). A failing
 `cel.block` slot that the result always reads is not reported, because slot evaluation is
 lazy. A custom validator hook is not provided yet.

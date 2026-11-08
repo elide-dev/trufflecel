@@ -15,6 +15,7 @@ public class InstrumentationTest {
     final Set<Class<? extends Tag>> tags = new HashSet<>();
     final List<String> sections = new ArrayList<>();
     final List<Long> localValues = new ArrayList<>();
+    final List<Long> returnedValues = new ArrayList<>();
     int failures;
   }
 
@@ -64,7 +65,8 @@ public class InstrumentationTest {
                         var library = NodeLibrary.getUncached();
                         Object scope = library.getScope(context.getInstrumentedNode(), frame, true);
                         Object value = InteropLibrary.getUncached().readMember(scope, "x");
-                        events.localValues.add(InteropLibrary.getUncached().asLong(value));
+                        if (InteropLibrary.getUncached().fitsInLong(value))
+                          events.localValues.add(InteropLibrary.getUncached().asLong(value));
                       }
                     } catch (InteropException e) {
                       throw new AssertionError(e);
@@ -73,8 +75,17 @@ public class InstrumentationTest {
                 }
 
                 @Override
-                public void onReturnValue(
-                    EventContext context, VirtualFrame frame, Object result) {}
+                @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+                public void onReturnValue(EventContext context, VirtualFrame frame, Object result) {
+                  if (context.hasTag(StandardTags.ReadVariableTag.class)
+                      && InteropLibrary.getUncached().fitsInLong(result)) {
+                    try {
+                      events.returnedValues.add(InteropLibrary.getUncached().asLong(result));
+                    } catch (InteropException e) {
+                      throw new AssertionError(e);
+                    }
+                  }
+                }
 
                 @Override
                 public void onReturnExceptional(
@@ -254,7 +265,8 @@ public class InstrumentationTest {
       assertTrue(events.tags.contains(StandardTags.CallTag.class));
       assertTrue(events.tags.contains(StandardTags.ReadVariableTag.class));
       assertTrue(events.tags.contains(StandardTags.WriteVariableTag.class));
-      assertTrue(events.localValues.contains(5L));
+      // A lazy initializer is absent on entry to its first read, then visible on return.
+      assertTrue(events.returnedValues.contains(5L));
       assertTrue(events.localValues.contains(2L));
     }
   }

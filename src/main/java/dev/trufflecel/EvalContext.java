@@ -57,7 +57,11 @@ final class EvalContext {
     if (singleName != null) visible.put(singleName, activation);
     else if (activation instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
     else visible.putAll(activationMap());
-    for (int i = 0; i < scopeSize; i += 2) visible.put((String) scopes[i], scopes[i + 1]);
+    for (int i = 0; i < scopeSize; i += 2) {
+      Object value = scopes[i + 1];
+      visible.put(
+          (String) scopes[i], value instanceof ExprNode.LazyBinding lazy ? lazy.display() : value);
+    }
     return Collections.unmodifiableMap(visible);
   }
 
@@ -67,7 +71,7 @@ final class EvalContext {
 
   /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
   long charged() {
-    return initialBudget - remaining;
+    return budgetParent == null ? initialBudget - remaining : budgetParent.charged();
   }
 
   void charge(long cost) {
