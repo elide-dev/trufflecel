@@ -441,3 +441,27 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "astInterchange",
+    srcs = ["AstInterchangeTest.java"],
+    test_class = "dev.trufflecel.AstInterchangeTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "parserRecovery",
+    srcs = ["ParserRecoveryTest.java"],
+    test_class = "dev.trufflecel.ParserRecoveryTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

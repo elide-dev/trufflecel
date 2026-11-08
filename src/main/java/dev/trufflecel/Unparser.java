@@ -17,7 +17,7 @@ public final class Unparser {
     List<Ast.Node> children = node.children();
     return switch (node.kind()) {
       case CONSTANT -> literal(node.value());
-      case IDENT -> node.name();
+      case IDENT -> identifier(node.name());
       case SELECT ->
           node.extensionSelect()
               ? "proto.getExt(" + expression(children.get(0)) + ", " + node.name() + ")"
@@ -112,7 +112,7 @@ public final class Unparser {
               .contains(name)
           && args.size() == 2)
         return "(" + expression(args.get(0)) + " " + name + " " + expression(args.get(1)) + ")";
-      return name
+      return identifier(name)
           + "("
           + args.stream().map(Unparser::expression).collect(Collectors.joining(", "))
           + ")";
@@ -120,7 +120,7 @@ public final class Unparser {
     return "("
         + expression(args.get(0))
         + ")."
-        + name
+        + field(name)
         + "("
         + args.subList(1, args.size()).stream()
             .map(Unparser::expression)
@@ -129,7 +129,30 @@ public final class Unparser {
   }
 
   private static String field(String field) {
-    return field.matches("[a-zA-Z_][a-zA-Z_0-9]*") ? field : "`" + field.replace("`", "\\`") + "`";
+    if (field.matches("[a-zA-Z_][a-zA-Z_0-9]*") && !keyword(field)) return field;
+    if (field.isEmpty()
+        || field.indexOf('`') >= 0
+        || field.indexOf('\\') >= 0
+        || field.indexOf('\n') >= 0
+        || field.indexOf('\r') >= 0)
+      throw new IllegalArgumentException("Field has no quoted CEL identifier spelling");
+    return "`" + field + "`";
+  }
+
+  private static boolean keyword(String name) {
+    return Parser.RESERVED.contains(name) || Set.of("true", "false", "null", "in").contains(name);
+  }
+
+  private static String identifier(String name) {
+    if (name.startsWith("$iter:")) {
+      String[] parts = name.split(":");
+      if (parts.length == 3) return "cel.iterVar(" + parts[1] + ", " + parts[2] + ")";
+    }
+    String spelling = name.startsWith(".") ? name.substring(1) : name;
+    for (String part : spelling.split("\\.", -1))
+      if (!part.matches("[a-zA-Z_][a-zA-Z_0-9]*") || keyword(part))
+        throw new IllegalArgumentException("Identifier has no CEL source spelling: " + name);
+    return name;
   }
 
   private static String literal(Object value) {
