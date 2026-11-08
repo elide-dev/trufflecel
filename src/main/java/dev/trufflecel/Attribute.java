@@ -12,6 +12,7 @@ public record Attribute(String variable, List<Object> qualifiers) {
     qualifiers = List.copyOf(normalized);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   public static Attribute of(String variable) {
     return new Attribute(variable, List.of());
   }
