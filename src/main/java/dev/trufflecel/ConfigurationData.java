@@ -1,6 +1,9 @@
 package dev.trufflecel;
 
 import java.util.*;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.lowlevel.Compose;
+import org.snakeyaml.engine.v2.nodes.*;
 
 /** Shared bounded, data-only YAML handling for host configuration tools. */
 final class ConfigurationData {
@@ -21,6 +24,62 @@ final class ConfigurationData {
 
   static String write(Map<String, Object> value) {
     return (String) EncoderFunctions.apply("yaml.encode", new Object[] {value}, context());
+  }
+
+  record Expression(String text, int offset) {}
+
+  /** Preserve expression block scalars before YAML folding changes CEL comments or literals. */
+  static Map<String, Object> policy(String yaml) {
+    Map<String, Object> data = read(yaml); // Data-only tags, aliases, depth and work limits first.
+    var settings = LoadSettings.builder().setCodePointLimit(1_000_000).build();
+    Node syntax = new Compose(settings).composeString(yaml).orElseThrow();
+    int[] offsets = new int[yaml.codePointCount(0, yaml.length()) + 1];
+    for (int point = 0, character = 0; point < offsets.length; point++) {
+      offsets[point] = character;
+      if (character < yaml.length()) character += Character.charCount(yaml.codePointAt(character));
+    }
+    return object(policyValue(data, syntax, yaml, offsets, false));
+  }
+
+  private static Object policyValue(
+      Object value, Node node, String yaml, int[] offsets, boolean expression) {
+    if (node instanceof ScalarNode scalar && expression) {
+      String text = string(value);
+      int start = offsets[node.getStartMark().orElseThrow().getIndex()];
+      int end = offsets[node.getEndMark().orElseThrow().getIndex()];
+      var style = scalar.getScalarStyle();
+      if (style == org.snakeyaml.engine.v2.common.ScalarStyle.FOLDED
+          || style == org.snakeyaml.engine.v2.common.ScalarStyle.LITERAL) {
+        int newline = yaml.indexOf('\n', start);
+        start = newline < 0 ? end : newline + 1;
+        text = yaml.substring(start, end);
+      } else if (style == org.snakeyaml.engine.v2.common.ScalarStyle.SINGLE_QUOTED
+          || style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED) start++;
+      return new Expression(text, start);
+    }
+    if (node instanceof MappingNode mapping) {
+      var result = object(value);
+      for (NodeTuple entry : mapping.getValue()) {
+        String key = ((ScalarNode) entry.getKeyNode()).getValue();
+        result.put(
+            key,
+            policyValue(
+                result.get(key),
+                entry.getValueNode(),
+                yaml,
+                offsets,
+                Set.of("expression", "condition", "output", "explanation").contains(key)));
+      }
+      return result;
+    }
+    if (node instanceof SequenceNode sequence) {
+      var values = list(value);
+      var result = new ArrayList<Object>();
+      for (int i = 0; i < values.size(); i++)
+        result.add(policyValue(values.get(i), sequence.getValue().get(i), yaml, offsets, false));
+      return result;
+    }
+    return value;
   }
 
   private static EvalContext context() {

@@ -8,6 +8,49 @@ import org.junit.Test;
 
 public class PolicyCompilerTest {
   @Test
+  public void blockScalarExpressionsPreserveCommentsWhitespaceAndPolicyLocations() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    String policy =
+        """
+        name: multiline
+        rule:
+          match:
+            - output: >
+                x + // folding this newline would remove the next operand
+                  2
+        """;
+    assertEquals(5L, PolicyCompiler.compile(env, policy).evaluate(Map.of("x", 3)));
+    for (String style : List.of("|", ">")) {
+      String failure = "name: '😀'\nrule:\n  match:\n    - output: " + style + "\n        x / 0\n";
+      var program = PolicyCompiler.compile(env, failure);
+      var error = assertThrows(CelException.class, () -> program.evaluate(Map.of("x", 1)));
+      assertEquals(CelException.Code.DIVIDE_BY_ZERO, error.code());
+      assertEquals(failure.indexOf('/'), error.offset());
+      assertEquals(5, error.line());
+      assertEquals(11, error.column());
+      assertTrue(error.expressionId() > 0);
+      String invalid = failure.replace("x / 0", "undeclared");
+      var compile = assertThrows(CelException.class, () -> PolicyCompiler.compile(env, invalid));
+      assertEquals(5, compile.line());
+      assertEquals(9, compile.column());
+    }
+  }
+
+  @Test
+  public void generatedHelpersDoNotExpandUserFunctionPermissions() {
+    var env = Cel.newBuilder().allowedFunctions(Set.of("+")).libraries(Map.of()).build();
+    assertEquals(
+        3L,
+        PolicyCompiler.compile(env, "name: limited\nrule: {match: [{output: '1 + 2'}]}")
+            .evaluate(Map.of()));
+    assertThrows(
+        CelException.class,
+        () ->
+            PolicyCompiler.compile(
+                env, "name: limited\nrule: {match: [{output: 'optional.of(1)'}]}"));
+  }
+
+  @Test
   public void firstMatchAndConditionalResults() {
     Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
     var complete =
@@ -34,7 +77,7 @@ public class PolicyCompilerTest {
           match:
             - {condition: 'x > 0', output: 'x * 2'}
         """);
-    assertEquals(OptionalValue.of(4L), conditional.evaluate(Map.of("x", 2)));
+    assertEquals(4L, conditional.evaluate(Map.of("x", 2)));
     assertEquals(OptionalValue.none(), conditional.evaluate(Map.of("x", 0)));
   }
 

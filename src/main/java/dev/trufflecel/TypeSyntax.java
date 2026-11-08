@@ -80,10 +80,22 @@ public final class TypeSyntax {
       }
       int arity =
           switch (name) {
-            case "map" -> 2;
-            case "list", "optional_type", "wrapper" -> 1;
+            case "map" -> parameters.isEmpty() ? 0 : 2;
+            case "list" -> parameters.isEmpty() ? 0 : 1;
+            case "optional_type", "wrapper" -> 1;
             case "type" -> parameters.isEmpty() ? 0 : 1;
-            default -> 0;
+            case "int",
+                "uint",
+                "double",
+                "bool",
+                "string",
+                "bytes",
+                "null_type",
+                "dyn",
+                "google.protobuf.Timestamp",
+                "google.protobuf.Duration" ->
+                0;
+            default -> name.startsWith("$") ? 0 : parameters.size();
           };
       if (parameters.size() != arity || name.startsWith("$") && name.contains(".")) throw error();
       return new CelType(name, parameters);
