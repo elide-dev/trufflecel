@@ -319,8 +319,9 @@ TruffleRegex RE2 flavor. The constant match's first execution must occur in an i
 entered CEL context. Instantiate the Program within its execution context; a reusable
 PreparedProgram may be prepared outside it. The accelerator remains owned by that
 context; the Program holds only a weak reference and checks the owning context on every accelerated call.
-Evaluation outside that context, after its closure, or after the weak handle is collected
-uses RE2/J. A match first executed without a CEL context stays on RE2/J and never
+Evaluation outside that context or after its closure uses RE2/J. If a weak handle
+is collected while its owning context remains active, the program reacquires it on
+its next evaluation in that context. A match first executed without a CEL context stays on RE2/J and never
 creates a hidden context. Cache eviction removes strong ownership; an evicted handle
 can continue accelerating matches in its owning context until collected. Dynamic
 patterns and capture/replacement extensions also remain on RE2/J. No caller context is required by the standalone Java API.
@@ -330,7 +331,9 @@ special groups. Unicode properties and case folding differ between the two engin
 Unicode tables, and some nullable capture loops have different match boundaries.
 Unsupported TruffleRegex patterns fall back after the same RE2/J syntax and program-size
 validation. The context's accelerator cache is bounded to 256 entries and cleared on
-disposal; the separate dynamic-pattern cache retains its existing bounds.
+disposal. Both caches evict one oldest insertion at capacity rather than clearing
+all entries. Repeated syntax failures cache only error data and raise fresh CEL
+exceptions; caller-specific limits remain enforced on every access.
 
 Upstream tracking covers [counted-repetition support](https://github.com/elide-dev/graal/issues/205),
 [nullable-loop match boundaries](https://github.com/elide-dev/graal/issues/206), and

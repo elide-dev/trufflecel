@@ -205,7 +205,7 @@ public class RegexAccelerationTest {
   }
 
   @Test
-  public void contextCacheIsBoundedAndClearedWeakHandlesFallBack() throws Exception {
+  public void contextCacheIsBoundedAndClearedWeakHandlesRecover() throws Exception {
     PreparedProgram template = template(EMAIL);
     try (var context = context()) {
       context.enter();
@@ -226,8 +226,26 @@ public class RegexAccelerationTest {
         handleField.setAccessible(true);
         ((TruffleWeakReference<?>) handleField.get(entry)).clear();
         assertFalse(matcher.isAccelerated());
+        context.leave();
+        try {
+          assertEquals(true, program.evaluate(Map.of("s", "alice@example.com")));
+          assertFalse(matcher.isAccelerated());
+        } finally {
+          context.enter();
+        }
+        try (var other = context()) {
+          other.enter();
+          try {
+            assertEquals(true, program.evaluate(Map.of("s", "alice@example.com")));
+            assertFalse(matcher.isAccelerated());
+            assertEquals(0, CelLanguage.currentScope().regexCount());
+          } finally {
+            other.leave();
+          }
+        }
         assertEquals(true, program.evaluate(Map.of("s", "alice@example.com")));
-        assertEquals(0, scope.regexCount());
+        assertEquals(1, scope.regexCount());
+        assertTrue(matcher.isAccelerated());
       } finally {
         context.leave();
       }
@@ -273,6 +291,126 @@ public class RegexAccelerationTest {
               });
       accelerated.get();
       fallback.get();
+    }
+  }
+
+  @Test
+  public void cachesEvictOneEntryAndRememberSyntaxFailures() throws Exception {
+    try (var context = context()) {
+      context.enter();
+      try {
+        var scope = CelLanguage.currentScope();
+        scope.regex("first");
+        var survivor = scope.regex("second");
+        for (int i = 0; i < 255; i++) scope.regex("cache" + i);
+        assertEquals(256, scope.regexCount());
+        assertSame(survivor, scope.regex("second"));
+        scope.clearRegexes();
+        var first = assertThrows(CelException.class, () -> scope.regex("[", 10000, true));
+        var second = assertThrows(CelException.class, () -> scope.regex("[", 10000, true));
+        assertNotSame(first, second);
+        assertEquals(first.code(), second.code());
+        assertEquals(1, scope.regexCount());
+        assertTrue(scope.regex("a", 10000, true).find("a"));
+        assertNull(scope.regex("(a|b)+c", 1, true));
+        assertNotNull(scope.regex("(a|b)+c", 10000, true));
+      } finally {
+        context.leave();
+      }
+    }
+    for (int i = 0; i < 257; i++) Regex.cached("dynamic" + i, 10000);
+    assertEquals(256, Regex.cacheSize());
+    var survivor = Regex.cached("dynamic256", 10000);
+    Regex.cached("last", 10000);
+    assertSame(survivor, Regex.cached("dynamic256", 10000));
+    for (int i = 0; i < 257; i++) {
+      String overBudget = "overBudget" + i;
+      assertThrows(CelException.class, () -> Regex.cached(overBudget, 1));
+    }
+    assertSame(survivor, Regex.cached("dynamic256", 10000));
+    var first = assertThrows(CelException.class, () -> Regex.cached("[", 10000));
+    var second = assertThrows(CelException.class, () -> Regex.cached("[", 10000));
+    assertNotSame(first, second);
+    assertEquals(first.code(), second.code());
+    assertThrows(CelException.class, () -> Regex.cached("a{99}", 1));
+    assertTrue(Regex.cached("a{99}", 10000).find("a".repeat(99)));
+    assertEquals(256, Regex.cacheSize());
+  }
+
+  @Test
+  public void onlyModeReattachesAfterCollectedHandle() throws Exception {
+    try (var context = context()) {
+      context.enter();
+      try {
+        var env = Cel.newBuilder().truffleRegexOnly(10000).variable("s", CelType.STRING).build();
+        var program = env.compile("s.matches('^[a-z]+@example[.]com$')");
+        var input = Map.<String, Object>of("s", "alice@example.com");
+        assertEquals(true, program.evaluate(input));
+        var node = matcher(program);
+        assertTrue(node.isAccelerated());
+        var scope = CelLanguage.currentScope();
+        scope.clearRegexes();
+        var entryField = Regex.MatchNode.class.getDeclaredField("entry");
+        entryField.setAccessible(true);
+        Object entry = entryField.get(node);
+        var handleField = entry.getClass().getDeclaredField("handle");
+        handleField.setAccessible(true);
+        ((TruffleWeakReference<?>) handleField.get(entry)).clear();
+        for (int i = 0; i < 100; i++) {
+          assertEquals(true, program.evaluate(input));
+          assertTrue(node.isAccelerated());
+          assertEquals(1, scope.regexCount());
+        }
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
+  public void concurrentAdmissionStaysBoundedAndChecksEveryCallersLimit() throws Exception {
+    try (var workers = Executors.newFixedThreadPool(8)) {
+      var start = new CountDownLatch(1);
+      var jobs = new java.util.ArrayList<java.util.concurrent.Future<?>>();
+      for (int worker = 0; worker < 8; worker++) {
+        final int id = worker;
+        jobs.add(
+            workers.submit(
+                () -> {
+                  start.await();
+                  for (int i = 0; i < 300; i++) {
+                    String pattern = "worker" + id + "value" + i;
+                    assertTrue(Regex.cached(pattern, 10000).find(pattern));
+                    assertThrows(CelException.class, () -> Regex.cached("a{88}", 1));
+                    assertTrue(Regex.cached("a{88}", 10000).find("a".repeat(88)));
+                    assertTrue(Regex.cacheSize() <= 256);
+                  }
+                  return null;
+                }));
+      }
+      start.countDown();
+      for (var job : jobs) job.get();
+    }
+  }
+
+  @Test
+  public void longNearMissesStayCorrectAcrossChurnAndModes() {
+    try (var context = context()) {
+      context.enter();
+      try {
+        for (boolean only : new boolean[] {false, true}) {
+          var builder =
+              Cel.newBuilder().variable("s", CelType.STRING).variable("p", CelType.STRING);
+          if (only) builder.truffleRegexOnly(10000);
+          var program = builder.build().compile("s.matches(p)");
+          String input = "a".repeat(100000) + "!";
+          for (int i = 0; i < 270; i++)
+            assertFalse(program.test(Map.of("s", "a!", "p", "^(a+)+z" + i + "$")));
+          for (int i = 0; i < 3; i++) assertFalse(program.test(Map.of("s", input, "p", "^(a+)+$")));
+        }
+      } finally {
+        context.leave();
+      }
     }
   }
 }
