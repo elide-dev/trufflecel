@@ -522,6 +522,22 @@ public final class ValidationTest {
   }
 
   @Test
+  public void conditionAnalysisDistinguishesBooleansFromOtherFoldedValuesAndFailures() {
+    Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
+    var context = new EvalContext(env, Map.of());
+    // Policy analysis inspects prepared subtrees, including already folded expressions.
+    // Nonboolean values and certain CEL errors must never become reachability findings.
+    for (String source : List.of("42", "1 + 1", "1 / 0 == 0", "x > 0"))
+      assertNull(source, Optimizer.constantBoolean(env.prepare(source).expression(), context));
+    assertEquals(
+        Boolean.TRUE,
+        Optimizer.constantBoolean(env.prepare("1 + 1 == 2").expression(), context));
+    assertEquals(
+        Boolean.FALSE,
+        Optimizer.constantBoolean(env.prepare("1 + 1 == 3").expression(), context));
+  }
+
+  @Test
   public void issuesAndLocations() {
     assertThrows(IllegalArgumentException.class, () -> new CelException(List.of()));
     assertThrows(
