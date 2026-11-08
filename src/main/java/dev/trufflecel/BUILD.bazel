@@ -39,6 +39,7 @@ java_library(
         "EvalContext.java",
         "EvaluationOptions.java",
         "EvaluationResult.java",
+        "EvaluationState.java",
         "ExprNode.java",
         "ExtensionFunctions.java",
         "FieldPlan.java",

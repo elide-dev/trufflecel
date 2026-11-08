@@ -10,7 +10,7 @@ final class EvalContext {
   private Object[] scopes;
   private int scopeSize;
   private long remaining, initialBudget;
-  private EvaluationOptions.Control control;
+  private EvaluationState evaluation;
   private EvalContext budgetParent;
   ExprNode.BlockScope block;
 
@@ -23,6 +23,7 @@ final class EvalContext {
     copy.scopeSize = scopeSize;
     copy.budgetParent = budgetParent == null ? this : budgetParent;
     copy.block = block;
+    copy.evaluation = evaluation;
     return copy;
   }
 
@@ -42,7 +43,7 @@ final class EvalContext {
 
   void configure(EvaluationOptions options) {
     if (options.budget != 0) initialBudget = remaining = options.budget;
-    control = options.control();
+    evaluation = new EvaluationState(environment, options);
   }
 
   @SuppressWarnings("unchecked")
@@ -78,8 +79,18 @@ final class EvalContext {
     else parent.chargeOwn(cost);
   }
 
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  Object invoke(Environment.FunctionOverload signature, Object[] arguments) {
+    var implementation = signature.binding().implementation();
+    if (signature.lateBound() && evaluation != null) {
+      var supplied = evaluation.functions.get(signature.id());
+      if (supplied != null) implementation = supplied;
+    }
+    return FunctionOverloads.invoke(implementation, arguments);
+  }
+
   void checkControl() {
-    if (control != null) control.check();
+    if (evaluation != null && evaluation.control != null) evaluation.control.check();
   }
 
   private void chargeOwn(long cost) {

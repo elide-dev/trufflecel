@@ -39,7 +39,12 @@ public final class Environment {
   final Map<String, List<FunctionOverload>> overloads;
 
   /** A named signature; receiver signatures include the receiver as argument zero. */
-  public record FunctionOverload(String id, Boolean receiver, FunctionBinding binding) {
+  public record FunctionOverload(
+      String id, Boolean receiver, FunctionBinding binding, boolean nonStrict, boolean lateBound) {
+    public FunctionOverload(String id, Boolean receiver, FunctionBinding binding) {
+      this(id, receiver, binding, false, false);
+    }
+
     public FunctionOverload {
       if (Objects.requireNonNull(id).isEmpty())
         throw new IllegalArgumentException("empty overload id");
@@ -336,6 +341,44 @@ public final class Environment {
       return addFunction(name, overloadId, receiver, arguments, result, implementation);
     }
 
+    /** Declare a function whose implementation is supplied separately for each evaluation. */
+    public Builder lateFunction(
+        String name, String overloadId, boolean receiver, List<CelType> arguments, CelType result) {
+      return lateFunction(name, overloadId, receiver, arguments, result, false);
+    }
+
+    public Builder lateFunction(
+        String name,
+        String overloadId,
+        boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        boolean nonStrict) {
+      return addFunction(
+          name,
+          overloadId,
+          receiver,
+          arguments,
+          result,
+          args -> {
+            throw Values.error(CelException.Code.UNDECLARED, "unbound function: " + overloadId);
+          },
+          nonStrict,
+          true);
+    }
+
+    /** Register a callback that may consume CEL errors and unknowns as argument values. */
+    public Builder nonStrictFunction(
+        String name,
+        String overloadId,
+        boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation) {
+      return addFunction(
+          name, overloadId, receiver, arguments, result, implementation, true, false);
+    }
+
     private Builder addFunction(
         String name,
         String id,
@@ -343,11 +386,23 @@ public final class Environment {
         List<CelType> arguments,
         CelType result,
         Function<List<Object>, Object> implementation) {
+      return addFunction(name, id, receiver, arguments, result, implementation, false, false);
+    }
+
+    private Builder addFunction(
+        String name,
+        String id,
+        Boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation,
+        boolean nonStrict,
+        boolean lateBound) {
       Objects.requireNonNull(name);
       if (Set.of("&&", "||", "?:", "or", "orValue", "@not_strictly_false").contains(name))
         throw new IllegalArgumentException("cannot overload lazy control function: " + name);
       var binding = new FunctionBinding(arguments, result, implementation);
-      var signature = new FunctionOverload(id, receiver, binding);
+      var signature = new FunctionOverload(id, receiver, binding, nonStrict, lateBound);
       if (overloadIds.contains(id))
         throw new IllegalArgumentException("duplicate overload id: " + id);
       for (var existing : overloads.getOrDefault(name, List.of())) {
