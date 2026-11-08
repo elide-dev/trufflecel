@@ -897,11 +897,7 @@ public final class NegativeCases {
     c("deep-parentheses", "(".repeat(2000) + "1" + ")".repeat(2000))
         .upstream(Upstream.rejects(Phase.PARSE))
         .parseLimit();
-    c("deep-negation", "-".repeat(2000) + "1")
-        .upstream(
-            Upstream.diverges(
-                Upstream.accepts(), "cel-java collapses repeated unary operators without a limit"))
-        .parseLimit();
+    c("deep-negation", "-".repeat(2000) + "1").value(1L);
     c("deep-selects", "x" + ".a".repeat(2000)).upstream(Upstream.rejects(Phase.PARSE)).parseLimit();
     c("deep-lists", "[".repeat(2000) + "1" + "]".repeat(2000))
         .upstream(Upstream.rejects(Phase.PARSE))
