@@ -122,6 +122,23 @@ final class Optimizer {
     return result;
   }
 
+  /** Policy conditions can be hidden under a folded parent; share one bounded analysis budget. */
+  static Boolean constantBoolean(ExprNode node, EvalContext context) {
+    if (node.kind == ExprNode.Kind.CONSTANT && node.value instanceof Boolean value) return value;
+    if (node.fold != null && node.fold.value() instanceof Boolean value) return value;
+    if ((node.analysis & 1) == 0 || !context.canCharge(1)) return null;
+    var free = new HashSet<String>();
+    node.free(Set.of(), free);
+    if (!free.isEmpty()) return null;
+    try {
+      Object value = node.execute(null, context);
+      return value instanceof Boolean result ? result : null;
+    } catch (CelException error) {
+      // A failure (including exhausted analysis budget) is not a known Boolean result.
+      return null;
+    }
+  }
+
   /** Replace annotated subtrees with their prebuilt results; used for uninstrumented targets. */
   static ExprNode rewrite(ExprNode node) {
     if (node.fold != null) return new Folded(node);

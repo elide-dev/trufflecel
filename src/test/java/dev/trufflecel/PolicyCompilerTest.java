@@ -8,6 +8,151 @@ import org.junit.Test;
 
 public class PolicyCompilerTest {
   @Test
+  public void staticRegexConditionsRemainValidatedAfterNodeSpecialization() {
+    for (String condition : List.of("'a'.matches('z')", "'a'.matches('a')")) {
+      String fallback = condition.contains("'z'") ? "" : ", {output: '2'}";
+      String yaml = "name: regex\nrule:\n  match:\n    - condition: >\n        " + condition + "\n      output: '1'\n";
+      if (!fallback.isEmpty()) yaml += "    - output: '2'\n";
+      String invalid = yaml;
+      assertThrows(CelException.class, () -> PolicyCompiler.compile(Cel.newBuilder().build(), invalid));
+    }
+  }
+
+  @Test
+  public void conditionAnalysisIsBoundedAndNeverInvokesHostFunctions() {
+    var calls = new AtomicInteger();
+    var env =
+        Cel.newBuilder()
+            .function(
+                "allow",
+                List.of(),
+                CelType.BOOL,
+                args -> {
+                  calls.incrementAndGet();
+                  return true;
+                })
+            .build();
+    var policy =
+        PolicyCompiler.compile(
+            env, "name: host\nrule: {match: [{condition: 'allow()', output: '1'}]}");
+    assertEquals(0, calls.get());
+    assertEquals(1L, policy.evaluate(Map.of()));
+    assertEquals(1, calls.get());
+    for (String condition : List.of("1/0 > 0", "dyn(1)")) {
+      var deferred =
+          PolicyCompiler.compile(
+              Cel.newBuilder().build(),
+              "name: deferred\nrule: {match: [{condition: '" + condition + "', output: '1'}]}");
+      assertThrows(CelException.class, () -> deferred.evaluate(Map.of()));
+    }
+    var tiny = Cel.newBuilder().evaluationBudget(1).build();
+    var bounded =
+        PolicyCompiler.compile(
+            tiny,
+            "name: bounded\nrule: {aggregate: [{condition: '1+1 == 2', output: '1'}, {condition: '2+2 == 4', output: '2'}]}");
+    assertThrows(CelException.class, () -> bounded.evaluate(Map.of()));
+    assertThrows(
+        CelException.class,
+        () ->
+            PolicyCompiler.compile(
+                tiny,
+                "name: bounded\nrule: {aggregate: [{condition: '1+1 == 2', output: '1'}, {condition: 'false', output: '2'}]}"));
+  }
+
+  @Test
+  public void policyLimitsAndImportedEnumsAreExplicit() {
+    var enums =
+        Cel.newBuilder().constant("example.Color.RED", 1L).constant("unrelated.BLUE", 2L).build();
+    assertEquals(
+        1L,
+        PolicyCompiler.compile(
+                enums,
+                "name: enums\nimports: [{name: example.Color}]\nrule: {match: [{output: Color.RED}]}")
+            .evaluate(Map.of()));
+    var oversized =
+        assertThrows(
+            CelException.class,
+            () ->
+                PolicyCompiler.compile(
+                    Cel.newBuilder().maxSourceLength(1).build(),
+                    "name: size\nrule: {match: [{output: '1+1'}]}"));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, oversized.code());
+    var deep =
+        assertThrows(
+            CelException.class,
+            () ->
+                PolicyCompiler.compile(
+                    Cel.newBuilder().maxDepth(1).build(),
+                    "name: depth\nrule: {match: [{rule: {match: [{rule: {match: [{output: '1'}]}}]}}]}"));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, deep.code());
+    assertThrows(
+        CelException.class,
+        () -> PolicyCompiler.compile(enums, "name: empty\nrule:\n  match:\n    - output: >"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            PolicyCompiler.compile(
+                enums,
+                "name: types\nrule: {variables: [{name: a, description: 1, expression: '1'}], match: [{output: '1'}]}"));
+    assertThrows(
+        CelException.class,
+        () ->
+            PolicyCompiler.compile(
+                enums, "name: falsity\nrule: {match: [{condition: '1 == 2', output: '1'}]}"));
+    assertThrows(
+        CelException.class,
+        () ->
+            PolicyCompiler.compile(
+                enums,
+                "name: unreachable\nrule: {match: [{condition: '1 == 1', output: '1'}, {output: '2'}]}"));
+    assertEquals(
+        "😀",
+        PolicyCompiler.compile(
+                Cel.newBuilder().maxSourceLength(3).build(),
+                "name: unicode\nrule: {match: [{output: \"'😀'\"}]}")
+            .evaluate(Map.of()));
+    assertThrows(
+        CelException.class,
+        () ->
+            PolicyCompiler.compile(
+                Cel.newBuilder().maxSourceLength(2).build(),
+                "name: unicode\nrule: {match: [{output: \"'😀'\"}]}"));
+  }
+
+  @Test
+  public void customComprehensionsAndMacroLocalsDoNotCapturePolicyVariables() {
+    var env =
+        Cel.newBuilder()
+            .macro(
+                Macro.global(
+                    "scoped",
+                    0,
+                    (c, t, a) ->
+                        Ast.Node.comprehension(
+                            "variables",
+                            "item",
+                            "",
+                            Ast.Node.list(),
+                            Ast.Node.map(Ast.Node.literal("n"), Ast.Node.literal(7)),
+                            Ast.Node.literal(false),
+                            Ast.Node.identifier("variables"),
+                            Ast.Node.select(Ast.Node.identifier("variables"), "n", false))))
+            .build();
+    assertEquals(
+        7L,
+        PolicyCompiler.compile(
+                env,
+                "name: scopes\nrule: {variables: [{name: n, expression: '99'}], match: [{output: 'scoped()'}]}")
+            .evaluate(Map.of()));
+    assertEquals(
+        8L,
+        PolicyCompiler.compile(
+                env,
+                "name: scopes\nrule: {variables: [{name: n, expression: '99'}], match: [{output: \"[{'n':8}].map(variables, variables.n)[0]\"}]}")
+            .evaluate(Map.of()));
+  }
+
+  @Test
   public void blockScalarExpressionsPreserveCommentsWhitespaceAndPolicyLocations() {
     var env = Cel.newBuilder().variable("x", CelType.INT).build();
     String policy =

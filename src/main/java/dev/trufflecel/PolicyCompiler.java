@@ -55,7 +55,7 @@ public final class PolicyCompiler {
       runtime.allowedFunctions(functions);
     }
     PreparedProgram result = runtime.build().prepare(yaml, expression, true);
-    compiler.validate();
+    compiler.validate(result.expression());
     if (data.containsKey("verification")) invariants(data);
     return result;
   }
@@ -112,6 +112,7 @@ public final class PolicyCompiler {
   private static final class Compiler {
     private final Environment environment;
     private final List<List<Outcome>> outputs = new ArrayList<>();
+    private final List<List<Choice>> matches = new ArrayList<>();
     private final List<ExprNode> conditions = new ArrayList<>(), explanations = new ArrayList<>();
     private final Set<String> ruleIds = new HashSet<>();
     private final Map<String, CelType> localTypes = new HashMap<>();
@@ -126,7 +127,8 @@ public final class PolicyCompiler {
 
     Rule rule(
         Map<String, Object> data, Map<String, String> outer, boolean insideAggregate, int depth) {
-      if (depth > environment.maxDepth) throw failure("policy nesting limit exceeded");
+      if (depth > environment.maxDepth)
+        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "policy nesting limit exceeded");
       keys(data, "id", "description", "variables", "match", "aggregate");
       if (data.containsKey("description")) string(data.get("description"));
       if (data.containsKey("id") && !ruleIds.add(string(data.get("id"))))
@@ -141,6 +143,7 @@ public final class PolicyCompiler {
       for (Object item : list(data, "variables")) {
         var variable = object(item);
         keys(variable, "name", "expression", "description");
+        if (variable.containsKey("description")) string(variable.get("description"));
         String name = string(variable.get("name"));
         if (!name.matches("[A-Za-z_][A-Za-z_0-9]*") || !names.add(name))
           throw failure("invalid or duplicate policy variable: " + name);
@@ -153,6 +156,7 @@ public final class PolicyCompiler {
       List<?> entries = list(data, aggregate ? "aggregate" : "match");
       if (entries.isEmpty()) throw failure("policy rule has no outcomes");
       var choices = new ArrayList<Choice>();
+      if (!aggregate) matches.add(choices);
       var outcomes = new ArrayList<Outcome>();
       outputs.add(outcomes);
       boolean exhaustive = aggregate;
@@ -162,7 +166,10 @@ public final class PolicyCompiler {
         keys(entry, "condition", "output", "rule", "explanation");
         if (entry.containsKey("output") == entry.containsKey("rule"))
           throw failure("choice requires exactly one output or rule");
-        ExprNode condition = expression(entry.getOrDefault("condition", "true"), scope);
+        ExprNode condition =
+            entry.containsKey("condition")
+                ? expression(entry.get("condition"), scope)
+                : ExprNode.constant(true, -1);
         conditions.add(condition);
         boolean unconditional =
             condition.kind == ExprNode.Kind.CONSTANT && Boolean.TRUE.equals(condition.value);
@@ -224,9 +231,8 @@ public final class PolicyCompiler {
               ? located
               : new ConfigurationData.Expression(string(value), 0);
       String source = expression.text();
-      if (source.length() > environment.maxSourceLength)
-        throw failure("policy expression length limit exceeded");
       try {
+        environment.checkSource(source);
         ExprNode parsed = new Parser(source, environment, expression.offset()).parse();
         environment.checkDepth(parsed);
         ExprNode rewritten = rewrite(parsed, variables, Set.of());
@@ -272,16 +278,29 @@ public final class PolicyCompiler {
       return node;
     }
 
-    void validate() {
-      for (ExprNode condition : conditions) {
-        boolean literal =
-            condition.kind == ExprNode.Kind.CONSTANT && condition.value instanceof Boolean;
-        if (!literal && !CelType.BOOL.accepts(condition.checkedType))
-          throw failure("policy condition must be bool");
-        if (literal && Boolean.FALSE.equals(condition.value)
-            || condition.fold != null && Boolean.FALSE.equals(condition.fold.value()))
-          throw failure("policy condition is statically false");
+    void validate(ExprNode optimized) {
+      var nodes = new HashMap<Long, ExprNode>();
+      var pending = new ArrayDeque<ExprNode>();
+      pending.push(optimized);
+      while (!pending.isEmpty()) {
+        ExprNode node = pending.pop();
+        nodes.put(node.canonicalId, node);
+        Collections.addAll(pending, node.children);
       }
+      var analysis = new EvalContext(environment, Map.of());
+      var known = new IdentityHashMap<ExprNode, Boolean>();
+      for (ExprNode condition : conditions) {
+        // The generated conditional already requires bool during checking.
+        Boolean value = Optimizer.constantBoolean(nodes.get(condition.canonicalId), analysis);
+        known.put(condition, value);
+        if (Boolean.FALSE.equals(value)) throw failure("policy condition is statically false");
+      }
+      for (List<Choice> choices : matches)
+        for (int i = 0; i < choices.size() - 1; i++) {
+          Choice choice = choices.get(i);
+          if (choice.exhaustive && Boolean.TRUE.equals(known.get(choice.condition)))
+            throw failure("unreachable choice after a statically true outcome");
+        }
       for (ExprNode explanation : explanations)
         if (!CelType.STRING.accepts(explanation.checkedType))
           throw failure("policy explanation must be string");
