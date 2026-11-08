@@ -121,3 +121,10 @@ immediate. Callbacks run once per preparation and may run concurrently; like hos
 callbacks, their own execution time is controlled by the embedder. `toBuilder()` preserves
 registered validators and macro selections. Custom validators also run on imported ASTs,
 whose source text may be empty.
+
+Parser recovery reports independent syntax failures in list/map/message entries
+and function arguments together. Recovery synchronizes at nesting-aware entry
+boundaries and stops after 100 findings; source, node and depth limits remain in
+force. A recovered tree is never compiled or evaluated. Lexical failures and
+resource exhaustion can stop recovery early. Custom macro callbacks are not run
+on argument lists already known to contain syntax errors.

@@ -7,7 +7,7 @@ import java.util.*;
 final class Parser {
   private record Token(String kind, String text, Object value, int offset) {}
 
-  private static final Set<String> RESERVED =
+  static final Set<String> RESERVED =
       Set.of(
           "as",
           "break",
@@ -30,6 +30,7 @@ final class Parser {
   private final Environment env;
   private int cursor, depth, consumedEnd;
   private Token token;
+  private final List<CelException.Issue> issues = new ArrayList<>();
 
   Parser(String source, Environment env) {
     this.source = source;
@@ -38,9 +39,44 @@ final class Parser {
   }
 
   ExprNode parse() {
-    ExprNode result = expression(0);
-    expect("EOF");
+    ExprNode result;
+    try {
+      result = expression(0);
+      expect("EOF");
+    } catch (CelException failure) {
+      if (issues.isEmpty() || failure.code() != CelException.Code.SYNTAX) throw failure;
+      record(failure);
+      throw new CelException(issues);
+    }
+    if (!issues.isEmpty()) throw new CelException(issues);
     return result;
+  }
+
+  private void record(CelException failure) {
+    if (failure.code() != CelException.Code.SYNTAX || failure.issues().size() > 1) throw failure;
+    if (issues.size() < 100) issues.add(failure.issues().get(0));
+    if (issues.size() == 100) throw new CelException(issues);
+  }
+
+  /** Resume at the next entry boundary, retaining nesting and all configured work limits. */
+  private void recover(CelException failure, String end) {
+    record(failure);
+    int nesting = 0;
+    while (!token.kind.equals("EOF")) {
+      if (nesting == 0 && (token.kind.equals(",") || token.kind.equals(end))) return;
+      if (Set.of("(", "[", "{").contains(token.kind)) nesting++;
+      else if (nesting > 0 && Set.of(")", "]", "}").contains(token.kind)) nesting--;
+      take();
+    }
+  }
+
+  private ExprNode entryExpression(String end) {
+    try {
+      return expression(0);
+    } catch (CelException failure) {
+      recover(failure, end);
+      return constant(CelNull.INSTANCE, failure.offset());
+    }
   }
 
   private int nodeCount;
@@ -128,6 +164,8 @@ final class Parser {
   }
 
   private ExprNode primaryValue() {
+    if (Set.of(",", ")", "]", "}", "EOF").contains(token.kind))
+      throw error("expected expression, found " + token.text);
     Token t = take();
     switch (t.kind) {
       case "NUMBER":
@@ -156,12 +194,17 @@ final class Parser {
           if (accept(",")) expect("}");
           else if (!accept("}"))
             do {
-              boolean optional = accept("?");
-              entries.add(expression(0));
-              expect(":");
-              ExprNode entry = expression(0);
-              entry.optionalEntry = optional;
-              entries.add(entry);
+              try {
+                boolean optional = accept("?");
+                ExprNode key = expression(0);
+                expect(":");
+                ExprNode entry = entryExpression("}");
+                entry.optionalEntry = optional;
+                entries.add(key);
+                entries.add(entry);
+              } catch (CelException failure) {
+                recover(failure, "}");
+              }
               if (accept("}")) break;
               expect(",");
               if (accept("}")) break;
@@ -199,14 +242,18 @@ final class Parser {
         if (accept(",")) expect("}");
         else if (!accept("}"))
           do {
-            boolean optional = accept("?");
-            String field = identifier(true);
-            if (names.contains(field)) throw error("duplicate field: " + field);
-            names.add(field);
-            expect(":");
-            ExprNode entry = expression(0);
-            entry.optionalEntry = optional;
-            values.add(entry);
+            try {
+              boolean optional = accept("?");
+              String field = identifier(true);
+              if (names.contains(field)) throw error("duplicate field: " + field);
+              expect(":");
+              ExprNode entry = entryExpression("}");
+              entry.optionalEntry = optional;
+              names.add(field);
+              values.add(entry);
+            } catch (CelException failure) {
+              recover(failure, "}");
+            }
             if (accept("}")) break;
             expect(",");
             if (accept("}")) break;
@@ -224,6 +271,8 @@ final class Parser {
   }
 
   private ExprNode call(String name, boolean receiver, int offset, ArrayList<ExprNode> args) {
+    if (!issues.isEmpty())
+      return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
     if (env.macros) {
       String prefix = receiver ? args.get(0).qualifiedName() : null;
       ExprNode custom = customMacro(name, receiver, prefix, offset, args);
@@ -390,7 +439,7 @@ final class Parser {
     var result = new ArrayList<ExprNode>();
     if (!accept(end)) {
       do {
-        result.add(expression(0));
+        result.add(entryExpression(end));
       } while (accept(","));
       expect(end);
     }
@@ -407,7 +456,7 @@ final class Parser {
     if (!accept(end))
       do {
         boolean optional = accept("?");
-        ExprNode entry = expression(0);
+        ExprNode entry = entryExpression(end);
         entry.optionalEntry = optional;
         result.add(entry);
         if (accept(end)) break;

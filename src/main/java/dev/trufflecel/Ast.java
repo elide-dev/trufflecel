@@ -236,8 +236,9 @@ public final class Ast {
 
     public Editor replace(long id, Node replacement) {
       Objects.requireNonNull(replacement);
+      validate(replacement, 100_000, 256);
       boolean[] found = {false};
-      root =
+      Node edited =
           rewrite(
               root,
               node -> {
@@ -246,12 +247,16 @@ public final class Ast {
                 return replacement;
               });
       if (!found[0]) throw new IllegalArgumentException("unknown expression id: " + id);
+      validate(edited, 100_000, 256);
+      root = edited;
       return this;
     }
 
     /** Bottom-up replacement, with replacements validated at freeze/compile time. */
     public Editor transform(UnaryOperator<Node> transform) {
-      root = rewrite(root, Objects.requireNonNull(transform));
+      Node edited = rewrite(root, Objects.requireNonNull(transform));
+      validate(edited, 100_000, 256);
+      root = edited;
       return this;
     }
 
@@ -340,6 +345,7 @@ public final class Ast {
           && !(node.value instanceof Long index && index >= 0 && index <= Integer.MAX_VALUE))
         throw new IllegalArgumentException("invalid block index");
       for (Node child : node.children) pending.push(new Pending(child, item.depth + 1));
+      if (node.macroCall != null) pending.push(new Pending(node.macroCall, item.depth + 1));
     }
     return count;
   }
@@ -375,6 +381,11 @@ public final class Ast {
   static ExprNode lower(Node root, Environment environment, int defaultOffset) {
     validate(root, environment.maxAstNodes, environment.maxDepth);
     return lower(root, defaultOffset);
+  }
+
+  // Only for snapshots that have already passed structural validation.
+  static ExprNode restore(Node root) {
+    return lower(root, -1);
   }
 
   private static ExprNode lower(Node node, int defaultOffset) {
