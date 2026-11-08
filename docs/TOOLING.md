@@ -80,7 +80,9 @@ optional helpers do not enlarge the functions allowed in user expressions.
 
 Policy block scalars preserve original newlines and leading spaces, including
 CEL line comments. Runtime and compile diagnostics retain policy-document source
-locations. Each embedded expression and the combined AST retain configured size,
+locations. For quoted YAML scalars, columns after an escape refer to the decoded
+expression; use block scalars when exact document columns are needed. Each embedded
+expression and the combined AST retain configured size,
 nesting and evaluation limits. Invariant declarations can be read as data with
 `PolicyCompiler.invariants`; compilation does not prove them. Formal verification
 is outside the 0.10.0 scope.
