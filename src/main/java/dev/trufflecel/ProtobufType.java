@@ -525,7 +525,14 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   public boolean isZero(Object value) {
     Value v = (Value) value;
-    return v.message().equals(DynamicMessage.getDefaultInstance(descriptor));
+    if (v.type.descriptor != descriptor) return false;
+    // Export synthesizes map-entry defaults and normalizes MessageSet unknowns.
+    if (descriptor.getOptions().getMapEntry() || descriptor.getOptions().getMessageSetWireFormat())
+      return v.message().equals(DynamicMessage.getDefaultInstance(descriptor));
+    ProtoRow row = v.row;
+    for (int i = 0; i < row.plan().size(); i++) if (row.has(i)) return false;
+    // No declared field is present. Any preserved unknown field makes the message non-default.
+    return row.unknownFieldBytes().length == 0;
   }
 
   public boolean equal(Object a, Object b) {

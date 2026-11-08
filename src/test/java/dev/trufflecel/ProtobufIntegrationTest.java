@@ -135,6 +135,69 @@ public class ProtobufIntegrationTest {
         .findMessageTypeByName("Record");
   }
 
+  private static void zeroMatchesHost(ProtobufType type, Object value) {
+    var message = ((ProtobufType.Value) value).message();
+    assertEquals(
+        message.equals(DynamicMessage.getDefaultInstance(message.getDescriptorForType())),
+        type.isZero(value));
+  }
+
+  @Test
+  public void nativeZeroChecksPreservePresenceUnknownsAndMapEntrySemantics() throws Exception {
+    var d = descriptor();
+    var type = new ProtobufType(d);
+    zeroMatchesHost(type, type.construct(Map.of()));
+    for (var fields :
+        List.of(
+            Map.of("double", 0.0),
+            Map.of("double", -0.0),
+            Map.of("double", Double.NaN),
+            Map.of("float", -0.0),
+            Map.of("int64", 0L),
+            Map.of("int64", 1L),
+            Map.of("string", ""),
+            Map.of("bytes", new Bytes(new byte[0])),
+            Map.of("items", List.of()),
+            Map.of("items", List.of(0L)),
+            Map.of("labels", Map.of()),
+            Map.of("labels", Map.of("", 0L)),
+            Map.of("message", type.construct(Map.of()))))
+      zeroMatchesHost(type, type.construct(new HashMap<>(fields)));
+    for (byte[] bytes :
+        List.of(
+            new byte[] {(byte) 0xa0, 6, 0},
+            new byte[] {(byte) 0xa2, 6, 0},
+            new byte[] {(byte) 0xa3, 6, (byte) 0xa4, 6}))
+      zeroMatchesHost(type, type.decode(new Bytes(bytes)));
+    var other = new ProtobufType(d);
+    assertTrue(type.isZero(other.construct(Map.of())));
+    assertFalse(type.isZero(new ProtobufType(descriptor()).construct(Map.of())));
+    var entry = new ProtobufType(d.findFieldByName("labels").getMessageType());
+    zeroMatchesHost(entry, entry.construct(Map.of()));
+    zeroMatchesHost(entry, entry.construct(Map.of("key", "x", "value", 0L)));
+    var required =
+        FileDescriptor.buildFrom(
+                FileDescriptorProto.newBuilder()
+                    .setName("required_zero.proto")
+                    .setSyntax("proto2")
+                    .addMessageType(
+                        DescriptorProto.newBuilder()
+                            .setName("Required")
+                            .addField(
+                                FieldDescriptorProto.newBuilder()
+                                    .setName("number")
+                                    .setNumber(1)
+                                    .setLabel(FieldDescriptorProto.Label.LABEL_REQUIRED)
+                                    .setType(FieldDescriptorProto.Type.TYPE_INT64)
+                                    .setDefaultValue("7")))
+                    .build(),
+                new FileDescriptor[] {})
+            .getMessageTypes()
+            .get(0);
+    var requiredType = new ProtobufType(required);
+    zeroMatchesHost(requiredType, requiredType.construct(Map.of("number", 7L)));
+  }
+
   @Test
   public void allScalarMappingsConstructionAndWire() throws Exception {
     Descriptor descriptor = descriptor();
@@ -374,6 +437,9 @@ public class ProtobufIntegrationTest {
     Object empty = type.construct(Map.of());
     assertEquals(7L, type.get(empty, "number"));
     assertFalse(type.has(empty, "number"));
+    zeroMatchesHost(type, empty);
+    zeroMatchesHost(type, type.construct(Map.of("number", 7L)));
+    zeroMatchesHost(type, type.construct(Map.of("a", "")));
     assertTrue(type.has(type.construct(Map.of("number", 7L)), "number"));
     assertThrows(CelException.class, () -> type.construct(Map.of("a", "x", "b", "y")));
     assertThrows(CelException.class, () -> type.construct(Map.of("number", "bad")));
@@ -631,6 +697,9 @@ public class ProtobufIntegrationTest {
             .field(type.plan().ordinal(descriptor.findExtensionByName("string_one").getNumber()))
             .jsonName());
     var empty = type.construct(Map.of());
+    zeroMatchesHost(type, empty);
+    zeroMatchesHost(type, value);
+    zeroMatchesHost(type, type.construct(Map.of("ext.string_one", "fallback")));
     assertFalse(env.compile("proto.hasExt(m, string_one)").test(Map.of("m", empty)));
     assertEquals(
         "fallback", env.compile("proto.getExt(m, string_one)").evaluate(Map.of("m", empty)));
@@ -728,6 +797,9 @@ public class ProtobufIntegrationTest {
     var env = type.register(Cel.newBuilder()).variable("m", CelType.of(type.name())).build();
     var message = DynamicMessage.newBuilder(d).setField(d.findFieldByNumber(1), 0L).build();
     var input = type.snapshot(message);
+    zeroMatchesHost(type, input);
+    zeroMatchesHost(type, type.construct(Map.of()));
+    zeroMatchesHost(type, type.construct(Map.of("implicit_value", 0L)));
     assertEquals(message, input.message());
     assertEquals(message, ((ProtobufType.Value) type.decode(input.toBytes())).message());
     assertTrue(
@@ -809,6 +881,9 @@ public class ProtobufIntegrationTest {
         type.decode(new Bytes(new byte[] {11, 26, 0, 16, 100, 12})) instanceof ProtobufType.Value);
     assertTrue(type.decode(new Bytes(new byte[] {-94, 6, 0})) instanceof ProtobufType.Value);
     Object nativeUnknownGroup = type.input(type.plan().decode(new byte[] {11, 12}));
+    zeroMatchesHost(type, type.construct(Map.of()));
+    zeroMatchesHost(type, value);
+    zeroMatchesHost(type, nativeUnknownGroup);
     assertTrue(((ProtobufType.Value) nativeUnknownGroup).toBytes().size() > 0);
     assertThrows(CelException.class, () -> type.decode(new Bytes(new byte[8 * 1024 * 1024 + 1])));
     var plain = new ProtobufType(root);
@@ -1018,6 +1093,9 @@ public class ProtobufIntegrationTest {
               .setField(outer.findFieldByNumber(2), List.of(1L, 2L, 3L))
               .build();
       ProtobufType.Value value = type.snapshot(message);
+      zeroMatchesHost(type, type.construct(Map.of()));
+      zeroMatchesHost(type, type.construct(Map.of("enumeration", 0L)));
+      zeroMatchesHost(type, type.decode(new Bytes(new byte[] {24, 99})));
       assertEquals(message, value.message());
       assertEquals(
           message, ((ProtobufType.Value) type.decode(new Bytes(message.toByteArray()))).message());
