@@ -359,7 +359,7 @@ final class Optimizer {
     // relative to that subtree rather than to any surrounding source comprehension.
     n.resolveLocals(new ArrayList<>(), null);
     n.resolveLazyBindings(Map.of());
-    var context = new EvalContext(env, Map.of());
+    var context = new EvalContext.Scoped(env, Map.of());
     Object value = null;
     CelException error = null;
     try {

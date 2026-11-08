@@ -299,7 +299,7 @@ public final class PolicyCompiler {
         nodes.put(node.canonicalId, node);
         Collections.addAll(pending, node.children);
       }
-      var analysis = new EvalContext(environment, Map.of());
+      var analysis = new EvalContext.Scoped(environment, Map.of());
       var known = new IdentityHashMap<ExprNode, Boolean>();
       for (ExprNode condition : conditions) {
         // The generated conditional already requires bool during checking.

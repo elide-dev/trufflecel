@@ -110,7 +110,7 @@ public class BoundaryTest {
 
   @Test
   public void activationAndDebugScopeContracts() throws Exception {
-    var context = new EvalContext(env, Map.of("x", 1L));
+    var context = new EvalContext.Scoped(env, Map.of("x", 1L));
     context.push("x", 2L);
     context.push("y", 3L);
     assertEquals(2L, context.getLocal(0));

@@ -631,10 +631,11 @@ class ExprNode extends CelNode {
     return switch (kind) {
       case BLOCK -> block(frame, ctx);
       case BLOCK_INDEX ->
-          ctx.block.read(
-              blockOwner.children[Math.toIntExact((Long) value)],
-              Math.toIntExact((Long) value),
-              frame);
+          ctx.block()
+              .read(
+                  blockOwner.children[Math.toIntExact((Long) value)],
+                  Math.toIntExact((Long) value),
+                  frame);
       case CONSTANT -> value;
       case IDENT ->
           checkedValue(
@@ -897,9 +898,9 @@ class ExprNode extends CelNode {
   private Object block(VirtualFrame frame, EvalContext ctx) {
     if (getSourceSection() != null) return instrumentedBlock(frame.materialize(), ctx);
     ctx.charge(children.length);
-    EvalContext scoped = ctx.fork();
+    var scoped = ctx.fork();
     scoped.block = new BlockScope(children, null, scoped);
-    EvalContext body = ctx.fork();
+    var body = ctx.fork();
     body.block = scoped.block;
     return children[children.length - 1].execute(frame, body);
   }
@@ -908,10 +909,10 @@ class ExprNode extends CelNode {
   private Object instrumentedBlock(
       com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
     ctx.charge(children.length);
-    EvalContext scoped = ctx.fork();
+    var scoped = ctx.fork();
     VirtualFrame captured = forkFrame(frame, scoped);
     scoped.block = new BlockScope(children, captured, scoped);
-    EvalContext body = ctx.fork();
+    var body = ctx.fork();
     body.block = scoped.block;
     return children[children.length - 1].execute(forkFrame(frame, body), body);
   }

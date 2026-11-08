@@ -87,6 +87,43 @@ public class EvaluationControlsTest {
   }
 
   @Test
+  public void reentrantBlocksKeepArgumentsScopesAndBudgetsIndependent() {
+    var reference = new AtomicReference<Program>();
+    var environment =
+        Cel.newBuilder()
+            .variable("x", CelType.INT)
+            .function(
+                "recurse",
+                List.of(CelType.INT),
+                CelType.INT,
+                arguments -> {
+                  long x = (Long) arguments.get(0);
+                  return x == 0 ? 0L : reference.get().evaluate(Map.of("x", x - 1));
+                })
+            .build();
+    var program = environment.compile("cel.block([x+1], cel.index(0) + recurse(x))");
+    reference.set(program);
+    var input = Map.<String, Object>of("x", 3L);
+    var snapshot = Activation.snapshot(input);
+    assertEquals(10L, program.evaluate(input));
+    assertEquals(10L, program.evaluate(snapshot));
+    assertEquals(10L, program.evaluate(Map.of("x", 3L, "unused", List.of(1L))));
+    long cost = program.evaluateWithDetails(Map.of("x", 0L), budget(100)).actualCost();
+    for (var options :
+        List.of(
+            budget(cost), EvaluationOptions.newBuilder().budget(cost).trace(event -> {}).build())) {
+      var result = program.evaluateWithDetails(snapshot, options);
+      assertEquals(10L, result.value());
+      assertEquals(cost, result.actualCost());
+      assertEquals(10L, program.evaluate(input, options));
+    }
+    var exhausted = program.evaluateWithDetails(snapshot, budget(cost - 1));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, exhausted.error().code());
+    assertEquals(cost - 1, exhausted.actualCost());
+    assertEquals(10L, program.evaluate(snapshot));
+  }
+
+  @Test
   public void cancellationAndDeadlinesAreCheckedBeforeReturning() {
     var program = Cel.compile("1");
     for (EvaluationOptions options :

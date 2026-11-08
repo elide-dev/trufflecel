@@ -214,7 +214,7 @@ final class CseOptimizer {
 
     @Override
     Object doExecute(VirtualFrame frame, EvalContext context) {
-      EvalContext body = context.fork();
+      var body = context.fork();
       body.block = new BlockScope(children, null, body, true);
       return children[children.length - 1].execute(frame, body);
     }
@@ -257,9 +257,9 @@ final class CseOptimizer {
     @Override
     Object doExecute(VirtualFrame frame, EvalContext context) {
       int index = Math.toIntExact((Long) value);
-      Object result = context.block.cached(index);
+      Object result = context.block().cached(index);
       if (result != null) {
-        long cost = context.block.cachedCost(index);
+        long cost = context.block().cachedCost(index);
         if (context.canCharge(cost)) {
           context.charge(cost);
           return result;
@@ -267,7 +267,7 @@ final class CseOptimizer {
       }
       long before = context.charged();
       result = original.execute(frame, context);
-      context.block.cache(index, result, context.charged() - before);
+      context.block().cache(index, result, context.charged() - before);
       return result;
     }
   }
