@@ -98,6 +98,16 @@ separates small-suite wins, memory losses, historical representative results and
 unmeasured categories. `Startup` and `tools/bench/startup.py` address the previously
 missing launch interval; adding the harness is not a startup performance result.
 
+The [2026-11-08 candidate startup/payback report](benchmarks/startup-payback-20261108/README.md)
+now records 285 launch-to-first-result processes and 54 natural-compilation reuse
+processes on pinned GraalVM 25.5.5-elide.27. Native runtime-prepared startup medians
+favor TruffleCEL across the six fixtures, with overlapping scalar ranges; JVM scalar
+startup remains slower. Native repeated-list guest JIT first wins at the 100,000
+sample, native scalar/policy and JVM repeated-list at one million, while JVM
+scalar/policy show no payback through one million. Those are post-compilation sampled
+process-range comparisons, not precise crossover points. The report preserves raw
+outputs, runtime/source hashes, controls and preparation boundaries.
+
 The parent process starts a monotonic clock immediately before `Popen`. The child
 flushes one readiness marker only after its first evaluation matches an independent
 fixture expectation. The parent records receipt of that marker separately from
@@ -251,6 +261,14 @@ snapshots, including allocation samples and semantic edge cases. It is a direct 
 measurement on a shared host; equality, hashing and ingestion remain separate follow-ups.
 
 ### Prepared-input cold curves and native throughput
+
+`tools/bench/focused_payback.py` supplies the bounded full-map subset used in the
+[2026-11-08 report](benchmarks/startup-payback-20261108/README.md): scalar-wide,
+protobuf policy and materialized repeated-list workloads across JVM runtime, native
+runtime and native image preparation, with three forks per execution mode and
+checkpoints through one million evaluations. Its inventory and tier validation are
+independent of whether a favorable crossing is observed. The report's `run.sh`
+preserves the exact invocation; profiling runs remain separate from these timings.
 
 `PreparedLifecycle` measures ordinary map entry, explicit snapshot reuse and creation
 of a fresh snapshot for every evaluation. Its cold modes include runtime configuration,
