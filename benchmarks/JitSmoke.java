@@ -1,5 +1,9 @@
 package dev.trufflecel;
 
+import com.google.protobuf.DescriptorProtos.DescriptorProto;
+import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
+import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import com.oracle.truffle.api.debug.Breakpoint;
 import com.oracle.truffle.api.debug.Debugger;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
@@ -48,6 +52,41 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        var file =
+            FileDescriptor.buildFrom(
+                FileDescriptorProto.newBuilder()
+                    .setName("native_zero.proto")
+                    .setSyntax("proto3")
+                    .addMessageType(
+                        DescriptorProto.newBuilder()
+                            .setName("Record")
+                            .addField(
+                                FieldDescriptorProto.newBuilder()
+                                    .setName("number")
+                                    .setNumber(1)
+                                    .setLabel(FieldDescriptorProto.Label.LABEL_OPTIONAL)
+                                    .setType(FieldDescriptorProto.Type.TYPE_INT64)))
+                    .build(),
+                new FileDescriptor[] {});
+        var protobuf = new ProtobufType(file.getMessageTypes().get(0));
+        var zeroProgram =
+            protobuf
+                .register(Cel.newBuilder())
+                .variable("p", CelType.of(protobuf.name()))
+                .build()
+                .compile("optional.ofNonZeroValue(p).hasValue()");
+        check(
+            zeroProgram,
+            Map.of("p", protobuf.construct(Map.of())),
+            false,
+            Map.of("p", protobuf.construct(Map.of("number", 1L))),
+            true);
+        check(
+            zeroProgram,
+            Map.of("p", protobuf.construct(Map.of())),
+            false,
+            Map.of("p", protobuf.decode(new Bytes(new byte[] {16, 0}))),
+            true);
         check(
             "regex.replace(s, '(a)', r'\\1x')", Map.of("s", "aba"), "axbax", Map.of("s", "z"), "z");
         check(
