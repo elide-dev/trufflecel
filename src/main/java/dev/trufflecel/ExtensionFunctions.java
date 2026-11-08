@@ -44,6 +44,13 @@ final class ExtensionFunctions {
           "sort",
           "math.greatest",
           "math.least",
+          "math.sqrt",
+          "optional.unwrap",
+          "first",
+          "last",
+          "regex.replace",
+          "regex.extract",
+          "regex.extractAll",
           "math.ceil",
           "math.floor",
           "math.round",
@@ -140,6 +147,25 @@ final class ExtensionFunctions {
       case "base64.decode", "base64.decodeUrl":
         ok = matches(t, str);
         result = CelType.BYTES;
+        break;
+      case "optional.unwrap":
+        ok = matches(t, CelType.list(new CelType("optional_type", List.of(CelType.DYN))));
+        result = CelType.list(p(p(a, 0), 0));
+        break;
+      case "first", "last":
+        ok = matches(t, list);
+        result = new CelType("optional_type", List.of(p(a, 0)));
+        break;
+      case "regex.replace":
+        ok = matches(t, str, str, str) || matches(t, str, str, str, integer);
+        result = str;
+        break;
+      case "regex.extract", "regex.extractAll":
+        ok = matches(t, str, str);
+        result =
+            name.equals("regex.extract")
+                ? new CelType("optional_type", List.of(str))
+                : CelType.list(str);
         break;
       case "charAt":
         ok = matches(t, str, integer);
@@ -247,7 +273,7 @@ final class ExtensionFunctions {
         ok = t.size() == 1 && (a.isDyn() || a.isNumeric());
         result = a;
         break;
-      case "math.ceil", "math.floor", "math.round", "math.trunc":
+      case "math.sqrt", "math.ceil", "math.floor", "math.round", "math.trunc":
         ok = matches(t, CelType.DOUBLE);
         result = CelType.DOUBLE;
         break;
@@ -273,12 +299,19 @@ final class ExtensionFunctions {
   static Object apply(String name, Object[] args, EvalContext ctx) {
     // Runtime validation remains mandatory for dyn and unchecked programs.
     try {
+      ctx.environment.libraryPolicy.library(
+          name, args.length == 0 ? CelType.DYN : Values.type(args[0]), -1);
       for (Object arg : args) {
         if (arg instanceof String str) ctx.charge(str.length());
         if (arg instanceof List<?> list) ctx.charge(list.size());
       }
       check(name, Arrays.stream(args).map(Values::type).toList(), true, -1);
       if (name.startsWith("math.")) return math(name.substring(5), args, ctx);
+      if (name.startsWith("regex.")) {
+        if (name.equals("regex.replace") && args.length == 4 && (Long) args[3] == 0) return args[0];
+        return Regex.cached((String) args[1], ctx.environment.maxRegexProgramSize)
+            .apply(name, args, ctx);
+      }
       if (NetworkValue.supports(name)) return NetworkValue.apply(name, args);
       if (name.startsWith("json.") || name.startsWith("yaml."))
         return EncoderFunctions.apply(name, args, ctx);
@@ -322,6 +355,18 @@ final class ExtensionFunctions {
             for (long i = 0; i < count; i++) out.add(i);
             return List.copyOf(out);
           }
+        case "optional.unwrap":
+          var unwrapped = new ArrayList<Object>();
+          for (Object item : (List<?>) a) {
+            if (!(item instanceof OptionalValue optional)) throw Values.overload(name);
+            if (optional.present()) unwrapped.add(optional.value());
+          }
+          return List.copyOf(unwrapped);
+        case "first", "last":
+          List<?> values = (List<?>) a;
+          return values.isEmpty()
+              ? OptionalValue.none()
+              : OptionalValue.of(values.get(name.equals("first") ? 0 : values.size() - 1));
         case "slice":
           {
             List<?> list = (List<?>) a;
@@ -489,6 +534,7 @@ final class ExtensionFunctions {
     }
     double d = (Double) v;
     return switch (name) {
+      case "sqrt" -> Math.sqrt(d);
       case "ceil" -> Math.ceil(d);
       case "floor" -> Math.floor(d);
       case "round" ->

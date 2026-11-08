@@ -29,6 +29,64 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        check(
+            "regex.replace(s, '(a)', r'\\1x')",
+            Map.of("s", "aba"),
+            "axbax",
+            Map.of("s", "z"),
+            "z",
+            4096);
+        check(
+            "regex.extractAll(s, '[0-9]+')",
+            Map.of("s", "a1b2"),
+            java.util.List.of("1", "2"),
+            Map.of("s", "z"),
+            java.util.List.of(),
+            4096);
+        var controlled = Cel.newBuilder().variable("x", CelType.INT).build().compile("x + 1");
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        var controls = EvaluationOptions.newBuilder().budget(10).cancelled(cancelled::get).build();
+        var input = Activation.snapshot(Map.of("x", 2L));
+        for (int i = 0; i < 2000; i++) {
+          cancelled.set(i % 2 == 0);
+          var result = controlled.evaluateWithDetails(input, controls);
+          if ((result.error() != null) != cancelled.get())
+            throw new AssertionError("cancellation outcome");
+        }
+        var controlledTarget = (OptimizedCallTarget) controlled.controlledTarget();
+        controlledTarget.compile(true);
+        controlledTarget.waitForCompilation();
+        for (int i = 0; i < 1000; i++) {
+          cancelled.set(i % 2 == 0);
+          var result = controlled.evaluateWithDetails(input, controls);
+          if (cancelled.get()) {
+            if (result.error().code() != CelException.Code.RESOURCE_EXHAUSTED)
+              throw new AssertionError("cancel code");
+          } else if (!result.value().equals(3L) || result.actualCost() != 3)
+            throw new AssertionError("controlled result/cost");
+        }
+        if (!controlledTarget.isValidLastTier())
+          throw new AssertionError("controlled target must remain compiled");
+        var overloaded =
+            Cel.newBuilder()
+                .variable("x", CelType.DYN)
+                .function(
+                    "label",
+                    "label_int",
+                    false,
+                    List.of(CelType.INT),
+                    CelType.STRING,
+                    a -> "integer")
+                .function(
+                    "label",
+                    "label_string",
+                    false,
+                    List.of(CelType.STRING),
+                    CelType.STRING,
+                    a -> "text")
+                .build()
+                .compile("label(x)");
+        check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text", 512);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",
@@ -61,6 +119,13 @@ public final class CompiledTest {
             false,
             65536);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
+        check(
+            "s.matches('^[a-z]+@[a-z]+[.]com$')",
+            Map.of("s", "person@example.com"),
+            true,
+            Map.of("s", "person@example.org"),
+            false,
+            4096);
         check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),

@@ -105,11 +105,11 @@ the outcome when the checker is bypassed, because dynamic integrations and canon
 | Optionals | 18 | Absent `value()`, non-optional entries, type mismatches, lazy fallbacks |
 | Protobuf | 56 | Unknown fields, ill-typed and out-of-range construction, null assignment, wrappers, `Any`, `Value`, `Struct`, maps, enums, proto2 defaults, binding type mismatches |
 
-Every case executes through five paths in `//src/test/java/dev/trufflecel:negativeMatrix`:
-the direct checked frontend, the direct unchecked frontend, canonical `ParsedExpr` import,
-canonical `CheckedExpr` import after a wire round trip, and a snapshot activation. The 60
-protobuf cases run with both the test fixture adapter and the shipped `ProtobufType` adapter
-(2,455 executions). `//benchmarks:negative_compiled` evaluates every evaluation-phase case
+Every case executes through six paths in `//src/test/java/dev/trufflecel:negativeMatrix`:
+the direct checked frontend, strict compile-time validation, the direct unchecked frontend,
+canonical `ParsedExpr` import, canonical `CheckedExpr` import after a wire round trip, and a
+snapshot activation. The 60 protobuf cases run with both the test fixture adapter and the
+shipped `ProtobufType` adapter (2,946 executions). `//benchmarks:negative_compiled` evaluates every evaluation-phase case
 (404 executions) from forced last-tier guest-compiled code and requires the same phase and
 category as the interpreter. `//benchmarks/representative:negative_differential` runs the 368
 cases that cel-java 0.15.0 can express against its default and Pratt parsers, each with and
@@ -118,19 +118,28 @@ recorded upstream phase and `CelErrorCode`.
 
 Optimizer-time failures are encoded explicitly: 41 cases are marked as folded, meaning
 cel-java's optimized configurations reject them with `CelOptimizationException` before
-evaluation while its plain configurations fail at evaluation. TruffleCEL has no constant
-folder, so those expressions always fail at evaluation time with the recorded category.
+evaluation while its plain configurations fail at evaluation. TruffleCEL's default policy
+raises the same failures at evaluation from prebuilt error nodes; every case also records its
+outcome under strict validation, which rejects all 41 folded cases at compile time with the
+evaluation category, plus seven more (an invalid constant pattern with a variable receiver, an
+invalid timestamp literal, a `cel.bind` initializer failure, constant duplicate and invalid map
+keys, and the range cap). The table requires a strict outcome for every folded case. See
+[compile-time validation](VALIDATION.md).
 
-The table records 26 divergences, each with its reason; none is hidden by a weaker assertion:
+The table records 22 divergences, each with its reason; none is hidden by a weaker assertion:
 
 - cel-java reports timestamp and duration range failures, enum range failures,
   `optional.value()` on an absent optional, dynamic field selection on messages and iteration
   over non-aggregates as `INTERNAL_ERROR`, and string parsing failures as `BAD_FORMAT`.
-- cel-java does not construct well-known types from message literals, rejects double map key
-  literals only at evaluation, accepts duplicate message literal fields, evaluates `cel.bind`
-  initializers lazily, collapses unlimited repeated unary operators, and its duration arithmetic
-  overflows below the protobuf range. Its Pratt parser rejects the lone comma that the grammar
-  (`"[" [ExprList] [","] "]"`) and its default parser accept.
+- cel-java does not validate `Duration` and `Timestamp` ranges in message literals, rejects
+  double map key literals only at evaluation, accepts duplicate message literal fields,
+  evaluates `cel.bind` initializers lazily, collapses unlimited repeated unary operators, and its
+  duration arithmetic overflows below the protobuf range. Its Pratt parser rejects the lone
+  comma that the grammar (`"[" [ExprList] [","] "]"`) and its default parser accept.
+
+The differential harness registers the well-known type descriptors with cel-java, so wrapper
+literal construction compares like for like: unknown wrapper fields and ill-typed wrapper
+values are check failures in both engines, and wrapper overflows are `NUMERIC_OVERFLOW`.
 
 Sixty-three cases are TruffleCEL-only: explicit unknown bindings, configured resource limits,
 inferred declarations, `cel.block` (produced by cel-java's optimizer rather than parsed) and
@@ -157,14 +166,37 @@ ordinary compiled control flow. An error raised inside a `@TruffleBoundary` meth
 invalidates the first compilation once, when the boundary's no-exception speculation fails. The
 runner asserts that each case settles within three compilations (one initial compilation plus
 one per distinct boundary that raises the error) and that 1,000 further errors neither
-deoptimize nor invalidate the compiled code: 185 executions settle after one compilation, 218
-after two and one after three. `//benchmarks:compiled` additionally checks that a program which
+deoptimize nor invalidate the compiled code: 248 executions settle after one compilation, 155
+after two and one after three (a folded constant failure throws its prebuilt exception as
+ordinary control flow, so it settles in the first compilation). `//benchmarks:compiled` additionally checks that a program which
 has already raised errors keeps the same happy-path allocation budget.
 
 | Metric | Measured after the negative matrix |
 | --- | ---: |
 | Line hits | 4,497 / 4,501 (99.91%) |
 | Branch hits | 4,590 / 4,595 (99.89%) |
+| CI minimum, each metric | 99.8% |
+
+## Compile-time validation and constant folding
+
+Every compilation now validates literals, precompiles constant regular expressions and folds
+closed pure subtrees at the original budget cost ([validation](VALIDATION.md)). The folds are
+exercised by every existing suite, because they are always on: the complete corpus runs an
+additional strict-validation variant (`strictConforms`) proving that strict mode never rejects a
+case that evaluates successfully, the negative matrix records each case's strict outcome, and the
+compiled-negative gate evaluates every folded error node from last-tier guest code.
+`ValidationTest` compares, budget by budget, the outcomes of folded and source-backed (unfolded)
+programs for the same expressions, so a folded node cannot bypass a limit that the original
+would hit. It also covers the every-path and unknown-precedence rules, positional literal
+validators, multi-issue line/column diagnostics, the homogeneous-literal and nesting validators,
+the dynamic-pattern cache bound, the regex-free duration and time-zone parsers, folding bounds,
+and host-function overload checks. The compiled regex case in `benchmarks/CompiledTest.java`
+dropped from 3,904 to 96 bytes per evaluation (its ceiling is 192).
+
+| Metric | Measured after compile-time validation |
+| --- | ---: |
+| Line hits | 4,828 / 4,832 (99.92%) |
+| Branch hits | 4,912 / 4,917 (99.90%) |
 | CI minimum, each metric | 99.8% |
 
 ## Remaining paths

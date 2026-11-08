@@ -54,5 +54,33 @@
   {
     "name": "network-cidr",
     "checksum": 256
+  },
+  {
+    "name": "folded-constant",
+    "checksum": 1024
+  },
+  {
+    "name": "two-variable-transform-input",
+    "checksum": 1024
+  },
+  {
+    "name": "string-format-input",
+    "checksum": 2048
+  },
+  {
+    "name": "list-sort-input",
+    "checksum": 1024
+  },
+  {
+    "name": "math-extrema-input",
+    "checksum": 1024
+  },
+  {
+    "name": "network-cidr-input",
+    "checksum": 256
+  },
+  {
+    "name": "comprehension-input",
+    "checksum": 1024
   }
 ]

@@ -5,6 +5,22 @@ import java.util.function.Function;
 
 /** Immutable compiler configuration; contains no per-evaluation mutable state. */
 public final class Environment {
+  /**
+   * When certain failures are reported. Analysis, constant folding and regular-expression
+   * precompilation always run at compile time; the policy only decides whether a subexpression that
+   * fails on every evaluation path is rejected by {@code compile} or raised, with the same category
+   * and budget cost, by {@code evaluate}.
+   */
+  public enum Validation {
+    /** Keep CEL evaluation semantics: constant failures are raised when evaluated. */
+    DEFERRED,
+    /**
+     * Reject at compile time every failure that no evaluation can avoid, together with invalid
+     * regular-expression, timestamp and duration literals; all findings are reported together.
+     */
+    STRICT
+  }
+
   public record FunctionBinding(
       List<CelType> arguments, CelType result, Function<List<Object>, Object> implementation) {
     public FunctionBinding {
@@ -20,12 +36,32 @@ public final class Environment {
   final Map<String, ObjectType> objectTypes;
   final ObjectType[] runtimeObjectTypes;
   final Map<String, FunctionBinding> functions;
+  final Map<String, List<FunctionOverload>> overloads;
+
+  /** A named signature; receiver signatures include the receiver as argument zero. */
+  public record FunctionOverload(String id, Boolean receiver, FunctionBinding binding) {
+    public FunctionOverload {
+      if (Objects.requireNonNull(id).isEmpty())
+        throw new IllegalArgumentException("empty overload id");
+      Objects.requireNonNull(binding);
+      if (Boolean.TRUE.equals(receiver) && binding.arguments().isEmpty())
+        throw new IllegalArgumentException("receiver overload needs a receiver argument");
+    }
+  }
+
+  final LibraryPolicy libraryPolicy;
+  final Map<String, String> aliases;
+  final CelType expectedResultType;
+  final int maxAstNodes, maxRegexProgramSize;
   final String container;
   final boolean inferVariables, macros;
   final long budget;
-  final int maxSourceLength, maxDepth;
+  final int maxSourceLength, maxDepth, comprehensionNesting;
+  final Validation validation;
+  final boolean homogeneousLiterals;
 
   private Environment(Builder b) {
+    libraryPolicy = new LibraryPolicy(b.libraries, b.allowedFunctions);
     variables = Map.copyOf(b.variables);
     variableNames = Set.copyOf(variables.keySet());
     constants = Map.copyOf(b.constants);
@@ -35,12 +71,22 @@ public final class Environment {
       if (!b.constructorOnlyTypes.contains(entry.getKey())) runtimeTypes.add(entry.getValue());
     runtimeObjectTypes = runtimeTypes.toArray(ObjectType[]::new);
     functions = Map.copyOf(b.functions);
+    var signatures = new LinkedHashMap<String, List<FunctionOverload>>();
+    b.overloads.forEach((name, values) -> signatures.put(name, List.copyOf(values)));
+    overloads = Map.copyOf(signatures);
+    aliases = Map.copyOf(b.aliases);
+    expectedResultType = b.expectedResultType;
+    maxAstNodes = b.maxAstNodes;
+    maxRegexProgramSize = b.maxRegexProgramSize;
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
     budget = b.budget;
     maxSourceLength = b.maxSourceLength;
     maxDepth = b.maxDepth;
+    comprehensionNesting = b.comprehensionNesting;
+    validation = b.validation;
+    homogeneousLiterals = b.homogeneousLiterals;
   }
 
   /**
@@ -75,41 +121,100 @@ public final class Environment {
     Objects.requireNonNull(source);
     if (source.length() > maxSourceLength)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
-    return prepare(source, new Parser(source, this).parse(), check);
-  }
-
-  /** Reject trees deeper than the configured limit before any recursive traversal. */
-  void checkDepth(ExprNode node) {
-    record Pending(ExprNode node, int depth) {}
-    var pending = new ArrayDeque<Pending>();
-    pending.push(new Pending(node, 1));
-    while (!pending.isEmpty()) {
-      Pending item = pending.pop();
-      if (item.depth() > maxDepth)
-        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST depth limit exceeded");
-      for (ExprNode child : item.node().children)
-        pending.push(new Pending(child, item.depth() + 1));
+    try {
+      return prepare(source, new Parser(source, this).parse(), check);
+    } catch (CelException e) {
+      throw e.locate(source);
     }
   }
 
+  /** Reject trees deeper than the configured limit before any recursive traversal. */
+  long checkDepth(ExprNode node) {
+    return checkDepth(node, null);
+  }
+
+  private long checkDepth(ExprNode node, String source) {
+    record Pending(ExprNode node, int depth) {}
+    boolean parsed = source != null && !source.isEmpty();
+    int[] lines = parsed ? lineOffsets(source) : null;
+    var pending = new ArrayDeque<Pending>();
+    pending.push(new Pending(node, 1));
+    int count = 0;
+    long nextId = 1;
+    while (!pending.isEmpty()) {
+      if (++count > maxAstNodes)
+        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST node limit exceeded");
+      Pending item = pending.pop();
+      if (item.depth() > maxDepth)
+        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST depth limit exceeded");
+      ExprNode current = item.node();
+      if (parsed) {
+        // Nonempty source comes directly from Parser; imported canonical trees use empty source.
+        current.canonicalId = count;
+        current.errorOffset = current.offset;
+        int line = lines == null ? 0 : Arrays.binarySearch(lines, current.offset);
+        if (line < 0) line = -line - 2;
+        current.errorLine = line + 1;
+        current.errorColumn = current.offset - (lines == null ? 0 : lines[line]) + 1;
+      } else nextId = Math.max(nextId, current.canonicalId + 1);
+      for (ExprNode child : current.children) pending.push(new Pending(child, item.depth() + 1));
+    }
+    return nextId;
+  }
+
+  private static int[] lineOffsets(String source) {
+    int count = 1;
+    for (int i = source.indexOf('\n'); i >= 0; i = source.indexOf('\n', i + 1)) count++;
+    if (count == 1) return null;
+    int[] lines = new int[count];
+    int line = 1;
+    for (int i = source.indexOf('\n'); i >= 0; i = source.indexOf('\n', i + 1))
+      lines[line++] = i + 1;
+    return lines;
+  }
+
+  private static long assignMissingIds(ExprNode node, long nextId) {
+    if (node.canonicalId == 0) node.canonicalId = nextId++;
+    for (ExprNode child : node.children) nextId = assignMissingIds(child, nextId);
+    return nextId;
+  }
+
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
-    checkDepth(node);
+    long nextId = checkDepth(node, source);
     Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();
       node.free(Set.of(), free);
+      boolean mutable = false;
       for (String name : free)
         if (resolve(name, constants.keySet()) == null
             && resolve(name, objectTypes.keySet()) == null
             && builtinType(name) == null
             && resolve(name, declarations.keySet()) == null) {
-          if (declarations == variables) declarations = new LinkedHashMap<>(variables);
-          declarations.put(name, CelType.DYN);
+          if (declarations.isEmpty()) declarations = Map.of(name, CelType.DYN);
+          else {
+            if (!mutable) {
+              declarations = new LinkedHashMap<>(declarations);
+              mutable = true;
+            }
+            declarations.put(name, CelType.DYN);
+          }
         }
     }
     var checker = new Checker(this, declarations, check);
     CelType result = checker.check(node, Map.of()).finish();
+    if (expectedResultType != null && !expectedResultType.accepts(result))
+      throw new CelException(
+          CelException.Code.TYPE,
+          "expected result type " + expectedResultType + ", got " + result,
+          node.offset);
+    if (source.isEmpty()) assignMissingIds(node, nextId);
     FieldPlan.prepare(node, this);
+    node = Optimizer.optimize(node, this, source);
+    // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
+    // string used as a list index) become type findings once the folds are known.
+    if (check && validation == Validation.STRICT)
+      new Checker(this, declarations, true).check(node, Map.of());
     return new PreparedProgram(
         source,
         declarations == variables ? variableNames : declarations.keySet(),
@@ -119,7 +224,10 @@ public final class Environment {
   }
 
   String resolve(String name, Set<String> names) {
+    if (names.isEmpty()) return null;
     if (name.startsWith(".")) return names.contains(name.substring(1)) ? name.substring(1) : null;
+    String expanded = expandAlias(name);
+    if (!expanded.equals(name)) return names.contains(expanded) ? expanded : null;
     String prefix = container;
     while (!prefix.isEmpty()) {
       String candidate = prefix + "." + name;
@@ -128,6 +236,14 @@ public final class Environment {
       prefix = dot < 0 ? "" : prefix.substring(0, dot);
     }
     return names.contains(name) ? name : null;
+  }
+
+  String expandAlias(String name) {
+    if (aliases.isEmpty()) return name;
+    int dot = name.indexOf('.');
+    String root = dot < 0 ? name : name.substring(0, dot);
+    String target = aliases.get(root);
+    return target == null ? name : target + (dot < 0 ? "" : name.substring(dot));
   }
 
   static CelType builtinType(String name) {
@@ -152,10 +268,19 @@ public final class Environment {
     private final Map<String, ObjectType> objectTypes = new LinkedHashMap<>();
     private final Set<String> constructorOnlyTypes = new HashSet<>();
     private final Map<String, FunctionBinding> functions = new LinkedHashMap<>();
+    private final Map<String, List<FunctionOverload>> overloads = new LinkedHashMap<>();
+    private final Set<String> overloadIds = new HashSet<>();
     private String container = "";
+    private Map<String, Integer> libraries = LibraryPolicy.LATEST;
+    private Set<String> allowedFunctions;
+    private final Map<String, String> aliases = new LinkedHashMap<>();
+    private CelType expectedResultType;
+    private int maxAstNodes = 100_000, maxRegexProgramSize = 10_000;
     private boolean inferVariables, macros = true;
     private long budget = 1_000_000;
-    private int maxSourceLength = 100_000, maxDepth = 256;
+    private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
+    private Validation validation = Validation.DEFERRED;
+    private boolean homogeneousLiterals;
 
     public Builder() {
       WellKnownTypes.register(this);
@@ -191,7 +316,105 @@ public final class Environment {
         List<CelType> arguments,
         CelType result,
         Function<List<Object>, Object> implementation) {
-      functions.put(name, new FunctionBinding(arguments, result, implementation));
+      return addFunction(
+          name,
+          name + "#" + overloads.getOrDefault(name, List.of()).size(),
+          null,
+          arguments,
+          result,
+          implementation);
+    }
+
+    /** Register a distinct global or receiver signature, with an ID exported in checked ASTs. */
+    public Builder function(
+        String name,
+        String overloadId,
+        boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation) {
+      return addFunction(name, overloadId, receiver, arguments, result, implementation);
+    }
+
+    private Builder addFunction(
+        String name,
+        String id,
+        Boolean receiver,
+        List<CelType> arguments,
+        CelType result,
+        Function<List<Object>, Object> implementation) {
+      Objects.requireNonNull(name);
+      if (Set.of("&&", "||", "?:", "or", "orValue", "@not_strictly_false").contains(name))
+        throw new IllegalArgumentException("cannot overload lazy control function: " + name);
+      var binding = new FunctionBinding(arguments, result, implementation);
+      var signature = new FunctionOverload(id, receiver, binding);
+      if (overloadIds.contains(id))
+        throw new IllegalArgumentException("duplicate overload id: " + id);
+      for (var existing : overloads.getOrDefault(name, List.of())) {
+        if ((receiver == null
+                || existing.receiver() == null
+                || receiver.equals(existing.receiver()))
+            && FunctionOverloads.overlaps(existing.binding().arguments(), arguments))
+          throw new IllegalArgumentException(
+              "ambiguous overloads: " + existing.id() + " and " + id);
+      }
+      overloadIds.add(id);
+      overloads.computeIfAbsent(name, unused -> new ArrayList<>()).add(signature);
+      functions.putIfAbsent(name, binding);
+      return this;
+    }
+
+    /** Replace the enabled extension libraries. An empty map disables every extension library. */
+    public Builder libraries(Map<String, Integer> libraries) {
+      this.libraries = new LibraryPolicy(libraries, null).libraries;
+      return this;
+    }
+
+    /**
+     * Restrict callable names, including host functions. Core syntax and types remain available.
+     */
+    public Builder allowedFunctions(Set<String> names) {
+      allowedFunctions = Set.copyOf(names);
+      return this;
+    }
+
+    /** Resolve the leading identifier through a qualified name before container lookup. */
+    public Builder alias(String alias, String qualifiedName) {
+      Objects.requireNonNull(alias);
+      Objects.requireNonNull(qualifiedName);
+      if (!alias.matches("[A-Za-z_][A-Za-z_0-9]*")
+          || builtinType(alias) != null
+          || !qualifiedName.matches("[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*")
+          || aliases.containsKey(alias))
+        throw new IllegalArgumentException("invalid or duplicate alias: " + alias);
+      aliases.put(alias, qualifiedName);
+      return this;
+    }
+
+    /** Use each qualified name's last identifier as its alias. */
+    public Builder abbreviations(String... qualifiedNames) {
+      for (String name : qualifiedNames) alias(name.substring(name.lastIndexOf('.') + 1), name);
+      return this;
+    }
+
+    /** Require the checked expression's static result to be assignable to this type. */
+    public Builder expectedResultType(CelType type) {
+      expectedResultType = Objects.requireNonNull(type);
+      return this;
+    }
+
+    /** Bound parser allocations and imported AST nodes, independently of nesting depth. */
+    public Builder maxAstNodes(int count) {
+      if (count <= 0) throw new IllegalArgumentException("node count must be positive");
+      maxAstNodes = count;
+      return this;
+    }
+
+    /** Bound the compiled RE2 instruction count for both constant and dynamic patterns. */
+    public Builder maxRegexProgramSize(int instructions) {
+      if (instructions <= 0)
+        throw new IllegalArgumentException("regex program size must be positive");
+      maxRegexProgramSize = instructions;
       return this;
     }
 
@@ -225,6 +448,31 @@ public final class Environment {
     public Builder maxDepth(int depth) {
       if (depth <= 0 || depth > 512) throw new IllegalArgumentException("depth must be in [1,512]");
       maxDepth = depth;
+      return this;
+    }
+
+    /** Report certain failures at compile time ({@link Validation#STRICT}) or at evaluation. */
+    public Builder validation(Validation policy) {
+      validation = Objects.requireNonNull(policy);
+      return this;
+    }
+
+    /**
+     * Reject list literals whose elements, and map literals whose keys or values, have different
+     * static types. Elements of type {@code dyn} are exempt. Reported under either policy.
+     */
+    public Builder homogeneousLiterals(boolean enabled) {
+      homogeneousLiterals = enabled;
+      return this;
+    }
+
+    /**
+     * Reject comprehension macros (including {@code cel.bind}) and canonical comprehensions nested
+     * deeper than {@code depth}. Unlimited by default; reported under either policy.
+     */
+    public Builder maxComprehensionNesting(int depth) {
+      if (depth <= 0) throw new IllegalArgumentException("depth must be positive");
+      comprehensionNesting = depth;
       return this;
     }
 

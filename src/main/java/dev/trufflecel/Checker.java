@@ -15,12 +15,19 @@ final class Checker {
   }
 
   CelType check(ExprNode n, Map<String, CelType> locals) {
-    CelType result = checkNode(n, locals);
+    // Strict validation rechecks after folding: a folded value has a precise type and no subtree.
+    CelType result =
+        n.fold != null && n.fold.error() == null
+            ? Values.type(n.fold.value())
+            : checkNode(n, locals);
     n.checkedType = result;
     return result;
   }
 
   private CelType checkNode(ExprNode n, Map<String, CelType> locals) {
+    if (n.extensionSelect) {
+      env.libraryPolicy.library("proto.getExt", CelType.DYN, n.offset);
+    }
     String qualified = n.qualifiedName();
     if (qualified != null && !locals.containsKey(qualified.split("\\.")[0])) {
       String name = env.resolve(qualified, declarations.keySet());
@@ -176,6 +183,14 @@ final class Checker {
         yield CelType.join(yes, no);
       }
       case MACRO -> {
+        String function =
+            n.name.equals("bind")
+                ? "cel.bind"
+                : n.name.equals("has") && n.children[0].extensionSelect ? "proto.hasExt" : n.name;
+        env.libraryPolicy.name(function, n.offset);
+        env.libraryPolicy.library(function, CelType.DYN, n.offset);
+        if (n.value instanceof String[] names && names.length == 2)
+          env.libraryPolicy.library("transformList", CelType.DYN, n.offset);
         if (n.name.equals("has")) {
           check(n.children[0], locals);
           yield CelType.BOOL;
@@ -239,18 +254,29 @@ final class Checker {
     };
   }
 
+  private boolean boundPrefix(String prefix, Map<String, CelType> locals) {
+    String root = prefix.split("\\.")[0];
+    return locals.containsKey(root)
+        || env.resolve(root, declarations.keySet()) != null
+        || env.resolve(root, env.constants.keySet()) != null;
+  }
+
   private CelType call(ExprNode n, Map<String, CelType> locals) {
     if (Boolean.TRUE.equals(n.value)) {
       String prefix = n.children[0].qualifiedName();
       if (prefix != null && prefix.startsWith(".")) prefix = prefix.substring(1);
-      if (ExtensionFunctions.namespaced(prefix, n.name)
-          || "optional".equals(prefix) && Set.of("of", "none", "ofNonZeroValue").contains(n.name)) {
+      boolean namespace = prefix != null && !boundPrefix(prefix, locals);
+      if (namespace) prefix = env.expandAlias(prefix);
+      if (namespace
+          && (ExtensionFunctions.namespaced(prefix, n.name)
+              || "optional".equals(prefix)
+                  && Set.of("of", "none", "ofNonZeroValue").contains(n.name))) {
         n.name = prefix + "." + n.name;
         n.children = Arrays.copyOfRange(n.children, 1, n.children.length);
         n.value = false;
       }
       String resolved =
-          prefix == null ? null : env.resolve(prefix + "." + n.name, env.functions.keySet());
+          !namespace ? null : env.resolve(prefix + "." + n.name, env.functions.keySet());
       if (resolved != null) {
         n.name = resolved;
         n.children = Arrays.copyOfRange(n.children, 1, n.children.length);
@@ -260,14 +286,37 @@ final class Checker {
       String resolved = env.resolve(n.name, env.functions.keySet());
       if (resolved != null) n.name = resolved;
     }
+    env.libraryPolicy.name(n.name, n.offset);
     n.extensionCall = ExtensionFunctions.supports(n.name);
     n.optionalFallback = n.name.equals("or") || n.name.equals("orValue");
     n.stringPredicate =
         n.name.equals("contains") || n.name.equals("startsWith") || n.name.equals("endsWith");
     var types = new ArrayList<CelType>();
     for (ExprNode child : n.children) types.add(check(child, locals));
-    var custom = env.functions.get(n.name);
+    var signatures = env.overloads.get(n.name);
+    n.customOverloads =
+        signatures != null && (signatures.size() > 1 || signatures.get(0).receiver() != null);
+    if (n.customOverloads) {
+      CelType result = null;
+      var ids = new ArrayList<String>();
+      for (var signature : signatures) {
+        if (!FunctionOverloads.matches(signature, Boolean.TRUE.equals(n.value), types)) continue;
+        var bindings = new HashMap<String, CelType>();
+        for (int i = 0; i < types.size(); i++)
+          bind(n, signature.binding().arguments().get(i), types.get(i), bindings);
+        CelType next = substitute(signature.binding().result(), bindings);
+        result = result == null ? next : CelType.join(result, next);
+        ids.add(signature.id());
+      }
+      n.overloadIds = List.copyOf(ids);
+      if (result != null) return result;
+      require(n, FunctionOverloads.standard(n.name), "no matching overload: " + n.name);
+    }
+    var custom = n.customOverloads ? null : env.functions.get(n.name);
     if (custom != null) {
+      n.overloadIds = List.of(signatures.get(0).id());
+      // New optional list helpers must not take over existing host functions.
+      if (n.name.equals("first") || n.name.equals("last")) n.extensionCall = false;
       require(n, types.size() == custom.arguments().size(), "incorrect argument count");
       var bindings = new HashMap<String, CelType>();
       if (types.size() == custom.arguments().size())
@@ -276,6 +325,7 @@ final class Checker {
       return substitute(custom.result(), bindings);
     }
     int count = types.size();
+    env.libraryPolicy.library(n.name, types.isEmpty() ? CelType.DYN : types.get(0), n.offset);
     CelType a = count > 0 ? types.get(0).unwrapped() : CelType.DYN,
         b = count > 1 ? types.get(1).unwrapped() : CelType.DYN;
     CelType extension = ExtensionFunctions.check(n.name, types, strict, n.offset);

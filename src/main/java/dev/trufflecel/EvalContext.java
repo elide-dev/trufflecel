@@ -9,7 +9,8 @@ final class EvalContext {
   // Allocate only for expressions with local bindings; reuse slots across loop iterations.
   private Object[] scopes;
   private int scopeSize;
-  private long remaining;
+  private long remaining, initialBudget;
+  private EvaluationOptions.Control control;
   private EvalContext budgetParent;
   ExprNode.BlockScope block;
 
@@ -29,14 +30,19 @@ final class EvalContext {
     this.environment = environment;
     this.activation = activation;
     singleName = null;
-    remaining = environment.budget;
+    initialBudget = remaining = environment.budget;
   }
 
   EvalContext(Environment environment, String name, Object value) {
     this.environment = environment;
     singleName = name;
     activation = value;
-    remaining = environment.budget;
+    initialBudget = remaining = environment.budget;
+  }
+
+  void configure(EvaluationOptions options) {
+    if (options.budget != 0) initialBudget = remaining = options.budget;
+    control = options.control();
   }
 
   @SuppressWarnings("unchecked")
@@ -58,6 +64,11 @@ final class EvalContext {
     charge(1);
   }
 
+  /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
+  long charged() {
+    return initialBudget - remaining;
+  }
+
   void charge(long cost) {
     // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
     // context with a loaded parent would force escape analysis to materialize the context in every
@@ -67,7 +78,12 @@ final class EvalContext {
     else parent.chargeOwn(cost);
   }
 
+  void checkControl() {
+    if (control != null) control.check();
+  }
+
   private void chargeOwn(long cost) {
+    checkControl();
     if (cost < 0 || cost > remaining)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "evaluation budget exceeded");
     remaining -= cost;
