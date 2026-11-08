@@ -186,4 +186,43 @@ public final class PojoTest {
                 }));
     assertEquals(Map.of("a", 1L), context.map(Map.of("a", 1), context::scalar, context::scalar));
   }
+
+  @Test
+  public void constructorsBoundExistingOwnedGraphsAndMapsRejectNullKeys() {
+    var type = PojoFixtures_RecursiveCel.INSTANCE;
+    Object previous = type.construct(Map.of());
+    for (int i = 1; i < 100; i++) previous = type.construct(Map.of("next", previous));
+    Object deepest = previous;
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> type.construct(Map.of("next", deepest))).code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> type.construct(Map.of("children", List.of(deepest))))
+            .code());
+    var userType = PojoFixtures_UserCel.INSTANCE;
+    var user =
+        userType.snapshot(
+            new PojoFixtures.User(
+                1,
+                List.of(new PojoFixtures.Address(1, "A")),
+                Map.of("group", List.of(1)),
+                PojoFixtures.State.ACTIVE,
+                new byte[] {1},
+                null));
+    // Existing owned values are inspected through both nested collections and objects.
+    var envelope = PojoFixtures_EnvelopeCel.INSTANCE;
+    Object wrapped = envelope.construct(Map.of("user", user));
+    assertEquals(user, envelope.get(wrapped, "user"));
+    assertEquals(user, userType.construct(user.fields()));
+    assertThrows(
+        CelException.class,
+        () ->
+            userType.snapshot(
+                new PojoFixtures.User(
+                    1, List.of(), Collections.singletonMap(null, List.of(1)), null, null, null)));
+    assertThrows(
+        CelException.class,
+        () -> userType.construct(Map.of("groups", Collections.singletonMap(null, List.of(1)))));
+  }
 }

@@ -46,11 +46,16 @@ public abstract class PojoType<T> implements ObjectType {
   public final Object construct(Map<String, Object> values) {
     var owned = new LinkedHashMap<String, Object>();
     var context = new SnapshotContext(100, 1_000_000);
-    for (var entry : values.entrySet()) {
-      CelType type = field(entry.getKey());
-      owned.put(entry.getKey(), context.owned(entry.getValue(), type));
+    context.enter(values);
+    try {
+      for (var entry : values.entrySet()) {
+        CelType type = field(entry.getKey());
+        owned.put(entry.getKey(), context.owned(entry.getValue(), type));
+      }
+      return new Value(name, owned);
+    } finally {
+      context.leave(values);
     }
-    return new Value(name, owned);
   }
 
   private static CelType valueType(Object value) {
@@ -180,11 +185,40 @@ public abstract class PojoType<T> implements ObjectType {
                 key -> owned(key, Checker.parameter(type, 0)),
                 item -> owned(item, Checker.parameter(type, 1)));
       } else if (value instanceof Value) {
-        count();
+        inspectOwned(value);
         result = value;
       } else result = scalar(value);
       if (result != CelNull.INSTANCE && !type.accepts(valueType(result))) throw invalidValue();
       return result;
+    }
+
+    private void inspectOwned(Object value) {
+      if (value instanceof Value object) {
+        enter(object);
+        try {
+          for (Object field : object.fields.values()) inspectOwned(field);
+        } finally {
+          leave(object);
+        }
+      } else if (value instanceof List<?> list) {
+        enter(list);
+        try {
+          for (Object item : list) inspectOwned(item);
+        } finally {
+          leave(list);
+        }
+      } else if (value instanceof Map<?, ?> map) {
+        enter(map);
+        try {
+          map.forEach(
+              (key, item) -> {
+                inspectOwned(key);
+                inspectOwned(item);
+              });
+        } finally {
+          leave(map);
+        }
+      } else scalar(value);
     }
 
     private static CelException invalidValue() {
@@ -223,7 +257,13 @@ public abstract class PojoType<T> implements ObjectType {
       enter(value);
       try {
         var result = new LinkedHashMap<Object, Object>();
-        value.forEach((k, v) -> result.put(key.apply(k), element.apply(v)));
+        value.forEach(
+            (k, v) -> {
+              Object convertedKey = key.apply(k);
+              if (convertedKey == CelNull.INSTANCE)
+                throw Values.error(CelException.Code.INVALID_ARGUMENT, "null POJO map key");
+              result.put(convertedKey, element.apply(v));
+            });
         return Collections.unmodifiableMap(result);
       } finally {
         leave(value);

@@ -479,8 +479,9 @@ no runtime reflection is used.
 Supported properties are primitive/boxed booleans and numbers, characters and strings, `UInt`,
 `Bytes`, `byte[]`, `Instant`, `Duration`, enums (their declared names as CEL strings), typed `List`
 and `Map`, and other annotated classes or records. Map keys must map to CEL string, integer, uint
-or boolean types. Raw collections, wildcard/generic properties, other arrays and arbitrary host
-objects receive compile-time diagnostics. Register nested adapters explicitly when their fields
+or boolean types. Raw collections, unresolved wildcard/generic properties, other arrays and arbitrary host
+objects receive compile-time diagnostics. Inherited generic members are resolved against the concrete
+annotated subclass before their types are checked. Register nested adapters explicitly when their fields
 are selected or their CEL constructors are used.
 
 Call `adapter.snapshot(host)` before evaluation. Generated accessors run once during this call,
@@ -494,6 +495,7 @@ Cycles fail with `INVALID_ARGUMENT`, and exceeded limits fail with `RESOURCE_EXH
 Every generated property is present in a host snapshot, including null properties, represented
 as CEL null. CEL constructors produce the same owned value type; omitted constructor fields are
 absent, so `has()` is false and an ordinary read raises `NO_SUCH_KEY`. Construction validates
-field names and nested value types. Evaluating a raw host POJO does not implicitly snapshot it;
+field names and nested value types and counts existing snapshot subgraphs against the same depth
+and node limits. Null map keys are rejected in both snapshots and CEL construction. Evaluating a raw host POJO does not implicitly snapshot it;
 only generated snapshots are accepted by these adapters. Policy execution never invokes bean
 getters or constructs host objects.
