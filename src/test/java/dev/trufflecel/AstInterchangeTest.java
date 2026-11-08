@@ -100,7 +100,8 @@ public final class AstInterchangeTest {
                 .filter(event -> event.error() != null)
                 .allMatch(
                     event ->
-                        event.error().offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
+                        event.error().offsetEncoding() == CelException.OffsetEncoding.CODE_POINT
+                            && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
         if (source.contains("x +")) {
           assertCanonicalLocation(
               source,
@@ -143,6 +144,44 @@ public final class AstInterchangeTest {
     assertEquals(-1, missing.offset());
     assertEquals(CelException.OffsetEncoding.CODE_POINT, missing.offsetEncoding());
     assertEquals(missing.getMessage(), missing.format(budgetSource));
+  }
+
+  @Test
+  public void successfulTraceEventsRetainOffsetUnitsAfterArithmeticRestoration() {
+    Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
+    String source = "// 😀\n'😀' == '😀' ? x + 1 + 2 : 0";
+    int index = source.indexOf('1');
+    var events = new ArrayList<TraceEvent>();
+    assertEquals(4L, env.compile(source).trace(events::add).evaluate(Map.of("x", 1)));
+    assertTrue(
+        events.stream()
+            .allMatch(event -> event.offsetEncoding() == CelException.OffsetEncoding.UTF16));
+    TraceEvent sourceLiteral =
+        events.stream()
+            .filter(
+                event -> event.kind().equals("CONSTANT") && Long.valueOf(1).equals(event.value()))
+            .findFirst()
+            .orElseThrow();
+    assertEquals(index, sourceLiteral.offset());
+    Message parsed = CanonicalAst.parse(env, source);
+    for (Message input : List.of(parsed, toV1Alpha1(parsed))) {
+      events.clear();
+      assertEquals(4L, program(env, check(env, input)).trace(events::add).evaluate(Map.of("x", 1)));
+      assertTrue(
+          events.stream()
+              .allMatch(
+                  event ->
+                      event.error() == null
+                          && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
+      TraceEvent literal =
+          events.stream()
+              .filter(
+                  event -> event.kind().equals("CONSTANT") && Long.valueOf(1).equals(event.value()))
+              .findFirst()
+              .orElseThrow();
+      assertEquals(source.codePointCount(0, index), literal.offset());
+      assertEquals(source.codePointCount(source.indexOf('\n') + 1, index) + 1, literal.column());
+    }
   }
 
   @Test
