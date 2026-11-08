@@ -74,3 +74,44 @@ java_test(
         "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_protobuf", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime",
         "@maven//:junit_junit", "@maven//:com_google_protobuf_protobuf_java"],
 )
+
+java_library(
+    name = "memory_phases_lib", testonly = True, srcs = ["MemoryPhases.java"],
+    deps = [":comparison", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@maven//:org_graalvm_truffle_truffle_runtime", "@maven//:org_graalvm_polyglot_polyglot"],
+)
+
+java_test(
+    name = "memory_phases_options", main_class = "dev.trufflecel.MemoryPhases",
+    args = ["trufflecel", "comprehension", "false", "0"], use_testrunner = False,
+    runtime_deps = [":memory_phases_lib"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.compiler.EncodedGraphCache=false"],
+)
+
+native_image(
+    name = "memory_phases", testonly = True, executable_name = "memory-phases",
+    main_class = "dev.trufflecel.MemoryPhases", deps = [":memory_phases_lib"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    extra_args = [
+        "--gc=serial", "-J-Xmx4g", "--parallelism=4", "-march=compatibility",
+        "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
+        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
+        "--initialize-at-run-time=dev.trufflecel.MemoryPhases",
+        "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions",
+    ],
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+
+sh_test(
+    name = "memory_diagnostic", srcs = ["memory_diagnostic.sh"],
+    args = ["$(rootpath :memory_phases)"], data = [":memory_phases", "memory_diagnostic.py", "//:maven_install.json"],
+    tags = ["manual"], size = "enormous", timeout = "eternal",
+    exec_properties = {"EstimatedCPU": "4", "EstimatedMemory": "4GB"},
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+
+sh_test(
+    name = "memory_diagnostic_test", srcs = ["memory_diagnostic_test.sh"],
+    data = ["memory_diagnostic.py", "test_memory_diagnostic.py"], size = "small",
+)
