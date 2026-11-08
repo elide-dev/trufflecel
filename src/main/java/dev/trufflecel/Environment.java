@@ -59,9 +59,9 @@ public final class Environment {
   final LibraryPolicy libraryPolicy;
   final Map<String, String> aliases;
   final CelType expectedResultType;
-  final int maxAstNodes, maxRegexProgramSize;
+  final int maxAstNodes, maxRegexProgramSize, regexParserTreeLimit;
   final String container;
-  final boolean inferVariables, macros;
+  final boolean inferVariables, macros, regexInstructionLimitExplicit;
   final List<Macro> customMacros;
   final Set<String> standardMacros;
   final long budget;
@@ -90,6 +90,8 @@ public final class Environment {
     expectedResultType = b.expectedResultType;
     maxAstNodes = b.maxAstNodes;
     maxRegexProgramSize = b.maxRegexProgramSize;
+    regexParserTreeLimit = b.regexParserTreeLimit;
+    regexInstructionLimitExplicit = b.regexInstructionLimitExplicit;
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
@@ -363,7 +365,8 @@ public final class Environment {
     private Set<String> allowedFunctions;
     private final Map<String, String> aliases = new LinkedHashMap<>();
     private CelType expectedResultType;
-    private int maxAstNodes = 100_000, maxRegexProgramSize = 10_000;
+    private int maxAstNodes = 100_000, maxRegexProgramSize = 10_000, regexParserTreeLimit;
+    private boolean regexInstructionLimitExplicit;
     private boolean inferVariables, macros = true;
     private final List<Macro> customMacros = new ArrayList<>();
     private Set<String> standardMacros = Macro.STANDARD;
@@ -397,6 +400,8 @@ public final class Environment {
       expectedResultType = environment.expectedResultType;
       maxAstNodes = environment.maxAstNodes;
       maxRegexProgramSize = environment.maxRegexProgramSize;
+      regexParserTreeLimit = environment.regexParserTreeLimit;
+      regexInstructionLimitExplicit = environment.regexInstructionLimitExplicit;
       inferVariables = environment.inferVariables;
       macros = environment.macros;
       customMacros.addAll(environment.customMacros);
@@ -586,9 +591,28 @@ public final class Environment {
     }
 
     /** Bound the compiled RE2 instruction count for both constant and dynamic patterns. */
+    /**
+     * Use TruffleRegex alone, bounded by parser-tree nodes rather than RE2 instructions.
+     * Preparation and evaluation require an entered CEL context. Unsupported patterns and
+     * capture/replacement operations fail explicitly. RE2/J need not be installed.
+     */
+    public Builder truffleRegexOnly(int maxParserTreeNodes) {
+      if (maxParserTreeNodes <= 0)
+        throw new IllegalArgumentException("parser tree limit must be positive");
+      if (regexInstructionLimitExplicit)
+        throw new IllegalArgumentException(
+            "RE2 instruction limit is incompatible with TruffleRegex-only mode");
+      regexParserTreeLimit = maxParserTreeNodes;
+      return this;
+    }
+
     public Builder maxRegexProgramSize(int instructions) {
+      if (regexParserTreeLimit != 0)
+        throw new IllegalArgumentException(
+            "RE2 instruction limit is incompatible with TruffleRegex-only mode");
       if (instructions <= 0)
         throw new IllegalArgumentException("regex program size must be positive");
+      regexInstructionLimitExplicit = true;
       maxRegexProgramSize = instructions;
       return this;
     }

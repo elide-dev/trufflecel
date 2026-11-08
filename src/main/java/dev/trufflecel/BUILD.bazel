@@ -71,6 +71,7 @@ java_library(
         "PolicyCompiler.java",
         "PreparedProgram.java",
         "Program.java",
+        "Re2Regex.java",
         "Regex.java",
         "TraceEvent.java",
         "TraceListener.java",
