@@ -1,0 +1,32 @@
+{
+  "baseline_commit": "f47ffa6f82ee43f1e12b1882a3d4472ddb4798c1",
+  "candidate_base": "f47ffa6",
+  "host": "Apple M5 Max / macOS Darwin 25.6.0 arm64",
+  "date_utc": "2026-11-08",
+  "scope": "shared-host allocation investigation; latency advisory",
+  "dependency_versions": {
+    "truffledata": "0.9.0",
+    "graalvm": "25.5.5-elide.27",
+    "cel-java": "0.15.0"
+  },
+  "candidate_source_sha256": {
+    "src/main/java/dev/trufflecel/Values.java": "aa91c183d2f9750dfe153bf553a8a433603c32b8275bffe5e8bf712d3e256863",
+    "benchmarks/representative/Engines.java": "5febf62e93a8be22817f1760a3224581d2a331e2ffe4c89c2d5ca4f96a868ac5",
+    "benchmarks/representative/Workloads.java": "beb04071782f8a54e59105430d2d8d70a9ea70b4105ffdc506d237ed1afcffa2",
+    "benchmarks/representative/SteadyState.java": "2ac6604dcef0904f6a79b8be71d8db2a7b30333a34ebea9768cf8e23e769a32a",
+    "MODULE.bazel": "ba715dde1dd41f069f4b6d1d9cb9dce51e9346ed1b664fec7f97cceb11a09be7",
+    "maven_install.json": "c19b6eec7d5c05dd15461b37ac1178c781668a2ebb2449857ca8eae91e6b0fce",
+    ".bazelversion": "4d9dfd02f463b487bd0bff68cf9292b3626b31c81febb54e8911e493f64793d0"
+  },
+  "candidate_artifact_sha256": {
+    "bazel-out/darwin_arm64-fastbuild/bin/src/main/java/dev/trufflecel/libtrufflecel.jar": "3e28b2010a7136c7d53e130afa853ad4ece271960f0fe8a1232216a0aabc7241",
+    "bazel-out/darwin_arm64-fastbuild/bin/benchmarks/representative/jmh.jar": "92c1647112c59b4995df384c0b42d10b9ceac45aebbe45b10d8cfe939f999cae",
+    "bazel-out/darwin_arm64-fastbuild/bin/benchmarks/representative/libengines.jar": "19a2af27b3910985e03c9e807f0542383a7f0083ee07676a0340c83e5bc11588"
+  },
+  "raw_result_sha256": {
+    "baseline.json": "85f6845efb40ed7ca1e76cab2b7a2a9d56d02d05e59c95d0adc22b6156abd6a3",
+    "candidate.json": "df6db10f94a39b0aa2940471ce89fa215dc09d89b8b669d857e26bee1cbc00a8",
+    "baseline.log": "723290d2cbbf42271aa58095e00e85cc4c4ced29eb60b4dc9c3a78ed3024b9f1",
+    "candidate.log": "a7f49532394b784b450716ef75f07016065e12a8648f30176a7b6c5a4092ff38"
+  }
+}

@@ -27,9 +27,11 @@ final class Values {
     if (v instanceof Float f) return f.doubleValue();
     if (v instanceof byte[] b) return new Bytes(b);
     if (v instanceof Map<?, ?> m) {
-      var r = new LinkedHashMap<Object, Object>();
-      m.forEach((k, value) -> r.put(in(k, depth + 1, remaining), in(value, depth + 1, remaining)));
-      return Collections.unmodifiableMap(r);
+      // Host size is only a bounded allocation hint; traversal enforces the actual node budget.
+      int size = Math.clamp(m.size(), 0, 1024);
+      OwnedMap snapshot = new OwnedMap(m, size, depth, remaining);
+      if (snapshot.fallback != null) return Collections.unmodifiableMap(snapshot.fallback);
+      return snapshot.length == 0 ? OwnedMap.EMPTY : Collections.unmodifiableMap(snapshot);
     }
     if (v instanceof List<?> values) {
       int size = values.size();
@@ -47,6 +49,112 @@ final class Values {
     }
     if (v instanceof Object[] values) return in(Arrays.asList(values), depth + 1, remaining);
     return v;
+  }
+
+  /** Compact insertion-ordered snapshots, with bounded hash chains and a collision fallback. */
+  private static final class OwnedMap extends AbstractMap<Object, Object> {
+    private static final Map<Object, Object> EMPTY =
+        Collections.unmodifiableMap(new OwnedMap(Map.of(), 0, 0, new int[] {0}));
+    private final Object[] entries;
+    // Bucket heads followed by one next-link per entry; zero denotes the end of a chain.
+    private final int[] index;
+    private final int buckets;
+    private int length;
+    private Map<Object, Object> fallback;
+
+    private OwnedMap(Map<?, ?> source, int size, int depth, int[] remaining) {
+      buckets = Math.max(1, Integer.highestOneBit(Math.max(1, size) - 1) << 1);
+      entries = new Object[size * 2];
+      index = new int[buckets + size];
+      source.forEach(
+          (key, value) ->
+              putNormalized(in(key, depth + 1, remaining), in(value, depth + 1, remaining)));
+    }
+
+    private int bucket(Object key) {
+      int hash = Objects.hashCode(key);
+      return (hash ^ (hash >>> 16)) & (buckets - 1);
+    }
+
+    private void putNormalized(Object key, Object value) {
+      if (fallback != null) {
+        fallback.put(key, value);
+        return;
+      }
+      int bucket = bucket(key);
+      int probes = 0;
+      for (int link = index[bucket]; link != 0; link = index[buckets + link - 1]) {
+        probes++;
+        if (Objects.equals(key, entries[(link - 1) * 2])) {
+          entries[(link - 1) * 2 + 1] = value;
+          return;
+        }
+      }
+      // Keep attacker-chosen hash collisions on the JDK's established map implementation.
+      if (probes >= 8 || length * 2 == entries.length) {
+        fallback = new LinkedHashMap<>();
+        for (int i = 0; i < length; i++) fallback.put(entries[i * 2], entries[i * 2 + 1]);
+        fallback.put(key, value);
+        return;
+      }
+      entries[length * 2] = key;
+      entries[length * 2 + 1] = value;
+      index[buckets + length] = index[bucket];
+      index[bucket] = ++length;
+    }
+
+    private int find(Object key) {
+      for (int link = index[bucket(key)]; link != 0; link = index[buckets + link - 1])
+        if (Objects.equals(key, entries[(link - 1) * 2])) return (link - 1) * 2 + 1;
+      return -1;
+    }
+
+    @Override
+    public Object get(Object key) {
+      int found = find(key);
+      return found < 0 ? null : entries[found];
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+      return find(key) >= 0;
+    }
+
+    @Override
+    public int size() {
+      return length;
+    }
+
+    @Override
+    public void forEach(java.util.function.BiConsumer<? super Object, ? super Object> consumer) {
+      Objects.requireNonNull(consumer);
+      for (int i = 0; i < length; i++) consumer.accept(entries[i * 2], entries[i * 2 + 1]);
+    }
+
+    @Override
+    public Set<Entry<Object, Object>> entrySet() {
+      return new AbstractSet<>() {
+        public int size() {
+          return length;
+        }
+
+        public Iterator<Entry<Object, Object>> iterator() {
+          return new Iterator<>() {
+            private int cursor;
+
+            public boolean hasNext() {
+              return cursor < length;
+            }
+
+            public Entry<Object, Object> next() {
+              if (!hasNext()) throw new NoSuchElementException();
+              int position = cursor++ * 2;
+              return new SimpleImmutableEntry<>(entries[position], entries[position + 1]);
+            }
+          };
+        }
+      };
+    }
   }
 
   /** Internal read-only iteration may share our owned snapshot; public toArray still copies. */
