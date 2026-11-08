@@ -21,6 +21,7 @@ class ExprNode extends CelNode {
   // Plan-time purity and binding depth, packed by Optimizer; avoids per-node analysis maps.
   int analysis;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean customOverloads;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean standardOverload;
   List<String> overloadIds = List.of();
   @Child private FieldPlan.ReadNode fieldRead;
 
@@ -781,7 +782,7 @@ class ExprNode extends CelNode {
     if (error != null) throw error;
     if (customOverloads) {
       if (binding != null) return ctx.invoke(binding, args);
-      if (!FunctionOverloads.standard(name)) throw Values.overload(name);
+      if (!standardOverload) throw Values.overload(name);
     }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);

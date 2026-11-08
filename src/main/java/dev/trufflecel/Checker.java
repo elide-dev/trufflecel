@@ -320,6 +320,7 @@ final class Checker {
     n.customOverloads =
         signatures != null && (signatures.size() > 1 || signatures.get(0).receiver() != null);
     if (n.customOverloads) {
+      n.standardOverload = FunctionOverloads.standard(n.name);
       CelType result = null;
       var ids = new ArrayList<String>();
       for (var signature : signatures) {
