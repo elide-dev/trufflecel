@@ -1,0 +1,27 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_test")
+
+java_library(
+    name = "harness",
+    testonly = True,
+    srcs = ["RetainedHeap.java"],
+    deps = ["//:trufflecel", "@maven//:org_graalvm_polyglot_polyglot"],
+    runtime_deps = ["@maven//:org_graalvm_truffle_truffle_runtime"],
+)
+
+java_binary(
+    name = "heap",
+    testonly = True,
+    main_class = "dev.trufflecel.bench.RetainedHeap",
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler", "-XX:+UseSerialGC", "-Xms512m", "-Xmx512m", "-XX:CompileCommand=dontinline,dev.trufflecel.bench.RetainedHeap::populate", "-XX:CompileCommand=dontinline,dev.trufflecel.bench.RetainedHeap::release"],
+    runtime_deps = [":harness"],
+)
+
+java_test(
+    name = "smoke",
+    testonly = True,
+    main_class = "dev.trufflecel.bench.RetainedHeap",
+    use_testrunner = False,
+    args = ["--smoke"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler"],
+    runtime_deps = [":harness"],
+)
