@@ -77,9 +77,24 @@ on the JVM and 3,504 to 120 B/op on native; its paired evaluation speedup is abo
 These compare the two cel-java input forms inside one artifact, not separate-report
 measurements of a revision change or a matched ranking against every TruffleCEL path.
 
-Both reports preserve this RE2/J baseline. A TruffleRegex integration requires its own
-paired measurements. The [November 5 report](benchmarks/representative-20261105/README.md)
-remains historical evidence with its original dependencies, raw data and methodology.
+Both reports preserve this RE2/J baseline. The separate
+[paired TruffleRegex RE2 qualification](benchmarks/regex-re2-20261108/README.md)
+compares that production code with the scoped constant-match candidate on the same
+regex workload and an unrelated scalar-wide control. It includes 24 JVM JMH forks,
+24 native timing processes, 48 allocation/RSS processes and 32 first-result launches.
+Every candidate regex cell must prove actual acceleration before being marked complete.
+
+Regex guest-JIT time improves 10.92% on JVM and 11.20% on native, while allocation
+increases by 6 and 4 B/op respectively. Current JIT RSS rises 10.28% on JVM and
+16.54% on native. Interpreter allocation also increases; native interpreter time has
+overlapping fork ranges and a 1.14% higher point estimate. Scalar-wide allocation
+is unchanged, but its timing point estimates rise 1.96–4.24%, with disjoint native-JIT
+ranges. The combined native benchmark executable grows about 9.4 MiB. These results
+describe a speed/footprint tradeoff, not a memory optimization or a new ranking
+against cel-java. The report preserves all controls and costs.
+
+The [November 5 report](benchmarks/representative-20261105/README.md) remains historical
+evidence with its original dependencies, raw data and methodology.
 
 `//benchmarks/representative` is the response to the methodology gaps in the historical
 three-expression suite. It compares the same CEL sources and four independently checked
