@@ -479,3 +479,18 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "policyConformance",
+    srcs = ["PolicyConformanceTest.java"],
+    data = [
+        "//third_party/cel-policy:corpus",
+        "//third_party/cel-spec:schemas.json",
+    ],
+    test_class = "dev.trufflecel.PolicyConformanceTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

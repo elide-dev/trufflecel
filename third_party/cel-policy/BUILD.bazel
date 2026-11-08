@@ -1,0 +1,1 @@
+filegroup(name = "corpus", srcs = glob(["testdata/**"]), visibility = ["//visibility:public"])
