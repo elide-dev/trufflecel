@@ -197,10 +197,25 @@ curves. Compilation includes this library's own parser and checker; it is not Tr
 guest compilation. Corpus coverage and microbenchmark speedups do not establish a
 general replacement for another CEL engine.
 
-The [dedicated Threadripper measurements](docs/benchmarks/representative-20261105/README.md)
-show mixed JVM results: TruffleCEL performs well on scalar arithmetic and repeated-list
-materialization, while cel-java is faster on wide activations and the protobuf policy fixtures.
-The report retains raw samples, preparation costs, runtime settings and follow-up priorities.
+The [November 8 six-fixture report](docs/benchmarks/evaluation-refresh-20261108/README.md)
+measures the RE2/J candidate `67ab33c` on pinned GraalVM 25.5.5-elide.27 with TruffleData
+0.9.0. Under the ordinary Map API, TruffleCEL has lower evaluation time in 24/24
+comparisons against the faster cel-java planner mode, lower allocation in 23/24 with
+one tie, and lower current process RSS in 9/24. These are separate timing and memory
+measurements; native guest-JIT memory remains higher on the complex fixtures.
+
+cel-java copies ordinary input maps on evaluation. The
+[paired prepared-map control](docs/benchmarks/cel-java-inputs-20261108/README.md)
+isolates how caller-prepared Guava immutable maps change that cost while retaining
+all 69 bindings: cel-java's scalar-wide allocation falls from 2,936 to 72 B/op on the
+JVM and 3,504 to 120 B/op on native, with substantially lower evaluation time.
+Caller-side preparation is excluded. The ordinary-map counts do not establish an
+advantage over every embedding path.
+[Startup and natural-JIT payback](docs/benchmarks/startup-payback-20261108/README.md)
+remain separate tradeoffs, including slower JVM scalar startup and no sampled
+JVM scalar-wide/policy payback through one million evaluations. Historical
+[November 5 measurements](docs/benchmarks/representative-20261105/README.md) remain
+available with their original dependencies and methodology.
 
 <details>
 <summary>Historical three-expression comparison (TruffleCEL 0.2.0)</summary>

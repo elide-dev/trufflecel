@@ -41,8 +41,45 @@ library memory optimizations.
 
 ## Representative comparisons
 
-See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
-for measured results, raw data, uncertainty and follow-up priorities.
+The [November 8 six-fixture report](benchmarks/evaluation-refresh-20261108/README.md)
+records production candidate `67ab33c`, GraalVM 25.5.5-elide.27, TruffleData 0.9.0 and
+the existing RE2/J path. It contains all six fixtures, four input variants and full
+69-binding activations except the explicitly single-binding scalar. The repeated
+fixture materializes 77–80 output elements from 128 input elements. Comparators
+include cel-java's default planner and constant-folding/CSE planner on both JVM and
+Native Image.
+
+Using the lower of cel-java's two modes separately for each metric, the ordinary-Map
+protocol records lower TruffleCEL time in all 24 runtime/mode/fixture comparisons,
+lower current-thread allocation in 23 with one tie, lower current RSS in 9, and lower
+lifetime peak RSS in 10. The 24 JMH
+cells each use three forks; 72 native timing processes and 144 separate allocation/RSS
+processes complete the matrix. These are descriptive point estimates from an observed
+low-load shared host with fixed affinity, not universal engine rankings. RSS includes
+setup, calibration, compilation and fixed sampled work at an uncontrolled GC point;
+guest JIT also has 2,000 additional preparation evaluations and forced compilation.
+It is not retained heap or equal total work since process launch.
+
+The full-input maps are JDK unmodifiable maps. cel-java's public `eval(Map)` copies
+their entries on each evaluation, while its Guava `ImmutableMap` path reuses the
+caller-prepared map. The [paired input-representation controls](benchmarks/cel-java-inputs-20261108/README.md)
+isolate this distinction for scalar-wide and protobuf policy on both runtimes, with
+default and optimized planners. Both control forms capture four complete maps in the
+same array and use the same evaluation lambda; caller-side preparation is outside
+the timing/allocation intervals. The original matrix is preserved rather than
+reinterpreted as a comparison of every optimized embedding path.
+
+Across the 96 supplemental control processes, immutable inputs reduce cel-java's
+allocation by 2,864 B/op on the JVM and 3,384 B/op on native in all eight matched
+runtime/workload/planner cells. Scalar-wide allocation falls from 2,936 to 72 B/op
+on the JVM and 3,504 to 120 B/op on native; its paired evaluation speedup is about
+20–22×. Protobuf-policy speedup is 1.78–1.85× on the JVM and 2.01–2.37× on native.
+These compare the two cel-java input forms inside one artifact, not separate-report
+measurements of a revision change or a matched ranking against every TruffleCEL path.
+
+Both reports preserve this RE2/J baseline. A TruffleRegex integration requires its own
+paired measurements. The [November 5 report](benchmarks/representative-20261105/README.md)
+remains historical evidence with its original dependencies, raw data and methodology.
 
 `//benchmarks/representative` is the response to the methodology gaps in the historical
 three-expression suite. It compares the same CEL sources and four independently checked

@@ -90,6 +90,14 @@ Map-entry adaptation cost. It does not establish the same margin for application
 that supply cel-java's reusable activation forms. The optimized comparator here
 changes AST planning, not input-map representation.
 
+The subsequent [paired prepared-input control](../cel-java-inputs-20261108/README.md)
+measures this distinction with the same captured-array lookup for both map forms.
+For scalar-wide, cel-java allocation falls from 2,936 to 72 B/op on the JVM and
+3,504 to 120 B/op on native. Those controls qualify the ordinary-map advantage
+reported here; they retain all bindings and exclude caller-side preparation.
+Their separate artifact and lookup path must not be treated as a revision change
+against this immutable baseline.
+
 Results escape to JMH's result consumer or a volatile sink. The repeated fixture
 returns and verifies the actual list; it does not replace the result with a size.
 The memory harness verifies complete expected outputs before and after measurement.
