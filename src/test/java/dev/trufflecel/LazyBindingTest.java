@@ -31,6 +31,15 @@ public class LazyBindingTest {
     var program = Cel.compile("[1, 2].map(x, cel.bind(y, x + 1, [3, 4].map(x, y + x)))");
     assertEquals(List.of(List.of(5L, 6L), List.of(6L, 7L)), program.evaluate());
     assertEquals(3L, Cel.compile("cel.bind(x, 1, cel.bind(x, x + 1, x + 1))").evaluate());
+    assertEquals(1L, Cel.compile("cel.bind(y, 1, cel.bind(x, y, cel.bind(y, 2, x)))").evaluate());
+    assertEquals(7L, Cel.compile("cel.bind(x, y, cel.bind(y, 2, x))").evaluate(Map.of("y", 7L)));
+    assertEquals(
+        7L,
+        Cel.newBuilder()
+            .variable("y", CelType.INT)
+            .build()
+            .compile("cel.bind(x, .y, cel.bind(y, 2, x))")
+            .evaluate(Map.of("y", 7L)));
     assertEquals(
         5L, Cel.compile("cel.block([3], cel.bind(x, cel.index(0) + 1, x + 1))").evaluate());
     assertEquals(
@@ -69,20 +78,33 @@ public class LazyBindingTest {
   }
 
   @Test
-  public void generatedBlockSeamReplaysCostAndDoesNotCacheFailures() {
-    var env = Cel.newBuilder().build();
+  public void explicitBlocksChargeCachedInitializersOnceAndMemoizeFailures() {
+    var calls = new AtomicInteger();
+    var env =
+        Cel.newBuilder()
+            .function(
+                "fail",
+                List.of(),
+                CelType.INT,
+                args -> {
+                  calls.incrementAndGet();
+                  throw new CelException(CelException.Code.DIVIDE_BY_ZERO, "failure");
+                })
+            .build();
+    var program = env.compile("cel.block([fail()], cel.index(0) == 0 || cel.index(0) == 1)");
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, program::evaluate).code());
+    assertEquals(1, calls.get());
+    assertThrows(CelException.class, program::evaluate);
+    assertEquals(2, calls.get());
     var context = new EvalContext(env, Map.of());
     var value = ExprNode.constant(3L, 0);
-    var scope = new ExprNode.BlockScope(new ExprNode[] {value, value}, null, context, true);
+    var scope = new ExprNode.BlockScope(new ExprNode[] {value, value}, null, context);
     assertEquals(3L, scope.read(value, 0, null));
     assertEquals(1L, context.charged());
     assertEquals(3L, scope.read(value, 0, null));
-    assertEquals(2L, context.charged());
-    assertEquals(2L, context.fork().charged());
-    var failure = new ExprNode(ExprNode.Kind.IDENT, "absent", null, 0);
-    var failing = new ExprNode.BlockScope(new ExprNode[] {failure, value}, null, context, true);
-    assertThrows(CelException.class, () -> failing.read(failure, 0, null));
-    assertThrows(CelException.class, () -> failing.read(failure, 0, null));
-    assertEquals(4L, context.charged());
+    assertEquals(1L, context.charged());
+    assertEquals(1L, context.fork().charged());
   }
 }
