@@ -138,6 +138,11 @@ while retaining one owned final representation. Unknown ordering, tags, groups,
 closed-enum values, ownership, and resource bounds must remain intact. This is
 separate from the already requested allocation-free unknown-presence query.
 
+The request is tracked as [TruffleData #38](https://github.com/elide-dev/truffledata/issues/38).
+It acknowledges the in-progress 0.10.0 slab work: source inspection still finds
+unknown-byte staging there, but these measurements cover the released 0.9.0 row
+decoder. The slab path needs its own allocation qualification before adoption.
+
 Ordinary-message samples identify native list/map materialization, row/batch
 storage, reader state and scalar wrappers as remaining allocation sites. Their
 sample distributions vary substantially between recordings; this report does not
