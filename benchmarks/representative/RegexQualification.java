@@ -40,7 +40,13 @@ final class RegexQualification {
         + " "
         + result.get("accelerated_nodes")
         + " "
-        + result.get("ast_nodes");
+        + result.get("ast_nodes")
+        + " "
+        + result.get("regex_policy")
+        + " "
+        + result.get("regex_execution")
+        + " "
+        + result.get("scoped_regexes");
   }
 
   // Only these four probe methods differ in the candidate overlay. Timed loops are identical.

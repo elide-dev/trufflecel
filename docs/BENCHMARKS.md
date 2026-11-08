@@ -39,6 +39,17 @@ separately evaluates compiler and heap settings, with matched cel-java controls.
 Its production baseline is unchanged; no embedding defaults are changed by the
 library memory optimizations.
 
+The [optional RE2/J qualification](benchmarks/optional-re2j-20261108/README.md)
+compares main, new compatibility mode and opt-in TruffleRegex-only execution.
+Compatibility retains unchanged allocation with overlapping timing ranges in all
+12 cells. Opt-in constant matching retains unchanged allocation and overlapping
+ranges. Dynamic guest-JIT matching is 8.17% faster on JVM and 16.68% faster on native
+than compatibility in the same artifact, with current process RSS increasing
+11.25% and 16.50%. The complete scalar controls, balanced confirmation, interpreter
+costs and raw evidence remain in the report. Performance artifacts include RE2/J;
+separate packaged JVM/native consumers prove execution and guest compilation with
+the optional JAR physically absent.
+
 ## Representative comparisons
 
 The [November 8 six-fixture report](benchmarks/evaluation-refresh-20261108/README.md)
