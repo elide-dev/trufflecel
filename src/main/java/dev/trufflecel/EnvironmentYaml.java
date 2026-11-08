@@ -7,6 +7,7 @@ import java.util.*;
 /** Data-only CEL environment declarations; host implementations and adapters stay explicit. */
 public final class EnvironmentYaml {
   private static final Map<String, Object> DEFAULT_CONSTANTS = Cel.newBuilder().build().constants;
+
   private EnvironmentYaml() {}
 
   public static Environment read(String yaml) {
@@ -85,7 +86,9 @@ public final class EnvironmentYaml {
         String name = string(library.get("name"));
         Object version = library.getOrDefault("version", 0L);
         Integer number =
-            version.equals("latest") ? LibraryPolicy.LATEST.get(name) : Integer.valueOf(integer(version));
+            version.equals("latest")
+                ? LibraryPolicy.LATEST.get(name)
+                : Integer.valueOf(integer(version));
         if (number == null || libraries.putIfAbsent(name, number) != null)
           throw new IllegalArgumentException("unknown or repeated extension: " + name);
       }
@@ -168,7 +171,8 @@ public final class EnvironmentYaml {
       throw new IllegalArgumentException(
           "host constants cannot be exported as variable declarations");
     if (!environment.customMacros.isEmpty())
-      throw new IllegalArgumentException("custom macro callbacks require explicit host registration");
+      throw new IllegalArgumentException(
+          "custom macro callbacks require explicit host registration");
     var data = new LinkedHashMap<String, Object>();
     var aliases = new ArrayList<Object>();
     new TreeMap<>(environment.aliases)
@@ -232,12 +236,14 @@ public final class EnvironmentYaml {
                 "trufflecel.strict_validation",
                 "enabled",
                 environment.validation == Environment.Validation.STRICT)));
-    var limits = new ArrayList<>(List.of(
-            limit("cel.limit.expression_code_points", environment.maxSourceLength),
-            limit("cel.limit.parse_recursion_depth", environment.maxDepth),
-            limit("trufflecel.ast_nodes", environment.maxAstNodes),
-            limit("trufflecel.regex_program_size", environment.maxRegexProgramSize),
-            limit("trufflecel.evaluation_budget", environment.budget)));
+    var limits =
+        new ArrayList<>(
+            List.of(
+                limit("cel.limit.expression_code_points", environment.maxSourceLength),
+                limit("cel.limit.parse_recursion_depth", environment.maxDepth),
+                limit("trufflecel.ast_nodes", environment.maxAstNodes),
+                limit("trufflecel.regex_program_size", environment.maxRegexProgramSize),
+                limit("trufflecel.evaluation_budget", environment.budget)));
     if (environment.comprehensionNesting > 0)
       limits.add(limit("trufflecel.comprehension_nesting", environment.comprehensionNesting));
     data.put("limits", limits);

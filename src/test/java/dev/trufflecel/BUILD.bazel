@@ -430,3 +430,14 @@ java_test(
         "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )
+
+java_test(
+    name = "costEstimator",
+    srcs = ["CostEstimatorTest.java"],
+    test_class = "dev.trufflecel.CostEstimatorTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
