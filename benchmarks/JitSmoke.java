@@ -57,6 +57,28 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        var sorting = Cel.compile("xs.sortBy(x, x)");
+        var sortTarget = (OptimizedCallTarget) sorting.callTarget();
+        var mapReceiver = Map.of("xs", Map.of("a", 1L));
+        var listReceiver = Map.of("xs", List.of(2L, 1L));
+        for (int phase = 0; phase < 2; phase++) {
+          if (phase == 1) {
+            sortTarget.compile(true);
+            sortTarget.waitForCompilation();
+          }
+          for (int i = 0; i < 1000; i++) {
+            if (!sorting.evaluate(listReceiver).equals(List.of(1L, 2L)))
+              throw new AssertionError("Native sortBy list result");
+            try {
+              sorting.evaluate(mapReceiver);
+              throw new AssertionError("Native sortBy accepted a map");
+            } catch (CelException error) {
+              if (error.code() != CelException.Code.NO_OVERLOAD) throw error;
+            }
+          }
+        }
+        if (!sortTarget.isValidLastTier())
+          throw new AssertionError("Native sortBy receiver errors must stay compiled");
         check(IMAGE_POLICY.instantiate(), Map.of("x", 2L), 3L, Map.of("x", -1L), 0L);
         var policyEnvironment = EnvironmentYaml.read("variables: [{name: x, type: int}]");
         check(

@@ -90,7 +90,9 @@ Nested bindings have lexical scope and are restored even on errors and early ret
 List extensions include `slice(start, end)`, `flatten([depth])`, `distinct()`, `reverse()`,
 `sort()`, `sortBy(variable, keyExpression)`, and `lists.range(count)`. Slice ends are exclusive;
 flattening defaults to one level. Distinct preserves first-occurrence order. Sorting requires
-comparable keys of the same runtime type and computes each sortBy key once.
+comparable keys of the same runtime type and computes each sortBy key once. `sortBy` requires
+a list receiver, including in dynamic and unchecked programs; maps are rejected with
+`NO_OVERLOAD` after key-expression errors or unknowns are propagated.
 
 ## Strings and math
 

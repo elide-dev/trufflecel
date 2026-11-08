@@ -153,6 +153,66 @@ public class ExtensionsTest {
   }
 
   @Test
+  public void sortByRejectsDynamicMapReceiversAfterEvaluatingKeys() {
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    Environment env =
+        Cel.newBuilder()
+            .variable("xs", CelType.DYN)
+            .variable("key", CelType.DYN)
+            .function("key", List.of(), CelType.INT, args -> (long) calls.incrementAndGet())
+            .build();
+    String source = "xs.sortBy(x, x)";
+    var parsed = CanonicalAst.parse(env, source);
+    for (Program program :
+        List.of(
+            env.compile(source),
+            env.parse(source),
+            env.compile("dyn(xs).sortBy(x, x)"),
+            CanonicalAst.program(env, parsed),
+            CanonicalAst.program(env, CanonicalAst.check(env, parsed)))) {
+      for (var receiver : List.of(Map.of(), Map.of("a", 1L, "b", 2L))) {
+        var input = Map.of("xs", receiver);
+        assertEquals(
+            CelException.Code.NO_OVERLOAD,
+            assertThrows(CelException.class, () -> program.evaluate(input)).code());
+        assertEquals(
+            CelException.Code.NO_OVERLOAD,
+            assertThrows(CelException.class, () -> program.trace(event -> {}).evaluate(input))
+                .code());
+      }
+      assertEquals(List.of(1L, 2L), program.evaluate(Map.of("xs", List.of(2L, 1L))));
+      assertEquals(List.of(), program.evaluate(Map.of("xs", List.of())));
+    }
+    assertEquals(
+        CelException.Code.NO_OVERLOAD,
+        assertThrows(CelException.class, () -> env.parse("{}.sortBy(x, x)").evaluate()).code());
+    var keys = env.compile("xs.sortBy(x, key())");
+    assertEquals(
+        CelException.Code.NO_OVERLOAD,
+        assertThrows(
+                CelException.class, () -> keys.evaluate(Map.of("xs", Map.of("a", 1L, "b", 2L))))
+            .code());
+    assertEquals(2, calls.get());
+    for (String expression : List.of("xs.sortBy(x, key)", "xs.sortBy(x, 1 / key)")) {
+      for (Program program :
+          List.of(
+              env.compile(expression),
+              CanonicalAst.program(env, CanonicalAst.parse(env, expression)))) {
+        assertEquals(
+            Unknown.of("key"),
+            program.evaluate(Map.of("xs", Map.of("a", 1L), "key", Unknown.of("key"))));
+        if (expression.contains("/"))
+          assertEquals(
+              CelException.Code.DIVIDE_BY_ZERO,
+              assertThrows(
+                      CelException.class,
+                      () -> program.evaluate(Map.of("xs", Map.of("a", 1L), "key", 0L)))
+                  .code());
+      }
+    }
+  }
+
+  @Test
   public void unicodeStringsFormattingAndLimits() {
     yes("'a😀b'.substring(1,2) == '😀' && 'a😀b'.indexOf('b') == 2");
     yes("'\\u001ctext\\u001f'.trim() == '\\u001ctext\\u001f'");

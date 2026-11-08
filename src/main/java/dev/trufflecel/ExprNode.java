@@ -1179,7 +1179,12 @@ class ExprNode extends CelNode {
       case "exists" -> false;
       case "exists_one", "existsOne" -> count == 1;
       case "transformMap", "transformMapEntry" -> HostCollections.freezeMap(mapped);
-      case "sortBy" -> ExtensionFunctions.sortBy(result, sortKeys, ctx);
+      case "sortBy" -> {
+        // The canonical expansion evaluates keys before dispatching the list-only sort overload.
+        // Keep its key-error/unknown precedence for dynamic and unchecked receivers.
+        if (!(range instanceof List<?>)) throw Values.overload(name);
+        yield ExtensionFunctions.sortBy(result, sortKeys, ctx);
+      }
       default -> HostCollections.freezeList(result);
     };
   }
