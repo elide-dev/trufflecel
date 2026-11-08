@@ -291,7 +291,7 @@ public final class PolicyCompiler {
       var known = new IdentityHashMap<ExprNode, Boolean>();
       for (ExprNode condition : conditions) {
         // The generated conditional already requires bool during checking.
-        Boolean value = Optimizer.constantBoolean(nodes.get(condition.canonicalId), analysis);
+        Boolean value = Optimizer.constantBoolean(nodes.getOrDefault(condition.canonicalId, condition), analysis);
         known.put(condition, value);
         if (Boolean.FALSE.equals(value)) throw failure("policy condition is statically false");
       }
