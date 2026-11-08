@@ -200,9 +200,26 @@ dropped from 3,904 to 96 bytes per evaluation (its ceiling is 192).
 | Branch hits | 4,912 / 4,917 (99.90%) |
 | CI minimum, each metric | 99.8% |
 
+## 0.10.0 functionality qualification
+
+The combined functionality suite measures all 66 owned production sources, including
+the configuration/policy tooling, editable ASTs, partial evaluation, and annotation
+processor. All 42 source test targets passed at `547c9fc`, including the complete
+CEL and CEL Policy corpora. No source exclusions or coverage floors changed.
+
+| Metric | Measured after functionality completion |
+| --- | ---: |
+| Line hits | 8,027 / 8,035 (99.90%) |
+| Branch hits | 7,391 / 7,403 (99.84%) |
+| CI minimum, each metric | 99.8% |
+
+The [full coverage invocation](https://app.buildbuddy.io/invocation/eaf381f3-814d-4ee4-a2ff-4a5bb4a22671)
+and the local coverage gate passed. Codecov's separate patch check counts partially
+covered lines differently; its result must also be checked before merge.
+
 ## Remaining paths
 
-The full-source audit leaves six missed lines in three exception handlers:
+Six of the eight missed lines are in three exception handlers:
 
 - `DataValues.from`: the checked interop exception handler for native arrays/nulls.
   TruffleData validates their representations before this conversion; arbitrary objects
@@ -212,6 +229,10 @@ The full-source audit leaves six missed lines in three exception handlers:
 - `CanonicalAst.LegacySchemas.build`: the descriptor-validation exception handler when
   converting the bundled `cel.expr` schemas to the legacy package. The suite exercises the
   conversion using the pinned descriptors, which validate successfully.
+
+The other two lines delegate attribute metadata through a CSE index. Current tracing and
+partial-evaluation paths restore the original source tree before resolving attributes,
+so they do not visit that delegation; ordinary evaluation does not require attribute metadata.
 
 The remaining branch outcomes include both defensive checks and combinations the current
 suite has not exercised. They are not all established as unreachable:
