@@ -1,0 +1,7 @@
+sample=0 ns/op=567.8125 bytes/op=3176.0 checksum=85
+sample=1 ns/op=617.4271 bytes/op=3176.0 checksum=85
+sample=2 ns/op=698.5625 bytes/op=3176.0 checksum=85
+sample=3 ns/op=480.73125 bytes/op=3176.0 checksum=85
+sample=4 ns/op=748.0229 bytes/op=3176.0 checksum=85
+sample=5 ns/op=373.35 bytes/op=3176.0 checksum=85
+sample=6 ns/op=397.63955 bytes/op=3176.0 checksum=85
