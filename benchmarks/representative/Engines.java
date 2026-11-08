@@ -201,11 +201,25 @@ final class Engines implements AutoCloseable {
   Map<String, Object> qualifyRegex(String workload) {
     if (!ours) return Map.of("backend", "cel-java");
     var result = RegexQualification.verify(truffle, workload);
-    boolean only = environment != null && environment.regexParserTreeLimit != 0;
+    boolean only = regexOnlyPolicy();
     if (only != Boolean.getBoolean("trufflecel.benchmark.regexOnly"))
       throw new AssertionError("Incorrect regex policy");
     result.put("regex_policy", only ? "truffle-only" : "compatibility");
+    boolean dynamic = workload.equals("map-regex-dynamic");
+    int cached = CelLanguage.currentScope().regexCount();
+    int expected = workload.equals("map-regex") ? 1 : dynamic && only ? 2 : 0;
+    if (cached != expected) throw new AssertionError("Incorrect scoped regex inventory: " + cached);
+    result.put("scoped_regexes", cached);
+    result.put(
+        "regex_execution",
+        !workload.equals("map-regex") && !dynamic
+            ? "none"
+            : dynamic && !only ? "re2j" : "truffle-regex-re2");
     return result;
+  }
+
+  private boolean regexOnlyPolicy() {
+    return environment != null && environment.regexParserTreeLimit != 0;
   }
 
   public void close() {
