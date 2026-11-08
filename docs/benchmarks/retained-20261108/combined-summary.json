@@ -1,0 +1,42 @@
+[
+  {
+    "file": "combined-chain-default-distinct-69.log",
+    "variant": "combined",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "distinct",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 1139.7287999999999,
+    "rounds": [
+      1140.8872,
+      1138.5704
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "c7a7fd404a149afade3ce65645a289353a20131ca7be50bcdb4723d036d8e251",
+    "reductionFromBaselinePercent": 51.9170265028914
+  },
+  {
+    "file": "combined-chain-default-template-69.log",
+    "variant": "combined",
+    "case": "chain",
+    "mode": "default",
+    "sharing": "template",
+    "declarations": 69,
+    "count": 10000,
+    "bytesPerProgram": 963.8088,
+    "rounds": [
+      964.9672,
+      962.6504
+    ],
+    "postReleaseDriftPerProgram": [
+      0.9712,
+      -1.3456
+    ],
+    "sha256": "1eb25d2615813468f79cc29587a2a803519d4331eeb6baaf64704eaa9a51e8c6",
+    "reductionFromBaselinePercent": 56.41680886770113
+  }
+]
