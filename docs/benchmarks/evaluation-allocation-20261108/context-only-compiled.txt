@@ -1,0 +1,24 @@
+COMPILED regex.replace(s, '(a)', r'\1x'): 856.00 bytes/evaluation, 5 nodes
+COMPILED regex.extractAll(s, '[0-9]+'): 968.00 bytes/evaluation, 4 nodes
+COMPILED label(x): 184.00 bytes/evaluation, 3 nodes
+COMPILED (x + 1) * (x + 1): 224.00 bytes/evaluation, 14 nodes
+COMPILED x * 2 + 1 > 100: 24.00 bytes/evaluation, 5 nodes
+COMPILED enabled && 10 / x > 1: 48.00 bytes/evaluation, 8 nodes
+COMPILED optional.of(x).orValue(0) > 5: 72.00 bytes/evaluation, 7 nodes
+COMPILED cel.bind(v, x + 1, v > 5): 24.00 bytes/evaluation, 9 nodes
+COMPILED cel.block([x + 1], cel.index(0) > 5): 120.00 bytes/evaluation, 8 nodes
+COMPILED json.parse(s).value().a == 1: 3776.00 bytes/evaluation, 7 nodes
+COMPILED yaml.parse(s).value().a == 1: 19512.00 bytes/evaluation, 7 nodes
+COMPILED sets.contains([1,2,3], [x]): 904.00 bytes/evaluation, 5 nodes
+COMPILED s.matches('^[a-z]+@[a-z]+[.]com$'): 168.00 bytes/evaluation, 4 nodes
+COMPILED xs.all(x, x > 0): 152.00 bytes/evaluation, 7 nodes
+COMPILED xs.filter(v, v % 2 == 0).map(v, v * v).size(): 248.00 bytes/evaluation, 15 nodes
+COMPILED [x, x + 1].size() == 2: 144.00 bytes/evaluation, 9 nodes
+COMPILED {'v': x}.v > 5: 296.00 bytes/evaluation, 7 nodes
+COMPILED cidr(s).containsIP('10.1.2.3'): 15336.00 bytes/evaluation, 5 nodes
+COMPILED enabled ? x + 1 : x - 1: 48.00 bytes/evaluation, 9 nodes
+COMPILED x + y: 48.00 bytes/evaluation, 4 nodes
+COMPILED r.id > 5: 128.00 bytes/evaluation, 5 nodes
+COMPILED p.name == 'CEL': 152.00 bytes/evaluation, 11 nodes
+COMPILED j.id > 5: 272.00 bytes/evaluation, 5 nodes
+COMPILED xs.all(x, 10 / x > 0): 152.00 bytes/evaluation, 9 nodes

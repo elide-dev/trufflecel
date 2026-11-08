@@ -1,0 +1,893 @@
+diff --git a/src/main/java/dev/trufflecel/Checker.java b/src/main/java/dev/trufflecel/Checker.java
+index 8c0fd0c..bbf5872 100644
+--- a/src/main/java/dev/trufflecel/Checker.java
++++ b/src/main/java/dev/trufflecel/Checker.java
+@@ -8,6 +8,8 @@ final class Checker {
+   private final boolean strict;
+   private List<CelType> blockTypes;
+   private List<CelException.Issue> issues;
++  // Most expressions read only one root binding. Allocate a set only for multiple roots.
++  private Object rootBindings;
+   private int depth;
+ 
+   Checker(Environment env, Map<String, CelType> declarations, boolean strict) {
+@@ -17,7 +19,10 @@ final class Checker {
+   }
+ 
+   CelType check(ExprNode n, Map<String, CelType> locals) {
+-    if (depth == 0) issues = null;
++    if (depth == 0) {
++      issues = null;
++      rootBindings = null;
++    }
+     depth++;
+     CelType result;
+     try {
+@@ -41,6 +46,27 @@ final class Checker {
+     return result;
+   }
+ 
++  @SuppressWarnings("unchecked")
++  private void rootBinding(String name) {
++    if (rootBindings == null) rootBindings = name;
++    else if (rootBindings instanceof String first) {
++      if (!first.equals(name)) {
++        var names = new HashSet<String>();
++        names.add(first);
++        names.add(name);
++        rootBindings = names;
++      }
++    } else ((Set<String>) rootBindings).add(name);
++  }
++
++  @SuppressWarnings("unchecked")
++  Map<String, Integer> bindingLayout() {
++    if (rootBindings == null) return Map.of();
++    return rootBindings instanceof String name
++        ? env.bindingLayout(name)
++        : env.bindingLayout((Set<String>) rootBindings);
++  }
++
+   private CelType checkNode(ExprNode n, Map<String, CelType> locals) {
+     if (n.extensionSelect) {
+       env.libraryPolicy.library("proto.getExt", CelType.DYN, n.offset);
+@@ -51,6 +77,7 @@ final class Checker {
+       if (name != null) {
+         n.kind = ExprNode.Kind.IDENT;
+         n.name = qualified.startsWith(".") ? "." + name : name;
++        rootBinding(name);
+         return declarations.get(name);
+       }
+       name = env.resolve(qualified, env.constants.keySet());
+@@ -118,6 +145,7 @@ final class Checker {
+       case IDENT -> {
+         if (locals.containsKey(n.name)) yield locals.get(n.name);
+         if (strict) throw failure(n, "undeclared reference: " + n.name);
++        rootBinding(n.name.startsWith(".") ? n.name.substring(1) : n.name);
+         yield CelType.DYN;
+       }
+       case SELECT, INDEX -> {
+diff --git a/src/main/java/dev/trufflecel/CseOptimizer.java b/src/main/java/dev/trufflecel/CseOptimizer.java
+index e5658ab..48b5010 100644
+--- a/src/main/java/dev/trufflecel/CseOptimizer.java
++++ b/src/main/java/dev/trufflecel/CseOptimizer.java
+@@ -201,6 +201,12 @@ final class CseOptimizer {
+       sourceRange(root.sourceStart, root.sourceEnd);
+     }
+ 
++    @Override
++    void finishPlanning(ExprNode owner) {
++      super.finishPlanning(owner);
++      original.finishPlanning(null);
++    }
++
+     @Override
+     ExprNode restoreTrace() {
+       return NodeUtil.cloneNode(original).restoreTrace();
+@@ -208,7 +214,7 @@ final class CseOptimizer {
+ 
+     @Override
+     Object doExecute(VirtualFrame frame, EvalContext context) {
+-      EvalContext body = context.fork();
++      var body = context.fork();
+       body.block = new BlockScope(children, null, body, true);
+       return children[children.length - 1].execute(frame, body);
+     }
+@@ -227,6 +233,12 @@ final class CseOptimizer {
+       sourceRange(original.sourceStart, original.sourceEnd);
+     }
+ 
++    @Override
++    void finishPlanning(ExprNode owner) {
++      super.finishPlanning(owner);
++      original.finishPlanning(owner);
++    }
++
+     @Override
+     void resolveLazyBindings(Map<String, ExprNode> owners) {
+       original.resolveLazyBindings(owners);
+@@ -245,9 +257,9 @@ final class CseOptimizer {
+     @Override
+     Object doExecute(VirtualFrame frame, EvalContext context) {
+       int index = Math.toIntExact((Long) value);
+-      Object result = context.block.cached(index);
++      Object result = context.block().cached(index);
+       if (result != null) {
+-        long cost = context.block.cachedCost(index);
++        long cost = context.block().cachedCost(index);
+         if (context.canCharge(cost)) {
+           context.charge(cost);
+           return result;
+@@ -255,7 +267,7 @@ final class CseOptimizer {
+       }
+       long before = context.charged();
+       result = original.execute(frame, context);
+-      context.block.cache(index, result, context.charged() - before);
++      context.block().cache(index, result, context.charged() - before);
+       return result;
+     }
+   }
+diff --git a/src/main/java/dev/trufflecel/Environment.java b/src/main/java/dev/trufflecel/Environment.java
+index 54ac89c..6ca1759 100644
+--- a/src/main/java/dev/trufflecel/Environment.java
++++ b/src/main/java/dev/trufflecel/Environment.java
+@@ -32,6 +32,7 @@ public final class Environment {
+ 
+   final Map<String, CelType> variables;
+   private final Set<String> variableNames;
++  private final Map<String, Integer> variableLayout;
+   final Map<String, Object> constants;
+   final Map<String, ObjectType> objectTypes;
+   final ObjectType[] runtimeObjectTypes;
+@@ -73,6 +74,7 @@ public final class Environment {
+     libraryPolicy = new LibraryPolicy(b.libraries, b.allowedFunctions);
+     variables = Map.copyOf(b.variables);
+     variableNames = Set.copyOf(variables.keySet());
++    variableLayout = indexBindings(variableNames);
+     constants = Map.copyOf(b.constants);
+     objectTypes = Map.copyOf(b.objectTypes);
+     constructorOnlyTypes = Set.copyOf(b.constructorOnlyTypes);
+@@ -103,6 +105,26 @@ public final class Environment {
+     validators = List.copyOf(b.validators);
+   }
+ 
++  // Declaration indexes are immutable and can be shared by every program in this environment.
++  // Inferred declarations belong to their prepared template, never to a global source cache.
++  Map<String, Integer> bindingLayout(Set<String> names) {
++    return names.equals(variableNames) ? variableLayout : indexBindings(names);
++  }
++
++  Map<String, Integer> bindingLayout(String name) {
++    return variableNames.size() == 1 && variableNames.contains(name)
++        ? variableLayout
++        : Map.of(name, 0);
++  }
++
++  private static Map<String, Integer> indexBindings(Set<String> names) {
++    if (names.isEmpty()) return Map.of();
++    if (names.size() == 1) return Map.of(names.iterator().next(), 0);
++    var result = new HashMap<String, Integer>();
++    for (String name : names) result.put(name, result.size());
++    return Map.copyOf(result);
++  }
++
+   /**
+    * Compile an instrumentable program in an entered Polyglot context; initializes CEL if needed.
+    */
+@@ -266,6 +288,7 @@ public final class Environment {
+     return new PreparedProgram(
+         source,
+         declarations == variables ? variableNames : declarations.keySet(),
++        checker.bindingLayout(),
+         result,
+         node,
+         this);
+diff --git a/src/main/java/dev/trufflecel/EvalContext.java b/src/main/java/dev/trufflecel/EvalContext.java
+index 15d94ae..d27d3bb 100644
+--- a/src/main/java/dev/trufflecel/EvalContext.java
++++ b/src/main/java/dev/trufflecel/EvalContext.java
+@@ -2,66 +2,100 @@ package dev.trufflecel;
+ 
+ import java.util.*;
+ 
+-final class EvalContext {
++sealed class EvalContext {
+   final Environment environment;
++  // Ordinary roots borrow their already allocated call arguments; scoped entries can hold a map.
+   private final Object activation;
+-  private final String singleName;
+-  // Allocate only for expressions with local bindings; reuse slots across loop iterations.
+-  private Object[] scopes;
+-  private int scopeSize;
+-  private long remaining, initialBudget;
++  private long remaining;
+   private EvaluationState evaluation;
+-  private EvalContext budgetParent;
+-  ExprNode.BlockScope block;
+-
+-  EvalContext fork() {
+-    EvalContext copy =
+-        singleName == null
+-            ? new EvalContext(environment, activation)
+-            : new EvalContext(environment, singleName, activation);
+-    copy.scopes = scopes == null ? null : scopes.clone();
+-    copy.scopeSize = scopeSize;
+-    copy.budgetParent = budgetParent == null ? this : budgetParent;
+-    copy.block = block;
+-    copy.evaluation = evaluation;
+-    return copy;
++
++  /** Only escaping or observable evaluation paths need lexical scopes and a budget owner. */
++  static final class Scoped extends EvalContext {
++    private final String singleName;
++    private Object[] scopes;
++    private int scopeSize;
++    private final EvalContext budgetParent;
++    ExprNode.BlockScope block;
++
++    Scoped(Environment environment, Object activation) {
++      this(environment, null, activation);
++    }
++
++    Scoped(Environment environment, String name, Object value) {
++      super(environment, value);
++      singleName = name;
++      budgetParent = null;
++    }
++
++    private Scoped(EvalContext original) {
++      super(original);
++      if (original instanceof Scoped scoped) {
++        singleName = scoped.singleName;
++        scopes = scoped.scopes == null ? null : scoped.scopes.clone();
++        scopeSize = scoped.scopeSize;
++        budgetParent = scoped.budgetParent == null ? original : scoped.budgetParent;
++        block = scoped.block;
++      } else {
++        singleName = null;
++        budgetParent = original;
++      }
++    }
++  }
++
++  final Scoped fork() {
++    return new Scoped(this);
++  }
++
++  final ExprNode.BlockScope block() {
++    return ((Scoped) this).block;
+   }
+ 
+   EvalContext(Environment environment, Object activation) {
+     this.environment = environment;
+     this.activation = activation;
+-    singleName = null;
+-    initialBudget = remaining = environment.budget;
++    remaining = environment.budget;
+   }
+ 
+-  EvalContext(Environment environment, String name, Object value) {
+-    this.environment = environment;
+-    singleName = name;
+-    activation = value;
+-    initialBudget = remaining = environment.budget;
++  private EvalContext(EvalContext original) {
++    environment = original.environment;
++    activation = original.activation;
++    remaining = environment.budget;
++    evaluation = original.evaluation;
+   }
+ 
+   void configure(EvaluationOptions options) {
+-    if (options.budget != 0) initialBudget = remaining = options.budget;
+     evaluation = new EvaluationState(environment, options);
++    remaining = evaluation.budget;
+   }
+ 
+   @SuppressWarnings("unchecked")
+-  private Map<String, Object> activationMap() {
++  private static Map<String, Object> activationMap(Object activation) {
+     return (Map<String, Object>) activation;
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   Map<String, Object> visibleBindings() {
+     var visible = new LinkedHashMap<String, Object>();
+-    if (singleName != null) visible.put(singleName, activation);
+-    else if (activation instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
+-    else visible.putAll(activationMap());
+-    for (int i = 0; i < scopeSize; i += 2) {
+-      Object value = scopes[i + 1];
+-      if (value instanceof PartialState.Slot slot) value = slot.value();
+-      visible.put(
+-          (String) scopes[i], value instanceof ExprNode.LazyBinding lazy ? lazy.display() : value);
++    Object binding = activation;
++    Object value = null;
++    if (activation instanceof Object[] arguments) {
++      binding = arguments[0];
++      value = arguments[1];
++    } else if (this instanceof Scoped scoped && scoped.singleName != null) {
++      binding = scoped.singleName;
++      value = activation;
++    }
++    if (binding instanceof String name) visible.put(name, value);
++    else if (binding instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
++    else visible.putAll(activationMap(binding));
++    if (this instanceof Scoped scoped) {
++      for (int i = 0; i < scoped.scopeSize; i += 2) {
++        Object local = scoped.scopes[i + 1];
++        if (local instanceof PartialState.Slot slot) local = slot.value();
++        visible.put(
++            (String) scoped.scopes[i],
++            local instanceof ExprNode.LazyBinding lazy ? lazy.display() : local);
++      }
+     }
+     return Collections.unmodifiableMap(visible);
+   }
+@@ -72,22 +106,27 @@ final class EvalContext {
+ 
+   /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
+   long charged() {
+-    return budgetParent == null
+-        ? initialBudget - remaining
+-        : budgetParent.initialBudget - budgetParent.remaining;
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      return scoped.budgetParent.chargedOwn();
++    return chargedOwn();
++  }
++
++  private long chargedOwn() {
++    return (evaluation == null ? environment.budget : evaluation.budget) - remaining;
+   }
+ 
+   boolean canCharge(long cost) {
+-    return budgetParent == null ? cost <= remaining : cost <= budgetParent.remaining;
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      return cost <= scoped.budgetParent.remaining;
++    return cost <= remaining;
+   }
+ 
+   void charge(long cost) {
+-    // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
+-    // context with a loaded parent would force escape analysis to materialize the context in every
+-    // compiled loop, now that error handlers rejoin the main control flow.
+-    EvalContext parent = budgetParent;
+-    if (parent == null) chargeOwn(cost);
+-    else parent.chargeOwn(cost);
++    // Keep root and parent dispatch separate: merging the virtual root with a loaded parent
++    // forces escape analysis to materialize the root in compiled loops.
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      scoped.budgetParent.chargeOwn(cost);
++    else chargeOwn(cost);
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+@@ -199,7 +238,7 @@ final class EvalContext {
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   Object getLocal(int slot) {
+-    return readStored(scopes[slot * 2 + 1]);
++    return readStored(((Scoped) this).scopes[slot * 2 + 1]);
+   }
+ 
+   private Object rootBinding(String name) {
+@@ -207,8 +246,16 @@ final class EvalContext {
+     Object override = attributeRead(path, false);
+     if (override != PartialState.NONE) return override;
+     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
+-    Object value =
+-        singleName == null ? lookup(activation, name) : singleName.equals(name) ? activation : null;
++    Object value;
++    if (activation instanceof Object[] arguments) {
++      Object binding = arguments[0];
++      value =
++          binding instanceof String single
++              ? single.equals(name) ? arguments[1] : null
++              : lookup(binding, name);
++    } else if (this instanceof Scoped scoped && scoped.singleName != null)
++      value = scoped.singleName.equals(name) ? activation : null;
++    else value = lookup(activation, name);
+     if (value != null) return value;
+     if (path != null && evaluation.partial.containsUnknown(path)) return PartialState.MISSING;
+     throw undeclared(name);
+@@ -229,15 +276,18 @@ final class EvalContext {
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   void push(String name, Object value) {
+-    if (scopes == null) scopes = new Object[8];
+-    else if (scopeSize == scopes.length) scopes = Arrays.copyOf(scopes, scopeSize * 2);
+-    scopes[scopeSize++] = name;
+-    scopes[scopeSize++] = value;
++    Scoped scoped = (Scoped) this;
++    if (scoped.scopes == null) scoped.scopes = new Object[8];
++    else if (scoped.scopeSize == scoped.scopes.length)
++      scoped.scopes = Arrays.copyOf(scoped.scopes, scoped.scopeSize * 2);
++    scoped.scopes[scoped.scopeSize++] = name;
++    scoped.scopes[scoped.scopeSize++] = value;
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   void pop() {
+-    scopes[--scopeSize] = null;
+-    scopes[--scopeSize] = null;
++    Scoped scoped = (Scoped) this;
++    scoped.scopes[--scoped.scopeSize] = null;
++    scoped.scopes[--scoped.scopeSize] = null;
+   }
+ }
+diff --git a/src/main/java/dev/trufflecel/EvaluationState.java b/src/main/java/dev/trufflecel/EvaluationState.java
+index 3a35bdb..c7a6653 100644
+--- a/src/main/java/dev/trufflecel/EvaluationState.java
++++ b/src/main/java/dev/trufflecel/EvaluationState.java
+@@ -5,12 +5,14 @@ import java.util.function.Function;
+ 
+ /** Optional observable execution state; ordinary calls allocate none of this state. */
+ final class EvaluationState {
++  final long budget;
+   final EvaluationOptions.Control control;
+   final TraceListener trace;
+   final PartialState partial;
+   final Map<String, Function<List<Object>, Object>> functions;
+ 
+   EvaluationState(Environment environment, EvaluationOptions options) {
++    budget = options.budget == 0 ? environment.budget : options.budget;
+     control = options.control();
+     trace = options.trace;
+     partial = options.partial == null ? null : new PartialState(options.partial);
+diff --git a/src/main/java/dev/trufflecel/ExprNode.java b/src/main/java/dev/trufflecel/ExprNode.java
+index aceff27..08673d4 100644
+--- a/src/main/java/dev/trufflecel/ExprNode.java
++++ b/src/main/java/dev/trufflecel/ExprNode.java
+@@ -9,6 +9,7 @@ import java.util.*;
+ /** Each parsed expression becomes an adopted Truffle AST node, never a delegated interpreter. */
+ @GenerateWrapper
+ class ExprNode extends CelNode {
++  private static final ExprNode[] NO_CHILDREN = new ExprNode[0];
+   boolean rootBody, statement;
+   long canonicalId;
+   // Original custom macro syntax is immutable metadata, never a runtime child.
+@@ -85,10 +86,22 @@ class ExprNode extends CelNode {
+   }
+ 
+   void resolveBlocks(ExprNode owner) {
++    if (children.length == 0) children = NO_CHILDREN;
+     if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
+     for (ExprNode child : children) child.resolveBlocks(kind == Kind.BLOCK ? this : owner);
+   }
+ 
++  /** Complete the owned runtime copy once; source templates keep their planning annotations. */
++  void finishPlanning(ExprNode owner) {
++    fold = null;
++    checkedType = null;
++    macroCall = null;
++    // NodeUtil also clones empty @Children arrays when instantiating a prepared template.
++    if (children.length == 0) children = NO_CHILDREN;
++    if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
++    for (ExprNode child : children) child.finishPlanning(kind == Kind.BLOCK ? this : owner);
++  }
++
+   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
+   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private int localSlot = -1;
+   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean frameLocalReads;
+@@ -169,7 +182,7 @@ class ExprNode extends CelNode {
+     this.name = name;
+     this.value = value;
+     this.offset = offset;
+-    this.children = children;
++    this.children = children.length == 0 ? NO_CHILDREN : children;
+   }
+ 
+   private static int scalarCode(String name) {
+@@ -372,28 +385,18 @@ class ExprNode extends CelNode {
+    */
+   private static final class ArithmeticChain extends ExprNode {
+     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+-    private final int[] operations;
++    // Per operator: encoded operation, error offset/line/column, then literal
++    // error offset/line/column and source start/end. IDs remain full-width longs.
++    private final int[] metadata;
+ 
+     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+     private final long[] constants;
+ 
+-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+-    private final int[] positions;
+-
+     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+     private final long[] ids;
+ 
+-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+-    private final long[] literalIds;
+-
+-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+-    private final int[] literalLocations;
+-
+-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+-    private final boolean[] codePointPositions;
+-
+-    private CelException.OffsetEncoding encoding(int index) {
+-      return codePointPositions[index]
++    private CelException.OffsetEncoding encoding(int index, boolean literal) {
++      return (metadata[index * 9] & (literal ? 512 : 256)) != 0
+           ? CelException.OffsetEncoding.CODE_POINT
+           : CelException.OffsetEncoding.UTF16;
+     }
+@@ -402,35 +405,32 @@ class ExprNode extends CelNode {
+ 
+     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
+       super(Kind.CALL, outer.name, false, outer.offset, leaf);
+-      operations = new int[count];
++      metadata = new int[count * 9];
+       constants = new long[count];
+-      positions = new int[count * 3];
+-      ids = new long[count];
+-      literalIds = new long[count];
+-      literalLocations = new int[count * 5];
+-      codePointPositions = new boolean[count * 2];
++      ids = new long[count * 2];
+       ExprNode node = outer;
+       for (int i = count - 1; i >= 0; i--) {
+-        positions[i * 3] = node.errorOffset;
+-        positions[i * 3 + 1] = node.errorLine;
+-        positions[i * 3 + 2] = node.errorColumn;
+-        ids[i] = node.canonicalId;
+-        codePointPositions[i] = node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
+-        operations[i] = node.name.charAt(0);
++        metadata[i * 9 + 1] = node.errorOffset;
++        metadata[i * 9 + 2] = node.errorLine;
++        metadata[i * 9 + 3] = node.errorColumn;
++        ids[i * 2] = node.canonicalId;
++        metadata[i * 9] = node.name.charAt(0);
++        if (node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
++          metadata[i * 9] |= 256;
+         ExprNode literal = node.children[1];
+         constants[i] = (Long) literal.value;
+-        literalIds[i] = literal.canonicalId;
+-        codePointPositions[i + count] =
+-            literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
+-        literalLocations[i * 5] = literal.errorOffset;
+-        literalLocations[i * 5 + 1] = literal.errorLine;
+-        literalLocations[i * 5 + 2] = literal.errorColumn;
+-        literalLocations[i * 5 + 3] = literal.sourceStart;
+-        literalLocations[i * 5 + 4] = literal.sourceEnd;
++        ids[i * 2 + 1] = literal.canonicalId;
++        if (literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
++          metadata[i * 9] |= 512;
++        metadata[i * 9 + 4] = literal.errorOffset;
++        metadata[i * 9 + 5] = literal.errorLine;
++        metadata[i * 9 + 6] = literal.errorColumn;
++        metadata[i * 9 + 7] = literal.sourceStart;
++        metadata[i * 9 + 8] = literal.sourceEnd;
+         node = node.children[0];
+       }
+       firstOperation =
+-          switch (operations[0]) {
++          switch ((metadata[0] & 255)) {
+             case '+' -> "+";
+             case '-' -> "-";
+             default -> "*";
+@@ -444,27 +444,27 @@ class ExprNode extends CelNode {
+     @Override
+     ExprNode restoreTrace() {
+       ExprNode restored = children[0].restoreTrace();
+-      for (int i = 0; i < operations.length; i++) {
+-        ExprNode literal = constant(constants[i], literalLocations[i * 5]);
+-        literal.canonicalId = literalIds[i];
+-        literal.errorOffset = literalLocations[i * 5];
+-        literal.errorLine = literalLocations[i * 5 + 1];
+-        literal.errorColumn = literalLocations[i * 5 + 2];
+-        literal.errorOffsetEncoding = encoding(i + operations.length);
+-        literal.sourceRange(literalLocations[i * 5 + 3], literalLocations[i * 5 + 4]);
++      for (int i = 0; i < constants.length; i++) {
++        ExprNode literal = constant(constants[i], metadata[i * 9 + 4]);
++        literal.canonicalId = ids[i * 2 + 1];
++        literal.errorOffset = metadata[i * 9 + 4];
++        literal.errorLine = metadata[i * 9 + 5];
++        literal.errorColumn = metadata[i * 9 + 6];
++        literal.errorOffsetEncoding = encoding(i, true);
++        literal.sourceRange(metadata[i * 9 + 7], metadata[i * 9 + 8]);
+         ExprNode next =
+             new ExprNode(
+                 Kind.CALL,
+-                Character.toString(operations[i]),
++                Character.toString((metadata[i * 9] & 255)),
+                 false,
+-                positions[i * 3],
++                metadata[i * 9 + 1],
+                 restored,
+                 literal);
+-        next.canonicalId = ids[i];
+-        next.errorOffset = positions[i * 3];
+-        next.errorLine = positions[i * 3 + 1];
+-        next.errorColumn = positions[i * 3 + 2];
+-        next.errorOffsetEncoding = encoding(i);
++        next.canonicalId = ids[i * 2];
++        next.errorOffset = metadata[i * 9 + 1];
++        next.errorLine = metadata[i * 9 + 2];
++        next.errorColumn = metadata[i * 9 + 3];
++        next.errorOffsetEncoding = encoding(i, false);
+         next.sourceRange(restored.sourceStart, literal.sourceEnd);
+         restored = next;
+       }
+@@ -478,43 +478,47 @@ class ExprNode extends CelNode {
+     @com.oracle.truffle.api.nodes.ExplodeLoop
+     Object doExecute(VirtualFrame frame, EvalContext ctx) {
+       // The original outer-to-inner operator visits all precede evaluation of the left operand.
+-      ctx.charge(operations.length);
++      ctx.charge(constants.length);
+       Object left;
+       try {
+         left = children[0].execute(frame, ctx);
+       } catch (CelException e) {
+         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+-        ctx.charge(operations.length);
++        ctx.charge(constants.length);
+         throw e;
+       }
+       if (left instanceof Unknown) {
+-        ctx.charge(operations.length);
++        ctx.charge(constants.length);
+         return left;
+       }
+       if (left instanceof Long number) {
+         long result = number;
+-        for (int i = 0; i < operations.length; i++) {
++        for (int i = 0; i < constants.length; i++) {
+           ctx.tick(); // The right literal's visit still consumes its original budget.
+           try {
+             result =
+-                switch (operations[i]) {
++                switch ((metadata[i * 9] & 255)) {
+                   case '+' -> Functions.add(result, constants[i]);
+                   case '-' -> Functions.subtract(result, constants[i]);
+                   default -> Functions.multiply(result, constants[i]);
+                 };
+           } catch (CelException e) {
+             // Outer constants are evaluated even when an inner operation fails.
+-            ctx.charge(operations.length - i - 1);
++            ctx.charge(constants.length - i - 1);
+             throw e.at(
+-                positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2], encoding(i));
++                metadata[i * 9 + 1],
++                ids[i * 2],
++                metadata[i * 9 + 2],
++                metadata[i * 9 + 3],
++                encoding(i, false));
+           }
+         }
+         return result;
+       }
+       // These operators require matching numeric types; every right operand is a CEL int.
+-      ctx.charge(operations.length);
++      ctx.charge(constants.length);
+       throw Values.overload(firstOperation)
+-          .at(positions[0], ids[0], positions[1], positions[2], encoding(0));
++          .at(metadata[1], ids[0], metadata[2], metadata[3], encoding(0, false));
+     }
+   }
+ 
+@@ -627,10 +631,11 @@ class ExprNode extends CelNode {
+     return switch (kind) {
+       case BLOCK -> block(frame, ctx);
+       case BLOCK_INDEX ->
+-          ctx.block.read(
+-              blockOwner.children[Math.toIntExact((Long) value)],
+-              Math.toIntExact((Long) value),
+-              frame);
++          ctx.block()
++              .read(
++                  blockOwner.children[Math.toIntExact((Long) value)],
++                  Math.toIntExact((Long) value),
++                  frame);
+       case CONSTANT -> value;
+       case IDENT ->
+           checkedValue(
+@@ -893,9 +898,9 @@ class ExprNode extends CelNode {
+   private Object block(VirtualFrame frame, EvalContext ctx) {
+     if (getSourceSection() != null) return instrumentedBlock(frame.materialize(), ctx);
+     ctx.charge(children.length);
+-    EvalContext scoped = ctx.fork();
++    var scoped = ctx.fork();
+     scoped.block = new BlockScope(children, null, scoped);
+-    EvalContext body = ctx.fork();
++    var body = ctx.fork();
+     body.block = scoped.block;
+     return children[children.length - 1].execute(frame, body);
+   }
+@@ -904,10 +909,10 @@ class ExprNode extends CelNode {
+   private Object instrumentedBlock(
+       com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
+     ctx.charge(children.length);
+-    EvalContext scoped = ctx.fork();
++    var scoped = ctx.fork();
+     VirtualFrame captured = forkFrame(frame, scoped);
+     scoped.block = new BlockScope(children, captured, scoped);
+-    EvalContext body = ctx.fork();
++    var body = ctx.fork();
+     body.block = scoped.block;
+     return children[children.length - 1].execute(forkFrame(frame, body), body);
+   }
+diff --git a/src/main/java/dev/trufflecel/Optimizer.java b/src/main/java/dev/trufflecel/Optimizer.java
+index bbdbb02..abfee65 100644
+--- a/src/main/java/dev/trufflecel/Optimizer.java
++++ b/src/main/java/dev/trufflecel/Optimizer.java
+@@ -359,7 +359,7 @@ final class Optimizer {
+     // relative to that subtree rather than to any surrounding source comprehension.
+     n.resolveLocals(new ArrayList<>(), null);
+     n.resolveLazyBindings(Map.of());
+-    var context = new EvalContext(env, Map.of());
++    var context = new EvalContext.Scoped(env, Map.of());
+     Object value = null;
+     CelException error = null;
+     try {
+@@ -483,6 +483,13 @@ final class Optimizer {
+       error = original.fold.error();
+     }
+ 
++    @Override
++    void finishPlanning(ExprNode owner) {
++      super.finishPlanning(owner);
++      // Created after template cloning, before this source copy can be shared by lazy targets.
++      original.finishPlanning(null);
++    }
++
+     @Override
+     ExprNode restoreTrace() {
+       return com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original).restoreTrace();
+diff --git a/src/main/java/dev/trufflecel/PolicyCompiler.java b/src/main/java/dev/trufflecel/PolicyCompiler.java
+index e2af361..06e61a8 100644
+--- a/src/main/java/dev/trufflecel/PolicyCompiler.java
++++ b/src/main/java/dev/trufflecel/PolicyCompiler.java
+@@ -299,7 +299,7 @@ public final class PolicyCompiler {
+         nodes.put(node.canonicalId, node);
+         Collections.addAll(pending, node.children);
+       }
+-      var analysis = new EvalContext(environment, Map.of());
++      var analysis = new EvalContext.Scoped(environment, Map.of());
+       var known = new IdentityHashMap<ExprNode, Boolean>();
+       for (ExprNode condition : conditions) {
+         // The generated conditional already requires bool during checking.
+diff --git a/src/main/java/dev/trufflecel/PreparedProgram.java b/src/main/java/dev/trufflecel/PreparedProgram.java
+index 8434851..30e17cc 100644
+--- a/src/main/java/dev/trufflecel/PreparedProgram.java
++++ b/src/main/java/dev/trufflecel/PreparedProgram.java
+@@ -1,6 +1,7 @@
+ package dev.trufflecel;
+ 
+ import com.oracle.truffle.api.nodes.NodeUtil;
++import java.util.Map;
+ import java.util.Set;
+ 
+ /**
+@@ -9,6 +10,7 @@ import java.util.Set;
+ public final class PreparedProgram {
+   private final String source;
+   private final Set<String> variables;
++  private final Map<String, Integer> bindingLayout;
+   private final CelType result;
+   private final ExprNode expression;
+   private final Environment environment;
+@@ -16,11 +18,13 @@ public final class PreparedProgram {
+   PreparedProgram(
+       String source,
+       Set<String> variables,
++      Map<String, Integer> bindingLayout,
+       CelType result,
+       ExprNode expression,
+       Environment environment) {
+     this.source = source;
+     this.variables = Set.copyOf(variables);
++    this.bindingLayout = bindingLayout;
+     this.result = result;
+     this.expression = expression;
+     this.environment = environment;
+@@ -28,7 +32,8 @@ public final class PreparedProgram {
+ 
+   /** Create an independent target. Call this at runtime for a template stored in a native image. */
+   public Program instantiate() {
+-    return new Program(source, variables, result, NodeUtil.cloneNode(expression), environment);
++    return new Program(
++        source, variables, bindingLayout, result, NodeUtil.cloneNode(expression), environment);
+   }
+ 
+   /** Instantiate with instrumentation in an entered Polyglot context; initializes CEL if needed. */
+@@ -38,6 +43,7 @@ public final class PreparedProgram {
+     return new Program(
+         source,
+         variables,
++        bindingLayout,
+         result,
+         NodeUtil.cloneNode(expression),
+         environment,
+@@ -46,12 +52,13 @@ public final class PreparedProgram {
+   }
+ 
+   Program adopt(CelLanguage language, com.oracle.truffle.api.source.Source truffleSource) {
+-    return new Program(source, variables, result, expression, environment, language, truffleSource);
++    return new Program(
++        source, variables, bindingLayout, result, expression, environment, language, truffleSource);
+   }
+ 
+   // Consume a freshly parsed tree only; public templates always clone before adoption.
+   Program adopt() {
+-    return new Program(source, variables, result, expression, environment);
++    return new Program(source, variables, bindingLayout, result, expression, environment);
+   }
+ 
+   // Compiler validation inspects the optimized template before it is exposed to callers.
+diff --git a/src/main/java/dev/trufflecel/Program.java b/src/main/java/dev/trufflecel/Program.java
+index dc481a0..59ad14a 100644
+--- a/src/main/java/dev/trufflecel/Program.java
++++ b/src/main/java/dev/trufflecel/Program.java
+@@ -24,15 +24,17 @@ public final class Program {
+   Program(
+       String source,
+       Set<String> variables,
++      Map<String, Integer> bindingLayout,
+       CelType resultType,
+       ExprNode body,
+       Environment environment) {
+-    this(source, variables, resultType, body, environment, null, null);
++    this(source, variables, bindingLayout, resultType, body, environment, null, null);
+   }
+ 
+   Program(
+       String source,
+       Set<String> variables,
++      Map<String, Integer> bindingLayout,
+       CelType resultType,
+       ExprNode body,
+       Environment environment,
+@@ -40,9 +42,10 @@ public final class Program {
+       Source truffleSource) {
+     this.source = source;
+     this.variables = Set.copyOf(variables);
+-    var layout = new LinkedHashMap<String, Integer>();
+-    for (String name : variables) layout.put(name, layout.size());
+-    bindingLayout = Map.copyOf(layout);
++    // A debugger can inspect unused declarations repeatedly. Plain evaluation only caches
++    // conversions for referenced roots, independently of the environment's declaration count.
++    this.bindingLayout =
++        truffleSource == null ? bindingLayout : environment.bindingLayout(this.variables);
+     String identifier = body.firstIdentifier();
+     bindingHint =
+         identifier != null
+@@ -57,7 +60,7 @@ public final class Program {
+       if (environment.commonSubexpressions) body = CseOptimizer.optimize(body, environment);
+       body = Optimizer.rewrite(body.lowerUninstrumented());
+     }
+-    body.resolveBlocks(null);
++    body.finishPlanning(null);
+     boolean hasBindings = body.hasBindings();
+     if (hasBindings) body.resolveLazyBindings(Map.of());
+     // Attribute qualification is needed only by the lazily restored trace/partial target.
+@@ -124,7 +127,8 @@ public final class Program {
+ 
+   public EvaluationResult evaluateWithDetails(Map<String, ?> variables, EvaluationOptions options) {
+     return evaluateWithDetails(
+-        new EvalContext(environment, new BorrowedBindings(variables, bindingLayout)), options);
++        new EvalContext.Scoped(environment, new BorrowedBindings(variables, bindingLayout)),
++        options);
+   }
+ 
+   public EvaluationResult evaluateWithDetails(Activation activation, EvaluationOptions options) {
+@@ -275,8 +279,8 @@ public final class Program {
+ 
+   private static EvalContext context(Environment environment, Object binding, Object value) {
+     return binding instanceof String name
+-        ? new EvalContext(environment, name, value)
+-        : new EvalContext(environment, binding);
++        ? new EvalContext.Scoped(environment, name, value)
++        : new EvalContext.Scoped(environment, binding);
+   }
+ 
+   private static boolean normalizedScalar(Object value) {
+@@ -335,7 +339,7 @@ public final class Program {
+       EvalContext context =
+           contextInArguments
+               ? (EvalContext) frame.getArguments()[0]
+-              : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
++              : new EvalContext(environment, frame.getArguments());
+       try {
+         Object result = body.execute(frame, context);
+         context.checkControl();
