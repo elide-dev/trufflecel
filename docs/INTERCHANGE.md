@@ -20,7 +20,7 @@ Messages implement protobuf's `Message` API with the canonical descriptors. Gene
 and `message` also expose the pinned schema for integrations that do not generate classes.
 `type` converts between `CelType` and canonical `Type` messages.
 
-Parsing expands macros into canonical comprehensions, including two-variable loops and
+Parsing expands iteration macros into canonical comprehensions, including two-variable loops and
 optional local bindings. Import handles arbitrary accumulator comprehensions, optional
 aggregate entries, namespaces, object constructors and block extensions. Parsed input uses
 dynamic evaluation; checked input is checked again against the receiving environment.
@@ -67,3 +67,11 @@ The transport test exercises a real loopback channel, including concurrent reuse
 unknown propagation and the Parse/Check/Eval sequence. Native guest compilation remains a
 separate Linux gate; passing the JVM interoperability tests does not establish Native Image
 compatibility.
+
+Lazy `cel.bind` uses the explicit canonical intrinsic
+`cel.@lazyBind(identifier, initializer, body)`. Import validates its arity and binding
+identifier and preserves lexical scope, including enclosing lazy block slots. This
+is a TruffleCEL extension: consumers must support it or reject it; cel-java is not
+claimed to execute this intrinsic. Ordinary imported accumulator comprehensions
+retain eager accumulator initialization. Removing or modifying `SourceInfo`,
+including `macro_calls`, never changes evaluation semantics.
