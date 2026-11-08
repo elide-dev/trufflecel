@@ -7,6 +7,8 @@ final class Checker {
   private final Map<String, CelType> declarations;
   private final boolean strict;
   private List<CelType> blockTypes;
+  private List<CelException.Issue> issues;
+  private int depth;
 
   Checker(Environment env, Map<String, CelType> declarations, boolean strict) {
     this.env = env;
@@ -15,12 +17,27 @@ final class Checker {
   }
 
   CelType check(ExprNode n, Map<String, CelType> locals) {
-    // Strict validation rechecks after folding: a folded value has a precise type and no subtree.
-    CelType result =
-        n.fold != null && n.fold.error() == null
-            ? Values.type(n.fold.value())
-            : checkNode(n, locals);
+    if (depth == 0) issues = null;
+    depth++;
+    CelType result;
+    try {
+      // A failed child becomes dyn for recovery, preventing spurious parent type mismatches.
+      result =
+          n.fold != null && n.fold.error() == null
+              ? Values.type(n.fold.value())
+              : checkNode(n, locals);
+    } catch (CelException error) {
+      if (error.code() == CelException.Code.RESOURCE_EXHAUSTED) throw error;
+      for (var issue : error.issues()) report(issue);
+      result = CelType.DYN;
+    } finally {
+      depth--;
+    }
     n.checkedType = result;
+    if (depth == 0 && issues != null) {
+      issues.sort(Comparator.comparingInt(CelException.Issue::offset));
+      throw new CelException(issues);
+    }
     return result;
   }
 
@@ -162,18 +179,24 @@ final class Checker {
       }
       case OBJECT -> {
         String name = env.resolve(n.name, env.objectTypes.keySet());
+        String[] fields = (String[]) n.value;
+        var actual = new ArrayList<CelType>();
+        for (ExprNode child : n.children) actual.add(entryType(child, locals));
         if (name == null) throw failure(n, "unknown object type: " + n.name);
         n.name = name;
         ObjectType type = env.objectTypes.get(name);
-        String[] fields = (String[]) n.value;
         for (int i = 0; i < n.children.length; i++) {
-          CelType actual = entryType(n.children[i], locals),
-              expected = type.fields().get(fields[i]);
-          if (expected == null) throw failure(n, "undefined field: " + fields[i]);
-          require(
-              n,
-              expected.accepts(actual) || actual.equals(CelType.NULL) && expected.nullable(),
-              "field type mismatch: " + fields[i]);
+          CelType expected = type.fields().get(fields[i]);
+          if (expected == null)
+            report(
+                new CelException.Issue(
+                    CelException.Code.TYPE, "undefined field: " + fields[i], n.offset, -1, -1));
+          if (expected != null)
+            require(
+                n,
+                expected.accepts(actual.get(i))
+                    || actual.get(i).equals(CelType.NULL) && expected.nullable(),
+                "field type mismatch: " + fields[i]);
         }
         yield WellKnownTypes.mapped(name);
       }
@@ -538,7 +561,13 @@ final class Checker {
   }
 
   private void require(ExprNode n, boolean condition, String message) {
-    if (strict && !condition) throw failure(n, message);
+    if (strict && !condition)
+      report(new CelException.Issue(CelException.Code.TYPE, message, n.offset, -1, -1));
+  }
+
+  private void report(CelException.Issue issue) {
+    if (issues == null) issues = new ArrayList<>();
+    if (issues.size() < CelException.MAX_ISSUES && !issues.contains(issue)) issues.add(issue);
   }
 
   private CelException failure(ExprNode n, String message) {

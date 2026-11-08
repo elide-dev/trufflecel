@@ -35,6 +35,7 @@ public final class Environment {
   final Map<String, Object> constants;
   final Map<String, ObjectType> objectTypes;
   final ObjectType[] runtimeObjectTypes;
+  final Set<String> constructorOnlyTypes;
   final Map<String, FunctionBinding> functions;
   final Map<String, List<FunctionOverload>> overloads;
 
@@ -71,6 +72,7 @@ public final class Environment {
     variableNames = Set.copyOf(variables.keySet());
     constants = Map.copyOf(b.constants);
     objectTypes = Map.copyOf(b.objectTypes);
+    constructorOnlyTypes = Set.copyOf(b.constructorOnlyTypes);
     var runtimeTypes = new ArrayList<ObjectType>();
     for (var entry : objectTypes.entrySet())
       if (!b.constructorOnlyTypes.contains(entry.getKey())) runtimeTypes.add(entry.getValue());
@@ -267,6 +269,11 @@ public final class Environment {
     };
   }
 
+  /** Copy this environment into an independent builder, retaining explicit host registrations. */
+  public Builder toBuilder() {
+    return new Builder(this);
+  }
+
   public static final class Builder {
     private final Map<String, CelType> variables = new LinkedHashMap<>();
     private final Map<String, Object> constants = new LinkedHashMap<>();
@@ -289,6 +296,36 @@ public final class Environment {
 
     public Builder() {
       WellKnownTypes.register(this);
+    }
+
+    /** Start with an immutable environment's complete configuration. */
+    public Builder(Environment environment) {
+      Objects.requireNonNull(environment);
+      variables.putAll(environment.variables);
+      constants.putAll(environment.constants);
+      objectTypes.putAll(environment.objectTypes);
+      constructorOnlyTypes.addAll(environment.constructorOnlyTypes);
+      functions.putAll(environment.functions);
+      environment.overloads.forEach(
+          (name, signatures) -> {
+            overloads.put(name, new ArrayList<>(signatures));
+            for (var signature : signatures) overloadIds.add(signature.id());
+          });
+      libraries = environment.libraryPolicy.libraries;
+      allowedFunctions = environment.libraryPolicy.functions;
+      aliases.putAll(environment.aliases);
+      container = environment.container;
+      expectedResultType = environment.expectedResultType;
+      maxAstNodes = environment.maxAstNodes;
+      maxRegexProgramSize = environment.maxRegexProgramSize;
+      inferVariables = environment.inferVariables;
+      macros = environment.macros;
+      budget = environment.budget;
+      maxSourceLength = environment.maxSourceLength;
+      maxDepth = environment.maxDepth;
+      comprehensionNesting = environment.comprehensionNesting;
+      validation = environment.validation;
+      homogeneousLiterals = environment.homogeneousLiterals;
     }
 
     public Builder variable(String name, CelType type) {

@@ -15,6 +15,9 @@ import java.util.Objects;
  * handler for one of those types is compiled as a deoptimization that recurs on every throw.
  */
 public final class CelException extends RuntimeException {
+  /** Maximum findings collected by a compiler pass. */
+  public static final int MAX_ISSUES = 100;
+
   public enum Code {
     SYNTAX,
     TYPE,
@@ -46,6 +49,29 @@ public final class CelException extends RuntimeException {
           start = i + 1;
         }
       return new Issue(code, message, offset, line, offset - start + 1);
+    }
+
+    /** Render this finding with a bounded source excerpt and a caret. */
+    public String format(String source) {
+      Objects.requireNonNull(source);
+      Issue located = locate(source);
+      if (offset < 0 || offset > source.length()) return located.toString();
+      int start = source.lastIndexOf('\n', Math.max(0, offset - 1)) + 1;
+      if (offset == 0) start = 0;
+      int end = source.indexOf('\n', offset);
+      if (end < 0) end = source.length();
+      int left = Math.max(start, offset - 80), right = Math.min(end, offset + 80);
+      String prefix = left > start ? "..." : "";
+      String suffix = right < end ? "..." : "";
+      String excerpt = source.substring(left, right).replace('\t', ' ').replace('\r', ' ');
+      return located
+          + "\n"
+          + prefix
+          + excerpt
+          + suffix
+          + "\n"
+          + " ".repeat(prefix.length() + offset - left)
+          + "^";
     }
 
     @Override
@@ -132,9 +158,19 @@ public final class CelException extends RuntimeException {
 
   /** This failure with line and column resolved against {@code source}. */
   CelException locate(String source) {
-    if (line >= 0 || offset < 0) return this;
-    return new CelException(
-        issues.stream().map(issue -> issue.locate(source)).toList(), expressionId);
+    List<Issue> located = issues.stream().map(issue -> issue.locate(source)).toList();
+    return located.equals(issues) ? this : new CelException(located, expressionId);
+  }
+
+  /** Render every finding with line/column, source excerpt and caret, without retaining source. */
+  public String format(String source) {
+    Objects.requireNonNull(source);
+    var result = new StringBuilder();
+    for (Issue issue : issues) {
+      if (!result.isEmpty()) result.append("\n\n");
+      result.append(issue.format(source));
+    }
+    return result.toString();
   }
 
   @Override
