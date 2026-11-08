@@ -9,6 +9,18 @@ import org.junit.Test;
 
 public final class CanonicalAstTest {
   @Test
+  public void canonicalParseSharesCodePointSourceLimits() {
+    Environment env = Cel.newBuilder().maxSourceLength(3).build();
+    assertEquals("😀", program(env, CanonicalAst.parse(env, "'😀'")).evaluate());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () -> CanonicalAst.parse(Cel.newBuilder().maxSourceLength(2).build(), "'😀'"))
+            .code());
+  }
+
+  @Test
   public void explicitLazyBindIntrinsicDoesNotTrustSourceMetadata() {
     Environment env = Cel.newBuilder().build();
     Message parsed = CanonicalAst.parse(env, "cel.bind(v, 2, v + 1)");

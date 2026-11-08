@@ -32,8 +32,7 @@ public final class CostEstimator {
           if (name.isBlank() || size < 0)
             throw new IllegalArgumentException("invalid collection size bound");
         });
-    if (source.length() > environment.maxSourceLength)
-      throw new CelException(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
+    environment.checkSource(source);
     ExprNode expression = new Parser(source, environment).parse();
     environment.prepare(source, expression, true);
     var estimator = new Analysis(bounds, environment.overloads.keySet());

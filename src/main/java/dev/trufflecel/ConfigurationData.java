@@ -1,7 +1,12 @@
 package dev.trufflecel;
 
 import java.util.*;
+import java.io.StringWriter;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.StreamDataWriter;
 import org.snakeyaml.engine.v2.api.lowlevel.Compose;
 import org.snakeyaml.engine.v2.nodes.*;
 
@@ -23,7 +28,26 @@ final class ConfigurationData {
   }
 
   static String write(Map<String, Object> value) {
-    return (String) EncoderFunctions.apply("yaml.encode", new Object[] {value}, context());
+    var context = context();
+    var json = new StringWriter();
+    // Configuration integers are exact int64 values, not protobuf JSON string values.
+    EncoderFunctions.writeJson(value, json, context);
+    Object data = new Load(LoadSettings.builder().build()).loadFromString(json.toString());
+    var output = new StringBuilder();
+    new Dump(DumpSettings.builder().build())
+        .dump(
+            data,
+            new StreamDataWriter() {
+              public void write(String text) {
+                write(text, 0, text.length());
+              }
+
+              public void write(String text, int offset, int length) {
+                context.charge(length);
+                output.append(text, offset, offset + length);
+              }
+            });
+    return output.toString();
   }
 
   record Expression(String text, int offset) {}

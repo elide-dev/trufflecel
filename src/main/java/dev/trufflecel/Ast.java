@@ -182,8 +182,7 @@ public final class Ast {
   /** Parse without type checking; configured syntax, expansion and structural limits apply. */
   public static Ast parse(Environment environment, String source) {
     Objects.requireNonNull(source);
-    if (source.length() > environment.maxSourceLength)
-      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
+    environment.checkSource(source);
     try {
       ExprNode tree = new Parser(source, environment).parse();
       environment.checkDepth(tree);

@@ -52,9 +52,13 @@ public final class EnvironmentYaml {
     for (Object item : list(data, "variables")) {
       var variable = object(item);
       keys(variable, "name", "description", "type", "type_name", "params", "is_type_param");
+      if (variable.containsKey("description")) string(variable.get("description"));
       String name = string(variable.get("name"));
       if (!names.add(name)) throw new IllegalArgumentException("duplicate variable: " + name);
-      builder.variable(name, type(variable));
+      var declaredType = new LinkedHashMap<>(variable);
+      declaredType.remove("name");
+      declaredType.remove("description");
+      builder.variable(name, type(declaredType));
     }
     if (data.containsKey("context_variable")) {
       CelType contextType = type(data.get("context_variable"));
@@ -73,6 +77,7 @@ public final class EnvironmentYaml {
     for (Object item : list(data, "functions")) {
       var function = object(item);
       keys(function, "name", "description", "overloads");
+      if (function.containsKey("description")) string(function.get("description"));
       String name = string(function.get("name"));
       List<?> overloads = list(function, "overloads");
       if (overloads.isEmpty())
@@ -142,7 +147,12 @@ public final class EnvironmentYaml {
         if (noMacros)
           macros.removeAll(
               Set.of("has", "all", "exists", "exists_one", "existsOne", "map", "filter"));
-        for (Object macro : list(stdlib, "exclude_macros")) macros.remove(string(macro));
+        for (Object macro : list(stdlib, "exclude_macros")) {
+          String name = string(macro);
+          if (!Macro.STANDARD.contains(name))
+            throw new IllegalArgumentException("unknown standard macro: " + name);
+          macros.remove(name);
+        }
         builder.standardMacros(macros);
       }
     }
@@ -241,8 +251,8 @@ public final class EnvironmentYaml {
                             "name", entry.getKey(), "version", (long) entry.getValue()))
                 .toList());
     var stdlib = new LinkedHashMap<String, Object>();
-    stdlib.put("disable_macros", !environment.macros);
-    if (environment.macros && !environment.standardMacros.equals(Macro.STANDARD)) {
+    // The independent trufflecel.macros feature preserves the global enable flag below.
+    if (!environment.standardMacros.equals(Macro.STANDARD)) {
       stdlib.put("include_macros", new ArrayList<>(new TreeSet<>(environment.standardMacros)));
       var excluded = new TreeSet<>(Macro.STANDARD);
       excluded.removeAll(environment.standardMacros);
@@ -297,6 +307,7 @@ public final class EnvironmentYaml {
   static CelType type(Object value) {
     if (value instanceof String text) return TypeSyntax.parse(text);
     var data = object(value);
+    keys(data, "type", "type_name", "params", "is_type_param");
     if (data.containsKey("type")) {
       if (data.containsKey("type_name")
           || data.containsKey("params")

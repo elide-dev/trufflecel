@@ -48,8 +48,7 @@ public final class CanonicalAst {
 
   /** Parse source independently; macro expansion is represented as canonical accumulator loops. */
   public static Message parse(Environment environment, String source) {
-    if (source.length() > environment.maxSourceLength)
-      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
+    environment.checkSource(source);
     ExprNode tree = new Parser(source, environment).parse();
     // Cloning recurses over the tree, so the depth limit applies before the copy.
     environment.checkDepth(tree);
