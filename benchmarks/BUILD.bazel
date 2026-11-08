@@ -104,3 +104,14 @@ sh_test(
     tags = ["manual"],
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
 )
+
+# Shared-host allocation diagnostic; engine.Compilation=false, with optional fallback runtime.
+java_test(
+    name = "evaluation_allocation",
+    srcs = ["EvaluationAllocation.java"],
+    main_class = "dev.trufflecel.EvaluationAllocation",
+    use_testrunner = False,
+    tags = ["manual"],
+    jvm_flags = ["-Xbatch", "-XX:-UseJVMCICompiler", "--enable-native-access=ALL-UNNAMED", "-Xms512m", "-Xmx512m"],
+    deps = ["//:trufflecel", "@maven//:org_graalvm_polyglot_polyglot", "@maven//:org_graalvm_truffle_truffle_runtime"],
+)
