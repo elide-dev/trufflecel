@@ -66,7 +66,7 @@ public final class Environment {
   final long budget;
   final int maxSourceLength, maxDepth, comprehensionNesting;
   final Validation validation;
-  final boolean homogeneousLiterals;
+  final boolean homogeneousLiterals, commonSubexpressions;
   final List<Validator> validators;
 
   private Environment(Builder b) {
@@ -99,6 +99,7 @@ public final class Environment {
     comprehensionNesting = b.comprehensionNesting;
     validation = b.validation;
     homogeneousLiterals = b.homogeneousLiterals;
+    commonSubexpressions = b.commonSubexpressions;
     validators = List.copyOf(b.validators);
   }
 
@@ -338,7 +339,7 @@ public final class Environment {
     private long budget = 1_000_000;
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
     private Validation validation = Validation.DEFERRED;
-    private boolean homogeneousLiterals;
+    private boolean homogeneousLiterals, commonSubexpressions;
     private final List<Validator> validators = new ArrayList<>();
 
     public Builder() {
@@ -375,6 +376,7 @@ public final class Environment {
       comprehensionNesting = environment.comprehensionNesting;
       validation = environment.validation;
       homogeneousLiterals = environment.homogeneousLiterals;
+      commonSubexpressions = environment.commonSubexpressions;
       validators.addAll(environment.validators);
     }
 
@@ -648,6 +650,14 @@ public final class Environment {
      */
     public Builder validator(Validator validator) {
       validators.add(Objects.requireNonNull(validator));
+      return this;
+    }
+
+    /**
+     * Cache repeated pure expressions lazily; disabled by default and invisible to source tracing.
+     */
+    public Builder commonSubexpressions(boolean enabled) {
+      commonSubexpressions = enabled;
       return this;
     }
 

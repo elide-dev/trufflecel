@@ -53,7 +53,10 @@ public final class Program {
     body.instantiateFieldPlans();
     // Tooling receives the complete source tree, including every literal and operator event;
     // plain targets replace folded subtrees with their prebuilt values and failures.
-    if (truffleSource == null) body = Optimizer.rewrite(body.lowerUninstrumented());
+    if (truffleSource == null) {
+      if (environment.commonSubexpressions) body = CseOptimizer.optimize(body, environment);
+      body = Optimizer.rewrite(body.lowerUninstrumented());
+    }
     body.resolveBlocks(null);
     body.resolveLazyBindings(Map.of());
     boolean hasBindings = body.hasBindings();

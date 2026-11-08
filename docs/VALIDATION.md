@@ -128,3 +128,26 @@ boundaries and stops after 100 findings; source, node and depth limits remain in
 force. A recovered tree is never compiled or evaluated. Lexical failures and
 resource exhaustion can stop recovery early. Custom macro callbacks are not run
 on argument lists already known to contain syntax errors.
+
+## Common subexpressions
+
+`commonSubexpressions(true)` enables conservative, lazy common-subexpression elimination;
+it is off by default and copied by `toBuilder()`. Repeated arithmetic, logical, comparison,
+string-predicate and size expressions with pure operands can share a cached value in a
+`cel.block`. Slots are evaluated on first use, so unused branches stay unevaluated. Each
+comprehension or macro body gets its own scope. Explicit blocks, presence tests and lazy
+`cel.bind` scopes are left intact. Host calls, object access and object-sensitive equality
+are not coalesced; this does not assume that an application callback is pure.
+
+Successful cache reads replay the original operation cost. Errors are evaluated at their
+actual occurrence, retaining expression IDs and source positions. The generated administrative
+nodes add no source-evaluation cost; configured budgets therefore accept or reject the same
+source evaluations. A rewrite that would exceed AST size/depth bounds is skipped. This is an
+opt-in optimization whose benefit depends on the expression; cache/context allocation can cost
+more than repeating very small expressions.
+
+Instrumented programs and `Program.trace` retain every original source event. Canonical checked
+AST export emits ordinary `cel.block`/`cel.index` expressions with distinct IDs, so another CEL
+implementation can execute the shared expression. Imported explicit blocks use their normal
+execution/cost rules; the source-budget replay metadata is an internal runtime optimization,
+not an extension to the canonical wire format.
