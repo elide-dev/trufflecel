@@ -72,11 +72,13 @@ final class EvalContext {
 
   /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
   long charged() {
-    return budgetParent == null ? initialBudget - remaining : budgetParent.charged();
+    return budgetParent == null
+        ? initialBudget - remaining
+        : budgetParent.initialBudget - budgetParent.remaining;
   }
 
   boolean canCharge(long cost) {
-    return budgetParent == null ? cost <= remaining : budgetParent.canCharge(cost);
+    return budgetParent == null ? cost <= remaining : cost <= budgetParent.remaining;
   }
 
   void charge(long cost) {

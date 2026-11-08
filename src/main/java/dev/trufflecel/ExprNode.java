@@ -902,6 +902,22 @@ class ExprNode extends CelNode {
     }
 
     @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    Object cached(int index) {
+      return results[index];
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    long cachedCost(int index) {
+      return costs[index];
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    void cache(int index, Object value, long cost) {
+      results[index] = value;
+      costs[index] = cost;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
     private Object readInstrumented(ExprNode initializer, int index) {
       return readValue(initializer, index, frame);
     }
@@ -918,7 +934,6 @@ class ExprNode extends CelNode {
           throw Values.error(
               CelException.Code.RESOURCE_EXHAUSTED, "block evaluation nesting limit exceeded");
         depth++;
-        long before = context.charged();
         try {
           EvalContext localContext = context.fork();
           result =
@@ -926,22 +941,16 @@ class ExprNode extends CelNode {
                   ? initializer.execute(callerFrame, localContext)
                   : instrumentedInitializer(initializer, localContext);
         } catch (CelException e) {
-          if (costs != null) throw e;
           result = e;
         } finally {
           depth--;
         }
-        if (costs != null) costs[index] = context.charged() - before;
         results[index] = result;
         Attribute path = context.attribute();
         if (path != null) {
           if (attributes == null) attributes = new Attribute[results.length];
           attributes[index] = path;
         }
-      } else if (costs != null) {
-        if (!context.canCharge(costs[index]))
-          return initializer.execute(callerFrame, context.fork());
-        context.charge(costs[index]);
       }
       context.attribute(attributes == null ? null : attributes[index]);
       if (result instanceof CelException error) throw error;
