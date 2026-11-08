@@ -118,7 +118,8 @@ def validate_inventory(rows, phase, engines=ENGINES, workloads=WORKLOADS):
         raise ValueError('Incomplete, duplicate or unexpected measurement cells')
 
 
-def main(*, engines=ENGINES, workloads=WORKLOADS, experiment='six-fixture evaluation', entrypoint=None):
+def main(*, engines=ENGINES, workloads=WORKLOADS, experiment='six-fixture evaluation', entrypoint=None,
+         qualify=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase', choices=('jvm-timing', 'native-timing', 'memory'))
     parser.add_argument('--java', type=Path, required=True)
@@ -147,6 +148,7 @@ def main(*, engines=ENGINES, workloads=WORKLOADS, experiment='six-fixture evalua
                     java_version=subprocess.check_output([artifacts['java'], '-version'], stderr=subprocess.STDOUT, text=True),
                     vm_flags=subprocess.check_output([artifacts['java'], *JVM_FLAGS, '-XX:+PrintFlagsFinal', '-version'], stderr=subprocess.STDOUT, text=True),
                     source_manifest=json.loads(args.source_manifest.read_text()), artifacts=artifacts, sha256=hashes,
+                    artifact_bytes={name: Path(path).stat().st_size for name, path in artifacts.items()},
                     source_manifest_sha256=sha(args.source_manifest),
                     runtime_sha256={name: sha(java_home / name) for name in ('release', 'lib/modules', 'lib/server/libjvm.so')},
                     driver_sha256=sha(__file__), jvm_flags=JVM_FLAGS, native_flags=NATIVE_FLAGS,
@@ -210,6 +212,8 @@ def main(*, engines=ENGINES, workloads=WORKLOADS, experiment='six-fixture evalua
     validate_inventory(records, args.phase, engines, workloads)
     if hashes != {name: sha(path) for name, path in artifacts.items()}:
         raise ValueError('Artifacts changed during measurement')
+    if qualify is not None:
+        qualify(args.output, metadata, records)
     metadata.update(complete=True, load_end=os.getloadavg())
     save()
 

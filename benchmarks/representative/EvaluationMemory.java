@@ -62,6 +62,7 @@ public final class EvaluationMemory {
       out.put("operations_per_sample", batch);
       out.put("allocation_calibration_bytes", calibration);
       out.put("allocated_bytes_per_op", allocated);
+      out.put("regex_path", e.qualifyRegex(workload));
       if (e.truffle != null) {
         var target = (OptimizedCallTarget) e.truffle.callTarget();
         out.put("guest_last_tier", target.isValidLastTier());
