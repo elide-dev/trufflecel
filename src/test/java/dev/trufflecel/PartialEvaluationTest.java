@@ -115,6 +115,12 @@ public class PartialEvaluationTest {
     assertEquals(
         Unknown.of("data.secret"),
         Cel.compile("cel.bind(x, data, x.secret)").partialEvaluate(data()).value());
+    var captured =
+        Cel.compile("cel.bind(a, cel.bind(tmp, data, tmp), cel.bind(data, {}, a.secret))")
+            .partialEvaluate(data());
+    assertEquals(Unknown.of("data.secret"), captured.value());
+    assertEquals(
+        4L, captured.advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 4L)).value());
     assertEquals(
         6L,
         Cel.compile("cel.block([data], cel.index(0).known + cel.index(0).known)")

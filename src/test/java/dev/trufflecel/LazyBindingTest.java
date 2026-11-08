@@ -22,6 +22,14 @@ public class LazyBindingTest {
         list.evaluate(Map.of("xs", List.of(1L, 2L)), EvaluationOptions.newBuilder().build()));
     var events = new ArrayList<TraceEvent>();
     assertEquals(7L, program.trace(events::add).evaluate(Map.of("input", 1L)));
+    for (var options :
+        List.of(
+            EvaluationOptions.newBuilder().budget(7).build(),
+            EvaluationOptions.newBuilder().budget(7).trace(events::add).build())) {
+      var result = program.evaluateWithDetails(Map.of("input", 1L), options);
+      assertEquals(CelException.Code.RESOURCE_EXHAUSTED, result.error().code());
+      assertEquals(7L, result.actualCost());
+    }
   }
 
   @Test
