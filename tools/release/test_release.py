@@ -34,6 +34,7 @@ class PublicationTest(unittest.TestCase):
                         for name in ('LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE'):
                             self.assertEqual(jar.read('META-INF/' + name), Path(name).read_bytes())
                 expected = {
+                    'processor': set(),
                     'core': {'org.graalvm.polyglot:polyglot', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'com.google.re2j:re2j', 'com.google.code.gson:gson', 'org.snakeyaml:snakeyaml-engine'},
                     'protobuf': {'dev.elide:trufflecel-core', 'org.graalvm.truffle:truffle-api', 'dev.elide:truffledata-core', 'dev.elide:truffledata-protobuf', 'dev.elide:truffledata-protobuf-runtime', 'com.google.protobuf:protobuf-java'},
                     'json': {'dev.elide:trufflecel-core', 'org.graalvm.shadowed:json'},
@@ -49,6 +50,10 @@ class PublicationTest(unittest.TestCase):
                 with zipfile.ZipFile(str(prefix) + '.jar') as jar:
                     names = jar.namelist()
                     self.assertTrue(any(n.endswith('.class') for n in names))
+                    if module == 'processor':
+                        self.assertIn('META-INF/services/javax.annotation.processing.Processor', names)
+                        self.assertEqual(jar.read('META-INF/services/javax.annotation.processing.Processor').decode().strip(), 'dev.trufflecel.processor.PojoProcessor')
+                        self.assertNotIn('dev/trufflecel/Cel.class', names)
                     if module == 'core':
                         self.assertIn('META-INF/services/com.oracle.truffle.api.provider.TruffleLanguageProvider', names)
                         self.assertIn('dev/trufflecel/CelLanguageProvider.class', names)

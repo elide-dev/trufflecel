@@ -18,7 +18,7 @@ if [[ $mode == --publish ]]; then
 fi
 bucket=${MAVEN_BUCKET:-elide:elide-maven}
 public=https://maven.elide.dev
-modules=(core protobuf json)
+modules=(core protobuf json processor)
 bazel=${BAZEL:-$(command -v bazelisk || command -v bazel)}
 mkdir -p build
 repo=$(mktemp -d "$PWD/build/release-repo.XXXXXX")
@@ -66,4 +66,4 @@ for module in "${modules[@]}"; do
   rclone check "$repo/$path" "$bucket/$path" --include 'maven-metadata.xml*' --one-way
 done
 rm -f "$repo/public-check"
-echo "Published dev.elide:trufflecel-{core,protobuf,json}:$version at $public"
+echo "Published dev.elide:trufflecel-{core,protobuf,json,processor}:$version at $public"

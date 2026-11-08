@@ -1,0 +1,16 @@
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
+java_library(
+    name = "processor",
+    srcs = ["PojoProcessor.java"],
+    resources = ["META-INF/services/javax.annotation.processing.Processor"],
+    resource_strip_prefix = "src/main/java/dev/trufflecel/processor",
+    visibility = ["//visibility:public"],
+)
+
+java_plugin(
+    name = "plugin",
+    processor_class = "dev.trufflecel.processor.PojoProcessor",
+    deps = [":processor"],
+    visibility = ["//visibility:public"],
+)

@@ -204,6 +204,16 @@ public final class JitSmoke {
             9L,
             Map.of("x", 3L),
             16L);
+        var pojo = PojoFixtures_AddressCel.INSTANCE;
+        check(
+            pojo.register(Cel.newBuilder())
+                .variable("p", CelType.of(pojo.name()))
+                .build()
+                .compile("p.zip > 100"),
+            Map.of("p", pojo.snapshot(new PojoFixtures.Address(123, "Main"))),
+            true,
+            Map.of("p", pojo.snapshot(new PojoFixtures.Address(1, "Other"))),
+            false);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false);
         check(
             "enabled && 10 / x > 1",

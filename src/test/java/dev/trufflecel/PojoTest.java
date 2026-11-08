@@ -1,0 +1,189 @@
+package dev.trufflecel;
+
+import static org.junit.Assert.*;
+
+import java.time.*;
+import java.util.*;
+import org.junit.Test;
+
+public final class PojoTest {
+  @Test
+  public void generatedRecordSnapshotsOwnNestedCollectionsBytesAndEnums() {
+    var addresses = new ArrayList<>(List.of(new PojoFixtures.Address(123, "Main")));
+    var group = new ArrayList<>(List.of(1, 2));
+    Map<String, List<Integer>> groups = new LinkedHashMap<>(Map.of("team", group));
+    byte[] bytes = {1, 2};
+    var original =
+        new PojoFixtures.User(
+            42, addresses, groups, PojoFixtures.State.ACTIVE, bytes, new Object());
+    var type = PojoFixtures_UserCel.INSTANCE;
+    var owned = type.snapshot(original);
+    addresses.clear();
+    group.clear();
+    groups.clear();
+    bytes[0] = 9;
+    var environment =
+        PojoFixtures_AddressCel.INSTANCE
+            .register(type.register(Cel.newBuilder()))
+            .variable("u", CelType.of(type.name()))
+            .build();
+    assertTrue(
+        environment
+            .compile(
+                "u.id == 42 && u.addresses[0].zip == 123 && u.groups.team == [1, 2] && u.state == 'ACTIVE' && u.payload == b'\\x01\\x02'")
+            .test(Map.of("u", owned)));
+    assertFalse(type.accepts(original));
+    assertTrue(type.accepts(owned));
+    assertEquals("example.User", owned.typeName());
+    assertFalse(owned.fields().containsKey("ignored"));
+    assertThrows(UnsupportedOperationException.class, () -> owned.fields().clear());
+    assertTrue(owned.toString().startsWith("example.User"));
+    assertEquals(owned, type.construct(owned.fields()));
+    assertEquals(owned.hashCode(), type.construct(owned.fields()).hashCode());
+    assertNotEquals(owned, "other");
+    assertNotEquals(
+        owned, PojoFixtures_AddressCel.INSTANCE.snapshot(new PojoFixtures.Address(123, "Main")));
+    assertNotEquals(owned, type.construct(Map.of("id", 0)));
+    assertEquals(
+        CelType.of("example.User"), environment.compile("type(u)").evaluate(Map.of("u", owned)));
+    assertEquals(123L, environment.compile("example.Address{zip: 123}.zip").evaluate());
+  }
+
+  @Test
+  public void beanAccessorsAndScalarsAreDirectAndNormalized() {
+    var bean = new PojoFixtures.Bean("first");
+    bean.count = 7;
+    var type = PojoFixtures_BeanCel.INSTANCE;
+    var owned = type.snapshot(bean);
+    bean.setLabel("changed");
+    bean.count = 10;
+    assertEquals(
+        Map.of(
+            "count",
+            7L,
+            "label",
+            "first",
+            "ready",
+            true,
+            "enabled",
+            true,
+            "URL",
+            "https://example.test",
+            "renamed",
+            4L),
+        owned.fields());
+    var scalar =
+        new PojoFixtures.Scalars(
+            (byte) 1,
+            (short) 2,
+            3,
+            4,
+            5,
+            6,
+            true,
+            'x',
+            (byte) 7,
+            (short) 8,
+            9,
+            10L,
+            11F,
+            12D,
+            false,
+            'y',
+            "z",
+            new UInt(13),
+            new Bytes(new byte[] {1}),
+            Instant.EPOCH,
+            Duration.ZERO);
+    var values = PojoFixtures_ScalarsCel.INSTANCE.snapshot(scalar).fields();
+    assertEquals(1L, values.get("a"));
+    assertEquals(5D, values.get("e"));
+    assertEquals("x", values.get("h"));
+    assertEquals("y", values.get("p"));
+    assertEquals(Instant.EPOCH, values.get("t"));
+    assertEquals(Duration.ZERO, values.get("u"));
+    var absent =
+        PojoFixtures_UserCel.INSTANCE.snapshot(
+            new PojoFixtures.User(0, null, null, null, null, null));
+    assertEquals(CelNull.INSTANCE, absent.fields().get("addresses"));
+    assertEquals(CelNull.INSTANCE, absent.fields().get("groups"));
+    assertEquals(CelNull.INSTANCE, absent.fields().get("state"));
+    assertEquals(CelNull.INSTANCE, absent.fields().get("payload"));
+    assertTrue(PojoFixtures_UserCel.INSTANCE.has(absent, "state"));
+  }
+
+  @Test
+  public void constructorsValidateOwnershipTypesAndPresence() {
+    var type = PojoFixtures_UserCel.INSTANCE;
+    Object partial = type.construct(Map.of("id", 1));
+    assertTrue(type.has(partial, "id"));
+    assertFalse(type.has(partial, "state"));
+    assertEquals(1L, type.get(partial, "id"));
+    assertThrows(CelException.class, () -> type.get(partial, "state"));
+    assertThrows(CelException.class, () -> type.construct(Map.of("missing", 1)));
+    assertThrows(CelException.class, () -> type.has(partial, "missing"));
+    assertThrows(CelException.class, () -> type.get(new Object(), "id"));
+    assertThrows(CelException.class, () -> type.construct(Map.of("id", "wrong")));
+    assertThrows(CelException.class, () -> type.construct(Map.of("id", List.of(1))));
+    assertThrows(CelException.class, () -> type.construct(Map.of("id", Map.of())));
+    assertThrows(
+        CelException.class, () -> type.construct(Map.of("addresses", List.of(new Object()))));
+    assertThrows(
+        CelException.class,
+        () -> type.construct(Map.of("addresses", List.of(type.construct(Map.of())))));
+    assertThrows(
+        CelException.class, () -> type.construct(Map.of("groups", Map.of("a", List.of("wrong")))));
+    assertEquals(
+        CelNull.INSTANCE,
+        type.get(type.construct(Collections.singletonMap("state", null)), "state"));
+    assertThrows(NullPointerException.class, () -> type.snapshot(null));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> type.snapshot(new PojoFixtures.User(0, null, null, null, null, null), 0, 1));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> type.snapshot(new PojoFixtures.User(0, null, null, null, null, null), 1, 0));
+  }
+
+  @Test
+  public void sharedTraversalBoundsCyclesDepthAndNodeCount() {
+    var type = PojoFixtures_RecursiveCel.INSTANCE;
+    var child = new PojoFixtures.Recursive();
+    var root = new PojoFixtures.Recursive();
+    root.next = child;
+    root.children = List.of(child, child);
+    assertNotNull(type.snapshot(root));
+    child.next = root;
+    assertEquals(
+        CelException.Code.INVALID_ARGUMENT,
+        assertThrows(CelException.class, () -> type.snapshot(root)).code());
+    child.next = null;
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> type.snapshot(root, 1, 100)).code());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> type.snapshot(root, 100, 2)).code());
+    var context = new PojoType.SnapshotContext(100, 100);
+    assertThrows(CelException.class, () -> context.scalar(new Object()));
+    assertThrows(
+        CelException.class,
+        () ->
+            context.list(
+                List.of(1),
+                value -> {
+                  throw new CelException(CelException.Code.INVALID_ARGUMENT, "bad value");
+                }));
+    assertEquals(List.of(1L), context.list(List.of(1), context::scalar));
+    assertThrows(
+        CelException.class,
+        () ->
+            context.map(
+                Map.of("a", 1),
+                context::scalar,
+                value -> {
+                  throw new CelException(CelException.Code.INVALID_ARGUMENT, "bad value");
+                }));
+    assertEquals(Map.of("a", 1L), context.map(Map.of("a", 1), context::scalar, context::scalar));
+  }
+}

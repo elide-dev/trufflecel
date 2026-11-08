@@ -89,8 +89,9 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 | `dev.elide:trufflecel-core` | Compiler, evaluator, Polyglot language and native TruffleData rows |
 | `dev.elide:trufflecel-protobuf` | Optional protobuf construction, ingestion, wire decoding and canonical CEL AST interchange |
 | `dev.elide:trufflecel-json` | Optional Oracle Truffle JSON input conversion |
+| `dev.elide:trufflecel-processor` | Build-time generation of reflection-free POJO, JavaBean and record snapshot adapters |
 
-All three are thin JARs. The optional bridges depend on the matching core version; core
+All artifacts are thin JARs. The processor belongs on the annotation processor path; generated adapters use only core. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
 **Java 25**, **Elide GraalVM `25.5.5-elide.27`**, and **TruffleData `0.9.0`**.
 

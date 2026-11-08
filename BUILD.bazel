@@ -15,3 +15,5 @@ filegroup(
     ],
     visibility = ["//visibility:public"],
 )
+
+alias(name = "trufflecel-processor", actual = "//src/main/java/dev/trufflecel/processor:processor", visibility = ["//visibility:public"])
