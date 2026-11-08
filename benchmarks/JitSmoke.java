@@ -14,6 +14,11 @@ import org.graalvm.polyglot.Context;
 
 /** Native Image must include a working guest compiler, not just build successfully. */
 public final class JitSmoke {
+  private static final PreparedProgram IMAGE_POLICY =
+      PolicyCompiler.prepare(
+          EnvironmentYaml.read("variables: [{name: x, type: int}]"),
+          "name: image-policy\nrule: {match: [{condition: 'x > 0', output: 'x + 1'}, {output: '0'}]}");
+
   public static void main(String[] args) throws Exception {
     dev.trufflecel.bench.SimulationBenchmark.main(new String[] {"--smoke"});
     try (Context context =
@@ -52,6 +57,19 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        check(IMAGE_POLICY.instantiate(), Map.of("x", 2L), 3L, Map.of("x", -1L), 0L);
+        var policyEnvironment = EnvironmentYaml.read("variables: [{name: x, type: int}]");
+        check(
+            PolicyCompiler.compile(
+                policyEnvironment,
+                "name: runtime-policy\nrule: {match: [{condition: 'x > 0', output: 'x + 2'}]}"),
+            Map.of("x", 2L),
+            4L,
+            Map.of("x", -1L),
+            OptionalValue.none());
+        if (CostEstimator.estimate(policyEnvironment, "x + 1").maximum().isEmpty())
+          throw new AssertionError("Native static cost estimation");
+        System.out.println("Native policy and environment tooling qualification passed");
         var macros =
             Cel.newBuilder()
                 .variable("x", CelType.INT)
