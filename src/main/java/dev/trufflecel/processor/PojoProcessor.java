@@ -85,12 +85,19 @@ public final class PojoProcessor extends AbstractProcessor {
               member,
               member.getSimpleName().toString(),
               member.getSimpleName().toString(),
-              member.asType());
+              processingEnv.getTypeUtils().asMemberOf((DeclaredType) type.asType(), member));
         } else if (member instanceof ExecutableElement method) {
-          String getter = getter(method);
+          var resolved =
+              (ExecutableType)
+                  processingEnv.getTypeUtils().asMemberOf((DeclaredType) type.asType(), member);
+          String getter = getter(method, resolved.getReturnType());
           if (getter != null)
             property(
-                properties, member, getter, member.getSimpleName() + "()", method.getReturnType());
+                properties,
+                member,
+                getter,
+                member.getSimpleName() + "()",
+                resolved.getReturnType());
           else if (configuration != null)
             error(member, "@CelField requires a zero-argument non-void getter");
         }
@@ -145,17 +152,15 @@ public final class PojoProcessor extends AbstractProcessor {
     }
   }
 
-  private String getter(ExecutableElement method) {
-    if (!method.getParameters().isEmpty() || method.getReturnType().getKind() == TypeKind.VOID)
-      return null;
+  private String getter(ExecutableElement method, TypeMirror result) {
+    if (!method.getParameters().isEmpty() || result.getKind() == TypeKind.VOID) return null;
     if (method.getEnclosingElement().toString().equals("java.lang.Object")) return null;
     String name = method.getSimpleName().toString();
     String property = null;
     if (name.startsWith("get") && name.length() > 3) property = name.substring(3);
     else if (name.startsWith("is")
         && name.length() > 2
-        && (method.getReturnType().getKind() == TypeKind.BOOLEAN
-            || method.getReturnType().toString().equals("java.lang.Boolean")))
+        && (result.getKind() == TypeKind.BOOLEAN || result.toString().equals("java.lang.Boolean")))
       property = name.substring(2);
     if (property == null) {
       if (annotation(method, FIELD) == null) return null;

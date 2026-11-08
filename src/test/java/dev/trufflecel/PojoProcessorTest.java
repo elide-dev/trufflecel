@@ -149,6 +149,7 @@ public final class PojoProcessorTest {
           public List<Record> records; public Map<String, List<Integer>> groups;
           public Map<Boolean, Choice> choices; public Map<UInt, String> unsigned;
           public static Object staticValue;
+          public class Marker {}
           @CelField(ignore = true) private Object hidden;
           @CelField(ignore = true) public Object ignored;
           public void setName(String name) {}
@@ -177,6 +178,28 @@ public final class PojoProcessorTest {
     assertFalse(source.contains("ignored"));
     assertTrue(source.contains("context.enumeration"));
     assertTrue(source.contains("context.map"));
+  }
+
+  @Test
+  public void resolvesInheritedGenericFieldsAndBeanGetterTypes() throws Exception {
+    var result =
+        compile(
+            true,
+            "sample.Concrete",
+            """
+        package sample;
+        class Base<T, U> {
+          public T field;
+          public T getLabel() { return field; }
+          public U isReady() { return null; }
+        }
+        @dev.trufflecel.CelPojo public final class Concrete extends Base<String, Boolean> {}
+        """);
+    assertTrue(result.diagnostics, result.success);
+    String source = result.generated.get("sample/ConcreteCel.java");
+    assertTrue(source.contains("\"field\", dev.trufflecel.CelType.STRING"));
+    assertTrue(source.contains("\"label\", dev.trufflecel.CelType.STRING"));
+    assertTrue(source.contains("\"ready\", dev.trufflecel.CelType.BOOL"));
   }
 
   @Test

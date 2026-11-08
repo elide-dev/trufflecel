@@ -24,6 +24,9 @@ public final class PojoFixtures {
       @CelField(ignore = true) Object ignored) {}
 
   @CelPojo
+  public record Envelope(User user) {}
+
+  @CelPojo
   public static final class Bean {
     public int count;
     public static int unrelated;
