@@ -31,6 +31,55 @@ public class ErrorLocationTest {
   }
 
   @Test
+  public void arithmeticChainRetainsEachOriginalOperatorLocation() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    String source = "(x + 1)\n * 2\n - 3";
+    var program = env.compile(source);
+    for (var input :
+        Map.of(Long.MAX_VALUE, '+', Long.MAX_VALUE / 2, '*', Long.MIN_VALUE / 2 - 1, '-')
+            .entrySet()) {
+      var error = failure(program, Map.of("x", input.getKey()));
+      int position = source.indexOf(input.getValue());
+      assertEquals(CelException.Code.OVERFLOW, error.code());
+      assertEquals(position, error.offset());
+      int lastNewline = source.lastIndexOf('\n', position);
+      assertEquals(position - lastNewline, error.column());
+      assertEquals(
+          1 + source.substring(0, position).chars().filter(c -> c == '\n').count(), error.line());
+      assertTrue(error.expressionId() > 0);
+    }
+  }
+
+  @Test
+  public void arithmeticChainRetainsFullWidthCanonicalIds() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    var parsed = parse(env, "x + 1 + 2");
+    var expr = child(parsed, "expr");
+    var call = child(expr, "call_expr");
+    var args = new ArrayList<>(messages(call, "args"));
+    var inner = args.get(0);
+    long id = (1L << 40) + 7;
+    args.set(
+        0,
+        inner.toBuilder().setField(inner.getDescriptorForType().findFieldByName("id"), id).build());
+    var updatedCall =
+        call.toBuilder()
+            .setField(call.getDescriptorForType().findFieldByName("args"), args)
+            .build();
+    var updatedExpr =
+        expr.toBuilder()
+            .setField(expr.getDescriptorForType().findFieldByName("call_expr"), updatedCall)
+            .build();
+    var updated =
+        parsed.toBuilder()
+            .setField(parsed.getDescriptorForType().findFieldByName("expr"), updatedExpr)
+            .build();
+    var error = failure(program(env, updated), Map.of("x", Long.MAX_VALUE));
+    assertEquals(CelException.Code.OVERFLOW, error.code());
+    assertEquals(id, error.expressionId());
+  }
+
+  @Test
   public void logicalLoweringPreservesUtf16SourcePositions() {
     var env = Cel.newBuilder().variable("x", CelType.INT).build();
     String source = "true &&\n ('😀' == '' || 10 / x == 0)";

@@ -293,26 +293,23 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] constants;
 
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] positions;
-
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final long[] ids;
+    // Prefixes hold runtime operations/constants; tails hold their original error locations/IDs.
+    // Two primitive arrays retain the full metadata without separate per-program allocations.
+    private final int count;
 
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
       super(Kind.CALL, outer.name, false, outer.offset, leaf);
-      operations = new int[count];
-      constants = new long[count];
-      positions = new int[count * 3];
-      ids = new long[count];
+      this.count = count;
+      operations = new int[count * 4];
+      constants = new long[count * 2];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
-        positions[i * 3] = node.errorOffset;
-        positions[i * 3 + 1] = node.errorLine;
-        positions[i * 3 + 2] = node.errorColumn;
-        ids[i] = node.canonicalId;
+        operations[count + i * 3] = node.errorOffset;
+        operations[count + i * 3 + 1] = node.errorLine;
+        operations[count + i * 3 + 2] = node.errorColumn;
+        constants[count + i] = node.canonicalId;
         operations[i] = node.name.charAt(0);
         constants[i] = (Long) node.children[1].value;
         node = node.children[0];
@@ -333,22 +330,22 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.nodes.ExplodeLoop
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
-      ctx.charge(operations.length);
+      ctx.charge(count);
       Object left;
       try {
         left = children[0].execute(frame, ctx);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-        ctx.charge(operations.length);
+        ctx.charge(count);
         throw e;
       }
       if (left instanceof Unknown) {
-        ctx.charge(operations.length);
+        ctx.charge(count);
         return left;
       }
       if (left instanceof Long number) {
         long result = number;
-        for (int i = 0; i < operations.length; i++) {
+        for (int i = 0; i < count; i++) {
           ctx.tick(); // The right literal's visit still consumes its original budget.
           try {
             result =
@@ -359,15 +356,20 @@ class ExprNode extends CelNode {
                 };
           } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
-            ctx.charge(operations.length - i - 1);
-            throw e.at(positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2]);
+            ctx.charge(count - i - 1);
+            throw e.at(
+                operations[count + i * 3],
+                constants[count + i],
+                operations[count + i * 3 + 1],
+                operations[count + i * 3 + 2]);
           }
         }
         return result;
       }
       // These operators require matching numeric types; every right operand is a CEL int.
-      ctx.charge(operations.length);
-      throw Values.overload(firstOperation).at(positions[0], ids[0], positions[1], positions[2]);
+      ctx.charge(count);
+      throw Values.overload(firstOperation)
+          .at(operations[count], constants[count], operations[count + 1], operations[count + 2]);
     }
   }
 
