@@ -226,7 +226,10 @@ final class Parser {
   private ExprNode call(String name, boolean receiver, int offset, ArrayList<ExprNode> args) {
     if (env.macros) {
       String prefix = receiver ? args.get(0).qualifiedName() : null;
-      if ("cel".equals(prefix) || ".cel".equals(prefix)) {
+      ExprNode custom = customMacro(name, receiver, prefix, offset, args);
+      if (custom != null) return custom;
+      if (("cel".equals(prefix) || ".cel".equals(prefix))
+          && env.standardMacros.contains("cel." + name)) {
         if (name.equals("index") || name.equals("iterVar")) {
           int count = name.equals("index") ? 2 : 3;
           if (args.size() != count) throw error("invalid cel." + name + " arguments");
@@ -272,6 +275,7 @@ final class Parser {
         }
       }
       if (("proto".equals(prefix) || ".proto".equals(prefix))
+          && env.standardMacros.contains("proto." + name)
           && (name.equals("getExt") || name.equals("hasExt"))) {
         env.libraryPolicy.name("proto." + name, offset);
         if (args.size() != 3 || args.get(2).qualifiedName() == null)
@@ -283,11 +287,15 @@ final class Parser {
             ? select
             : node(ExprNode.Kind.MACRO, "has", null, offset, select);
       }
-      if (name.equals("has") && !receiver && args.size() == 1) {
+      if (env.standardMacros.contains(name)
+          && name.equals("has")
+          && !receiver
+          && args.size() == 1) {
         if (args.get(0).kind != ExprNode.Kind.SELECT) throw error("has requires a field selection");
         return node(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));
       }
       if (receiver
+          && env.standardMacros.contains(name)
           && Set.of(
                   "all",
                   "exists",
@@ -329,6 +337,53 @@ final class Parser {
       }
     }
     return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
+  }
+
+  private long macroNames;
+
+  private ExprNode customMacro(
+      String name, boolean receiver, String prefix, int offset, List<ExprNode> args) {
+    Macro selected = null;
+    boolean globalNamespace = false;
+    int count = args.size() - (receiver ? 1 : 0);
+    for (Macro macro : env.customMacros) {
+      boolean namespace =
+          receiver
+              && !macro.receiver()
+              && prefix != null
+              && macro
+                  .name()
+                  .equals((prefix.startsWith(".") ? prefix.substring(1) : prefix) + "." + name);
+      if (!(namespace || macro.receiver() == receiver && macro.name().equals(name))) continue;
+      if (macro.variadic() ? count < macro.argumentCount() : count != macro.argumentCount())
+        continue;
+      if (selected == null || selected.variadic() && !macro.variadic()) {
+        selected = macro;
+        globalNamespace = namespace;
+      }
+    }
+    if (selected == null) return null;
+    var original = new ArrayList<Ast.Node>();
+    for (ExprNode argument : args) {
+      env.checkDepth(argument);
+      original.add(Ast.snapshot(argument));
+    }
+    boolean target = receiver && !globalNamespace;
+    List<Ast.Node> arguments = List.copyOf(original.subList(receiver ? 1 : 0, original.size()));
+    Ast.Node expansion =
+        Objects.requireNonNull(
+            selected
+                .expander()
+                .expand(
+                    new Macro.Context(offset, () -> ++macroNames),
+                    target ? original.get(0) : null,
+                    arguments),
+            "macro expansion");
+    int added = Ast.validate(expansion, env.maxAstNodes - nodeCount, env.maxDepth);
+    nodeCount += added;
+    ExprNode result = Ast.lower(expansion, env, offset);
+    result.macroCall = new Ast.Node(0, Ast.Kind.CALL, name, receiver, original, false, offset);
+    return result;
   }
 
   private ArrayList<ExprNode> arguments(String end) {
