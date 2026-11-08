@@ -421,6 +421,23 @@ public final class CanonicalAst {
           node =
               new ExprNode(
                   ExprNode.Kind.SELECT, (String) children.get(1).value, true, 0, children.get(0));
+        } else if (function.equals("cel.@lazyBind")) {
+          arity(children, 3);
+          ExprNode variable = children.get(0);
+          if (receiver
+              || variable.kind != ExprNode.Kind.IDENT
+              || variable.name.isEmpty()
+              || variable.name.contains("."))
+            throw new IllegalArgumentException("Invalid lazy binding identifier");
+          node =
+              new ExprNode(
+                  ExprNode.Kind.MACRO,
+                  "bind",
+                  new String[] {variable.name},
+                  0,
+                  children.get(1),
+                  children.get(2));
+          node.bindings = new WriteNode[] {new WriteNode(variable.name, 0, 0)};
         } else if (function.equals("cel.block")) {
           arity(children, 2);
           if (children.get(0).kind != ExprNode.Kind.LIST)
@@ -750,14 +767,10 @@ public final class CanonicalAst {
       String[] names = (String[]) node.value;
       String acc = "@trufflecel_acc_" + nextId;
       if (node.name.equals("bind"))
-        return loop(
-            "@unused",
-            "",
-            list(),
-            names[0],
-            expression(node.children[0]),
-            literal(false),
+        return call(
+            "cel.@lazyBind",
             ident(names[0]),
+            expression(node.children[0]),
             expression(node.children[1]));
       Message range = expression(node.children[0]);
       Message init, condition, step, result;

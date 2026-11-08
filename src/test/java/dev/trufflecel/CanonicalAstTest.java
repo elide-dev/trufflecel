@@ -9,6 +9,68 @@ import org.junit.Test;
 
 public final class CanonicalAstTest {
   @Test
+  public void explicitLazyBindIntrinsicDoesNotTrustSourceMetadata() {
+    Environment env = Cel.newBuilder().build();
+    Message parsed = CanonicalAst.parse(env, "cel.bind(v, 2, v + 1)");
+    Message expr = child(parsed, "expr");
+    Message call = child(expr, "call_expr");
+    assertEquals("cel.@lazyBind", field(call, "function"));
+    assertEquals(3L, program(env, parsed).evaluate());
+    Message stripped =
+        parsed.toBuilder()
+            .clearField(parsed.getDescriptorForType().findFieldByName("source_info"))
+            .build();
+    assertEquals(3L, program(env, stripped).evaluate());
+    Message misleading =
+        parsed.toBuilder()
+            .setField(
+                parsed.getDescriptorForType().findFieldByName("source_info"),
+                message(
+                    "cel.expr.SourceInfo", "macro_calls", Map.of((Long) field(expr, "id"), expr)))
+            .build();
+    assertEquals(3L, program(env, misleading).evaluate());
+    List<Message> args = messages(call, "args");
+    for (Message invalid :
+        List.of(
+            message("cel.expr.Expr.Call", "function", "cel.@lazyBind", "args", args.subList(1, 3)),
+            message(
+                "cel.expr.Expr.Call",
+                "function",
+                "cel.@lazyBind",
+                "args",
+                List.of(
+                    message(
+                        "cel.expr.Expr",
+                        "id",
+                        field(args.get(0), "id"),
+                        "const_expr",
+                        message("cel.expr.Constant", "int64_value", 1L)),
+                    args.get(1),
+                    args.get(2))),
+            message(
+                "cel.expr.Expr.Call",
+                "function",
+                "cel.@lazyBind",
+                "args",
+                List.of(
+                    message(
+                        "cel.expr.Expr",
+                        "id",
+                        field(args.get(0), "id"),
+                        "ident_expr",
+                        message("cel.expr.Expr.Ident", "name", "qualified.name")),
+                    args.get(1),
+                    args.get(2))))) {
+      Message bad =
+          message(
+              "cel.expr.ParsedExpr",
+              "expr",
+              message("cel.expr.Expr", "id", field(expr, "id"), "call_expr", invalid));
+      assertThrows(IllegalArgumentException.class, () -> program(env, bad));
+    }
+  }
+
+  @Test
   public void serializerRejectsUnsupportedCompilerMacros() {
     var node =
         new ExprNode(
