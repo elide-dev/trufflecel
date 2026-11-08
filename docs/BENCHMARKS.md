@@ -19,6 +19,15 @@ which are already present before caching. They do not measure native process RSS
 Raw samples, unchanged intermediate results, reproduction patches, and limitations
 are preserved in the reports.
 
+The [CodSpeed check](https://github.com/elide-dev/trufflecel/runs/128794753405)
+classified all 21 benchmarks as unchanged for `07a3fe4` against the actual
+functionality base `547c9fc`. It detected no timing regression in that suite; it
+does not turn the allocation reductions into a measured throughput improvement.
+The [native phase investigation](#native-memory-by-execution-phase-graalvm-27)
+separately evaluates compiler and heap settings, with matched cel-java controls.
+Its production baseline is unchanged; no embedding defaults are changed by the
+library memory optimizations.
+
 ## Representative comparisons
 
 See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
