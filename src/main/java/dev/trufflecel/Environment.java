@@ -32,6 +32,7 @@ public final class Environment {
 
   final Map<String, CelType> variables;
   private final Set<String> variableNames;
+  private final Map<String, Integer> variableLayout;
   final Map<String, Object> constants;
   final Map<String, ObjectType> objectTypes;
   final ObjectType[] runtimeObjectTypes;
@@ -73,6 +74,7 @@ public final class Environment {
     libraryPolicy = new LibraryPolicy(b.libraries, b.allowedFunctions);
     variables = Map.copyOf(b.variables);
     variableNames = Set.copyOf(variables.keySet());
+    variableLayout = indexBindings(variableNames);
     constants = Map.copyOf(b.constants);
     objectTypes = Map.copyOf(b.objectTypes);
     constructorOnlyTypes = Set.copyOf(b.constructorOnlyTypes);
@@ -101,6 +103,20 @@ public final class Environment {
     homogeneousLiterals = b.homogeneousLiterals;
     commonSubexpressions = b.commonSubexpressions;
     validators = List.copyOf(b.validators);
+  }
+
+  // Declaration indexes are immutable and can be shared by every program in this environment.
+  // Inferred declarations belong to their prepared template, never to a global source cache.
+  Map<String, Integer> bindingLayout(Set<String> names) {
+    return names.equals(variableNames) ? variableLayout : indexBindings(names);
+  }
+
+  private static Map<String, Integer> indexBindings(Set<String> names) {
+    if (names.isEmpty()) return Map.of();
+    if (names.size() == 1) return Map.of(names.iterator().next(), 0);
+    var result = new HashMap<String, Integer>();
+    for (String name : names) result.put(name, result.size());
+    return Map.copyOf(result);
   }
 
   /**

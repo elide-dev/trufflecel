@@ -8,6 +8,53 @@ import org.junit.Test;
 
 public class BorrowedBindingsTest {
   @Test
+  public void preparedAndSeparatelyCompiledProgramsKeepIndependentConversionCaches()
+      throws Exception {
+    var environment =
+        Cel.newBuilder()
+            .variable("left", CelType.list(CelType.INT))
+            .variable("right", CelType.list(CelType.INT))
+            .variable("unused", CelType.DYN)
+            .build();
+    var prepared = environment.prepare("left[0] + right[0] + left[0]");
+    var programs =
+        List.of(
+            prepared.instantiate(),
+            prepared.instantiate(),
+            environment.compile("right[0] + left[0] + left[0]"));
+    try (var executor = Executors.newFixedThreadPool(4)) {
+      var calls = new ArrayList<Callable<Object>>();
+      for (int i = 0; i < 100; i++) {
+        int n = i;
+        Program program = programs.get(i % programs.size());
+        calls.add(
+            () -> {
+              int[] traversals = {0};
+              Iterable<Integer> left =
+                  () -> {
+                    assertEquals("one conversion per evaluation", 0, traversals[0]++);
+                    return List.of(n).iterator();
+                  };
+              var input = Map.of("left", left, "right", List.of(n + 1));
+              return n % 2 == 0
+                  ? program.evaluate(input)
+                  : program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build());
+            });
+      }
+      var answers = executor.invokeAll(calls);
+      for (int i = 0; i < answers.size(); i++) assertEquals(3L * i + 1, answers.get(i).get());
+    }
+    var inferred = Cel.newBuilder().inferVariables(true).variable("base", CelType.INT).build();
+    var first = inferred.prepare("base + x[0]");
+    var second = inferred.prepare("base + y[0]");
+    assertEquals(3L, first.instantiate().evaluate(Map.of("base", 1, "x", List.of(2))));
+    assertEquals(6L, second.instantiate().evaluate(Map.of("base", 2, "y", List.of(4))));
+    assertEquals(Set.of("base", "x"), first.instantiate().variables());
+    assertEquals(Set.of("base", "y"), second.instantiate().variables());
+    assertEquals(Set.of("base"), inferred.compile("base").variables());
+  }
+
+  @Test
   public void evaluationDoesNotEnumerateBindingsAndConversionsAreEvaluationLocal() {
     int[] reads = {0};
     int[] value = {2};
