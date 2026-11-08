@@ -130,6 +130,8 @@ final class Optimizer {
     var free = new HashSet<String>();
     node.free(Set.of(), free);
     if (!free.isEmpty()) return null;
+    node.resolveLocals(new ArrayList<>(), null);
+    node.resolveLazyBindings(Map.of());
     try {
       Object value = node.execute(null, context);
       return value instanceof Boolean result ? result : null;
