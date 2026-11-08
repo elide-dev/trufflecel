@@ -13,7 +13,7 @@ final class EvaluationState {
   EvaluationState(Environment environment, EvaluationOptions options) {
     control = options.control();
     trace = options.trace;
-    partial = options.partial == null ? null : new PartialState(environment, options.partial);
+    partial = options.partial == null ? null : new PartialState(options.partial);
     functions = options.functions;
     for (String id : functions.keySet()) {
       boolean declared = false;

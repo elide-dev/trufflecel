@@ -23,6 +23,19 @@ public final class PartialActivation {
     return patterns;
   }
 
+  private static void requireKnown(Object value) {
+    if (value instanceof Unknown || value instanceof CelException)
+      throw new IllegalArgumentException("resolution must contain only known values");
+    if (value instanceof List<?> list) for (Object element : list) requireKnown(element);
+    else if (value instanceof Map<?, ?> map)
+      for (var entry : map.entrySet()) {
+        requireKnown(entry.getKey());
+        requireKnown(entry.getValue());
+      }
+    else if (value instanceof OptionalValue optional && optional.present())
+      requireKnown(optional.value());
+  }
+
   /** Return a new snapshot; this activation remains unchanged and safe for concurrent reuse. */
   public PartialActivation resolve(Map<Attribute, ?> values) {
     var resolved = new LinkedHashMap<>(resolutions);
@@ -33,8 +46,7 @@ public final class PartialActivation {
       if (!applicable)
         throw new IllegalArgumentException("attribute is outside unknown patterns: " + attribute);
       Object value = Values.in(entry.getValue());
-      if (value instanceof Unknown || value instanceof CelException)
-        throw new IllegalArgumentException("resolution must be a known value");
+      requireKnown(value);
       // A newly supplied parent replaces previous child resolutions. A child may refine a parent.
       resolved.keySet().removeIf(attribute::prefixOf);
       resolved.put(attribute, value);

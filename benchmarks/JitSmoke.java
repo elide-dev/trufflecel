@@ -150,6 +150,57 @@ public final class JitSmoke {
             true,
             Map.of("x", 2.0),
             false);
+        var masked =
+            protobuf.mask(com.google.protobuf.FieldMask.newBuilder().addPaths("number").build());
+        var maskedProgram =
+            masked
+                .register(Cel.newBuilder())
+                .variable("p", CelType.of(masked.name()))
+                .build()
+                .compile("p.number + 1");
+        check(
+            maskedProgram,
+            Map.of("p", masked.construct(Map.of("number", 1L))),
+            2L,
+            Map.of("p", masked.construct(Map.of("number", 3L))),
+            4L);
+        var partialProgram = Cel.compile("cel.bind(x, data, x.known + x.secret)");
+        var partialInput =
+            PartialActivation.of(
+                Map.of("data", Map.of("known", 2L)), AttributePattern.of("data").qualify("secret"));
+        for (int i = 0; i < 2000; i++) {
+          var pending = partialProgram.partialEvaluate(partialInput);
+          if (!pending.unknownAttributes().equals(java.util.Set.of("data.secret")))
+            throw new AssertionError("partial unknown");
+          if (!pending
+              .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 3L))
+              .value()
+              .equals(5L)) throw new AssertionError("partial advance");
+        }
+        var partialTarget = (OptimizedCallTarget) partialProgram.traceTarget();
+        partialTarget.compile(true);
+        partialTarget.waitForCompilation();
+        if (!partialProgram
+                .partialEvaluate(partialInput)
+                .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 4L))
+                .value()
+                .equals(6L)
+            || !partialTarget.isValidLastTier())
+          throw new AssertionError("compiled partial target");
+        var traceCount = new java.util.concurrent.atomic.AtomicInteger();
+        if (!Cel.compile("1 + 2").trace(event -> traceCount.incrementAndGet()).evaluate().equals(3L)
+            || traceCount.get() != 3) throw new AssertionError("native source trace");
+        var late =
+            Cel.newBuilder()
+                .lateFunction("inc", "inc_int", false, List.of(CelType.INT), CelType.INT)
+                .build()
+                .compile("inc(1)");
+        var functions =
+            EvaluationOptions.newBuilder()
+                .function("inc_int", a -> (Long) a.getFirst() + 1)
+                .build();
+        if (!late.evalAsync(Map.of(), functions, Runnable::run).join().equals(2L))
+          throw new AssertionError("native async late function");
         var controlled = Cel.newBuilder().variable("x", CelType.INT).build().compile("x + 1");
         var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
         var controls = EvaluationOptions.newBuilder().budget(10).cancelled(cancelled::get).build();

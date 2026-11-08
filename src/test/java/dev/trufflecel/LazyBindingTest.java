@@ -30,6 +30,7 @@ public class LazyBindingTest {
   public void lazyValuesCaptureOuterScopesAcrossNestedLoopsAndShadowing() {
     var program = Cel.compile("[1, 2].map(x, cel.bind(y, x + 1, [3, 4].map(x, y + x)))");
     assertEquals(List.of(List.of(5L, 6L), List.of(6L, 7L)), program.evaluate());
+    assertEquals(List.of(List.of(3L)), Cel.compile("[1].map(x, [2].map(y, y + 1))").evaluate());
     assertEquals(3L, Cel.compile("cel.bind(x, 1, cel.bind(x, x + 1, x + 1))").evaluate());
     assertEquals(1L, Cel.compile("cel.bind(y, 1, cel.bind(x, y, cel.bind(y, 2, x)))").evaluate());
     assertEquals(7L, Cel.compile("cel.bind(x, y, cel.bind(y, 2, x))").evaluate(Map.of("y", 7L)));

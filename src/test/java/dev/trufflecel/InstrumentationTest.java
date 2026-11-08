@@ -97,6 +97,30 @@ public class InstrumentationTest {
   }
 
   @Test
+  public void sourceTraceRestoresInstrumentedBindingAndReadWrappers() {
+    Program program;
+    var trace = new ArrayList<TraceEvent>();
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder(
+                    "cel", "cel.bind(x, 2, [3].map(y, x + y))", "trace-wrapped.cel")
+                .build();
+        program = Cel.newBuilder().build().compile(source);
+        assertEquals(List.of(5L), program.evaluate());
+      } finally {
+        context.leave();
+      }
+    }
+    assertEquals(List.of(5L), program.trace(trace::add).evaluate());
+    assertTrue(
+        trace.stream().anyMatch(e -> e.kind().equals("IDENT") && Objects.equals(e.value(), 2L)));
+  }
+
+  @Test
   public void sourceLookupStaysOutsideRuntimeCompilation() throws Exception {
     // Native Image follows virtual root lookups into other languages unless this is a boundary.
     assertTrue(

@@ -50,11 +50,18 @@ final class ComprehensionNode extends ExprNode {
               ? ctx.qualify(rangeAttribute, index)
               : null);
       bindings[1].execute(
-          frame, ctx, range instanceof List<?> && !names[2].isEmpty() ? index : item);
+          frame,
+          ctx,
+          ctx.iterationValue(
+              range instanceof List<?> && !names[2].isEmpty() ? index : item, ctx.attribute()));
       if (bindings.length == 3) {
         ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
         bindings[2].execute(
-            frame, ctx, range instanceof Map<?, ?> map ? HostCollections.get(map, item) : item);
+            frame,
+            ctx,
+            ctx.iterationValue(
+                range instanceof Map<?, ?> map ? HostCollections.get(map, item) : item,
+                ctx.attribute()));
       }
       index++;
       try {

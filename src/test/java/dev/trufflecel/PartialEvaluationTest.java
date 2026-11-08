@@ -186,6 +186,21 @@ public class PartialEvaluationTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> activation.resolve(Map.of(Attribute.of("data"), Unknown.of("x"))));
+    for (Object value :
+        List.of(
+            List.of(Unknown.of("nested")),
+            Map.of("x", Unknown.of("nested")),
+            OptionalValue.of(Unknown.of("nested"))))
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> activation.resolve(Map.of(Attribute.of("data"), value)));
+    for (Object value : List.of(List.of(1L), OptionalValue.of(1L), OptionalValue.none()))
+      assertEquals(
+          value,
+          program
+              .partialEvaluate(activation)
+              .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), value))
+              .value());
     assertEquals(List.of(SECRET), activation.unknownPatterns());
     assertThrows(UnsupportedOperationException.class, () -> activation.unknownPatterns().clear());
   }
@@ -239,6 +254,121 @@ public class PartialEvaluationTest {
   }
 
   @Test
+  public void resolvedParentsPreserveOptionalReadsAndIteratorOverrides() {
+    var missing = data().resolve(Map.of(Attribute.of("data"), Map.of()));
+    assertEquals(
+        OptionalValue.none(), Cel.compile("data.?secret").partialEvaluate(missing).value());
+    assertEquals(
+        OptionalValue.none(), Cel.compile("data[?'secret']").partialEvaluate(missing).value());
+    var rows =
+        PartialActivation.of(
+            Map.of("rows", List.of(Map.of("known", 1L))), AttributePattern.of("rows").wildcard());
+    var resolved = rows.resolve(Map.of(Attribute.of("rows").qualify(0), Map.of("known", 4L)));
+    assertEquals(
+        List.of(4L), Cel.compile("rows.map(r, r.known)").partialEvaluate(resolved).value());
+    assertEquals(
+        List.of(Map.of("known", 4L)),
+        Cel.compile("rows.filter(r, true)").partialEvaluate(resolved).value());
+    var env = Cel.newBuilder().variable("rows", CelType.DYN).build();
+    var canonical =
+        CanonicalAst.program(
+            env, CanonicalAst.check(env, CanonicalAst.parse(env, "rows.map(r, r.known)")));
+    assertEquals(List.of(4L), canonical.partialEvaluate(resolved).value());
+    var fields =
+        PartialActivation.of(
+            Map.of("rows", List.of(Map.of("known", 1L))),
+            AttributePattern.of("rows").wildcard().qualify("secret"));
+    assertEquals(List.of(1L), canonical.partialEvaluate(fields).value());
+    assertEquals(
+        Unknown.of("rows[0].secret"),
+        CanonicalAst.program(
+                env, CanonicalAst.check(env, CanonicalAst.parse(env, "rows.map(r, r.secret)")))
+            .partialEvaluate(fields)
+            .value());
+  }
+
+  @Test
+  public void partialCollectionShapesRemainBoundedAndDynamicKeysRetainTypes() {
+    var rows =
+        PartialActivation.of(
+            Map.of("rows", List.of(Map.of("known", 2L), Map.of("known", 1L))),
+            AttributePattern.of("rows").wildcard().qualify("secret"));
+    assertEquals(
+        new Unknown(Set.of("rows[0]", "rows[1]")),
+        Cel.compile("rows.sortBy(r, r.known)").partialEvaluate(rows).value());
+    assertEquals(
+        6L,
+        Cel.compile("cel.block([data, data], cel.index(0).known + cel.index(1).known)")
+            .partialEvaluate(data())
+            .value());
+    var missing =
+        PartialActivation.of(Map.of(), AttributePattern.of("rows").wildcard().qualify("secret"));
+    assertEquals(
+        Unknown.of("rows"), Cel.compile("rows.map(r, r.known)").partialEvaluate(missing).value());
+    var env = Cel.newBuilder().variable("rows", CelType.DYN).build();
+    assertEquals(
+        Unknown.of("rows"),
+        CanonicalAst.program(
+                env, CanonicalAst.check(env, CanonicalAst.parse(env, "rows.map(r, r.known)")))
+            .partialEvaluate(missing)
+            .value());
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        Cel.compile("rows[1]")
+            .partialEvaluate(PartialActivation.of(Map.of(), AttributePattern.of("rows").qualify(0)))
+            .error()
+            .code());
+    var overlap = PartialActivation.of(Map.of(), SECRET, SECRET.qualify("deep"));
+    assertEquals(
+        new Unknown(Set.of("data.secret", "data.secret.deep")),
+        Cel.compile("data.secret.deep").partialEvaluate(overlap).value());
+    for (Object key : List.of(1.0, 1.5, Double.POSITIVE_INFINITY, CelNull.INSTANCE)) {
+      var input =
+          PartialActivation.of(
+              Map.of("xs", List.of(1L, 2L), "key", key), AttributePattern.of("xs").qualify(1));
+      var result = Cel.compile("xs[key]").partialEvaluate(input);
+      if (key.equals(1.0)) assertEquals(Unknown.of("xs[1]"), result.value());
+      else assertNotNull(result.error());
+    }
+    var optional =
+        PartialActivation.of(Map.of("data", OptionalValue.of(Map.of())), SECRET)
+            .resolve(Map.of(Attribute.of("data").qualify("secret"), 8L));
+    assertEquals(
+        OptionalValue.of(8L), Cel.compile("data.secret").partialEvaluate(optional).value());
+    assertEquals(
+        OptionalValue.of(8L), Cel.compile("data['secret']").partialEvaluate(optional).value());
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            data()
+                .resolve(
+                    Map.of(Attribute.of("data"), new CelException(CelException.Code.TYPE, "bad"))));
+    var context = new EvalContext(Cel.newBuilder().build(), Map.of());
+    context.configure(EvaluationOptions.newBuilder().build().withPartial(data()));
+    context.attribute(Attribute.of("data"));
+    context.push("local", context.store(Map.of("known", 3L)));
+    assertEquals(Map.of("known", 3L), context.visibleBindings().get("local"));
+    context.pop();
+    assertTrue(context.visibleBindings().isEmpty());
+  }
+
+  @Test
+  public void overriddenDynIsAnOrdinaryCallbackAndCannotCarryInputAttributes() {
+    var env =
+        Cel.newBuilder()
+            .variable("data", CelType.DYN)
+            .nonStrictFunction(
+                "dyn",
+                "custom_dyn",
+                false,
+                List.of(CelType.DYN),
+                CelType.DYN,
+                args -> Map.of("secret", 8L))
+            .build();
+    assertEquals(8L, env.compile("dyn(data).secret").partialEvaluate(data()).value());
+  }
+
+  @Test
   public void attributePatternsAreTypedImmutableAndValidated() {
     assertEquals(
         "v.a['x.y'][1][2u][false]",
@@ -258,5 +388,17 @@ public class PartialEvaluationTest {
     assertTrue(SECRET.intersects(Attribute.of("data")));
     assertFalse(SECRET.intersects(Attribute.of("data").qualify("known")));
     assertFalse(SECRET.intersects(Attribute.of("other")));
+    assertEquals(
+        List.of(1L, 2L, 3L), new Attribute("v", List.of((byte) 1, (short) 2, 3)).qualifiers());
+    for (Object left : List.of(-1L, 0L, new UInt(-1), new UInt(0), true, "x"))
+      for (Object right : List.of(-1L, 0L, new UInt(-1), new UInt(0), false, "y")) {
+        boolean expected =
+            Objects.equals(left, right)
+                || left.equals(0L) && right.equals(new UInt(0))
+                || left.equals(new UInt(0)) && right.equals(0L);
+        assertEquals(
+            expected,
+            AttributePattern.of("v").qualify(left).matches(Attribute.of("v").qualify(right)));
+      }
   }
 }

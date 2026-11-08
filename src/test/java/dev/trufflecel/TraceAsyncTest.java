@@ -3,6 +3,7 @@ package dev.trufflecel;
 import static org.junit.Assert.*;
 
 import com.oracle.truffle.api.source.Source;
+import com.oracle.truffle.runtime.OptimizedCallTarget;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -11,6 +12,72 @@ import org.graalvm.polyglot.Context;
 import org.junit.Test;
 
 public class TraceAsyncTest {
+  @Test
+  public void restoredPartialTargetCompilesWithoutDynamicAstCalls() {
+    try (var context =
+        Context.newBuilder("cel")
+            .allowExperimentalOptions(true)
+            .option("engine.BackgroundCompilation", "false")
+            .option("engine.CompilationFailureAction", "Throw")
+            .option("compiler.TreatPerformanceWarningsAsErrors", "all")
+            .option("compiler.MaximumGraalGraphSize", "10000")
+            .build()) {
+      context.initialize("cel");
+      context.enter();
+      try {
+        var program = Cel.compile("cel.bind(x, data, x.known + x.secret)");
+        var inputs =
+            PartialActivation.of(
+                Map.of("data", Map.of("known", 2L)), AttributePattern.of("data").qualify("secret"));
+        for (int i = 0; i < 1000; i++) {
+          assertEquals(Unknown.of("data.secret"), program.partialEvaluate(inputs).value());
+          assertEquals(
+              5L,
+              program
+                  .partialEvaluate(inputs)
+                  .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 3L))
+                  .value());
+        }
+        var target = (OptimizedCallTarget) program.traceTarget();
+        target.compile(true);
+        target.waitForCompilation();
+        assertEquals(Unknown.of("data.secret"), program.partialEvaluate(inputs).value());
+        assertEquals(
+            6L,
+            program
+                .partialEvaluate(inputs)
+                .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 4L))
+                .value());
+        assertTrue(target.isValidLastTier());
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
+  public void presenceTracingIncludesSelectorsAndOptionalAsyncCancellationCanStayFalse() {
+    var events = new ArrayList<TraceEvent>();
+    assertEquals(
+        true,
+        Cel.compile("has(data.x)").trace(events::add).evaluate(Map.of("data", Map.of("x", 1L))));
+    assertEquals(
+        List.of("IDENT", "SELECT", "MACRO"), events.stream().map(TraceEvent::kind).toList());
+    events.clear();
+    assertThrows(
+        CelException.class, () -> Cel.compile("has(data.x)").trace(events::add).evaluate(Map.of()));
+    assertEquals(
+        List.of("IDENT", "SELECT", "MACRO"), events.stream().map(TraceEvent::kind).toList());
+    assertEquals(
+        1L,
+        Cel.compile("1")
+            .evalAsync(
+                Map.of(),
+                EvaluationOptions.newBuilder().cancelled(() -> false).build(),
+                Runnable::run)
+            .join());
+  }
+
   @Test
   public void traceRestoresFoldedAndLoweredNodesAndPreservesShortCircuitOrder() {
     var events = new ArrayList<TraceEvent>();

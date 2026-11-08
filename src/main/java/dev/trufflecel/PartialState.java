@@ -9,12 +9,10 @@ final class PartialState {
 
   record Slot(Object value, Attribute attribute) {}
 
-  private final Environment environment;
   private final PartialActivation activation;
   Attribute attribute;
 
-  PartialState(Environment environment, PartialActivation activation) {
-    this.environment = environment;
+  PartialState(PartialActivation activation) {
     this.activation = activation;
   }
 
@@ -23,26 +21,15 @@ final class PartialState {
     attribute = path;
     if (path == null) return NONE;
     Attribute parent = null;
+    // Resolution insertion order places ancestors before any retained child refinements.
     for (Attribute candidate : activation.resolutions.keySet())
-      if (candidate.prefixOf(path)
-          && (parent == null || candidate.qualifiers().size() > parent.qualifiers().size()))
-        parent = candidate;
-    if (parent != null) {
-      Object value = activation.resolutions.get(parent);
-      try {
-        for (int i = parent.qualifiers().size(); i < path.qualifiers().size(); i++)
-          value =
-              select(
-                  value, path.qualifiers().get(i), presence && i == path.qualifiers().size() - 1);
-        return presence && parent.qualifiers().size() == path.qualifiers().size() ? true : value;
-      } catch (CelException error) {
-        if (presence
-            && (error.code() == CelException.Code.NO_SUCH_FIELD
-                || error.code() == CelException.Code.NO_SUCH_KEY
-                || error.code() == CelException.Code.INDEX)) return false;
-        throw error;
-      }
-    }
+      if (candidate.prefixOf(path)) parent = candidate;
+    // A resolved ancestor has already supplied the receiver to its selector. Let the normal
+    // selector read it once, preserving optional access, presence and adapter callback semantics.
+    if (parent != null)
+      return parent.qualifiers().size() == path.qualifiers().size()
+          ? presence ? true : activation.resolutions.get(parent)
+          : NONE;
     Unknown unknown = null;
     for (AttributePattern pattern : activation.patterns)
       if (pattern.matches(path)) {
@@ -53,18 +40,6 @@ final class PartialState {
         unknown = unknown == null ? next : unknown.merge(next);
       }
     return unknown == null ? NONE : unknown;
-  }
-
-  private Object select(Object value, Object qualifier, boolean presence) {
-    if (qualifier instanceof String field)
-      for (ObjectType type : environment.runtimeObjectTypes)
-        if (type.accepts(value)) {
-          if (!type.fields().containsKey(field))
-            throw Values.error(CelException.Code.NO_SUCH_FIELD, "no such field: " + field);
-          return presence ? type.has(value, field) : Values.in(type.get(value, field));
-        }
-    Object result = Values.index(value, qualifier);
-    return presence ? true : result;
   }
 
   @TruffleBoundary
