@@ -1,5 +1,31 @@
 # Coverage audit
 
+## November 8 memory optimization qualification
+
+The combined memory changes passed
+[69 test targets](https://app.buildbuddy.io/invocation/1d8267df-d34b-4325-8860-54ddfd240c7e),
+including the complete default suite, JVM compilation/allocation checks, native guest
+JIT/blocklist validation, native comparisons, representative native tests, and
+image-prepared programs. The production changes are at `b81fa2f`; subsequent commits
+add diagnostics, evidence, and regression coverage without changing production code.
+
+All [42 source test targets](https://app.buildbuddy.io/invocation/14903df3-890d-4620-a77c-15ba17b0e05c)
+passed under coverage instrumentation. Every one of the 66 owned production sources
+remains measured, including the adapters and annotation processor.
+
+| Metric | Combined memory changes |
+| --- | ---: |
+| Line hits | 8,103 / 8,113 (99.88%) |
+| Branch hits | 7,452 / 7,465 (99.83%) |
+| Required floor, each metric | 99.8% |
+
+Regressions cover concurrent template ownership, independent conversion caches,
+aliases and absolute roots, inferred and unchecked bindings, recursive exact budgets,
+missing captured bindings, debugger scopes, and trace/error/partial-evaluation
+provenance. No coverage exclusions, allocation ceilings, or Codecov settings changed.
+
+## Coverage policy and historical audits
+
 The [Codecov report](https://app.codecov.io/github/elide-dev/trufflecel) and Bazel's LCOV
 report guide tests for missed lines and partially covered conditions. All owned
 production sources remain measured, including the optional protobuf and JSON adapters
