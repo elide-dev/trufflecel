@@ -1,9 +1,23 @@
 # Benchmark methodology and results
 
-The [November 8 retained Program heap diagnostic](benchmarks/retained-20261108/README.md)
-measures 10,000 cached Programs, including distinct sources, shared prepared templates,
-tracing, partial evaluation and CSE. It separates Java live-heap reductions from RSS
-and runtime compilation costs.
+## November 8 memory reductions
+
+The [paired evaluation allocation report](benchmarks/evaluation-allocation-20261108/README.md)
+measures the combined 0.10.0 candidate against the completed functionality baseline.
+The ordinary interpreted scalar falls from 128 to 96 bytes per call. A separate
+fixture reading one converted binding falls from 4,192 to 168 bytes with 1,000
+declarations; the final allocation stays at 168 bytes with 1, 69, or 1,000 declarations.
+Controlled calls remain at their baseline allocation in the matched comparison.
+Compile-and-evaluate controls also allocate less; neither diagnostic measures throughput.
+
+The final combined section of the
+[retained Program report](benchmarks/retained-20261108/README.md#combined-production-follow-up)
+measures a 51.9% reduction for 10,000 distinct scalar Programs sharing a 69-declaration
+Environment, and 56.4% for Programs instantiated from one shared PreparedProgram.
+These incremental live-Java-heap results exclude the shared environment and runtime,
+which are already present before caching. They do not measure native process RSS.
+Raw samples, unchanged intermediate results, reproduction patches, and limitations
+are preserved in the reports.
 
 ## Representative comparisons
 
