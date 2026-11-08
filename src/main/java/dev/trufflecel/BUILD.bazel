@@ -23,6 +23,8 @@ java_library(
     srcs = [
         "Activation.java",
         "Ast.java",
+        "Attribute.java",
+        "AttributePattern.java",
         "BorrowedBindings.java",
         "Bytes.java",
         "Cel.java",
@@ -61,6 +63,9 @@ java_library(
         "OptionalValue.java",
         "Parser.java",
         "PolicyCompiler.java",
+        "PartialActivation.java",
+        "PartialResult.java",
+        "PartialState.java",
         "PreparedProgram.java",
         "Program.java",
         "Regex.java",

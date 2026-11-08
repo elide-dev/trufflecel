@@ -59,6 +59,7 @@ public final class Program {
     }
     body.resolveBlocks(null);
     body.resolveLazyBindings(Map.of());
+    body.resolveAttributes(false);
     boolean hasBindings = body.hasBindings();
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
     FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;
@@ -134,7 +135,9 @@ public final class Program {
     try {
       value =
           Values.out(
-              (options.trace == null ? controlledTarget() : traceTarget())
+              (options.trace == null && options.partial == null
+                      ? controlledTarget()
+                      : traceTarget())
                   .call(null, new Object[] {context}));
     } catch (CelException failure) {
       error = failure;
@@ -171,6 +174,7 @@ public final class Program {
       ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body).restoreTrace();
       body.resolveBlocks(null);
       body.resolveLazyBindings(Map.of());
+      body.resolveAttributes(false);
       body.resolveLocals(new ArrayList<>(), null);
       body.accept(
           node -> {
@@ -181,6 +185,24 @@ public final class Program {
       traceTarget = new ExpressionRoot(body, environment, true, null, null, null).getCallTarget();
     }
     return traceTarget;
+  }
+
+  public PartialResult partialEvaluate(PartialActivation activation) {
+    return partialEvaluate(activation, EvaluationOptions.newBuilder().build());
+  }
+
+  public PartialResult partialEvaluate(PartialActivation activation, EvaluationOptions options) {
+    Objects.requireNonNull(activation);
+    Objects.requireNonNull(options);
+    EvaluationResult result =
+        evaluateWithDetails(activation.activation, options.withPartial(activation));
+    return new PartialResult(this, activation, options, result);
+  }
+
+  public PartialResult advanceEvaluation(PartialResult previous, Map<Attribute, ?> values) {
+    if (Objects.requireNonNull(previous).program != this)
+      throw new IllegalArgumentException("partial result belongs to another program");
+    return previous.advanceEvaluation(values);
   }
 
   /** Observe evaluated source nodes without an ambient Polyglot context. */

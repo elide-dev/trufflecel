@@ -32,20 +32,30 @@ final class ComprehensionNode extends ExprNode {
 
   Object executeComprehension(VirtualFrame frame, EvalContext ctx) {
     Object range = children[0].execute(frame, ctx);
+    Attribute rangeAttribute = ctx.attribute();
+    if (range == PartialState.MISSING) return ctx.consume(range);
     if (range instanceof Unknown) return range;
     Object accumulator = children[1].execute(frame, ctx);
+    Attribute accumulatorAttribute = ctx.attribute();
     Values.OwnedList items = HostCollections.range(range);
     String[] names = (String[]) value;
     long index = 0;
     for (int position = 0; position < items.size(); position++) {
       Object item = items.get(position);
       ctx.tick();
+      ctx.attribute(accumulatorAttribute);
       bindings[0].execute(frame, ctx, accumulator);
+      ctx.attribute(
+          range instanceof List<?> && names[2].isEmpty()
+              ? ctx.qualify(rangeAttribute, index)
+              : null);
       bindings[1].execute(
           frame, ctx, range instanceof List<?> && !names[2].isEmpty() ? index : item);
-      if (bindings.length == 3)
+      if (bindings.length == 3) {
+        ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
         bindings[2].execute(
             frame, ctx, range instanceof Map<?, ?> map ? HostCollections.get(map, item) : item);
+      }
       index++;
       try {
         Object condition = children[2].execute(frame, ctx);
@@ -54,14 +64,17 @@ final class ComprehensionNode extends ExprNode {
         if (!Boolean.TRUE.equals(condition)) throw Values.overload("comprehension condition");
         try {
           accumulator = children[3].execute(frame, ctx);
+          accumulatorAttribute = ctx.attribute();
         } catch (CelException e) {
           if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
           accumulator = e;
+          accumulatorAttribute = null;
         }
       } finally {
         for (int i = bindings.length - 1; i >= 0; i--) bindings[i].clear(frame, ctx);
       }
     }
+    ctx.attribute(accumulatorAttribute);
     bindings[0].execute(frame, ctx, accumulator);
     try {
       return children[4].execute(frame, ctx);

@@ -505,3 +505,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "partialEvaluation",
+    srcs = ["PartialEvaluationTest.java"],
+    test_class = "dev.trufflecel.PartialEvaluationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

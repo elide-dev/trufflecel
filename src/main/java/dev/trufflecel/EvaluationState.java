@@ -7,11 +7,13 @@ import java.util.function.Function;
 final class EvaluationState {
   final EvaluationOptions.Control control;
   final TraceListener trace;
+  final PartialState partial;
   final Map<String, Function<List<Object>, Object>> functions;
 
   EvaluationState(Environment environment, EvaluationOptions options) {
     control = options.control();
     trace = options.trace;
+    partial = options.partial == null ? null : new PartialState(environment, options.partial);
     functions = options.functions;
     for (String id : functions.keySet()) {
       boolean declared = false;
