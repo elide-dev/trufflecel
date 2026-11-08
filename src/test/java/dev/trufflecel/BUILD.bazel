@@ -362,3 +362,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "astMacro",
+    srcs = ["AstMacroTest.java"],
+    test_class = "dev.trufflecel.AstMacroTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

@@ -61,6 +61,8 @@ public final class Environment {
   final int maxAstNodes, maxRegexProgramSize;
   final String container;
   final boolean inferVariables, macros;
+  final List<Macro> customMacros;
+  final Set<String> standardMacros;
   final long budget;
   final int maxSourceLength, maxDepth, comprehensionNesting;
   final Validation validation;
@@ -88,6 +90,8 @@ public final class Environment {
     container = b.container;
     inferVariables = b.inferVariables;
     macros = b.macros;
+    customMacros = List.copyOf(b.customMacros);
+    standardMacros = Set.copyOf(b.standardMacros);
     budget = b.budget;
     maxSourceLength = b.maxSourceLength;
     maxDepth = b.maxDepth;
@@ -289,6 +293,8 @@ public final class Environment {
     private CelType expectedResultType;
     private int maxAstNodes = 100_000, maxRegexProgramSize = 10_000;
     private boolean inferVariables, macros = true;
+    private final List<Macro> customMacros = new ArrayList<>();
+    private Set<String> standardMacros = Macro.STANDARD;
     private long budget = 1_000_000;
     private int maxSourceLength = 100_000, maxDepth = 256, comprehensionNesting;
     private Validation validation = Validation.DEFERRED;
@@ -522,6 +528,31 @@ public final class Environment {
 
     public Builder macros(boolean enabled) {
       macros = enabled;
+      return this;
+    }
+
+    /** Choose enabled built-in expansions; custom registrations are configured separately. */
+    public Builder standardMacros(Set<String> names) {
+      if (!Macro.STANDARD.containsAll(names))
+        throw new IllegalArgumentException("unknown standard macro");
+      standardMacros = Set.copyOf(names);
+      return this;
+    }
+
+    /**
+     * Register a fixed-arity or variadic compile-time macro. Exact signatures win over variadic
+     * ones.
+     */
+    public Builder macro(Macro macro) {
+      Objects.requireNonNull(macro);
+      for (Macro existing : customMacros)
+        if (existing.name().equals(macro.name())
+            && existing.receiver() == macro.receiver()
+            && (existing.variadic() && macro.variadic()
+                || existing.variadic() == macro.variadic()
+                    && existing.argumentCount() == macro.argumentCount()))
+          throw new IllegalArgumentException("duplicate macro signature");
+      customMacros.add(macro);
       return this;
     }
 

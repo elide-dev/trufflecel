@@ -11,6 +11,8 @@ import java.util.*;
 class ExprNode extends CelNode {
   boolean rootBody, statement;
   long canonicalId;
+  // Original custom macro syntax is immutable metadata, never a runtime child.
+  Ast.Node macroCall;
   int errorOffset = -1, errorLine = -1, errorColumn = -1;
   CelType checkedType;
   FieldPlan fieldPlan;
