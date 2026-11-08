@@ -13,6 +13,7 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayDeque;
 
 /**
  * The single regular-expression engine seam. Constant patterns are compiled once at plan time and
@@ -36,7 +37,19 @@ final class Regex {
 
   // Dynamic patterns come from data, so both the entry count and the cached key size are bounded.
   private static final int CACHE_ENTRIES = 256, CACHE_KEY_LENGTH = 4096;
-  private static final ConcurrentHashMap<String, Compiled> CACHE = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, Object> CACHE = new ConcurrentHashMap<>();
+  private static final ArrayDeque<String> CACHE_ORDER = new ArrayDeque<>();
+
+  /** Cache error data, never exceptions with stacks or guest/context ownership. */
+  record Failure(CelException.Code code, String message) {
+    Failure(CelException error) {
+      this(error.code(), error.issues().getFirst().message());
+    }
+
+    CelException exception() {
+      return Values.error(code, message);
+    }
+  }
 
   /** Compile an RE2 pattern, reporting syntax failures as {@code INVALID_ARGUMENT}. */
   @TruffleBoundary
@@ -130,6 +143,13 @@ final class Regex {
         current = initialize();
       }
       Handle handle = current.handle == null ? null : current.handle.get();
+      if (handle == null && current.token != null) {
+        handle = recover(current);
+        if (handle != null) {
+          CompilerDirectives.transferToInterpreterAndInvalidate();
+          entry = new Entry(current.token, new TruffleWeakReference<>(handle));
+        }
+      }
       if (handle == null || !handle.isCurrent(current.token)) return fallback.find(text);
       return handle.find(text);
     }
@@ -150,6 +170,15 @@ final class Regex {
                 : new Entry(scope.regexToken, new TruffleWeakReference<>(handle));
       }
       return entry;
+    }
+
+    @TruffleBoundary
+    private Handle recover(Entry observed) {
+      CelLanguage.Scope scope = CelLanguage.currentScope();
+      if (scope == null || scope.regexToken != observed.token) return null;
+      return fallback instanceof TruffleOnly only
+          ? scope.regex(source, only.parserLimit(), true)
+          : scope.regex(source);
     }
 
     /** Qualification checks use this after execution to distinguish acceleration from fallback. */
@@ -235,13 +264,28 @@ final class Regex {
   @TruffleBoundary
   static Compiled cached(String pattern, int limit) {
     if (pattern.length() > CACHE_KEY_LENGTH) return compile(pattern, limit);
-    Compiled compiled = CACHE.get(pattern);
-    if (compiled == null) {
-      compiled = compile(pattern, limit);
-      if (CACHE.size() >= CACHE_ENTRIES) CACHE.clear();
-      CACHE.put(pattern, compiled);
+    Object result = CACHE.get(pattern);
+    if (result == null) {
+      Object compiled;
+      try {
+        // Compilation stays outside the admission lock; unrelated misses can compile concurrently.
+        compiled = compile(pattern, limit);
+      } catch (CelException error) {
+        if (error.code() != CelException.Code.INVALID_ARGUMENT) throw error;
+        compiled = new Failure(error);
+      }
+      synchronized (CACHE) {
+        result = CACHE.get(pattern);
+        if (result == null) {
+          result = compiled;
+          if (CACHE.size() >= CACHE_ENTRIES) CACHE.remove(CACHE_ORDER.removeFirst());
+          CACHE_ORDER.addLast(pattern);
+          CACHE.put(pattern, result);
+        }
+      }
     }
-    return bounded(compiled, limit);
+    if (result instanceof Failure failure) throw failure.exception();
+    return bounded((Compiled) result, limit);
   }
 
   /** The number of cached dynamic patterns, for tests of the cache bound. */

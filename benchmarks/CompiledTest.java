@@ -3,7 +3,6 @@ package dev.trufflecel;
 import static org.junit.Assert.*;
 
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.sun.management.ThreadMXBean;
 import java.lang.management.ManagementFactory;
@@ -17,8 +16,15 @@ import org.junit.Test;
 public final class CompiledTest {
   private static volatile Object sink;
 
+  private static java.lang.ref.WeakReference<Regex.Handle> evictRegexHandle() {
+    var scope = CelLanguage.currentScope();
+    var weak = new java.lang.ref.WeakReference<>(scope.regex("^[a-z]+@[a-z]+[.]com$"));
+    scope.clearRegexes();
+    return weak;
+  }
+
   @Test
-  public void compiledScalarAndLazyPathsStayWithinBudgets() throws ReflectiveOperationException {
+  public void compiledScalarAndLazyPathsStayWithinBudgets() throws Exception {
     try (Context context =
         Context.newBuilder("cel")
             .allowExperimentalOptions(true)
@@ -67,17 +73,22 @@ public final class CompiledTest {
                     ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
                     Regex.MatchNode.class)
                 .getFirst();
-        CelLanguage.currentScope().clearRegexes();
-        // Exercise loss of a compiled weak-cache referent deterministically, without a GC race.
-        var entryField = Regex.MatchNode.class.getDeclaredField("entry");
-        entryField.setAccessible(true);
-        Object entry = entryField.get(regexNode);
-        var handleField = entry.getClass().getDeclaredField("handle");
-        handleField.setAccessible(true);
-        ((TruffleWeakReference<?>) handleField.get(entry)).clear();
+        var weakRegex = evictRegexHandle();
+        for (int attempt = 0; attempt < 100 && !weakRegex.refersTo(null); attempt++) {
+          System.gc();
+          Thread.sleep(10);
+        }
+        assertTrue("Program retained evicted regex", weakRegex.refersTo(null));
         assertEquals(true, regexProgram.evaluate(Map.of("s", "person@example.com")));
         assertEquals(false, regexProgram.evaluate(Map.of("s", "person@example.org")));
-        assertFalse(regexNode.isAccelerated());
+        assertTrue(regexNode.isAccelerated());
+        check(
+            regexProgram,
+            Map.of("s", "person@example.com"),
+            true,
+            Map.of("s", "person@example.org"),
+            false,
+            4096);
         check(
             "regex.replace(s, '(a)', r'\\1x')",
             Map.of("s", "aba"),

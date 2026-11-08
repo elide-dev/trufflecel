@@ -15,6 +15,13 @@ import org.graalvm.polyglot.Context;
 
 /** Native Image must include a working guest compiler, not just build successfully. */
 public final class JitSmoke {
+  private static java.lang.ref.WeakReference<Regex.Handle> evictRegexHandle() {
+    var scope = CelLanguage.currentScope();
+    var weak = new java.lang.ref.WeakReference<>(scope.regex("^[a-z]+@[a-z]+[.]com$"));
+    scope.clearRegexes();
+    return weak;
+  }
+
   private static final PreparedProgram IMAGE_POLICY =
       PolicyCompiler.prepare(
           EnvironmentYaml.read("variables: [{name: x, type: int}]"),
@@ -93,6 +100,23 @@ public final class JitSmoke {
             .stream()
             .noneMatch(Regex.MatchNode::isAccelerated))
           throw new AssertionError("Native constant matches did not use TruffleRegex");
+        var weakRegex = evictRegexHandle();
+        for (int attempt = 0; attempt < 100 && !weakRegex.refersTo(null); attempt++) {
+          System.gc();
+          Thread.sleep(10);
+        }
+        if (!weakRegex.refersTo(null)) throw new AssertionError("Program retained evicted regex");
+        check(
+            regexProgram,
+            Map.of("s", "alice@example.com"),
+            true,
+            Map.of("s", "not-an-email"),
+            false);
+        if (NodeUtil.findAllNodeInstances(
+                regexProgram.callTarget().getRootNode(), Regex.MatchNode.class)
+            .stream()
+            .noneMatch(Regex.MatchNode::isAccelerated))
+          throw new AssertionError("Native regex did not recover after GC");
         check(IMAGE_POLICY.instantiate(), Map.of("x", 2L), 3L, Map.of("x", -1L), 0L);
         var policyEnvironment = EnvironmentYaml.read("variables: [{name: x, type: int}]");
         check(
