@@ -13,6 +13,7 @@ public final class EvaluationOptions {
   final long budget;
   final Map<String, Function<List<Object>, Object>> functions;
   final TraceListener trace;
+  final PartialActivation partial;
   private final Duration timeout;
   private final Instant deadline;
   private final BooleanSupplier cancelled;
@@ -21,6 +22,7 @@ public final class EvaluationOptions {
     budget = builder.budget;
     functions = Map.copyOf(builder.functions);
     trace = builder.trace;
+    partial = builder.partial;
     timeout = builder.timeout;
     deadline = builder.deadline;
     cancelled = builder.cancelled;
@@ -28,6 +30,12 @@ public final class EvaluationOptions {
 
   public static Builder newBuilder() {
     return new Builder();
+  }
+
+  EvaluationOptions withPartial(PartialActivation activation) {
+    Builder builder = copy();
+    builder.partial = activation;
+    return builder.build();
   }
 
   EvaluationOptions withTrace(TraceListener listener) {
@@ -51,6 +59,7 @@ public final class EvaluationOptions {
     builder.cancelled = cancelled;
     builder.functions.putAll(functions);
     builder.trace = trace;
+    builder.partial = partial;
     return builder;
   }
 
@@ -88,6 +97,7 @@ public final class EvaluationOptions {
     private long budget;
     private final Map<String, Function<List<Object>, Object>> functions = new LinkedHashMap<>();
     private TraceListener trace;
+    private PartialActivation partial;
     private Duration timeout;
     private Instant deadline;
     private BooleanSupplier cancelled;

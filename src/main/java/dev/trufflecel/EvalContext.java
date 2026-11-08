@@ -59,6 +59,7 @@ final class EvalContext {
     else visible.putAll(activationMap());
     for (int i = 0; i < scopeSize; i += 2) {
       Object value = scopes[i + 1];
+      if (value instanceof PartialState.Slot slot) value = slot.value();
       visible.put(
           (String) scopes[i], value instanceof ExprNode.LazyBinding lazy ? lazy.display() : value);
     }
@@ -97,6 +98,55 @@ final class EvalContext {
     return FunctionOverloads.invoke(implementation, arguments);
   }
 
+  Attribute attribute() {
+    return evaluation == null || evaluation.partial == null ? null : evaluation.partial.attribute;
+  }
+
+  void attribute(Attribute attribute) {
+    if (evaluation != null && evaluation.partial != null) evaluation.partial.attribute = attribute;
+  }
+
+  Object consume(Object value) {
+    return evaluation == null || evaluation.partial == null
+        ? value
+        : evaluation.partial.consume(value);
+  }
+
+  Object attributeRead(Attribute path, boolean presence) {
+    return evaluation == null || evaluation.partial == null
+        ? PartialState.NONE
+        : evaluation.partial.override(path, presence);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  Attribute qualify(Attribute parent, Object qualifier) {
+    if (parent == null) return null;
+    if (qualifier instanceof Integer number) qualifier = number.longValue();
+    if (qualifier instanceof Double number) {
+      if (!Double.isFinite(number) || number != (long) number.doubleValue()) return null;
+      qualifier = (long) number.doubleValue();
+    }
+    if (!(qualifier instanceof String
+        || qualifier instanceof Long
+        || qualifier instanceof UInt
+        || qualifier instanceof Boolean)) return null;
+    return parent.qualify(qualifier);
+  }
+
+  Object store(Object value) {
+    Attribute path = attribute();
+    return path == null ? value : new PartialState.Slot(value, path);
+  }
+
+  Object readStored(Object value) {
+    if (value instanceof PartialState.Slot slot) {
+      attribute(slot.attribute());
+      return slot.value();
+    }
+    attribute(null);
+    return value;
+  }
+
   void trace(ExprNode node, Object value, CelException error) {
     if (evaluation != null && evaluation.trace != null) reportTrace(node, value, error);
   }
@@ -110,7 +160,7 @@ final class EvalContext {
             node.errorLine,
             node.errorColumn,
             node.kind.name(),
-            error == null ? Values.out(value) : null,
+            error == null ? Values.out(consume(value)) : null,
             error));
   }
 
@@ -131,7 +181,8 @@ final class EvalContext {
   Object getBoundary(String name) {
     if (name.startsWith(".")) name = name.substring(1);
     else {
-      for (int i = scopeSize - 2; i >= 0; i -= 2) if (name.equals(scopes[i])) return scopes[i + 1];
+      for (int i = scopeSize - 2; i >= 0; i -= 2)
+        if (name.equals(scopes[i])) return readStored(scopes[i + 1]);
     }
     return rootBinding(name);
   }
@@ -143,14 +194,18 @@ final class EvalContext {
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   Object getLocal(int slot) {
-    return scopes[slot * 2 + 1];
+    return readStored(scopes[slot * 2 + 1]);
   }
 
   private Object rootBinding(String name) {
+    Attribute path = evaluation == null || evaluation.partial == null ? null : Attribute.of(name);
+    Object override = attributeRead(path, false);
+    if (override != PartialState.NONE) return override;
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value =
         singleName == null ? lookup(activation, name) : singleName.equals(name) ? activation : null;
     if (value != null) return value;
+    if (path != null && evaluation.partial.containsUnknown(path)) return PartialState.MISSING;
     throw undeclared(name);
   }
 

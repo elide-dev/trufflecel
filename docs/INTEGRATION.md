@@ -395,3 +395,27 @@ future prevents queued work and requests cooperative cancellation at CEL cost st
 work; it does not interrupt arbitrary host callbacks. The caller chooses and manages the executor.
 Executor rejection is synchronous, and evaluation failures complete the future exceptionally.
 A context-bound embedding must arrange its normal context entry on the executor thread.
+
+Field-level partial evaluation uses owned activations and typed attribute paths:
+
+```java
+var inputs = PartialActivation.of(
+    Map.of("request", Map.of("region", "us")),
+    AttributePattern.of("request").qualify("approved"));
+var pending = program.partialEvaluate(inputs);
+var finished = pending.advanceEvaluation(
+    Map.of(Attribute.of("request").qualify("approved"), true));
+```
+
+Patterns can contain `.wildcard()` qualifiers for individual map keys, list indices,
+or object fields. Known sibling fields remain available, including through local
+bindings and comprehensions. `has()` preserves unknown presence. Resolutions are
+immutable snapshots; resolving a parent replaces previous child resolutions.
+Reading a whole aggregate with an unresolved descendant produces an unknown for
+that aggregate. Supply the complete parent value to resolve such a whole-object
+read; individual child resolutions do not reconstruct arbitrary host objects.
+Each advance evaluates the original expression afresh, with a new operation budget
+and fresh lazy scopes. Host callbacks may therefore run again. Results expose
+`isComplete()`, `unknownAttributes()`, `error()` and `actualCost()`; a failed result's
+`value()` throws its CEL error. Partial execution uses the same lazily restored
+source target as tracing, preserving source semantics through optimization.

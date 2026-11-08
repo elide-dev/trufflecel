@@ -21,8 +21,9 @@ class WriteNode extends CelNode {
   }
 
   Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
-    if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, value);
-    else ctx.push(name, value);
+    Object stored = ctx.store(value);
+    if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, stored);
+    else ctx.push(name, stored);
     return value;
   }
 
