@@ -71,7 +71,7 @@ was not dedicated or CPU-pinned. Latency is advisory; these samples do not estab
 throughput claim or cross-platform result.
 
 `metadata.json` records the exact command, base revision, source and artifact hashes,
-toolchain path, hardware, load and timestamps. `source.diff` records the production change
+toolchain path, hardware, load and timestamps. `source.diff.gz` records the production change
 from that base. Compressed raw JSON includes every per-fork sample; the compressed log
 includes warmup results. The pinned VM version and effective flags are preserved alongside
 them. Build and reproduce with:
