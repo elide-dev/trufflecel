@@ -315,12 +315,13 @@ against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXH
 A zero-count regex replacement still returns its input without compiling the pattern.
 
 Constant `matches` patterns in a conservative ASCII subset can use the pinned
-TruffleRegex RE2 flavor. The Program's first evaluation must occur in an initialized,
+TruffleRegex RE2 flavor. The constant match's first execution must occur in an initialized,
 entered CEL context. The accelerator remains owned by that context; the Program
 holds only a weak reference and checks the owning context on every accelerated call.
-Evaluation outside that context, after its closure, or after cache eviction uses
-RE2/J. A Program first evaluated without a CEL context stays on RE2/J and never
-creates a hidden context. Dynamic patterns and capture/replacement extensions also
+Evaluation outside that context, after its closure, or after the weak handle is collected
+uses RE2/J. A match first executed without a CEL context stays on RE2/J and never
+creates a hidden context. Cache eviction removes strong ownership; an evicted handle
+can continue accelerating matches in its owning context until collected. Dynamic patterns and capture/replacement extensions also
 remain on RE2/J. No caller context is required by the standalone Java API.
 
 The initial accelerated subset excludes escapes, non-ASCII pattern characters and
