@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.9.0](https://github.com/elide-dev/trufflecel/compare/v0.8.0...v0.9.0) (2026-11-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* CelException no longer extends IllegalArgumentException; callers that caught IllegalArgumentException to observe CEL failures must catch CelException (or RuntimeException).
+
+### Features
+
+* integrate CEL parity and TruffleData 0.9.0 ([d0ef064](https://github.com/elide-dev/trufflecel/commit/d0ef064663b6a30b52054bcca6ef332e84ada741))
+
+
+### Performance Improvements
+
+* keep compiled error paths compiled ([#46](https://github.com/elide-dev/trufflecel/issues/46)) ([41f889b](https://github.com/elide-dev/trufflecel/commit/41f889b94f10735674d34aeed7c968edaa7abebf))
+
 ## [0.8.0](https://github.com/elide-dev/trufflecel/compare/v0.7.0...v0.8.0) (2026-11-07)
 
 
