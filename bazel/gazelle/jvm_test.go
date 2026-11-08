@@ -83,3 +83,14 @@ func TestOptionalAdapterBoundaries(t *testing.T) {
 		}
 	}
 }
+
+func TestProcessorStaysOutsideRuntimeLibrary(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "PojoProcessor.java"), []byte("package dev.trufflecel.processor;\nimport javax.annotation.processing.AbstractProcessor;"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	generated := (&java{}).GenerateRules(language.GenerateArgs{Dir: dir, Rel: "src/main/java/dev/trufflecel/processor", RegularFiles: []string{"PojoProcessor.java"}})
+	if len(generated.Gen) != 1 || generated.Gen[0].Name() != "processor" || len(generated.Gen[0].AttrStrings("deps")) != 0 {
+		t.Fatalf("processor must remain an independent host artifact: %v", generated.Gen)
+	}
+}

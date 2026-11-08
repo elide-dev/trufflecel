@@ -22,10 +22,12 @@ java_library(
     testonly = True,
     srcs = [
         "NegativeCases.java",
+        "PojoFixtures.java",
         "ProductionCorpus.java",
         "ProtoSchema.java",
         "TestObjects.java",
     ],
+    plugins = ["//src/main/java/dev/trufflecel/processor:plugin"],
     visibility = ["//benchmarks:__subpackages__"],
     deps = [
         "//:trufflecel",
@@ -510,6 +512,29 @@ java_test(
     name = "partialEvaluation",
     srcs = ["PartialEvaluationTest.java"],
     test_class = "dev.trufflecel.PartialEvaluationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "pojoProcessor",
+    srcs = ["PojoProcessorTest.java"],
+    test_class = "dev.trufflecel.PojoProcessorTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-processor",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "pojo",
+    srcs = ["PojoTest.java"],
+    test_class = "dev.trufflecel.PojoTest",
     deps = [
         ":test_support",
         "//:trufflecel",

@@ -1,4 +1,4 @@
-load("@rules_java//java:defs.bzl", "java_import", "java_test")
+load("@rules_java//java:defs.bzl", "java_import", "java_plugin", "java_test")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//bazel:maven.bzl", "maven_publication", "release_version")
 
@@ -9,6 +9,7 @@ release_version(
 )
 
 DEPENDENCIES = {
+    "processor": [],
     "core": [
         "org.graalvm.polyglot:polyglot:25.5.5-elide.27",
         "org.graalvm.truffle:truffle-api:25.5.5-elide.27",
@@ -40,7 +41,7 @@ DEPENDENCIES = {
 
 filegroup(
     name = "publications",
-    srcs = [":core", ":protobuf", ":json"],
+    srcs = [":core", ":protobuf", ":json", ":processor"],
 )
 
 sh_test(
@@ -65,8 +66,15 @@ sh_test(
     ],
 ) for module, dependencies in DEPENDENCIES.items()]
 
+java_plugin(
+    name = "published_pojo_processor",
+    processor_class = "dev.trufflecel.processor.PojoProcessor",
+    deps = [":processor_import"],
+)
+
 java_test(
     name = "consumer_test",
+    plugins = [":published_pojo_processor"],
     srcs = ["Consumer.java"],
     main_class = "Consumer",
     use_testrunner = False,

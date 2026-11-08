@@ -444,3 +444,56 @@ environment. Projection equality compares visible fields and their presence;
 projection values retain native rows, not host messages. Field masks govern CEL
 field visibility; they do not redact the original host message or its serialized
 bytes.
+
+
+## Generated POJO, JavaBean and record snapshots
+
+Add `dev.elide:trufflecel-processor` at the same version as core to your Java annotation
+processor path. With javac, use `-processor dev.trufflecel.processor.PojoProcessor` (or enable
+processor discovery with `-proc:full`). Bazel consumers can use
+`//src/main/java/dev/trufflecel/processor:plugin` in their Java target's `plugins`.
+The processor has no runtime dependencies and does not belong in a Native Image runtime classpath.
+
+```java
+@CelPojo("app.User")
+public record User(long id, @CelField("display_name") String displayName) {}
+
+var type = UserCel.INSTANCE;
+var environment = type.register(Cel.newBuilder())
+    .variable("user", CelType.of(type.name())).build();
+var policy = environment.compile("user.id > 0 && has(user.display_name)");
+var snapshot = type.snapshot(new User(42, "Ada"));
+boolean allowed = policy.test(Map.of("user", snapshot));
+```
+
+An adapter is generated beside the annotated Java type, named `<Type>Cel`; nested Java types
+use enclosing names joined with underscores, such as `Models_UserCel`. The default CEL type name
+is the qualified Java name. The generator reads public instance fields, ordinary JavaBean
+`getX()`/boolean `isX()` accessors, or record components. `@CelField` can rename a property,
+expose a zero-argument accessor, or exclude it with `ignore = true`. Duplicate CEL field names
+are rejected rather than choosing between a public field and a getter. Static members and
+unannotated non-getter methods are not exposed. Both annotations have class-file retention so
+already compiled nested types and inherited annotated members remain available to the processor;
+no runtime reflection is used.
+
+Supported properties are primitive/boxed booleans and numbers, characters and strings, `UInt`,
+`Bytes`, `byte[]`, `Instant`, `Duration`, enums (their declared names as CEL strings), typed `List`
+and `Map`, and other annotated classes or records. Map keys must map to CEL string, integer, uint
+or boolean types. Raw collections, wildcard/generic properties, other arrays and arbitrary host
+objects receive compile-time diagnostics. Register nested adapters explicitly when their fields
+are selected or their CEL constructors are used.
+
+Call `adapter.snapshot(host)` before evaluation. Generated accessors run once during this call,
+copying nested objects, collections and bytes into immutable `PojoType.Value` objects. The caller
+must keep the host graph stable during copying. Subsequent host mutation is invisible; snapshots
+can be shared by concurrent evaluations and `Activation.snapshot`. They contain no original POJO
+references. The default traversal limits are depth 100 and one million values, shared across all
+nested adapters and containers; `snapshot(host, maxDepth, maxNodes)` selects tighter limits.
+Cycles fail with `INVALID_ARGUMENT`, and exceeded limits fail with `RESOURCE_EXHAUSTED`.
+
+Every generated property is present in a host snapshot, including null properties, represented
+as CEL null. CEL constructors produce the same owned value type; omitted constructor fields are
+absent, so `has()` is false and an ordinary read raises `NO_SUCH_KEY`. Construction validates
+field names and nested value types. Evaluating a raw host POJO does not implicitly snapshot it;
+only generated snapshots are accepted by these adapters. Policy execution never invokes bean
+getters or constructs host objects.
