@@ -57,6 +57,7 @@ public final class EvaluationAllocation {
             .commonSubexpressions(true)
             .build()
             .compile("(x + 1) * (x + 1)");
+    var reusedEnvironment = Cel.newBuilder().variable("x", CelType.INT).build();
     var converted = Map.<String, Object>of("x", 42);
     var narrowDeclarations = convertedScalar(1);
     var wideDeclarations = convertedScalar(69);
@@ -76,7 +77,13 @@ public final class EvaluationAllocation {
             new Case("converted-1-declaration", () -> narrowDeclarations.evaluate(converted), 84L),
             new Case("converted-69-declarations", () -> wideDeclarations.evaluate(converted), 84L),
             new Case(
-                "converted-1000-declarations", () -> largeDeclarations.evaluate(converted), 84L));
+                "converted-1000-declarations", () -> largeDeclarations.evaluate(converted), 84L),
+            new Case(
+                "compile-scalar-inferred", () -> Cel.compile("x * 2 + 1").evaluate(input), 85L),
+            new Case(
+                "compile-scalar-reused-environment",
+                () -> reusedEnvironment.compile("x * 2 + 1").evaluate(input),
+                85L));
     var bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
     if (!bean.isThreadAllocatedMemorySupported())
       throw new IllegalStateException("per-thread allocation accounting is required");
