@@ -1,0 +1,15 @@
+{
+  "base_revision": "8559e4f33760e3c535b2b0e12214aaae8d453c01",
+  "truffledata": "0.8.0",
+  "graalvm": "25.5.5-elide.27",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "command": "bazel run --config=local //benchmarks/representative:jmh -- IngestionStages -wi 3 -i 3 -w 500ms -r 500ms -f 3 -prof gc -rf json -rff docs/benchmarks/ingestion-20261107/jmh.json",
+  "conditions": "Shared developer host; concurrent Bazel builds. Advisory stage/allocation diagnostics, not a quiet-host release comparison.",
+  "files": {
+    "benchmarks/representative/IngestionStages.java": "3f5a89cade692a9e7d65bb050a1bf5f7bf74af2f604e80614b44594378fd4d5b",
+    "MODULE.bazel": "e4bb6c46e4c19e91a112faa102f5a0df1cfc9ba6459c80c8012fc60e9f2344ce",
+    "maven_install.json": "5f83a21a22adb446a5337335deca618b29abb96a44041313803153a91a87c1a0",
+    "docs/benchmarks/ingestion-20261107/jmh.json.gz": "61204b2184ee61a4d3b23eaa0fa895b7e489709ddad729c7ff7c33f6f8b2e92f"
+  },
+  "uncompressed_jmh_sha256": "ba1a3447ef65d7fe97d88e74190d13088f4ba3a3ac7522b4dae62e7aa2fbcfd3"
+}

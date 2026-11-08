@@ -124,9 +124,9 @@ continue through the generic adapter.
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.8.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+at `0.9.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
 Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.27` Elide GraalVM artifacts.
-The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.8.0`,
+The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.9.0`,
 which contains the native plans and codecs split from the protobuf-java bridge.
 No sibling checkout or local Maven cache is required.
 
@@ -169,8 +169,8 @@ var program = env.compile("has(message.owner) && message.count > 0u");
 Object result = program.evaluate(Map.of("message", type.input(myMessage)));
 ```
 
-`input(Message)` snapshots through TruffleData's bound `ProtoCompiler.Source` and applies
-CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a lossless
+`input(Message)` serializes the supplied message, normalizes MessageSet wire data,
+and decodes through TruffleData's native plan before applying CEL well-known mappings. `snapshot` returns a `ProtobufType.Value` backed by a lossless
 `ProtoRow`; it retains no protobuf `Message`. Field reads use native storage, `ProtoRow.has`
 provides protobuf presence independently of readable defaults, and enums retain numeric values.
 Bytes use compact immutable storage; unsigned integers preserve their full width.
@@ -270,3 +270,60 @@ embedder. Dedicated JVM compilation/allocation and native guest-JIT gates enforc
 contracts described in [benchmark details](BENCHMARKS.md). Production image size, peak
 allocation across arbitrary inputs, and compiled throughput in Elide still need qualification. The embedder must provide the matching Truffle runtime and
 its Native Image integration. No speculative reflection/resource configuration is shipped.
+
+## Names, result types and AST size
+
+`Builder.alias("short", "package.QualifiedName")` resolves a leading identifier before
+container lookup; `abbreviations("package.QualifiedName")` uses the final identifier as
+the alias. Aliases apply to declared variables, constants, object types, host functions
+and extension function namespaces. Absolute names beginning with `.` bypass aliases.
+Invalid, duplicate and built-in type aliases are rejected. Environments copy the builder's
+alias table, and runtime bindings continue to use their declared qualified names.
+
+`expectedResultType(CelType.BOOL)` constrains the static result of source preparation and
+canonical imports, including unchecked planning. Dynamic results remain assignable under
+CEL's gradual typing rules; use `Program.test` to require a boolean value at evaluation.
+
+`maxAstNodes(count)` limits parser node allocations and imported AST size independently
+of `maxDepth`. The default is 100,000. Parser accounting includes temporary nodes used
+while recognizing macros and namespaces; input length limits still apply. Canonical input
+retains its existing source-length-derived node cap as well as the explicit node limit.
+
+## Runtime error locations
+
+`CelException` exposes `expressionId()`, `offset()`, `line()` and `column()` for runtime
+failures as well as compile-time diagnostics. Runtime IDs are stable within a prepared
+program; canonical imports preserve supplied expression IDs. The innermost failing
+operation retains its location through folding, arithmetic lowering and error propagation.
+Exception instances supplied by host callbacks are never mutated.
+
+For source programs, offsets count Java chars and line/column are one-based. Imported
+canonical `SourceInfo` uses CEL's code-point positions; absent position metadata remains
+`-1` while the expression ID is still available. Budget exhaustion identifies the policy
+root because optimized evaluation can charge multiple original visits together. Arbitrary
+exceptions outside CEL's normalized callback errors retain their existing propagation.
+
+`maxRegexProgramSize(instructions)` caps the compiled RE2 program size, with a default of
+10,000. Oversized constant `matches` patterns are rejected during preparation; dynamic
+patterns and regex extension calls are checked before matching. Cached patterns are rechecked
+against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXHAUSTED`.
+A zero-count regex replacement still returns its input without compiling the pattern.
+
+## Per-evaluation controls and cost
+
+`EvaluationOptions.newBuilder()` configures a per-call `budget(long)`, `timeout(Duration)`,
+absolute `deadline(Instant)`, or `cancelled(BooleanSupplier)` hook. Pass the immutable options
+to `Program.evaluate(bindings, options)` or the corresponding `Activation` overload. An omitted
+budget uses the environment's budget; a supplied budget replaces it for that call only.
+Timeouts begin at evaluation entry, and the earlier timeout/deadline wins.
+
+`evaluateWithDetails(bindings, options)` returns an `EvaluationResult` containing `actualCost()`
+and a nullable `error()`. Its `value()` method returns the owned value or throws the original
+located CEL error. Cost counts successfully charged CEL operations, including those before a
+failure; an operation rejected for exceeding the remaining budget is not charged. Folded work
+retains its recorded cost. Concurrent calls never share counters or scopes.
+
+Cancellation and deadline checks run at CEL cost steps and before returning the result. They
+report `RESOURCE_EXHAUSTED`; they do not interrupt arbitrary host callback code. Cancellation
+predicates execute on the evaluating thread. Ordinary evaluation retains its existing call
+target and allocation behavior; calls with observable controls use a separate compiled target.

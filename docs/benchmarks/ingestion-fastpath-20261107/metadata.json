@@ -1,0 +1,18 @@
+{
+  "base_revision": "c179b8fedb4a84213a38435a1c8d7d4a0898fec1",
+  "truffledata": "0.8.0",
+  "graalvm": "25.5.5-elide.27",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "command": "bazel run --config=local //benchmarks/representative:jmh -- IngestionStages -wi 3 -i 3 -w 500ms -r 500ms -f 3 -prof gc -rf json -rff docs/benchmarks/ingestion-fastpath-20261107/jmh.json",
+  "conditions": "Shared developer host with concurrent Bazel builds. Advisory stage and allocation diagnostics, not a quiet-host release comparison.",
+  "uncompressed_jmh_sha256": "96e8983222070a3fd9c1a5c9af770169919a1a1fffec2e6b872c0be776035aa1",
+  "files": {
+    "src/main/java/dev/trufflecel/ProtobufType.java": "de36ef116e6cf1bab46c610a605ec8b9a95adda8b8907b20c7a941c04e2e1b5d",
+    "benchmarks/representative/IngestionStages.java": "3f5a89cade692a9e7d65bb050a1bf5f7bf74af2f604e80614b44594378fd4d5b",
+    "MODULE.bazel": "e4bb6c46e4c19e91a112faa102f5a0df1cfc9ba6459c80c8012fc60e9f2344ce",
+    "maven_install.json": "5f83a21a22adb446a5337335deca618b29abb96a44041313803153a91a87c1a0",
+    "docs/benchmarks/ingestion-fastpath-20261107/jmh.json.gz": "581ff759fc15598aa51dcbbab0b7bd55a083ecd043a80956865359424c7c6446",
+    "docs/benchmarks/ingestion-fastpath-20261107/run.log.gz": "d87df2f8a19f3f700a9a817910185740c6e5e192036581e6e78dbb9ab33bdc98",
+    "docs/benchmarks/ingestion-fastpath-20261107/source.patch.gz": "51b2b9cb0e04cfec93cfc3ec99eaa6bab174f1e7efd430b44e425752e69a516e"
+  }
+}

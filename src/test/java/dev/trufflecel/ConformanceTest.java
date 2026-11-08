@@ -78,6 +78,15 @@ public class ConformanceTest {
     conforms(true, true, true);
   }
 
+  /**
+   * Strict validation must never reject a case that evaluates successfully: every folded failure it
+   * reports at compile time has to be one the corpus expects at evaluation.
+   */
+  @Test
+  public void strictConforms() {
+    conforms(false, false, false, true);
+  }
+
   private Program plan(Environment env, String source, boolean check, boolean canonical) {
     if (!canonical) return check ? env.compile(source) : env.parse(source);
     var parsed = CanonicalAst.parse(env, source);
@@ -89,7 +98,13 @@ public class ConformanceTest {
   }
 
   private void conforms(boolean canonical, boolean production, boolean preparedActivation) {
+    conforms(canonical, production, preparedActivation, false);
+  }
+
+  private void conforms(
+      boolean canonical, boolean production, boolean preparedActivation, boolean strict) {
     Environment.Builder builder = Cel.newBuilder();
+    if (strict) builder.validation(Environment.Validation.STRICT);
     if (production) ProductionCorpus.register(builder);
     else TestObjects.register(builder);
     if (test.has("container")) builder.container(test.get("container").getAsString());
@@ -133,6 +148,9 @@ public class ConformanceTest {
     try {
       program = plan(env, test.get("expr").getAsString(), !flag("disable_check"), canonical);
     } catch (CelException e) {
+      // Strict validation reports certain evaluation failures from compile; the corpus expects
+      // them at evaluation, or never evaluates the (type-correct) check-only expression.
+      if (strict && (error || flag("check_only") && e.code() != CelException.Code.TYPE)) return;
       // Some upstream eval_error cases describe a statically invalid overload. Keep the
       // checker rejection and also execute unchecked to verify the required runtime error.
       if (error && e.code() == CelException.Code.TYPE)

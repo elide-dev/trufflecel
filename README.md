@@ -92,7 +92,7 @@ host collections and JSON trees are converted to bounded CEL snapshots. See the
 
 All three are thin JARs. The optional bridges depend on the matching core version; core
 does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
-**Java 25**, **Elide GraalVM `25.5.5-elide.27`**, and **TruffleData `0.8.0`**.
+**Java 25**, **Elide GraalVM `25.5.5-elide.27`**, and **TruffleData `0.9.0`**.
 
 Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
 for available versions. The example below uses released TruffleCEL `0.8.0`, whose POM pins
@@ -131,6 +131,12 @@ boolean allowed = program.test(Map.of("balance", 42L, "enabled", true));
 `Program.evaluate` returns a value; `Program.test` requires a boolean. `source`, `variables`
 and `resultType` describe the compiled program. Explicit `ObjectType` and function bindings
 extend the environment. The registered Polyglot language ID is `cel`.
+
+Every compilation validates literals, precompiles constant regular expressions and folds
+constant subexpressions. `validation(Environment.Validation.STRICT)` additionally rejects, at
+compile time and with line/column diagnostics, every failure that no evaluation could avoid;
+the default keeps CEL's evaluation-time semantics. See
+[compile-time validation](docs/VALIDATION.md).
 
 For TruffleData, bind a `DataType` to a schema and pass immutable batch/JDBC rows directly.
 For protobuf, register a `ProtobufType` and ingest messages or native `ProtoRow` values through
@@ -271,11 +277,13 @@ or diagnostic text. A separate table of 431 independently specified negative and
 collection, arithmetic, conversion, short-circuit, comprehension, optional and protobuf edge
 cases) records the rejection phase and, where the contract defines one, the `CelException.Code`
 category, never the diagnostic wording. Each case runs through the direct checked and unchecked
-frontends, canonical `ParsedExpr`/`CheckedExpr` interchange with a wire round trip, borrowed and
-snapshot activations, both protobuf adapters for protobuf cases, and forced last-tier guest
-compilation; the 368 cases expressible in cel-java also run against both of its parsers with and
-without AST optimizers, with 26 recorded, explained divergences. Custom functions, limits,
-concurrency, and unknown propagation have separate regression tests.
+frontends, strict compile-time validation, canonical `ParsedExpr`/`CheckedExpr` interchange
+with a wire round trip, borrowed and snapshot activations, both protobuf adapters for protobuf
+cases, and forced last-tier guest compilation; the 368 cases expressible in cel-java also run
+against both of its parsers with and without AST optimizers, with 22 recorded, explained
+divergences. Strict validation rejects at compile time every case that cel-java's
+constant-folding optimizer rejects. Custom functions, limits, concurrency, and unknown
+propagation have separate regression tests.
 See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
 
 The table describes the current `main` branch against the pinned corpus, not every CEL
@@ -285,6 +293,7 @@ validation evidence and execution limits.
 | Capability | Status | Scope and limitations |
 | --- | --- | --- |
 | Independent parser, type checker, and evaluator | ✅ Implemented | No CEL Java frontend or interpreter dependency; core syntax, types, operators, namespaces, and standard functions pass the pinned suites. |
+| Compile-time validation and constant folding | ✅ Implemented | Bounded constant folding and constant regular-expression precompilation on every compilation, at the original budget cost and invisible to AST export and tooling; opt-in strict validation with every-path analysis, homogeneous-literal and nesting validators, and multi-issue line/column diagnostics; see [validation](docs/VALIDATION.md). |
 | Complete pinned conformance corpus | ✅ Passing | All 2,771 cases across 32 files; no suite exclusions or per-case skips. |
 | Macros and optional values | ✅ Implemented | Standard macros, two-variable comprehensions, optional selection/indexing, and optional aggregate entries. |
 | String, list, math, and network extensions | ✅ Implemented | All cases in their pinned suites; see [supported APIs and limits](docs/EXTENSIONS.md). |
@@ -314,6 +323,7 @@ and [benchmark methodology](docs/BENCHMARKS.md) for the detailed contracts.
 | [CEL language definition](https://github.com/cel-expr/cel-spec/blob/master/doc/langdef.md) | Syntax, types, evaluation, and standard functions |
 | [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, complete corpus, and reproducible import |
 | [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
+| [Compile-time validation](docs/VALIDATION.md) | Validation policies, constant folding bounds, strict every-path rules, and diagnostics |
 | [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
 | [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
 | [Benchmark methodology](docs/BENCHMARKS.md) | Paired cel-java timings, SVG results, CodSpeed simulation, and guest-JIT qualification |

@@ -255,3 +255,77 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "validation",
+    srcs = ["ValidationTest.java"],
+    test_class = "dev.trufflecel.ValidationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "functionOverload",
+    srcs = ["FunctionOverloadTest.java"],
+    test_class = "dev.trufflecel.FunctionOverloadTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "libraryPolicy",
+    srcs = ["LibraryPolicyTest.java"],
+    test_class = "dev.trufflecel.LibraryPolicyTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "environmentControls",
+    srcs = ["EnvironmentControlsTest.java"],
+    test_class = "dev.trufflecel.EnvironmentControlsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "errorLocation",
+    srcs = ["ErrorLocationTest.java"],
+    test_class = "dev.trufflecel.ErrorLocationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "evaluationControls",
+    srcs = ["EvaluationControlsTest.java"],
+    test_class = "dev.trufflecel.EvaluationControlsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)

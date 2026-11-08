@@ -74,6 +74,7 @@ public final class CanonicalAst {
     requireSchema(parsed, "cel.expr.ParsedExpr");
     size(parsed);
     var reader = new Reader(environment);
+    reader.sourceInfo(child(parsed, "source_info"));
     ExprNode tree = reader.expression(child(parsed, "expr"), 0);
     environment.prepare("", tree, true);
     var writer = new Writer();
@@ -100,6 +101,7 @@ public final class CanonicalAst {
     if (!schema.equals("cel.expr.ParsedExpr") && !schema.equals("cel.expr.CheckedExpr"))
       throw new IllegalArgumentException("Expected ParsedExpr or CheckedExpr");
     var reader = new Reader(environment);
+    reader.sourceInfo(child(ast, "source_info"));
     if (schema.equals("cel.expr.CheckedExpr"))
       for (Message entry : messages(ast, "reference_map"))
         reader.references.put((Long) field(entry, "key"), child(entry, "value"));
@@ -287,13 +289,27 @@ public final class CanonicalAst {
     final Set<Long> ids = new HashSet<>();
     final Map<Long, Message> references = new HashMap<>();
     int count;
+    final Map<Long, Integer> positions = new HashMap<>();
+    final List<Integer> lineOffsets = new ArrayList<>();
+
+    void sourceInfo(Message info) {
+      for (Message entry : messages(info, "positions"))
+        positions.put((Long) field(entry, "key"), (Integer) field(entry, "value"));
+      for (Object offset : (List<?>) field(info, "line_offsets")) lineOffsets.add((Integer) offset);
+      int previous = -1;
+      for (int offset : lineOffsets) {
+        if (offset <= previous) throw new IllegalArgumentException("invalid source line offsets");
+        previous = offset;
+      }
+    }
 
     Reader(Environment environment) {
       this.environment = environment;
     }
 
     ExprNode expression(Message expr, int depth) {
-      if (++count > environment.maxSourceLength || depth > environment.maxDepth)
+      if (++count > Math.min(environment.maxAstNodes, environment.maxSourceLength)
+          || depth > environment.maxDepth)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST size/depth limit exceeded");
       long id = (Long) field(expr, "id");
       if (id <= 0 || !ids.add(id))
@@ -440,6 +456,14 @@ public final class CanonicalAst {
         }
       }
       node.canonicalId = id;
+      Integer position = positions.get(id);
+      if (position != null && position >= 0) {
+        node.errorOffset = position;
+        int line = Collections.binarySearch(lineOffsets, position);
+        line = line >= 0 ? line + 1 : -line - 1;
+        node.errorLine = line + 1;
+        node.errorColumn = position - (line == 0 ? 0 : lineOffsets.get(line - 1)) + 1;
+      }
       return node;
     }
   }
@@ -698,7 +722,12 @@ public final class CanonicalAst {
       if (node.kind == ExprNode.Kind.CALL)
         references.put(
             id,
-            message("cel.expr.Reference", "name", OPERATORS.getOrDefault(node.name, node.name)));
+            message(
+                "cel.expr.Reference",
+                "name",
+                OPERATORS.getOrDefault(node.name, node.name),
+                "overload_id",
+                node.overloadIds));
       return result;
     }
 

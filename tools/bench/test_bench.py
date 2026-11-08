@@ -31,8 +31,8 @@ class MeasurementTest(unittest.TestCase):
 
     def test_case_manifest(self):
         cases = json.loads((ROOT / "benchmarks/cases.json").read_text())
-        self.assertEqual(len(cases), 14)
-        self.assertEqual(len({case["name"] for case in cases}), 14)
+        self.assertEqual(len(cases), 21)
+        self.assertEqual(len({case["name"] for case in cases}), 21)
         for case in cases:
             self.assertGreater(case["checksum"], 0)
             self.assertRegex(case["name"], r"^[a-z0-9-]+$")

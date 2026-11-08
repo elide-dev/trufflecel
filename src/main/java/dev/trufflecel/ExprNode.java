@@ -11,8 +11,15 @@ import java.util.*;
 class ExprNode extends CelNode {
   boolean rootBody, statement;
   long canonicalId;
+  int errorOffset = -1, errorLine = -1, errorColumn = -1;
   CelType checkedType;
   FieldPlan fieldPlan;
+  // Plan-time constant fold; uninstrumented targets replace the subtree with its prebuilt result.
+  Optimizer.Fold fold;
+  // Plan-time purity and binding depth, packed by Optimizer; avoids per-node analysis maps.
+  int analysis;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean customOverloads;
+  List<String> overloadIds = List.of();
   @Child private FieldPlan.ReadNode fieldRead;
 
   void instantiateFieldPlans() {
@@ -133,7 +140,8 @@ class ExprNode extends CelNode {
     }
 
     @Override
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
+      if (customOverloads) return super.doExecute(frame, ctx);
       ctx.tick();
       return scalarBinary(frame, ctx);
     }
@@ -204,9 +212,16 @@ class ExprNode extends CelNode {
   }
 
   ExprNode lowerUninstrumented() {
+    // A folded subtree is replaced wholesale; lowering inside it would only be discarded.
+    if (fold != null) return this;
+    if (customOverloads) {
+      for (int i = 0; i < children.length; i++) children[i] = children[i].lowerUninstrumented();
+      return this;
+    }
     int count = 0;
     ExprNode leaf = this;
     while (leaf.kind == Kind.CALL
+        && !leaf.customOverloads
         && !Boolean.TRUE.equals(leaf.value)
         && leaf.children.length == 2
         && (leaf.name.equals("+") || leaf.name.equals("-") || leaf.name.equals("*"))
@@ -217,6 +232,7 @@ class ExprNode extends CelNode {
     }
     if (count >= 2) return new ArithmeticChain(this, count, leaf.lowerUninstrumented());
     for (int i = 0; i < children.length; i++) children[i] = children[i].lowerUninstrumented();
+    if (kind == Kind.CALL && (name.equals("&&") || name.equals("||"))) return new LogicalNode(this);
     if (kind == Kind.CALL && name.equals("size") && !extensionCall && children.length == 1) {
       ExprNode range = children[0];
       if (range.kind == Kind.MACRO
@@ -230,17 +246,38 @@ class ExprNode extends CelNode {
     return this;
   }
 
+  /** Logical operators keep their error/unknown precedence without general function dispatch. */
+  private static final class LogicalNode extends ExprNode {
+    private final boolean decisive;
+
+    LogicalNode(ExprNode original) {
+      super(Kind.CALL, original.name, original.value, original.offset, original.children);
+      decisive = original.name.equals("||");
+      sourceRange(original.sourceStart, original.sourceEnd);
+      copyLocation(original);
+      optionalEntry = original.optionalEntry;
+      statement = original.statement;
+    }
+
+    @Override
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
+      ctx.tick();
+      return logical(frame, ctx, decisive);
+    }
+  }
+
   /** Counts results without retaining them; mapper visits, errors and budgets are unchanged. */
   private static final class ComprehensionSize extends ExprNode {
     ComprehensionSize(ExprNode outer, ExprNode range) {
       super(Kind.CALL, outer.name, outer.value, outer.offset, range);
       sourceRange(outer.sourceStart, outer.sourceEnd);
+      copyLocation(outer);
       optionalEntry = outer.optionalEntry;
       statement = outer.statement;
     }
 
     @Override
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       return children[0].execute(frame, ctx);
     }
@@ -256,14 +293,26 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] constants;
 
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final int[] positions;
+
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final long[] ids;
+
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
       super(Kind.CALL, outer.name, false, outer.offset, leaf);
       operations = new int[count];
       constants = new long[count];
+      positions = new int[count * 3];
+      ids = new long[count];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
+        positions[i * 3] = node.errorOffset;
+        positions[i * 3 + 1] = node.errorLine;
+        positions[i * 3 + 2] = node.errorColumn;
+        ids[i] = node.canonicalId;
         operations[i] = node.name.charAt(0);
         constants[i] = (Long) node.children[1].value;
         node = node.children[0];
@@ -275,13 +324,14 @@ class ExprNode extends CelNode {
             default -> "*";
           };
       sourceRange(outer.sourceStart, outer.sourceEnd);
+      copyLocation(outer);
       optionalEntry = outer.optionalEntry;
       statement = outer.statement;
     }
 
     @Override
     @com.oracle.truffle.api.nodes.ExplodeLoop
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
       ctx.charge(operations.length);
       Object left;
@@ -310,14 +360,14 @@ class ExprNode extends CelNode {
           } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
             ctx.charge(operations.length - i - 1);
-            throw e;
+            throw e.at(positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2]);
           }
         }
         return result;
       }
       // These operators require matching numeric types; every right operand is a CEL int.
       ctx.charge(operations.length);
-      throw Values.overload(firstOperation);
+      throw Values.overload(firstOperation).at(positions[0], ids[0], positions[1], positions[2]);
     }
   }
 
@@ -327,7 +377,7 @@ class ExprNode extends CelNode {
     }
 
     @Override
-    Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       return value;
     }
@@ -379,6 +429,22 @@ class ExprNode extends CelNode {
   }
 
   Object execute(VirtualFrame frame, EvalContext ctx) {
+    try {
+      return doExecute(frame, ctx);
+    } catch (CelException e) {
+      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+    }
+  }
+
+  void copyLocation(ExprNode original) {
+    canonicalId = original.canonicalId;
+    errorOffset = original.errorOffset;
+    errorLine = original.errorLine;
+    errorColumn = original.errorColumn;
+  }
+
+  Object doExecute(VirtualFrame frame, EvalContext ctx) {
     ctx.tick();
     return switch (kind) {
       case BLOCK -> block(frame, ctx);
@@ -434,7 +500,12 @@ class ExprNode extends CelNode {
   }
 
   Object executePresence(VirtualFrame frame, EvalContext ctx) {
-    return select(frame, ctx, true);
+    try {
+      return select(frame, ctx, true);
+    } catch (CelException e) {
+      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+    }
   }
 
   private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
@@ -494,9 +565,11 @@ class ExprNode extends CelNode {
       }
     }
 
-    if ((scalarOperator != 0 || stringPredicate) && children.length == 2 && !extensionCall)
-      return scalarBinary(frame, ctx);
-    if (name.equals("&&") || name.equals("||")) return logical(frame, ctx);
+    if ((scalarOperator != 0 || stringPredicate)
+        && children.length == 2
+        && !extensionCall
+        && !customOverloads) return scalarBinary(frame, ctx);
+    if (name.equals("&&") || name.equals("||")) return logical(frame, ctx, name.equals("||"));
     if (optionalFallback && children.length == 2) {
       Object first = children[0].execute(frame, ctx);
       if (first instanceof Unknown) return first;
@@ -519,6 +592,12 @@ class ExprNode extends CelNode {
     }
     if (unknown != null) return unknown;
     if (error != null) throw error;
+    if (customOverloads) {
+      var binding =
+          FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args);
+      if (binding != null) return FunctionOverloads.invoke(binding, args);
+      if (!FunctionOverloads.standard(name)) throw Values.overload(name);
+    }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);
   }
@@ -568,8 +647,7 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object logical(VirtualFrame frame, EvalContext ctx) {
-    boolean decisive = name.equals("||");
+  final Object logical(VirtualFrame frame, EvalContext ctx, boolean decisive) {
     CelException error = null;
     Unknown unknown = null;
     for (ExprNode child : children) {

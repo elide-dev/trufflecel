@@ -12,6 +12,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   private final Descriptor descriptor;
   private final ProtoPlan plan;
+  private final boolean normalizeWire;
   private final Map<String, CelType> fields;
   private final Map<Descriptor, ProtobufType> graph;
   private final Map<String, FieldDescriptor> descriptors;
@@ -244,6 +245,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       ProtoPlan.Model model,
       List<FieldDescriptor> extensions) {
     this.descriptor = descriptor;
+    normalizeWire = reachesMessageSet(descriptor, extensions);
     this.graph = graph;
     this.model = model;
     this.extensions = extensions;
@@ -819,11 +821,33 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     }
   }
 
+  // Resolve this once from the explicit descriptor graph, including registered extension edges.
+  // Cycles are legal; unknown payloads and Any.value bytes are not traversable schema edges.
+  private static boolean reachesMessageSet(Descriptor root, List<FieldDescriptor> extensions) {
+    var visited = new HashSet<Descriptor>();
+    var pending = new ArrayDeque<Descriptor>();
+    pending.add(root);
+    while (!pending.isEmpty()) {
+      Descriptor descriptor = pending.removeFirst();
+      if (!visited.add(descriptor)) continue;
+      if (descriptor.getOptions().getMessageSetWireFormat()) return true;
+      for (FieldDescriptor field : descriptor.getFields())
+        if (field.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
+          pending.add(field.getMessageType());
+      for (FieldDescriptor extension : extensions)
+        if (extension.getContainingType() == descriptor
+            && extension.getJavaType() == FieldDescriptor.JavaType.MESSAGE)
+          pending.add(extension.getMessageType());
+    }
+    return false;
+  }
+
   // MessageSet is normalized to ordinary length-delimited extension fields for native storage.
   // Recurse through registered messages so nested MessageSets use the same bounded codec.
   private byte[] wire(byte[] bytes, boolean ingest, int depth) {
     if (depth > 100 || bytes.length > 8 * 1024 * 1024)
       throw new ContractViolation("Protobuf wire budget exceeded");
+    if (!normalizeWire) return bytes;
     try {
       var input = CodedInputStream.newInstance(bytes);
       var buffer = new java.io.ByteArrayOutputStream();
