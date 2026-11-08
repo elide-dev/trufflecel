@@ -32,6 +32,7 @@ class ExprNode extends CelNode {
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode lazyInitializer;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean isolatedInitializer;
 
   void resolveLazyBindings(Map<String, ExprNode> owners) {
     if (kind == Kind.IDENT) {
@@ -42,7 +43,10 @@ class ExprNode extends CelNode {
       children[0].resolveLazyBindings(owners);
       var nested = new HashMap<>(owners);
       for (String variable : (String[]) value) nested.remove(variable);
-      if (name.equals("bind")) nested.put(((String[]) value)[0], children[0]);
+      if (name.equals("bind")) {
+        nested.put(((String[]) value)[0], children[0]);
+        isolatedInitializer = children[0].hasBindings();
+      }
       for (int i = 1; i < children.length; i++) children[i].resolveLazyBindings(nested);
     } else if (kind == Kind.COMPREHENSION) {
       children[0].resolveLazyBindings(owners);
@@ -973,22 +977,31 @@ class ExprNode extends CelNode {
   /** A binding owns one lexical snapshot and evaluates its initializer at most once. */
   static final class LazyBinding {
     private final EvalContext context;
-    private final com.oracle.truffle.api.frame.MaterializedFrame frame;
+    private final VirtualFrame frame;
     private Object result;
     private Attribute attribute;
 
-    LazyBinding(VirtualFrame frame, EvalContext context, boolean instrumented) {
-      // Reads have lexical slots (including explicit root reads), and the initializer cannot
-      // outlive this bind scope. Outer slots remain stable while nested body scopes run.
-      this.context = context;
-      this.frame = instrumented ? frame.materialize() : null;
+    LazyBinding(VirtualFrame frame, EvalContext context, boolean capture, boolean captureLocals) {
+      // Initializer-local slots overlap body-local slots. Capture them only when the initializer
+      // declares locals (or instrumentation observes the lexical scope); simple reads stay virtual.
+      this.context = capture ? context.fork() : context;
+      this.frame =
+          captureLocals && frame != null ? captureFrame(frame.materialize(), this.context) : null;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private static VirtualFrame captureFrame(
+        com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext context) {
+      VirtualFrame copy = forkFrame(frame, context);
+      for (int i = 0; i < frame.getFrameDescriptor().getNumberOfAuxiliarySlots(); i++)
+        copy.setAuxiliarySlot(i, frame.getAuxiliarySlot(i));
+      return copy;
     }
 
     Object read(ExprNode initializer, VirtualFrame caller) {
       if (result == null) {
         try {
-          result =
-              frame == null ? initializer.execute(caller, context) : readInstrumented(initializer);
+          result = frame == null ? initializer.execute(caller, context) : readCaptured(initializer);
           attribute = context.attribute();
         } catch (CelException error) {
           result = error;
@@ -1000,8 +1013,8 @@ class ExprNode extends CelNode {
     }
 
     @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-    private Object readInstrumented(ExprNode initializer) {
-      return initializer.execute(forkFrame(frame, context), context);
+    private Object readCaptured(ExprNode initializer) {
+      return initializer.execute(frame, context);
     }
 
     Object display() {
@@ -1013,7 +1026,14 @@ class ExprNode extends CelNode {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
     if (name.equals("bind")) {
       ctx.attribute(null);
-      bindings[0].execute(frame, ctx, new LazyBinding(frame, ctx, instrumentedSource));
+      bindings[0].execute(
+          frame,
+          ctx,
+          new LazyBinding(
+              frame,
+              ctx,
+              instrumentedSource || isolatedInitializer,
+              instrumentedSource || isolatedInitializer && bindings[0].frameSlot >= 0));
       try {
         return children[1].execute(frame, ctx);
       } finally {
