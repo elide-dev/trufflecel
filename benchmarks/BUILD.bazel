@@ -84,7 +84,7 @@ native_image(
     exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB", "EstimatedFreeDiskBytes": "16GB"},
     executable_name = "trufflecel-jit",
     extra_args = ["--gc=serial", "-J-Xmx4g",
-                  "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata",
+                  "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,com.google.protobuf",
                   "--initialize-at-run-time=dev.trufflecel.bench", "--parallelism=4", "-march=compatibility",
                   "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-DeleteLocalSymbols", "-H:+PreserveFramePointer",
                   "-H:-UnlockExperimentalVMOptions"],
