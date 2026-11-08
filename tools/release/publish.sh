@@ -13,6 +13,9 @@ validate_version(sys.argv[1])
 if 'SNAPSHOT' in sys.argv[1].upper():
     sys.exit('Use an explicit immutable release version, for example 0.1.0-alpha.1')
 PY
+if [[ $mode == --publish ]]; then
+  python3 tools/release/dependency_gate.py --version "$version"
+fi
 bucket=${MAVEN_BUCKET:-elide:elide-maven}
 public=https://maven.elide.dev
 modules=(core protobuf json)
@@ -39,7 +42,9 @@ if [[ $mode == --publish ]]; then
 fi
 "$bazel" test //... "--//tools/release:version=$version"
 "$bazel" build //tools/release:publications "--//tools/release:version=$version"
-python3 tools/release/maven_repo.py bazel-bin/tools/release "$repo" "$version"
+# Resolve the physical configuration path; another Bazel command may change bazel-bin.
+release_bin=$("$bazel" info bazel-bin "--//tools/release:version=$version")
+python3 tools/release/maven_repo.py "$release_bin/tools/release" "$repo" "$version"
 echo "Staged Maven repository: $repo"
 [[ $mode == --publish ]] || exit 0
 # Run only one publisher at a time: R2/rclone has no multi-object transaction.
