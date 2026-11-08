@@ -2,5 +2,5 @@ load("@rules_shell//shell:sh_test.bzl", "sh_test")
 sh_test(
     name = "test",
     srcs = ["test.sh"],
-    data = ["evaluation_refresh.py", "test_evaluation_refresh.py", "startup.py", "test_startup.py", "bench.py", "test_bench.py", "compare.py", "codspeed_profile.py", "test_profile.py", "test_compare.py", "representative.py", "test_representative.py", "structured.py", "test_structured.py", "prepared_lifecycle.py", "test_prepared_lifecycle.py", "prepared_report.py", "test_prepared_report.py", "structured_report.py", "activation_report.py", "activation_suite_report.py", "//benchmarks:cases.json"],
+    data = ["evaluation_refresh.py", "test_evaluation_refresh.py", "startup.py", "test_startup.py", "bench.py", "test_bench.py", "compare.py", "codspeed_profile.py", "test_profile.py", "test_compare.py", "representative.py", "test_representative.py", "structured.py", "test_structured.py", "prepared_lifecycle.py", "test_prepared_lifecycle.py", "focused_payback.py", "test_focused_payback.py", "prepared_report.py", "test_prepared_report.py", "structured_report.py", "activation_report.py", "activation_suite_report.py", "//benchmarks:cases.json"],
 )
