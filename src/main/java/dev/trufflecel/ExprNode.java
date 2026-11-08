@@ -287,28 +287,29 @@ class ExprNode extends CelNode {
    * Constant-right arithmetic keeps intermediates unboxed and preserves source evaluation order.
    */
   private static final class ArithmeticChain extends ExprNode {
+    // Keep the operation count as the array length to eliminate runtime index range checks.
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final int[] operations;
 
+    // The tail holds full-width expression IDs without a separate per-program allocation.
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] constants;
 
-    // Prefixes hold runtime operations/constants; tails hold their original error locations/IDs.
-    // Two primitive arrays retain the full metadata without separate per-program allocations.
-    private final int count;
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final int[] positions;
 
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
       super(Kind.CALL, outer.name, false, outer.offset, leaf);
-      this.count = count;
-      operations = new int[count * 4];
+      operations = new int[count];
+      positions = new int[count * 3];
       constants = new long[count * 2];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
-        operations[count + i * 3] = node.errorOffset;
-        operations[count + i * 3 + 1] = node.errorLine;
-        operations[count + i * 3 + 2] = node.errorColumn;
+        positions[i * 3] = node.errorOffset;
+        positions[i * 3 + 1] = node.errorLine;
+        positions[i * 3 + 2] = node.errorColumn;
         constants[count + i] = node.canonicalId;
         operations[i] = node.name.charAt(0);
         constants[i] = (Long) node.children[1].value;
@@ -330,6 +331,7 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.nodes.ExplodeLoop
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
+      int count = operations.length;
       ctx.charge(count);
       Object left;
       try {
@@ -358,10 +360,7 @@ class ExprNode extends CelNode {
             // Outer constants are evaluated even when an inner operation fails.
             ctx.charge(count - i - 1);
             throw e.at(
-                operations[count + i * 3],
-                constants[count + i],
-                operations[count + i * 3 + 1],
-                operations[count + i * 3 + 2]);
+                positions[i * 3], constants[count + i], positions[i * 3 + 1], positions[i * 3 + 2]);
           }
         }
         return result;
@@ -369,7 +368,7 @@ class ExprNode extends CelNode {
       // These operators require matching numeric types; every right operand is a CEL int.
       ctx.charge(count);
       throw Values.overload(firstOperation)
-          .at(operations[count], constants[count], operations[count + 1], operations[count + 2]);
+          .at(positions[0], constants[count], positions[1], positions[2]);
     }
   }
 
