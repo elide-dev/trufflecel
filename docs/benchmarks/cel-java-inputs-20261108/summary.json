@@ -1,0 +1,470 @@
+{
+  "raw_sha256": "bb47890b3de6501e9fc2e8483710b179aa91712f2f292713c600fa4d563fdc30",
+  "source_manifest_sha256": "ce3255bacb7225d81f694def4bb16a709af865445a625c5c61a2f889fb961d5f",
+  "source_commit": "a3027e1765f758c8c000bba72d8abd0d192a4ce6",
+  "production_revision": "67ab33cf89e0f06ad71b0b3c49d32fab53adf2d1",
+  "process_count": 96,
+  "statistic": "median [minimum, maximum] of three independent fork means",
+  "drift_screen": "absolute difference of first-two and last-two measurement means, divided by whole-fork mean",
+  "maximum_relative_measurement_drift": 0.07584435790534833,
+  "timing_unit": "ns/op",
+  "allocation_unit": "B/op",
+  "rows": [
+    {
+      "runtime": "jvm",
+      "workload": "scalar-wide",
+      "optimizer": "default",
+      "ordinary_ns": {
+        "median": 563.4963199352969,
+        "minimum": 516.1977626942592,
+        "maximum": 571.6528670264867,
+        "forks": [
+          563.4963199352969,
+          516.1977626942592,
+          571.6528670264867
+        ]
+      },
+      "immutable_ns": {
+        "median": 25.16850989277508,
+        "minimum": 25.160630129350555,
+        "maximum": 25.251286434335157,
+        "forks": [
+          25.251286434335157,
+          25.16850989277508,
+          25.160630129350555
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 2936.0,
+        "minimum": 2936.0,
+        "maximum": 2936.0,
+        "forks": [
+          2936.0,
+          2936.0,
+          2936.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 72.0,
+        "minimum": 72.0,
+        "maximum": 72.0,
+        "forks": [
+          72.0,
+          72.0,
+          72.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.003905285079597552,
+        0.010518248031848634,
+        0.0004197417119398528
+      ],
+      "immutable_relative_measurement_drift": [
+        0.0030480977174254654,
+        0.0023964762914421753,
+        0.00033026290418194145
+      ],
+      "speedup": 22.38894246564256,
+      "allocation_reduction_bytes": 2864.0
+    },
+    {
+      "runtime": "jvm",
+      "workload": "scalar-wide",
+      "optimizer": "optimized",
+      "ordinary_ns": {
+        "median": 523.145863722169,
+        "minimum": 517.8499551021682,
+        "maximum": 558.8431665275612,
+        "forks": [
+          517.8499551021682,
+          523.145863722169,
+          558.8431665275612
+        ]
+      },
+      "immutable_ns": {
+        "median": 25.397586713928213,
+        "minimum": 25.304430286447854,
+        "maximum": 26.447807432873308,
+        "forks": [
+          25.304430286447854,
+          25.397586713928213,
+          26.447807432873308
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 2936.0,
+        "minimum": 2936.0,
+        "maximum": 2936.0,
+        "forks": [
+          2936.0,
+          2936.0,
+          2936.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 72.0,
+        "minimum": 72.0,
+        "maximum": 72.0,
+        "forks": [
+          72.0,
+          72.0,
+          72.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.009174858848006617,
+        0.01803390507102065,
+        0.012196064821443382
+      ],
+      "immutable_relative_measurement_drift": [
+        6.613220684984461e-05,
+        0.004091335709365693,
+        0.0015559693520956488
+      ],
+      "speedup": 20.598250913157514,
+      "allocation_reduction_bytes": 2864.0
+    },
+    {
+      "runtime": "jvm",
+      "workload": "proto-policy",
+      "optimizer": "default",
+      "ordinary_ns": {
+        "median": 1220.2744156968142,
+        "minimum": 1183.1392255205394,
+        "maximum": 1276.5615307245014,
+        "forks": [
+          1220.2744156968142,
+          1276.5615307245014,
+          1183.1392255205394
+        ]
+      },
+      "immutable_ns": {
+        "median": 687.3288756791511,
+        "minimum": 677.4859299236832,
+        "maximum": 703.9369261104877,
+        "forks": [
+          677.4859299236832,
+          687.3288756791511,
+          703.9369261104877
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 4158.0,
+        "minimum": 4158.0,
+        "maximum": 4158.0,
+        "forks": [
+          4158.0,
+          4158.0,
+          4158.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 1294.0,
+        "minimum": 1294.0,
+        "maximum": 1294.0,
+        "forks": [
+          1294.0,
+          1294.0,
+          1294.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.002580883087853498,
+        0.026928955036069336,
+        5.816811066706709e-05
+      ],
+      "immutable_relative_measurement_drift": [
+        0.0052111415581083675,
+        0.007613026595153406,
+        0.07584435790534833
+      ],
+      "speedup": 1.7753865127389832,
+      "allocation_reduction_bytes": 2864.0
+    },
+    {
+      "runtime": "jvm",
+      "workload": "proto-policy",
+      "optimizer": "optimized",
+      "ordinary_ns": {
+        "median": 1170.6844781881534,
+        "minimum": 1061.4526514155446,
+        "maximum": 1243.4082101836939,
+        "forks": [
+          1170.6844781881534,
+          1061.4526514155446,
+          1243.4082101836939
+        ]
+      },
+      "immutable_ns": {
+        "median": 632.6513496655236,
+        "minimum": 607.3235338843284,
+        "maximum": 653.4999196837341,
+        "forks": [
+          607.3235338843284,
+          632.6513496655236,
+          653.4999196837341
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 4046.0,
+        "minimum": 4046.0,
+        "maximum": 4046.0,
+        "forks": [
+          4046.0,
+          4046.0,
+          4046.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 1182.0,
+        "minimum": 1182.0,
+        "maximum": 1182.0,
+        "forks": [
+          1182.0,
+          1182.0,
+          1182.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.004104129486493509,
+        0.0038778722788500013,
+        0.0026560594223969374
+      ],
+      "immutable_relative_measurement_drift": [
+        0.005318555023518774,
+        0.019130678275172938,
+        0.0052187805573459065
+      ],
+      "speedup": 1.850441761970606,
+      "allocation_reduction_bytes": 2864.0
+    },
+    {
+      "runtime": "svm",
+      "workload": "scalar-wide",
+      "optimizer": "default",
+      "ordinary_ns": {
+        "median": 1275.5063543678611,
+        "minimum": 1264.406090409435,
+        "maximum": 1287.15908602666,
+        "forks": [
+          1275.5063543678611,
+          1287.15908602666,
+          1264.406090409435
+        ]
+      },
+      "immutable_ns": {
+        "median": 63.61428687178174,
+        "minimum": 63.19121006978069,
+        "maximum": 63.77864781634361,
+        "forks": [
+          63.19121006978069,
+          63.77864781634361,
+          63.61428687178174
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 3504.0,
+        "minimum": 3504.0,
+        "maximum": 3504.0,
+        "forks": [
+          3504.0,
+          3504.0,
+          3504.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0,
+        "forks": [
+          120.0,
+          120.0,
+          120.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.00419560219208516,
+        0.011330858930316578,
+        0.002976316510042227
+      ],
+      "immutable_relative_measurement_drift": [
+        0.0011236697828149258,
+        6.208728380931915e-05,
+        0.0006326176793010894
+      ],
+      "speedup": 20.0506272582874,
+      "allocation_reduction_bytes": 3384.0
+    },
+    {
+      "runtime": "svm",
+      "workload": "scalar-wide",
+      "optimizer": "optimized",
+      "ordinary_ns": {
+        "median": 1302.4821046705608,
+        "minimum": 1233.9246562947317,
+        "maximum": 1395.299624928889,
+        "forks": [
+          1395.299624928889,
+          1302.4821046705608,
+          1233.9246562947317
+        ]
+      },
+      "immutable_ns": {
+        "median": 63.281122761165335,
+        "minimum": 63.23277002902449,
+        "maximum": 63.42770468593808,
+        "forks": [
+          63.42770468593808,
+          63.23277002902449,
+          63.281122761165335
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 3504.0,
+        "minimum": 3504.0,
+        "maximum": 3504.0,
+        "forks": [
+          3504.0,
+          3504.0,
+          3504.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0,
+        "forks": [
+          120.0,
+          120.0,
+          120.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.0005947731383977859,
+        0.009261502337228592,
+        0.027652292475944654
+      ],
+      "immutable_relative_measurement_drift": [
+        0.00012380889576226633,
+        0.0006319591553175637,
+        0.0004437194900883914
+      ],
+      "speedup": 20.58247464392137,
+      "allocation_reduction_bytes": 3384.0
+    },
+    {
+      "runtime": "svm",
+      "workload": "proto-policy",
+      "optimizer": "default",
+      "ordinary_ns": {
+        "median": 2506.1461839343933,
+        "minimum": 2484.7816462722544,
+        "maximum": 2648.9458904622047,
+        "forks": [
+          2484.7816462722544,
+          2506.1461839343933,
+          2648.9458904622047
+        ]
+      },
+      "immutable_ns": {
+        "median": 1246.392897750171,
+        "minimum": 1232.925241094168,
+        "maximum": 1312.2620782033832,
+        "forks": [
+          1312.2620782033832,
+          1232.925241094168,
+          1246.392897750171
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 4794.0,
+        "minimum": 4794.0,
+        "maximum": 4794.0,
+        "forks": [
+          4794.0,
+          4794.0,
+          4794.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 1410.0,
+        "minimum": 1410.0,
+        "maximum": 1410.0,
+        "forks": [
+          1410.0,
+          1410.0,
+          1410.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.019886591971909947,
+        0.014222395390579344,
+        0.0032946519052101035
+      ],
+      "immutable_relative_measurement_drift": [
+        0.004681005171045552,
+        0.009188662233226412,
+        0.05832525293695575
+      ],
+      "speedup": 2.010719243071882,
+      "allocation_reduction_bytes": 3384.0
+    },
+    {
+      "runtime": "svm",
+      "workload": "proto-policy",
+      "optimizer": "optimized",
+      "ordinary_ns": {
+        "median": 2444.354526950497,
+        "minimum": 2245.9962299724666,
+        "maximum": 2520.0400629152446,
+        "forks": [
+          2444.354526950497,
+          2520.0400629152446,
+          2245.9962299724666
+        ]
+      },
+      "immutable_ns": {
+        "median": 1030.8277892269004,
+        "minimum": 1030.0880478994288,
+        "maximum": 1106.116366168092,
+        "forks": [
+          1030.8277892269004,
+          1106.116366168092,
+          1030.0880478994288
+        ]
+      },
+      "ordinary_bytes": {
+        "median": 4598.0,
+        "minimum": 4598.0,
+        "maximum": 4598.0,
+        "forks": [
+          4598.0,
+          4598.0,
+          4598.0
+        ]
+      },
+      "immutable_bytes": {
+        "median": 1214.0,
+        "minimum": 1214.0,
+        "maximum": 1214.0,
+        "forks": [
+          1214.0,
+          1214.0,
+          1214.0
+        ]
+      },
+      "ordinary_relative_measurement_drift": [
+        0.0006177574018313937,
+        0.01742075521508257,
+        0.010280463249133264
+      ],
+      "immutable_relative_measurement_drift": [
+        0.0006824466885565684,
+        0.0042936642161172395,
+        0.009732224802261673
+      ],
+      "speedup": 2.371254008182795,
+      "allocation_reduction_bytes": 3384.0
+    }
+  ]
+}
