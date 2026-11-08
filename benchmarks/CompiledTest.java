@@ -87,6 +87,17 @@ public final class CompiledTest {
                 .build()
                 .compile("label(x)");
         check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text", 512);
+        check(
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .commonSubexpressions(true)
+                .build()
+                .compile("(x + 1) * (x + 1)"),
+            Map.of("x", 2L),
+            9L,
+            Map.of("x", 3L),
+            16L,
+            512);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",
