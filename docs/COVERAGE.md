@@ -1,8 +1,9 @@
 # Coverage audit
 
 The [Codecov report](https://app.codecov.io/github/elide-dev/trufflecel) and Bazel's LCOV
-report guide tests for missed lines and partially covered conditions. All 34 owned
-production sources remain measured, including the optional protobuf and JSON adapters.
+report guide tests for missed lines and partially covered conditions. All owned
+production sources remain measured, including the optional protobuf and JSON adapters
+and the POJO annotation processor.
 No coverage exclusions were added.
 
 The November 4, 2026 audit improved the JVM suite:
