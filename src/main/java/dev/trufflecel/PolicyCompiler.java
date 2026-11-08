@@ -226,7 +226,8 @@ public final class PolicyCompiler {
 
     void validate() {
       for (ExprNode condition : conditions) {
-        boolean literal = condition.kind == ExprNode.Kind.CONSTANT && condition.value instanceof Boolean;
+        boolean literal =
+            condition.kind == ExprNode.Kind.CONSTANT && condition.value instanceof Boolean;
         if (!literal && !CelType.BOOL.accepts(condition.checkedType))
           throw failure("policy condition must be bool");
         if (literal && Boolean.FALSE.equals(condition.value)
