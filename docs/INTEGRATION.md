@@ -293,14 +293,16 @@ retains its existing source-length-derived node cap as well as the explicit node
 
 ## Runtime error locations
 
-`CelException` exposes `expressionId()`, `offset()`, `line()` and `column()` for runtime
+`CelException` exposes `expressionId()`, `offset()`, `offsetEncoding()`, `line()` and `column()` for runtime
 failures as well as compile-time diagnostics. Runtime IDs are stable within a prepared
 program; canonical imports preserve supplied expression IDs. The innermost failing
 operation retains its location through folding, arithmetic lowering and error propagation.
 Exception instances supplied by host callbacks are never mutated.
 
 For source programs, offsets count Java chars and line/column are one-based. Imported
-canonical `SourceInfo` uses CEL's code-point positions; absent position metadata remains
+canonical `SourceInfo` uses CEL's code-point positions. `offsetEncoding()` preserves this
+distinction through optimization and tracing; `format(source)` uses it to place source carets.
+Absent position metadata remains
 `-1` while the expression ID is still available. Budget exhaustion identifies the policy
 root because optimized evaluation can charge multiple original visits together. Arbitrary
 exceptions outside CEL's normalized callback errors retain their existing propagation.
@@ -381,7 +383,7 @@ tracing together with per-call budgets and late-bound functions.
 The ordinary target keeps its lowering and folding fast paths. A tracing target is created
 lazily and shared by subsequent traced calls. Fold replacements retain their discarded immutable
 source subtrees outside Truffle child edges. Arithmetic chains retain compact literal IDs and
-locations (28 bytes of array payload per operator, plus two array headers), allowing reconstruction
+locations with encoding flags (30 bytes of array payload per operator, plus three array headers), allowing reconstruction
 without retaining the original chain. Comprehension-size nodes restore normal list semantics only
 in the tracing target. Thus an unchanged tree needs no second source tree; a five-node folded
 expression retains those five source nodes plus its single runtime fold node. Requesting tracing

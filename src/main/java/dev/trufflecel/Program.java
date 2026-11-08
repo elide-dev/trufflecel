@@ -342,7 +342,12 @@ public final class Program {
         return result;
       } catch (CelException e) {
         // Budget accounting may aggregate lowered visits; attribute exhaustion to the policy root.
-        throw e.at(body.errorOffset, body.canonicalId, body.errorLine, body.errorColumn);
+        throw e.at(
+            body.errorOffset,
+            body.canonicalId,
+            body.errorLine,
+            body.errorColumn,
+            body.errorOffsetEncoding);
       }
     }
 

@@ -18,9 +18,13 @@ of this while building a native image.
 
 ## Diagnostics
 
-Every compile-time `CelException` carries a `CelException.Code`, a char offset, and a
-one-based line and column resolved against the source (`line()`, `column()`, `-1` when the
-position is unknown, for example for canonical AST input). `issues()` lists every finding in
+Every compile-time `CelException` carries a `CelException.Code`, an offset, and a
+one-based line and column (`line()`, `column()`, `-1` when source metadata is absent).
+`offsetEncoding()` identifies offset and column units: `UTF16` for ordinary source parsing,
+`CODE_POINT` for canonical `SourceInfo`. Each `Issue` carries the same explicit metadata;
+the five-argument `Issue` constructor keeps the `UTF16` default. Formatting converts these
+units when selecting the excerpt and counts code points for caret placement, without
+changing the numeric offset or column. `issues()` lists every finding in
 source order; `code()` and `offset()` describe the first one. Strict validation reports all
 of its findings together, for example:
 

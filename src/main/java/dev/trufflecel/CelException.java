@@ -32,35 +32,66 @@ public final class CelException extends RuntimeException {
     RESOURCE_EXHAUSTED
   }
 
-  /** One finding. Offsets count chars; line and column are one-based or -1 when unknown. */
-  public record Issue(Code code, String message, int offset, int line, int column) {
+  /**
+   * Units used by offsets and columns. Source parsing uses UTF-16; canonical ASTs use code points.
+   */
+  public enum OffsetEncoding {
+    UTF16,
+    CODE_POINT
+  }
+
+  /** One finding with explicit offset units; line and column are one-based or -1 when unknown. */
+  public record Issue(
+      Code code, String message, int offset, int line, int column, OffsetEncoding offsetEncoding) {
     public Issue {
       Objects.requireNonNull(code);
       Objects.requireNonNull(message);
+      Objects.requireNonNull(offsetEncoding);
+    }
+
+    /** Source-compatible constructor for ordinary Java-char source offsets. */
+    public Issue(Code code, String message, int offset, int line, int column) {
+      this(code, message, offset, line, column, OffsetEncoding.UTF16);
+    }
+
+    private int sourceIndex(String source) {
+      if (offset < 0) return -1;
+      if (offsetEncoding == OffsetEncoding.UTF16) return offset > source.length() ? -1 : offset;
+      return offset > source.codePointCount(0, source.length())
+          ? -1
+          : source.offsetByCodePoints(0, offset);
     }
 
     /** The issue located in {@code source}; unchanged when it is already located or unlocatable. */
     public Issue locate(String source) {
-      if (line >= 0 || offset < 0 || offset > source.length()) return this;
+      if (line >= 0) return this;
+      int index = sourceIndex(source);
+      if (index < 0) return this;
       int line = 1, start = 0;
-      for (int i = 0; i < offset; i++)
+      for (int i = 0; i < index; i++)
         if (source.charAt(i) == '\n') {
           line++;
           start = i + 1;
         }
-      return new Issue(code, message, offset, line, offset - start + 1);
+      int column =
+          offsetEncoding == OffsetEncoding.UTF16
+              ? index - start + 1
+              : source.codePointCount(start, index) + 1;
+      return new Issue(code, message, offset, line, column, offsetEncoding);
     }
 
     /** Render this finding with a bounded source excerpt and a caret. */
     public String format(String source) {
       Objects.requireNonNull(source);
       Issue located = locate(source);
-      if (offset < 0 || offset > source.length()) return located.toString();
-      int start = source.lastIndexOf('\n', Math.max(0, offset - 1)) + 1;
-      if (offset == 0) start = 0;
-      int end = source.indexOf('\n', offset);
+      int index = sourceIndex(source);
+      if (index < 0) return located.toString();
+      int start = source.lastIndexOf('\n', index - 1) + 1;
+      int end = source.indexOf('\n', index);
       if (end < 0) end = source.length();
-      int left = Math.max(start, offset - 80), right = Math.min(end, offset + 80);
+      int left =
+          source.offsetByCodePoints(index, -Math.min(80, source.codePointCount(start, index)));
+      int right = source.offsetByCodePoints(index, Math.min(80, source.codePointCount(index, end)));
       String prefix = left > start ? "..." : "";
       String suffix = right < end ? "..." : "";
       String excerpt = source.substring(left, right).replace('\t', ' ').replace('\r', ' ');
@@ -70,7 +101,7 @@ public final class CelException extends RuntimeException {
           + excerpt
           + suffix
           + "\n"
-          + " ".repeat(prefix.length() + offset - left)
+          + " ".repeat(prefix.length() + source.codePointCount(left, index))
           + "^";
     }
 
@@ -127,10 +158,11 @@ public final class CelException extends RuntimeException {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  CelException at(int offset, long id, int line, int column) {
+  CelException at(int offset, long id, int line, int column, OffsetEncoding encoding) {
     if (expressionId >= 0) return this;
     Issue issue = issues.get(0);
-    return new CelException(List.of(new Issue(code, issue.message(), offset, line, column)), id);
+    return new CelException(
+        List.of(new Issue(code, issue.message(), offset, line, column, encoding)), id);
   }
 
   public Code code() {
@@ -139,6 +171,13 @@ public final class CelException extends RuntimeException {
 
   public int offset() {
     return offset;
+  }
+
+  /**
+   * Offset and column units of the first issue; numeric values are never rewritten for formatting.
+   */
+  public OffsetEncoding offsetEncoding() {
+    return issues.getFirst().offsetEncoding();
   }
 
   /** One-based line of the first issue, or -1 when the source position is unknown. */

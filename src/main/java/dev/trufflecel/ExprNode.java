@@ -14,6 +14,7 @@ class ExprNode extends CelNode {
   // Original custom macro syntax is immutable metadata, never a runtime child.
   Ast.Node macroCall;
   int errorOffset = -1, errorLine = -1, errorColumn = -1;
+  CelException.OffsetEncoding errorOffsetEncoding = CelException.OffsetEncoding.UTF16;
   CelType checkedType;
   FieldPlan fieldPlan;
   // Plan-time constant fold; uninstrumented targets replace the subtree with its prebuilt result.
@@ -388,6 +389,15 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final int[] literalLocations;
 
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final boolean[] codePointPositions;
+
+    private CelException.OffsetEncoding encoding(int index) {
+      return codePointPositions[index]
+          ? CelException.OffsetEncoding.CODE_POINT
+          : CelException.OffsetEncoding.UTF16;
+    }
+
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
@@ -398,16 +408,20 @@ class ExprNode extends CelNode {
       ids = new long[count];
       literalIds = new long[count];
       literalLocations = new int[count * 5];
+      codePointPositions = new boolean[count * 2];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
         positions[i * 3] = node.errorOffset;
         positions[i * 3 + 1] = node.errorLine;
         positions[i * 3 + 2] = node.errorColumn;
         ids[i] = node.canonicalId;
+        codePointPositions[i] = node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
         operations[i] = node.name.charAt(0);
         ExprNode literal = node.children[1];
         constants[i] = (Long) literal.value;
         literalIds[i] = literal.canonicalId;
+        codePointPositions[i + count] =
+            literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
         literalLocations[i * 5] = literal.errorOffset;
         literalLocations[i * 5 + 1] = literal.errorLine;
         literalLocations[i * 5 + 2] = literal.errorColumn;
@@ -436,6 +450,7 @@ class ExprNode extends CelNode {
         literal.errorOffset = literalLocations[i * 5];
         literal.errorLine = literalLocations[i * 5 + 1];
         literal.errorColumn = literalLocations[i * 5 + 2];
+        literal.errorOffsetEncoding = encoding(i + operations.length);
         literal.sourceRange(literalLocations[i * 5 + 3], literalLocations[i * 5 + 4]);
         ExprNode next =
             new ExprNode(
@@ -449,6 +464,7 @@ class ExprNode extends CelNode {
         next.errorOffset = positions[i * 3];
         next.errorLine = positions[i * 3 + 1];
         next.errorColumn = positions[i * 3 + 2];
+        next.errorOffsetEncoding = encoding(i);
         next.sourceRange(restored.sourceStart, literal.sourceEnd);
         restored = next;
       }
@@ -489,14 +505,16 @@ class ExprNode extends CelNode {
           } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
             ctx.charge(operations.length - i - 1);
-            throw e.at(positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2]);
+            throw e.at(
+                positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2], encoding(i));
           }
         }
         return result;
       }
       // These operators require matching numeric types; every right operand is a CEL int.
       ctx.charge(operations.length);
-      throw Values.overload(firstOperation).at(positions[0], ids[0], positions[1], positions[2]);
+      throw Values.overload(firstOperation)
+          .at(positions[0], ids[0], positions[1], positions[2], encoding(0));
     }
   }
 
@@ -576,7 +594,7 @@ class ExprNode extends CelNode {
       CelException located =
           e.code() == CelException.Code.RESOURCE_EXHAUSTED
               ? e
-              : e.at(errorOffset, canonicalId, errorLine, errorColumn);
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
       if (observe) {
         ctx.attribute(null);
         ctx.trace(this, null, located);
@@ -592,6 +610,16 @@ class ExprNode extends CelNode {
     errorOffset = original.errorOffset;
     errorLine = original.errorLine;
     errorColumn = original.errorColumn;
+    errorOffsetEncoding = original.errorOffsetEncoding;
+  }
+
+  CelException.Issue issue(CelException.Code code, String message) {
+    int position =
+        errorOffset >= 0 || errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT
+            ? errorOffset
+            : offset;
+    return new CelException.Issue(
+        code, message, position, errorLine, errorColumn, errorOffsetEncoding);
   }
 
   Object doExecute(VirtualFrame frame, EvalContext ctx) {
@@ -672,7 +700,7 @@ class ExprNode extends CelNode {
       CelException located =
           e.code() == CelException.Code.RESOURCE_EXHAUSTED
               ? e
-              : e.at(errorOffset, canonicalId, errorLine, errorColumn);
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
       ctx.attribute(null);
       ctx.trace(this, null, located);
       throw located;

@@ -662,6 +662,7 @@ public final class CanonicalAst {
         }
       }
       node.canonicalId = id;
+      node.errorOffsetEncoding = CelException.OffsetEncoding.CODE_POINT;
       Integer position = positions.get(id);
       if (position != null && position >= 0) {
         node.errorOffset = position;
