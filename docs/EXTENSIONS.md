@@ -175,11 +175,16 @@ only `math.abs` among callable functions. Core literals, selection, types and co
 syntax remain available. Restrictions apply before folding, to unchecked programs and
 when canonical ASTs are imported; dynamic extension dispatch rechecks library membership.
 
-Supported library versions: `math`, `lists`, `optional` 0–2; `strings`, `regex`, `sets`,
+Supported library versions: `math`, `lists`, `optional` 0–2; `strings` 0–3; `regex`, `sets`,
 `encoders`, `json`, `yaml`, `net`, `bindings`, `protos`, `comprehensions` 0. Unknown libraries
 and versions fail at registration. Math 0 exposes extrema, 1 adds the other numeric and
 bit functions, and 2 adds sqrt. Lists 0 exposes slice, 1 adds flatten, and 2 adds the
-remaining list helpers. Optional 1 adds optFlatMap and 2 adds first/last. Host functions
+remaining list helpers. Optional 1 adds optFlatMap and 2 adds first/last. String versions
+follow the [CEL extension function introduction versions](https://github.com/cel-expr/cel-go/blob/master/ext/strings.go):
+0 exposes the original character/search/case/replace/split/substring/trim helpers,
+1 adds format and strings.quote, 2 adds join, and 3 adds string reverse. These versions
+gate function availability; formatting always uses TruffleCEL's documented CEL formatting
+behavior, without legacy locale-dependent rendering. Host functions
 are explicitly supplied capabilities and are not removed by library version restrictions;
 the function allow-list still applies to them.
 
