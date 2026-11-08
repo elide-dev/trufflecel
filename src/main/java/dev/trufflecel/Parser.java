@@ -107,9 +107,9 @@ final class Parser {
     if (token.kind.equals("!") || token.kind.equals("-")) {
       Token op = take();
       int count = 1;
-      while (accept(op.kind)) {
-        if (++count > env.maxDepth) throw limit("unary nesting limit exceeded");
-      }
+      // CEL collapses a run by parity; its token count is not AST nesting. Source length
+      // bounds this iterative scan, while the resulting tree still passes depth/node limits.
+      while (accept(op.kind)) count++;
       if (op.kind.equals("-") && count % 2 == 1 && token.kind.equals("NUMBER")) {
         Token number = take();
         return postfix(number(number, true).sourceRange(op.offset, consumedEnd));

@@ -87,6 +87,34 @@ public class ParserTest {
   }
 
   @Test
+  public void longUnaryRunsUseParityWithoutConsumingAstDepth() {
+    var shallow = Cel.newBuilder().variable("x", CelType.INT).maxDepth(1).maxAstNodes(1).build();
+    assertEquals(
+        Long.MIN_VALUE,
+        shallow.compile("-".repeat(20000) + "x").evaluate(Map.of("x", Long.MIN_VALUE)));
+    assertEquals(
+        Long.MIN_VALUE, shallow.compile("-".repeat(20001) + "9223372036854775808").evaluate());
+    assertEquals(true, shallow.compile("!".repeat(20000) + "true").evaluate());
+    assertEquals(false, Cel.compile("!".repeat(20001) + "true").evaluate());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> shallow.compile("-".repeat(20001) + "x")).code());
+    var smallSource = Cel.newBuilder().maxSourceLength(10).build();
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> smallSource.compile("!".repeat(20) + "true"))
+            .code());
+    var odd = Cel.compile("-".repeat(20001) + "x");
+    assertEquals(-2L, odd.evaluate(Map.of("x", 2L)));
+    assertEquals(
+        CelException.Code.OVERFLOW,
+        assertThrows(CelException.class, () -> odd.evaluate(Map.of("x", Long.MIN_VALUE))).code());
+    assertEquals(
+        CelException.Code.SYNTAX,
+        assertThrows(CelException.class, () -> Cel.compile("!".repeat(20000))).code());
+  }
+
+  @Test
   public void inputLimitsPreventStackOverflow() {
     var env = Cel.newBuilder().maxSourceLength(10).build();
     assertEquals(
@@ -95,10 +123,7 @@ public class ParserTest {
     var small = Cel.newBuilder().maxDepth(16).build();
     for (String source :
         List.of(
-            "(".repeat(20) + "1" + ")".repeat(20),
-            "!".repeat(20) + "true",
-            "x" + ".a".repeat(20),
-            "1" + "+1".repeat(20)))
+            "(".repeat(20) + "1" + ")".repeat(20), "x" + ".a".repeat(20), "1" + "+1".repeat(20)))
       assertEquals(
           source,
           CelException.Code.RESOURCE_EXHAUSTED,
