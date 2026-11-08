@@ -18,12 +18,13 @@ public final class PreparedProgram {
   PreparedProgram(
       String source,
       Set<String> variables,
+      Map<String, Integer> bindingLayout,
       CelType result,
       ExprNode expression,
       Environment environment) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    this.bindingLayout = environment.bindingLayout(this.variables);
+    this.bindingLayout = bindingLayout;
     this.result = result;
     this.expression = expression;
     this.environment = environment;

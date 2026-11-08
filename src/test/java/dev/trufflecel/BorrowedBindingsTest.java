@@ -8,6 +8,51 @@ import org.junit.Test;
 
 public class BorrowedBindingsTest {
   @Test
+  public void conversionCachesResolveAliasesAndAbsoluteRootsWithoutCachingLocals() {
+    var builder =
+        Cel.newBuilder()
+            .container("example")
+            .alias("items", "example.values")
+            .variable("example.values", CelType.list(CelType.INT));
+    for (int i = 0; i < 100; i++) builder.variable("unused" + i, CelType.DYN);
+    var environment = builder.build();
+    var prepared =
+        environment.prepare("cel.bind(values, [9], values[0] + items[0] + .example.values[0])");
+    for (boolean controlled : List.of(false, true)) {
+      int[] traversals = {0};
+      Iterable<Integer> items =
+          () -> {
+            assertEquals("one conversion for both spellings of the root", 0, traversals[0]++);
+            return List.of(2).iterator();
+          };
+      var program = prepared.instantiate();
+      assertEquals(101, program.variables().size());
+      assertTrue(program.variables().contains("unused99"));
+      var input = Map.of("example.values", items);
+      assertEquals(
+          13L,
+          controlled
+              ? program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build())
+              : program.evaluate(input));
+      assertEquals(1, traversals[0]);
+    }
+  }
+
+  @Test
+  public void uncheckedUndeclaredBindingsAlsoNormalizeOnlyOnce() {
+    var program = Cel.newBuilder().build().parse("xs[0] + xs[1]");
+    int[] traversals = {0};
+    Iterable<Integer> items =
+        () -> {
+          assertEquals(0, traversals[0]++);
+          return List.of(1, 2).iterator();
+        };
+    assertEquals(3L, program.evaluate(Map.of("xs", items)));
+    assertEquals(1, traversals[0]);
+    assertTrue(program.variables().isEmpty());
+  }
+
+  @Test
   public void preparedAndSeparatelyCompiledProgramsKeepIndependentConversionCaches()
       throws Exception {
     var environment =

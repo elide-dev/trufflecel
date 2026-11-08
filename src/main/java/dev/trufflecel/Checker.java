@@ -8,6 +8,8 @@ final class Checker {
   private final boolean strict;
   private List<CelType> blockTypes;
   private List<CelException.Issue> issues;
+  // Most expressions read only one root binding. Allocate a set only for multiple roots.
+  private Object rootBindings;
   private int depth;
 
   Checker(Environment env, Map<String, CelType> declarations, boolean strict) {
@@ -17,7 +19,10 @@ final class Checker {
   }
 
   CelType check(ExprNode n, Map<String, CelType> locals) {
-    if (depth == 0) issues = null;
+    if (depth == 0) {
+      issues = null;
+      rootBindings = null;
+    }
     depth++;
     CelType result;
     try {
@@ -41,6 +46,27 @@ final class Checker {
     return result;
   }
 
+  @SuppressWarnings("unchecked")
+  private void rootBinding(String name) {
+    if (rootBindings == null) rootBindings = name;
+    else if (rootBindings instanceof String first) {
+      if (!first.equals(name)) {
+        var names = new HashSet<String>();
+        names.add(first);
+        names.add(name);
+        rootBindings = names;
+      }
+    } else ((Set<String>) rootBindings).add(name);
+  }
+
+  @SuppressWarnings("unchecked")
+  Map<String, Integer> bindingLayout() {
+    if (rootBindings == null) return Map.of();
+    return rootBindings instanceof String name
+        ? env.bindingLayout(name)
+        : env.bindingLayout((Set<String>) rootBindings);
+  }
+
   private CelType checkNode(ExprNode n, Map<String, CelType> locals) {
     if (n.extensionSelect) {
       env.libraryPolicy.library("proto.getExt", CelType.DYN, n.offset);
@@ -51,6 +77,7 @@ final class Checker {
       if (name != null) {
         n.kind = ExprNode.Kind.IDENT;
         n.name = qualified.startsWith(".") ? "." + name : name;
+        rootBinding(name);
         return declarations.get(name);
       }
       name = env.resolve(qualified, env.constants.keySet());
@@ -118,6 +145,7 @@ final class Checker {
       case IDENT -> {
         if (locals.containsKey(n.name)) yield locals.get(n.name);
         if (strict) throw failure(n, "undeclared reference: " + n.name);
+        rootBinding(n.name.startsWith(".") ? n.name.substring(1) : n.name);
         yield CelType.DYN;
       }
       case SELECT, INDEX -> {
