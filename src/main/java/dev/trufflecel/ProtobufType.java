@@ -371,6 +371,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     private final String name;
     private final Map<String, CelType> fields;
     private final Map<String, Masked> nested;
+    private final Map<String, CelType> extensions;
 
     private Masked(ProtobufType source, String name, MaskNode mask) {
       this.source = source;
@@ -392,6 +393,11 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       }
       fields = Map.copyOf(types);
       nested = Map.copyOf(children);
+      var selectedExtensions = new LinkedHashMap<String, CelType>();
+      for (var entry : source.extensionTypes.entrySet())
+        if (fields.containsKey(entry.getKey()))
+          selectedExtensions.put(entry.getKey(), entry.getValue());
+      extensions = Map.copyOf(selectedExtensions);
     }
 
     public String name() {
@@ -400,6 +406,10 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
     public Map<String, CelType> fields() {
       return fields;
+    }
+
+    public Map<String, CelType> extensions() {
+      return extensions;
     }
 
     public Environment.Builder register(Environment.Builder builder) {
