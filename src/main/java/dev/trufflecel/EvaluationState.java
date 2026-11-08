@@ -5,12 +5,14 @@ import java.util.function.Function;
 
 /** Optional observable execution state; ordinary calls allocate none of this state. */
 final class EvaluationState {
+  final long budget;
   final EvaluationOptions.Control control;
   final TraceListener trace;
   final PartialState partial;
   final Map<String, Function<List<Object>, Object>> functions;
 
   EvaluationState(Environment environment, EvaluationOptions options) {
+    budget = options.budget == 0 ? environment.budget : options.budget;
     control = options.control();
     trace = options.trace;
     partial = options.partial == null ? null : new PartialState(options.partial);

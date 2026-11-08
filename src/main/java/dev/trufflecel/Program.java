@@ -124,7 +124,8 @@ public final class Program {
 
   public EvaluationResult evaluateWithDetails(Map<String, ?> variables, EvaluationOptions options) {
     return evaluateWithDetails(
-        new EvalContext(environment, new BorrowedBindings(variables, bindingLayout)), options);
+        new EvalContext.Scoped(environment, new BorrowedBindings(variables, bindingLayout)),
+        options);
   }
 
   public EvaluationResult evaluateWithDetails(Activation activation, EvaluationOptions options) {
@@ -275,8 +276,8 @@ public final class Program {
 
   private static EvalContext context(Environment environment, Object binding, Object value) {
     return binding instanceof String name
-        ? new EvalContext(environment, name, value)
-        : new EvalContext(environment, binding);
+        ? new EvalContext.Scoped(environment, name, value)
+        : new EvalContext.Scoped(environment, binding);
   }
 
   private static boolean normalizedScalar(Object value) {
@@ -335,7 +336,7 @@ public final class Program {
       EvalContext context =
           contextInArguments
               ? (EvalContext) frame.getArguments()[0]
-              : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
+              : new EvalContext(environment, frame.getArguments());
       try {
         Object result = body.execute(frame, context);
         context.checkControl();

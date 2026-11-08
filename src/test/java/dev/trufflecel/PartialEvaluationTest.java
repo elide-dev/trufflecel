@@ -349,7 +349,7 @@ public class PartialEvaluationTest {
             data()
                 .resolve(
                     Map.of(Attribute.of("data"), new CelException(CelException.Code.TYPE, "bad"))));
-    var context = new EvalContext(Cel.newBuilder().build(), Map.of());
+    var context = new EvalContext.Scoped(Cel.newBuilder().build(), Map.of());
     context.configure(EvaluationOptions.newBuilder().build().withPartial(data()));
     context.attribute(Attribute.of("data"));
     context.push("local", context.store(Map.of("known", 3L)));
