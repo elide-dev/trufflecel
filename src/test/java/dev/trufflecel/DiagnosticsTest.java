@@ -97,6 +97,64 @@ public final class DiagnosticsTest {
   }
 
   @Test
+  public void offsetEncodingKeepsNumericPositionsAndFormatsUnicodeCarets() {
+    String source = "😀\n'😀' + nope";
+    int javaOffset = source.indexOf("nope");
+    int pointOffset = source.codePointCount(0, javaOffset);
+    var javaIssue = new CelException.Issue(CelException.Code.TYPE, "unknown", javaOffset, -1, -1);
+    var pointIssue =
+        new CelException.Issue(
+            CelException.Code.TYPE,
+            "unknown",
+            pointOffset,
+            -1,
+            -1,
+            CelException.OffsetEncoding.CODE_POINT);
+    assertEquals(CelException.OffsetEncoding.UTF16, javaIssue.offsetEncoding());
+    assertEquals(javaOffset, javaIssue.locate(source).offset());
+    assertEquals(pointOffset, pointIssue.locate(source).offset());
+    assertEquals(8, javaIssue.locate(source).column());
+    assertEquals(7, pointIssue.locate(source).column());
+    assertEquals(2, pointIssue.locate(source).line());
+    assertTrue(javaIssue.format(source), javaIssue.format(source).endsWith("'😀' + nope\n      ^"));
+    assertTrue(
+        pointIssue.format(source), pointIssue.format(source).endsWith("'😀' + nope\n      ^"));
+    assertEquals(
+        CelException.OffsetEncoding.CODE_POINT,
+        new CelException(List.of(pointIssue)).offsetEncoding());
+    assertEquals(
+        "end at offset 1 (line 1, column 2)\n😀\n ^",
+        new CelException.Issue(
+                CelException.Code.SYNTAX, "end", 1, -1, -1, CelException.OffsetEncoding.CODE_POINT)
+            .format("😀"));
+    assertEquals(
+        "outside at offset 2",
+        new CelException.Issue(
+                CelException.Code.SYNTAX,
+                "outside",
+                2,
+                -1,
+                -1,
+                CelException.OffsetEncoding.CODE_POINT)
+            .format("😀"));
+    assertThrows(
+        NullPointerException.class,
+        () -> new CelException.Issue(CelException.Code.TYPE, "x", 0, 1, 1, null));
+    String longLine = "😀".repeat(500);
+    String clipped =
+        new CelException.Issue(
+                CelException.Code.TYPE,
+                "middle",
+                250,
+                -1,
+                -1,
+                CelException.OffsetEncoding.CODE_POINT)
+            .format(longLine);
+    assertTrue(clipped.contains("..." + "😀".repeat(160) + "..."));
+    assertTrue(clipped.endsWith(" ".repeat(83) + "^"));
+  }
+
+  @Test
   public void rendersCaretsWithoutRetainingOrDumpingTheWholeSource() {
     String source = "first\n\tbad\r\nlast";
     var issue = new CelException.Issue(CelException.Code.SYNTAX, "expected expression", 7, -1, -1);

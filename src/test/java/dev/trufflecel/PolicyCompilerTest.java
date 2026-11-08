@@ -182,6 +182,11 @@ public class PolicyCompilerTest {
       var compile = assertThrows(CelException.class, () -> PolicyCompiler.compile(env, invalid));
       assertEquals(5, compile.line());
       assertEquals(9, compile.column());
+      assertEquals(invalid.indexOf("undeclared"), compile.offset());
+      assertEquals(CelException.OffsetEncoding.UTF16, compile.offsetEncoding());
+      assertTrue(
+          compile.format(invalid),
+          compile.format(invalid).endsWith("        undeclared\n        ^"));
     }
   }
 

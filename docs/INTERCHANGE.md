@@ -25,6 +25,9 @@ optional local bindings. Import handles arbitrary accumulator comprehensions, op
 aggregate entries, namespaces, object constructors and block extensions. Parsed input uses
 dynamic evaluation; checked input is checked again against the receiving environment.
 Imported annotations cannot bypass declarations, type checking or execution budgets.
+Canonical diagnostics retain `SourceInfo` code-point offsets and columns, exposed by
+`CelException.OffsetEncoding.CODE_POINT`. `format(source)` converts those offsets to Java
+string indexes for excerpts without changing the reported numeric positions.
 Expression ids must be positive and unique. Import bounds node count, depth and serialized
 size (8 MiB); source parsing retains the environment's source/depth limits.
 Opaque host constants that have no canonical CEL literal representation cannot be exported.

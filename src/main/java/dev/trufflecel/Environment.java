@@ -172,6 +172,7 @@ public final class Environment {
         // Nonempty source comes directly from Parser; imported canonical trees use empty source.
         current.canonicalId = count;
         current.errorOffset = current.offset;
+        current.errorOffsetEncoding = CelException.OffsetEncoding.UTF16;
         int line = lines == null ? 0 : Arrays.binarySearch(lines, current.offset);
         if (line < 0) line = -line - 2;
         current.errorLine = current.offset < 0 ? -1 : line + 1;
@@ -228,9 +229,10 @@ public final class Environment {
     CelType result = checker.check(node, Map.of()).finish();
     if (expectedResultType != null && !expectedResultType.accepts(result))
       throw new CelException(
-          CelException.Code.TYPE,
-          "expected result type " + expectedResultType + ", got " + result,
-          node.offset);
+          List.of(
+              node.issue(
+                  CelException.Code.TYPE,
+                  "expected result type " + expectedResultType + ", got " + result)));
     Validator.Context context =
         validationTree == null
             ? null

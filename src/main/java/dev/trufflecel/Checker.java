@@ -28,7 +28,7 @@ final class Checker {
               : checkNode(n, locals);
     } catch (CelException error) {
       if (error.code() == CelException.Code.RESOURCE_EXHAUSTED) throw error;
-      for (var issue : error.issues()) report(issue);
+      for (var issue : error.issues()) report(n.issue(issue.code(), issue.message()));
       result = CelType.DYN;
     } finally {
       depth--;
@@ -188,9 +188,7 @@ final class Checker {
         for (int i = 0; i < n.children.length; i++) {
           CelType expected = type.fields().get(fields[i]);
           if (expected == null)
-            report(
-                new CelException.Issue(
-                    CelException.Code.TYPE, "undefined field: " + fields[i], n.offset, -1, -1));
+            report(n.issue(CelException.Code.TYPE, "undefined field: " + fields[i]));
           if (expected != null)
             require(
                 n,
@@ -562,8 +560,7 @@ final class Checker {
   }
 
   private void require(ExprNode n, boolean condition, String message) {
-    if (strict && !condition)
-      report(new CelException.Issue(CelException.Code.TYPE, message, n.offset, -1, -1));
+    if (strict && !condition) report(n.issue(CelException.Code.TYPE, message));
   }
 
   private void report(CelException.Issue issue) {
@@ -572,6 +569,6 @@ final class Checker {
   }
 
   private CelException failure(ExprNode n, String message) {
-    return new CelException(CelException.Code.TYPE, message, n.offset);
+    return new CelException(List.of(n.issue(CelException.Code.TYPE, message)));
   }
 }

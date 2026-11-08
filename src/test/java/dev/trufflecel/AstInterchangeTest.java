@@ -41,6 +41,8 @@ public final class AstInterchangeTest {
           source.codePointCount(0, source.indexOf('/', source.indexOf('\n'))), failure.offset());
       assertEquals(2, failure.line());
       assertEquals(5, failure.column());
+      assertEquals(CelException.OffsetEncoding.CODE_POINT, failure.offsetEncoding());
+      assertTrue(failure.format(source), failure.format(source).endsWith("(10 / x) +\n    ^"));
       assertFalse(
           before.stream().anyMatch(entry -> field(entry, "key").equals(failure.expressionId())));
       assertTrue(
@@ -69,6 +71,135 @@ public final class AstInterchangeTest {
                 message("cel.expr.SourceInfo", "positions", negative))
             .build();
     assertEquals(child(unknown, "source_info"), child(check(env, unknown), "source_info"));
+  }
+
+  @Test
+  public void canonicalUnicodeLocationsSurviveLoweringFoldingAndTraceRestoration() {
+    Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
+    for (String source :
+        List.of("// 😀\nx + 1 + 2", "'😀' == '😀' ? x + 1 + 2 : 0", "// 😀\n1 / 0")) {
+      int index = source.contains("x +") ? source.indexOf('+') : source.lastIndexOf('/');
+      Message parsed = CanonicalAst.parse(env, source);
+      Message checked = check(env, parsed);
+      for (Message input : List.of(parsed, checked, toV1Alpha1(parsed), toV1Alpha1(checked))) {
+        Program program = program(env, input);
+        assertCanonicalLocation(
+            source,
+            index,
+            assertThrows(CelException.class, () -> program.evaluate(Map.of("x", Long.MAX_VALUE))));
+        var events = new ArrayList<TraceEvent>();
+        assertCanonicalLocation(
+            source,
+            index,
+            assertThrows(
+                CelException.class,
+                () -> program.trace(events::add).evaluate(Map.of("x", Long.MAX_VALUE))));
+        assertFalse(events.isEmpty());
+        assertTrue(
+            events.stream()
+                .filter(event -> event.error() != null)
+                .allMatch(
+                    event ->
+                        event.error().offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
+        if (source.contains("x +")) {
+          assertCanonicalLocation(
+              source,
+              source.lastIndexOf('+'),
+              assertThrows(
+                  CelException.class, () -> program.evaluate(Map.of("x", Long.MAX_VALUE - 1))));
+          assertCanonicalLocation(
+              source,
+              index,
+              assertThrows(CelException.class, () -> program.evaluate(Map.of("x", "wrong"))));
+        }
+      }
+      CelException ordinary =
+          assertThrows(
+              CelException.class, () -> env.compile(source).evaluate(Map.of("x", Long.MAX_VALUE)));
+      assertEquals(CelException.OffsetEncoding.UTF16, ordinary.offsetEncoding());
+      assertEquals(index, ordinary.offset());
+    }
+    String regex = "// 😀\nx.matches('[')";
+    Environment strings = Cel.newBuilder().variable("x", CelType.STRING).build();
+    Program matches = program(strings, check(strings, CanonicalAst.parse(strings, regex)));
+    assertCanonicalLocation(
+        regex,
+        regex.indexOf("x.matches"),
+        assertThrows(CelException.class, () -> matches.evaluate(Map.of("x", "text"))));
+    String budgetSource = "// 😀\nx + 1 + 2";
+    Message ast = CanonicalAst.parse(env, budgetSource);
+    Environment bounded = env.toBuilder().evaluationBudget(1).build();
+    CelException budget =
+        assertThrows(CelException.class, () -> program(bounded, ast).evaluate(Map.of("x", 1)));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, budget.code());
+    assertCanonicalLocation(budgetSource, budgetSource.lastIndexOf('+'), budget);
+    Message absent =
+        ast.toBuilder()
+            .clearField(ast.getDescriptorForType().findFieldByName("source_info"))
+            .build();
+    CelException missing =
+        assertThrows(
+            CelException.class, () -> program(env, absent).evaluate(Map.of("x", Long.MAX_VALUE)));
+    assertEquals(-1, missing.offset());
+    assertEquals(CelException.OffsetEncoding.CODE_POINT, missing.offsetEncoding());
+    assertEquals(missing.getMessage(), missing.format(budgetSource));
+  }
+
+  @Test
+  public void canonicalCheckerAndValidatorFindingsUseImportedPositions() {
+    Environment env = Cel.newBuilder().build();
+    String source = "// 😀\n['😀', missing, true + 1]";
+    Message parsed = CanonicalAst.parse(env, source);
+    for (Message input : List.of(parsed, toV1Alpha1(parsed))) {
+      CelException failure = assertThrows(CelException.class, () -> check(env, input));
+      assertEquals(2, failure.issues().size());
+      assertCanonicalLocation(source, source.indexOf("missing"), failure);
+      assertEquals(
+          CelException.OffsetEncoding.CODE_POINT, failure.issues().get(1).offsetEncoding());
+      assertEquals(source.codePointCount(0, source.indexOf('+')), failure.issues().get(1).offset());
+    }
+    Message absent =
+        parsed.toBuilder()
+            .clearField(parsed.getDescriptorForType().findFieldByName("source_info"))
+            .build();
+    CelException unlocated = assertThrows(CelException.class, () -> check(env, absent));
+    assertEquals(-1, unlocated.offset());
+    assertEquals(CelException.OffsetEncoding.CODE_POINT, unlocated.offsetEncoding());
+    String division = "// 😀\n1 / 0";
+    Message constant = CanonicalAst.parse(env, division);
+    Environment strict = env.toBuilder().validation(Environment.Validation.STRICT).build();
+    assertCanonicalLocation(
+        division,
+        division.lastIndexOf('/'),
+        assertThrows(CelException.class, () -> check(strict, constant)));
+    String disabled = "// 😀\n'😀'.size()";
+    Message call = CanonicalAst.parse(env, disabled);
+    assertCanonicalLocation(
+        disabled,
+        disabled.indexOf('\''),
+        assertThrows(
+            CelException.class,
+            () -> check(env.toBuilder().allowedFunctions(Set.of()).build(), call)));
+    String result = "// 😀\n'😀'";
+    Message literal = CanonicalAst.parse(env, result);
+    assertCanonicalLocation(
+        result,
+        result.indexOf('\''),
+        assertThrows(
+            CelException.class,
+            () -> check(env.toBuilder().expectedResultType(CelType.INT).build(), literal)));
+  }
+
+  private static void assertCanonicalLocation(String source, int javaIndex, CelException error) {
+    assertEquals(CelException.OffsetEncoding.CODE_POINT, error.offsetEncoding());
+    assertEquals(source.codePointCount(0, javaIndex), error.offset());
+    int start = source.lastIndexOf('\n', javaIndex - 1) + 1;
+    int end = source.indexOf('\n', javaIndex);
+    if (end < 0) end = source.length();
+    int column = source.codePointCount(start, javaIndex);
+    assertEquals(column + 1, error.column());
+    String expected = source.substring(start, end) + "\n" + " ".repeat(column) + "^";
+    assertTrue(error.format(source), error.issues().getFirst().format(source).endsWith(expected));
   }
 
   @Test

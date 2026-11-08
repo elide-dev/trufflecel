@@ -148,10 +148,10 @@ final class Optimizer {
     return node;
   }
 
-  private void issue(CelException.Code code, String message, int offset) {
+  private void issue(CelException.Code code, String message, ExprNode node) {
     if (issues == null) issues = new ArrayList<>();
     if (issues.size() < CelException.MAX_ISSUES)
-      issues.add(new CelException.Issue(code, message, offset, -1, -1).locate(source));
+      issues.add(node.issue(code, message).locate(source));
   }
 
   // Qualified names resolved to identifiers or constants keep parsed children that never execute.
@@ -191,8 +191,7 @@ final class Optimizer {
         || n.kind == ExprNode.Kind.MACRO && NESTING.contains(n.name)) {
       nesting++;
       if (env.comprehensionNesting > 0 && nesting > env.comprehensionNesting)
-        issue(
-            CelException.Code.RESOURCE_EXHAUSTED, "comprehension nesting limit exceeded", n.offset);
+        issue(CelException.Code.RESOURCE_EXHAUSTED, "comprehension nesting limit exceeded", n);
     }
     if (env.homogeneousLiterals) {
       if (n.kind == ExprNode.Kind.LIST) uniform(n.children, 0, 1, "list element");
@@ -253,7 +252,7 @@ final class Optimizer {
       try {
         Functions.apply(n.name, new Object[] {n.children[0].value}, env);
       } catch (CelException e) {
-        issue(e.code(), e.getMessage(), n.offset);
+        issue(e.code(), e.getMessage(), n);
       }
     }
     if (n.kind == ExprNode.Kind.CALL
@@ -266,8 +265,9 @@ final class Optimizer {
         n = new MatchesNode(n, Regex.compile(pattern, env.maxRegexProgramSize), null);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED)
-          throw new CelException(e.code(), e.issues().get(0).message(), n.children[1].offset);
-        if (strict) issue(e.code(), e.getMessage(), n.children[1].offset);
+          throw new CelException(
+              List.of(n.children[1].issue(e.code(), e.issues().get(0).message())));
+        if (strict) issue(e.code(), e.getMessage(), n.children[1]);
         n = new MatchesNode(n, null, e);
       }
     }
@@ -328,7 +328,7 @@ final class Optimizer {
         issue(
             CelException.Code.TYPE,
             "heterogeneous " + what + ": expected " + expected + ", found " + type,
-            child.offset);
+            child);
     }
   }
 
@@ -394,7 +394,7 @@ final class Optimizer {
     CelException error = n.fold.error();
     // The literal validators already reported this pattern or conversion.
     if (n instanceof MatchesNode matches && matches.error == error || literalConversion(n)) return;
-    if (strictPath) issue(error.code(), error.issues().get(0).message(), n.offset);
+    if (strictPath) issue(error.code(), error.issues().get(0).message(), n);
   }
 
   /** {@code timestamp('...')} and {@code duration('...')} are validated regardless of position. */
@@ -512,7 +512,9 @@ final class Optimizer {
       canonicalId = original.canonicalId;
       this.pattern = pattern;
       this.error =
-          error == null ? null : error.at(errorOffset, canonicalId, errorLine, errorColumn);
+          error == null
+              ? null
+              : error.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
     }
 
     @Override
