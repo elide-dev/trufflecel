@@ -11,6 +11,67 @@ public final class AstInterchangeTest {
   private static final Environment ENV = Cel.newBuilder().inferVariables(true).build();
 
   @Test
+  public void cseExportPreservesImportedAndGeneratedSourceLocations() {
+    Environment env =
+        Cel.newBuilder().variable("x", CelType.INT).commonSubexpressions(true).build();
+    String source = "// 😀\n(10 / x) +\n(10 / x)";
+    Message parsed = CanonicalAst.parse(env, source);
+    Message oldInfo = child(parsed, "source_info");
+    oldInfo =
+        oldInfo.toBuilder()
+            .setField(oldInfo.getDescriptorForType().findFieldByName("location"), "unicode.cel")
+            .build();
+    parsed =
+        parsed.toBuilder()
+            .setField(parsed.getDescriptorForType().findFieldByName("source_info"), oldInfo)
+            .build();
+    for (Message input : List.of(parsed, toV1Alpha1(parsed))) {
+      Message checked = check(env, input);
+      Message info = child(toCelExpr(checked), "source_info");
+      assertEquals("unicode.cel", field(info, "location"));
+      assertEquals(field(oldInfo, "line_offsets"), field(info, "line_offsets"));
+      assertEquals(field(oldInfo, "macro_calls"), field(info, "macro_calls"));
+      List<Message> before = messages(oldInfo, "positions"), after = messages(info, "positions");
+      assertTrue(after.containsAll(before));
+      assertTrue(after.size() > before.size());
+      CelException failure =
+          assertThrows(CelException.class, () -> program(env, checked).evaluate(Map.of("x", 0)));
+      assertEquals(CelException.Code.DIVIDE_BY_ZERO, failure.code());
+      assertEquals(
+          source.codePointCount(0, source.indexOf('/', source.indexOf('\n'))), failure.offset());
+      assertEquals(2, failure.line());
+      assertEquals(5, failure.column());
+      assertFalse(
+          before.stream().anyMatch(entry -> field(entry, "key").equals(failure.expressionId())));
+      assertTrue(
+          after.stream()
+              .anyMatch(
+                  entry ->
+                      field(entry, "key").equals(failure.expressionId())
+                          && field(entry, "value").equals(failure.offset())));
+    }
+    Message absent =
+        parsed.toBuilder()
+            .setField(
+                parsed.getDescriptorForType().findFieldByName("source_info"),
+                oldInfo.toBuilder()
+                    .clearField(oldInfo.getDescriptorForType().findFieldByName("positions"))
+                    .build())
+            .build();
+    assertTrue(messages(child(check(env, absent), "source_info"), "positions").isEmpty());
+    var negative = new LinkedHashMap<Long, Integer>();
+    for (Message entry : messages(oldInfo, "positions"))
+      negative.put((Long) field(entry, "key"), -1);
+    Message unknown =
+        parsed.toBuilder()
+            .setField(
+                parsed.getDescriptorForType().findFieldByName("source_info"),
+                message("cel.expr.SourceInfo", "positions", negative))
+            .build();
+    assertEquals(child(unknown, "source_info"), child(check(env, unknown), "source_info"));
+  }
+
+  @Test
   public void macroSourceAndLegacySchemasRoundTrip() {
     for (String source :
         List.of(
