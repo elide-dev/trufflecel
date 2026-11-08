@@ -102,7 +102,23 @@ def fixed_memory(command, directory):
             raise
 
 
-def main():
+def validate_inventory(rows, phase, engines=ENGINES, workloads=WORKLOADS):
+    if phase == 'jvm-timing':
+        expected = set(itertools.product(engines, workloads))
+        keys = [(row['params']['engine'], row['params']['workload']) for row in rows]
+        for row in rows:
+            validate_jmh(row, row['params']['engine'], row['params']['workload'])
+    else:
+        runtimes = ('jvm', 'svm') if phase == 'memory' else ('svm',)
+        expected = set(itertools.product(runtimes, engines, workloads, range(3)))
+        keys = [tuple(row[k] for k in ('runtime', 'engine', 'workload', 'fork')) for row in rows]
+        for row in rows:
+            validate_result(row, row['runtime'], row['engine'], row['workload'], phase == 'memory')
+    if len(keys) != len(set(keys)) or set(keys) != expected:
+        raise ValueError('Incomplete, duplicate or unexpected measurement cells')
+
+
+def main(*, engines=ENGINES, workloads=WORKLOADS, experiment='six-fixture evaluation', entrypoint=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase', choices=('jvm-timing', 'native-timing', 'memory'))
     parser.add_argument('--java', type=Path, required=True)
@@ -120,6 +136,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     artifacts = {name: str(getattr(args, name).resolve()) for name in ('java', 'jmh', 'memory_jar', 'native', 'memory_native')}
     hashes = {name: sha(path) for name, path in artifacts.items()}
+    java_home = Path(artifacts['java']).parent.parent
     cpuinfo = Path('/proc/cpuinfo').read_text()
     governors = {p.name + '/' + p.parent.name: p.read_text().strip() for p in
                  Path('/sys/devices/system/cpu/cpufreq').glob('policy*/scaling_governor')}
@@ -130,7 +147,11 @@ def main():
                     java_version=subprocess.check_output([artifacts['java'], '-version'], stderr=subprocess.STDOUT, text=True),
                     vm_flags=subprocess.check_output([artifacts['java'], *JVM_FLAGS, '-XX:+PrintFlagsFinal', '-version'], stderr=subprocess.STDOUT, text=True),
                     source_manifest=json.loads(args.source_manifest.read_text()), artifacts=artifacts, sha256=hashes,
+                    source_manifest_sha256=sha(args.source_manifest),
+                    runtime_sha256={name: sha(java_home / name) for name in ('release', 'lib/modules', 'lib/server/libjvm.so')},
                     driver_sha256=sha(__file__), jvm_flags=JVM_FLAGS, native_flags=NATIVE_FLAGS,
+                    experiment=experiment, engines=engines, workloads=workloads,
+                    entrypoint_sha256=sha(entrypoint or __file__),
                     fixed_work_jvm_extra_flags=['-Xbatch'], commands=[], complete=False,
                     limits='Observed low-load shared Linux host, fixed affinity; no isolated CPUs or global tuning. Timing, allocation and RSS are distinct observations. RSS includes setup, input preparation, counter calibration, warmup and fixed evaluation in a combined executable/JVM; not retained heap or standalone deployment size.')
     records = []
@@ -148,7 +169,7 @@ def main():
 
     save()
     if args.phase == 'jvm-timing':
-        jobs = list(itertools.product(ENGINES, WORKLOADS))
+        jobs = list(itertools.product(engines, workloads))
         random.Random(20261108).shuffle(jobs)
         for engine, workload in jobs:
             key = engine + '-' + workload
@@ -168,7 +189,7 @@ def main():
     else:
         memory = args.phase == 'memory'
         runtimes = ('jvm', 'svm') if memory else ('svm',)
-        jobs = list(itertools.product(range(3), WORKLOADS, ENGINES, runtimes))
+        jobs = list(itertools.product(range(3), workloads, engines, runtimes))
         random.Random(20261108).shuffle(jobs)
         for fork, workload, engine, runtime in jobs:
             key = f'{runtime}-{engine}-{workload}-{fork}'
@@ -186,6 +207,7 @@ def main():
             row['fork'] = fork
             records.append(row); save()
             print('completed', key, flush=True)
+    validate_inventory(records, args.phase, engines, workloads)
     if hashes != {name: sha(path) for name, path in artifacts.items()}:
         raise ValueError('Artifacts changed during measurement')
     metadata.update(complete=True, load_end=os.getloadavg())
