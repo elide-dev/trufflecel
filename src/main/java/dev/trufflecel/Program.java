@@ -24,15 +24,17 @@ public final class Program {
   Program(
       String source,
       Set<String> variables,
+      Map<String, Integer> bindingLayout,
       CelType resultType,
       ExprNode body,
       Environment environment) {
-    this(source, variables, resultType, body, environment, null, null);
+    this(source, variables, bindingLayout, resultType, body, environment, null, null);
   }
 
   Program(
       String source,
       Set<String> variables,
+      Map<String, Integer> bindingLayout,
       CelType resultType,
       ExprNode body,
       Environment environment,
@@ -40,9 +42,7 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    var layout = new LinkedHashMap<String, Integer>();
-    for (String name : variables) layout.put(name, layout.size());
-    bindingLayout = Map.copyOf(layout);
+    this.bindingLayout = bindingLayout;
     String identifier = body.firstIdentifier();
     bindingHint =
         identifier != null

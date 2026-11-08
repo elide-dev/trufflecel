@@ -1,6 +1,7 @@
 package dev.trufflecel;
 
 import com.oracle.truffle.api.nodes.NodeUtil;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Set;
 public final class PreparedProgram {
   private final String source;
   private final Set<String> variables;
+  private final Map<String, Integer> bindingLayout;
   private final CelType result;
   private final ExprNode expression;
   private final Environment environment;
@@ -21,6 +23,7 @@ public final class PreparedProgram {
       Environment environment) {
     this.source = source;
     this.variables = Set.copyOf(variables);
+    this.bindingLayout = environment.bindingLayout(this.variables);
     this.result = result;
     this.expression = expression;
     this.environment = environment;
@@ -28,7 +31,8 @@ public final class PreparedProgram {
 
   /** Create an independent target. Call this at runtime for a template stored in a native image. */
   public Program instantiate() {
-    return new Program(source, variables, result, NodeUtil.cloneNode(expression), environment);
+    return new Program(
+        source, variables, bindingLayout, result, NodeUtil.cloneNode(expression), environment);
   }
 
   /** Instantiate with instrumentation in an entered Polyglot context; initializes CEL if needed. */
@@ -38,6 +42,7 @@ public final class PreparedProgram {
     return new Program(
         source,
         variables,
+        bindingLayout,
         result,
         NodeUtil.cloneNode(expression),
         environment,
@@ -46,12 +51,13 @@ public final class PreparedProgram {
   }
 
   Program adopt(CelLanguage language, com.oracle.truffle.api.source.Source truffleSource) {
-    return new Program(source, variables, result, expression, environment, language, truffleSource);
+    return new Program(
+        source, variables, bindingLayout, result, expression, environment, language, truffleSource);
   }
 
   // Consume a freshly parsed tree only; public templates always clone before adoption.
   Program adopt() {
-    return new Program(source, variables, result, expression, environment);
+    return new Program(source, variables, bindingLayout, result, expression, environment);
   }
 
   // Compiler validation inspects the optimized template before it is exposed to callers.
