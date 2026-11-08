@@ -443,6 +443,8 @@ final class Optimizer {
 
   /** A constant subtree replaced by its value or its certain failure at the original cost. */
   static final class Folded extends ExprNode {
+    // This discarded source subtree is immutable and is not a Truffle child of the fast target.
+    private final ExprNode original;
     private final long cost;
     private final CelException error;
 
@@ -453,8 +455,14 @@ final class Optimizer {
       optionalEntry = original.optionalEntry;
       statement = original.statement;
       checkedType = original.checkedType;
+      this.original = original;
       cost = original.fold.cost();
       error = original.fold.error();
+    }
+
+    @Override
+    ExprNode restoreTrace() {
+      return com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original).restoreTrace();
     }
 
     @Override
