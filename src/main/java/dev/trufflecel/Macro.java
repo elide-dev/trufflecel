@@ -20,7 +20,6 @@ public record Macro(
           "optMap",
           "optFlatMap",
           "sortBy",
-          "bind",
           "cel.bind",
           "cel.block",
           "cel.index",

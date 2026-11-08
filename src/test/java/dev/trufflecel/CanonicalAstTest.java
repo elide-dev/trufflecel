@@ -37,6 +37,28 @@ public final class CanonicalAstTest {
                 "cel.expr.Expr.Call",
                 "function",
                 "cel.@lazyBind",
+                "target",
+                args.get(0),
+                "args",
+                args.subList(1, 3)),
+            message(
+                "cel.expr.Expr.Call",
+                "function",
+                "cel.@lazyBind",
+                "args",
+                List.of(
+                    message(
+                        "cel.expr.Expr",
+                        "id",
+                        field(args.get(0), "id"),
+                        "ident_expr",
+                        message("cel.expr.Expr.Ident", "name", "")),
+                    args.get(1),
+                    args.get(2))),
+            message(
+                "cel.expr.Expr.Call",
+                "function",
+                "cel.@lazyBind",
                 "args",
                 List.of(
                     message(

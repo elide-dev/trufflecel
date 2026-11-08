@@ -54,7 +54,7 @@ final class Parser {
 
   private void record(CelException failure) {
     if (failure.code() != CelException.Code.SYNTAX || failure.issues().size() > 1) throw failure;
-    if (issues.size() < 100) issues.add(failure.issues().get(0));
+    issues.add(failure.issues().get(0));
     if (issues.size() == 100) throw new CelException(issues);
   }
 
@@ -393,6 +393,7 @@ final class Parser {
   private ExprNode customMacro(
       String name, boolean receiver, String prefix, int offset, List<ExprNode> args) {
     Macro selected = null;
+    int selectedRank = -1;
     boolean globalNamespace = false;
     int count = args.size() - (receiver ? 1 : 0);
     for (Macro macro : env.customMacros) {
@@ -403,11 +404,15 @@ final class Parser {
               && macro
                   .name()
                   .equals((prefix.startsWith(".") ? prefix.substring(1) : prefix) + "." + name);
-      if (!(namespace || macro.receiver() == receiver && macro.name().equals(name))) continue;
+      String function = !receiver && name.startsWith(".") ? name.substring(1) : name;
+      if (!(namespace || macro.receiver() == receiver && macro.name().equals(function))) continue;
       if (macro.variadic() ? count < macro.argumentCount() : count != macro.argumentCount())
         continue;
-      if (selected == null || selected.variadic() && !macro.variadic()) {
+      // Prefer fixed arity, then a qualified global match, independently of registration order.
+      int rank = (macro.variadic() ? 0 : 2) + (namespace ? 1 : 0);
+      if (rank > selectedRank) {
         selected = macro;
+        selectedRank = rank;
         globalNamespace = namespace;
       }
     }

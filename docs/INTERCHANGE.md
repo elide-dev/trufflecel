@@ -87,7 +87,9 @@ No mutable Truffle nodes or opaque host constant values are exposed.
 
 `Macro.global`, `receiver`, `globalVarargs`, and `receiverVarargs` register through
 `Environment.Builder.macro`. Argument counts exclude receivers; variadic counts
-are minimum counts and exact signatures take precedence. Qualified global macro
+are minimum counts and exact signatures take precedence. At equal arity specificity,
+a qualified global macro takes precedence over a receiver macro, independently of
+registration order. Qualified global macro
 names are supported. Expanders receive immutable syntax and return `Ast.Node`
 trees. `Macro.Context.freshName()` supplies identifiers that cannot collide with
 source identifiers, for hygienic comprehensions. Expansions share the parser's

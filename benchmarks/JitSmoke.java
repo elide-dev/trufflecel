@@ -52,6 +52,37 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        var macros =
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .macro(
+                    Macro.global(
+                        "twice", 1, (c, t, a) -> Ast.Node.call("*", a.get(0), Ast.Node.literal(2))))
+                .build();
+        Ast syntax = Ast.parse(macros, "twice(x) + 1");
+        if (!syntax.unparse().contains("twice"))
+          throw new AssertionError("Native macro source reconstruction");
+        Ast edited =
+            syntax
+                .editor()
+                .transform(
+                    n ->
+                        n.kind() == Ast.Kind.CONSTANT && Long.valueOf(1).equals(n.value())
+                            ? Ast.Node.literal(3)
+                            : n)
+                .freeze();
+        var legacy = CanonicalAst.toV1Alpha1(CanonicalAst.parsed(edited));
+        var checked = CanonicalAst.check(macros, legacy);
+        if (!checked
+            .getDescriptorForType()
+            .getFullName()
+            .equals("google.api.expr.v1alpha1.CheckedExpr"))
+          throw new AssertionError("Native legacy AST schema");
+        check(CanonicalAst.program(macros, checked), Map.of("x", 2L), 7L, Map.of("x", 4L), 11L);
+        var original = CanonicalAst.toV1Alpha1(CanonicalAst.parse(macros, "twice(x)"));
+        if (!CanonicalAst.unparse(macros, original).equals("twice(x)"))
+          throw new AssertionError("Native canonical macro source reconstruction");
+        System.out.println("Native editable AST, macro and v1alpha1 qualification passed");
         var file =
             FileDescriptor.buildFrom(
                 FileDescriptorProto.newBuilder()

@@ -494,3 +494,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "astValidation",
+    srcs = ["AstValidationTest.java"],
+    test_class = "dev.trufflecel.AstValidationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

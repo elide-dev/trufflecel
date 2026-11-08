@@ -6,9 +6,13 @@ import java.util.*;
 /** Canonical CEL accumulator loops, including arbitrary non-macro comprehensions. */
 final class ComprehensionNode extends ExprNode {
   ComprehensionNode(String[] names, ExprNode... children) {
-    super(Kind.COMPREHENSION, "", names, 0, children);
+    this(names, 0, children);
+  }
+
+  ComprehensionNode(String[] names, int offset, ExprNode... children) {
+    super(Kind.COMPREHENSION, "", names, offset, children);
     bindings = new WriteNode[names[2].isEmpty() ? 2 : 3];
-    for (int i = 0; i < bindings.length; i++) bindings[i] = new WriteNode(names[i], 0, 0);
+    for (int i = 0; i < bindings.length; i++) bindings[i] = new WriteNode(names[i], offset, offset);
   }
 
   void resolveComprehensionLocals(ArrayList<String> locals) {
