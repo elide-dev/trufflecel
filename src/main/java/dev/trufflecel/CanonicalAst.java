@@ -89,6 +89,7 @@ public final class CanonicalAst {
     reader.sourceInfo(child(parsed, "source_info"));
     ExprNode tree = reader.expression(child(parsed, "expr"), 0);
     environment.prepare("", tree, true);
+    if (environment.commonSubexpressions) tree = CseOptimizer.export(tree, environment);
     var writer = new Writer();
     writer.reserved.addAll(reader.ids);
     Message expr = writer.expression(tree);

@@ -35,6 +35,7 @@ java_library(
         "ComprehensionNode.java",
         "ConfigurationData.java",
         "CostEstimator.java",
+        "CseOptimizer.java",
         "DataType.java",
         "DataValues.java",
         "EncoderFunctions.java",

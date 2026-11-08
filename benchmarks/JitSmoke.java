@@ -145,6 +145,16 @@ public final class JitSmoke {
                 .build()
                 .compile("label(x)");
         check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text");
+        check(
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .commonSubexpressions(true)
+                .build()
+                .compile("(x + 1) * (x + 1)"),
+            Map.of("x", 2L),
+            9L,
+            Map.of("x", 3L),
+            16L);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false);
         check(
             "enabled && 10 / x > 1",
