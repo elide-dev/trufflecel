@@ -160,6 +160,7 @@ public final class AstMacroTest {
                     (ctx, target, args) -> Ast.Node.call("*", args.get(0), Ast.Node.literal(2))))
             .build();
     assertEquals(6L, env.compile("twice(3)").evaluate());
+    assertEquals(6L, env.compile(".twice(3)").evaluate());
     assertEquals(8L, env.compile("4.twice()").evaluate());
     assertEquals(0L, env.compile("total()").evaluate());
     assertEquals(99L, env.compile("total(1)").evaluate());
@@ -178,6 +179,19 @@ public final class AstMacroTest {
     assertFalse(edited.unparse().contains("twice"));
     assertThrows(CelException.class, () -> env.compile("total(1).append()"));
     assertThrows(CelException.class, () -> env.compile("twice()"));
+    Macro global = Macro.globalVarargs("ns.pick", 0, (c, t, a) -> Ast.Node.literal("global"));
+    Macro receiver = Macro.receiverVarargs("pick", 0, (c, t, a) -> Ast.Node.literal("receiver"));
+    for (boolean globalFirst : List.of(true, false)) {
+      var builder = Cel.newBuilder();
+      builder.macro(globalFirst ? global : receiver).macro(globalFirst ? receiver : global);
+      assertEquals("global", builder.build().compile("ns.pick()").evaluate());
+    }
+    var exact =
+        Cel.newBuilder()
+            .macro(Macro.global("choose", 0, (c, t, a) -> Ast.Node.literal(1)))
+            .macro(Macro.globalVarargs("choose", 0, (c, t, a) -> Ast.Node.literal(2)))
+            .build();
+    assertEquals(1L, exact.compile("choose()").evaluate());
   }
 
   @Test
@@ -201,6 +215,9 @@ public final class AstMacroTest {
     Environment env = Cel.newBuilder().macro(sum).build();
     assertEquals(6L, env.compile("sum([1,2,3])").evaluate());
     assertEquals(6L, env.compile("sum([sum([1,2]),3])").evaluate());
+    ExprNode generated = new Parser("1 + sum([2])", env).parse().children[1];
+    assertEquals(4, generated.offset);
+    assertEquals(4, generated.bindings[0].sourceStart);
     assertEquals("sum([1, 2])", Ast.parse(env, "sum([1,2])").unparse());
     assertThrows(
         CelException.class,
@@ -221,6 +238,7 @@ public final class AstMacroTest {
     CelException error = assertThrows(CelException.class, () -> reject.compile("reject()"));
     assertEquals(CelException.Code.SYNTAX, error.code());
     assertEquals(0, error.offset());
+    assertThrows(CelException.class, () -> Cel.compile("cel.bind(.x,1,x)"));
   }
 
   @Test

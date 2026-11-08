@@ -131,6 +131,18 @@ public final class AstInterchangeTest {
     Environment limited = Cel.newBuilder().inferVariables(true).maxDepth(10).build();
     assertThrows(CelException.class, () -> CanonicalAst.unparse(limited, excessive));
     assertEquals(true, program(limited, excessive).evaluate());
+    Message many =
+        message(
+            "cel.expr.Expr",
+            "id",
+            1L,
+            "call_expr",
+            message(
+                "cel.expr.Expr.Call", "function", "f", "args", Collections.nCopies(30, original)));
+    Message excessiveNodes = source(parsed, Map.of(rootId, many));
+    Environment small = Cel.newBuilder().inferVariables(true).maxAstNodes(25).build();
+    assertThrows(CelException.class, () -> CanonicalAst.unparse(small, excessiveNodes));
+    assertEquals(true, program(small, excessiveNodes).evaluate());
   }
 
   private static Message source(Message parsed, Map<Long, Message> macros) {

@@ -34,5 +34,19 @@ public final class ParserRecoveryTest {
     assertThrows(CelException.class, () -> env.compile("[1 + , 2 +"));
     assertThrows(CelException.class, () -> env.compile("{'a' (1+2), 'b': }"));
     assertEquals(java.util.List.of(1L, 2L), env.compile("[1,2]").evaluate());
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    Environment custom =
+        Cel.newBuilder()
+            .macro(
+                Macro.global(
+                    "f",
+                    1,
+                    (c, t, a) -> {
+                      calls.incrementAndGet();
+                      return a.get(0);
+                    }))
+            .build();
+    assertThrows(CelException.class, () -> custom.compile("f(1 + )"));
+    assertEquals(0, calls.get());
   }
 }

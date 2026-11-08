@@ -252,7 +252,7 @@ public final class Ast {
       return this;
     }
 
-    /** Bottom-up replacement, with replacements validated at freeze/compile time. */
+    /** Bottom-up replacement, validating each completed edit before retaining it. */
     public Editor transform(UnaryOperator<Node> transform) {
       Node edited = rewrite(root, Objects.requireNonNull(transform));
       validate(edited, 100_000, 256);
@@ -354,10 +354,18 @@ public final class Ast {
     if (node.name.equals("has"))
       return node.children.size() == 1 && node.children.get(0).kind == Kind.SELECT;
     if (!(node.value instanceof List<?> names) || names.isEmpty() || names.size() > 2) return false;
-    for (Object name : names) if (name.equals("")) return false;
-    return node.children.size() >= 2
-        && node.children.size() <= 3
-        && Macro.STANDARD.contains(node.name);
+    for (Object name : names) if (name.equals("") || ((String) name).contains(".")) return false;
+    if (names.size() == 2 && names.get(0).equals(names.get(1))) return false;
+    int children = node.children.size();
+    return switch (node.name) {
+      case "bind", "exists_one", "filter", "optMap", "optFlatMap", "sortBy" ->
+          names.size() == 1 && children == 2;
+      case "all", "exists", "existsOne" -> children == 2;
+      case "map" -> names.size() == 1 && (children == 2 || children == 3);
+      case "transformList", "transformMap", "transformMapEntry" ->
+          names.size() == 2 && (children == 2 || children == 3);
+      default -> false;
+    };
   }
 
   static Node snapshot(ExprNode node) {
@@ -394,7 +402,8 @@ public final class Ast {
     Object value = node.value instanceof List<?> names ? names.toArray(String[]::new) : node.value;
     ExprNode result =
         node.kind == Kind.COMPREHENSION
-            ? new ComprehensionNode((String[]) value, children)
+            ? new ComprehensionNode(
+                (String[]) value, node.offset < 0 ? defaultOffset : node.offset, children)
             : new ExprNode(
                 ExprNode.Kind.valueOf(node.kind.name()),
                 node.name,
