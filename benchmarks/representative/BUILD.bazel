@@ -21,6 +21,15 @@ java_library(
 java_plugin(name = "jmh_generator", testonly = True, processor_class = "org.openjdk.jmh.generators.BenchmarkProcessor", deps = ["@cel_java//:org_openjdk_jmh_jmh_generator_annprocess"])
 java_library(name = "jmh_benchmarks", testonly = True, srcs = ["SteadyState.java", "FrontendStages.java", "ActivationPreparation.java", "ActivationEvaluation.java", "StructuredAccess.java", "IngestionStages.java", "ProtobufZero.java"], plugins = [":jmh_generator"], deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime", "@maven//:dev_elide_truffledata_protobuf", "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:org_openjdk_jmh_jmh_core", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel"])
 java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", runtime_deps = [":jmh_benchmarks", "@cel_java//:org_openjdk_jmh_jmh_core"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+java_library(name = "ingestion_profile_lib", testonly = True, srcs = ["IngestionProfile.java"],
+    deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf",
+        "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:dev_cel_runtime",
+        "@maven//:dev_elide_truffledata_protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime",
+        "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
+java_binary(name = "ingestion_profile", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler", "-Xbatch", "-Xms512m", "-Xmx512m", "-Dpolyglot.engine.Compilation=false"])
+java_test(name = "ingestion_profile_smoke", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"], use_testrunner = False, args = ["smoke"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.engine.Compilation=false"])
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
