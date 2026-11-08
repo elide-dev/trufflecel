@@ -876,7 +876,11 @@ class ExprNode extends CelNode {
         }
         if (costs != null) costs[index] = context.charged() - before;
         results[index] = result;
-      } else if (costs != null) context.charge(costs[index]);
+      } else if (costs != null) {
+        if (!context.canCharge(costs[index]))
+          return initializer.execute(callerFrame, context.fork());
+        context.charge(costs[index]);
+      }
       if (result instanceof CelException error) throw error;
       return result;
     }

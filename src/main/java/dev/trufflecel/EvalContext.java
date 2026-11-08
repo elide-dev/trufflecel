@@ -74,6 +74,10 @@ final class EvalContext {
     return budgetParent == null ? initialBudget - remaining : budgetParent.charged();
   }
 
+  boolean canCharge(long cost) {
+    return budgetParent == null ? cost <= remaining : budgetParent.canCharge(cost);
+  }
+
   void charge(long cost) {
     // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
     // context with a loaded parent would force escape analysis to materialize the context in every
