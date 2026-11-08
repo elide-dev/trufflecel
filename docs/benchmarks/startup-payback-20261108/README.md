@@ -4,7 +4,7 @@ This run closes the missing launch-to-first-result measurement for the current
 TruffleCEL candidate and samples guest-JIT payback through one million evaluations.
 It does **not** establish a win over cel-java in every category. Native runtime
 preparation favors TruffleCEL's median first-result time in all six fixtures, with
-overlapping scalar process ranges. JVM scalar startup remains slower, and JVM scalar
+overlapping scalar process ranges. JVM scalar startup remains slower, and JVM scalar-wide
 and protobuf-policy guest JIT do not recover their compilation cost within this run.
 
 Production source is `67ab33cf89e0f06ad71b0b3c49d32fab53adf2d1`, the owned protobuf

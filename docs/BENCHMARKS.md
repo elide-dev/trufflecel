@@ -19,6 +19,17 @@ which are already present before caching. They do not measure native process RSS
 Raw samples, unchanged intermediate results, reproduction patches, and limitations
 are preserved in the reports.
 
+The [paired ingestion report](benchmarks/ingestion-20261108/README.md) removes one
+redundant wire-array copy from protobuf decoding. Ordinary decode allocation falls
+from 5,366 to 5,152 B/op on the JVM and 4,834 to 4,628 B/op in Native Image. Adding a
+64 KiB unknown payload increases the saving to about 65.7 KB per decode on either
+runtime. Unprofiled ordinary decode timing ranges overlap; this establishes an
+allocation saving without a throughput claim. Bound generated-message snapshots
+remain a tradeoff: slower on the measured JVM fixture and more allocation for the
+ordinary native fixture. Remaining unknown-byte staging is tracked in
+[TruffleData #38](https://github.com/elide-dev/truffledata/issues/38), with separate
+qualification requested for its unreleased 0.10.0 slab decoder.
+
 The [CodSpeed check](https://github.com/elide-dev/trufflecel/runs/128794753405)
 classified all 21 benchmarks as unchanged for `07a3fe4` against the actual
 functionality base `547c9fc`. It detected no timing regression in that suite; it
@@ -103,8 +114,8 @@ now records 285 launch-to-first-result processes and 54 natural-compilation reus
 processes on pinned GraalVM 25.5.5-elide.27. Native runtime-prepared startup medians
 favor TruffleCEL across the six fixtures, with overlapping scalar ranges; JVM scalar
 startup remains slower. Native repeated-list guest JIT first wins at the 100,000
-sample, native scalar/policy and JVM repeated-list at one million, while JVM
-scalar/policy show no payback through one million. Those are post-compilation sampled
+sample, native scalar-wide/policy and JVM repeated-list at one million, while JVM
+scalar-wide/policy show no payback through one million. Those are post-compilation sampled
 process-range comparisons, not precise crossover points. The report preserves raw
 outputs, runtime/source hashes, controls and preparation boundaries.
 
