@@ -5,6 +5,34 @@ import org.junit.Test;
 
 public final class ParserRecoveryTest {
   @Test
+  public void embeddedExpressionsRetainOriginalSourceOffsets() {
+    Environment env = Cel.newBuilder().build();
+    String expression = "[1].map(x, x + 1)";
+    ExprNode plain = new Parser(expression, env).parse();
+    ExprNode embedded = new Parser(expression, env, 17).parse();
+    var left = Ast.preorder(Ast.snapshot(plain));
+    var right = Ast.preorder(Ast.snapshot(embedded));
+    for (int i = 0; i < left.size(); i++)
+      assertEquals(left.get(i).offset() + 17, right.get(i).offset());
+    assertEquals(17, embedded.sourceStart);
+    assertEquals(17 + expression.length(), embedded.sourceEnd);
+    assertEquals(plain.bindings[0].sourceStart + 17, embedded.bindings[0].sourceStart);
+    for (String invalid :
+        java.util.List.of("[1 + , 2 + ]", "@", "'\\q'", "1 + @", "9223372036854775808", "[")) {
+      CelException normal =
+          assertThrows(CelException.class, () -> new Parser(invalid, env).parse());
+      CelException shifted =
+          assertThrows(CelException.class, () -> new Parser(invalid, env, 17).parse());
+      assertEquals(normal.issues().size(), shifted.issues().size());
+      for (int i = 0; i < normal.issues().size(); i++)
+        assertEquals(
+            invalid, normal.issues().get(i).offset() + 17, shifted.issues().get(i).offset());
+    }
+    assertThrows(IllegalArgumentException.class, () -> new Parser("1", env, -1));
+    assertThrows(IllegalArgumentException.class, () -> new Parser("1", env, Integer.MAX_VALUE));
+  }
+
+  @Test
   public void independentEntriesReportSeveralErrors() {
     Environment env = Cel.newBuilder().inferVariables(true).build();
     for (String source :
