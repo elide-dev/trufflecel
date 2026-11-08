@@ -332,6 +332,12 @@ Unsupported TruffleRegex patterns fall back after the same RE2/J syntax and prog
 validation. The context's accelerator cache is bounded to 256 entries and cleared on
 disposal; the separate dynamic-pattern cache retains its existing bounds.
 
+Upstream tracking covers [counted-repetition support](https://github.com/elide-dev/graal/issues/205),
+[nullable-loop match boundaries](https://github.com/elide-dev/graal/issues/206), and
+[UTF-16 search progress](https://github.com/elide-dev/graal/issues/204). The latter two
+also inform the RE2/J fallback for extraction/replacement extensions; constant boolean
+matching always starts from zero and does not expose capture boundaries.
+
 ## Per-evaluation controls and cost
 
 `EvaluationOptions.newBuilder()` configures a per-call `budget(long)`, `timeout(Duration)`,
