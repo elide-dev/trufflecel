@@ -19,6 +19,7 @@ public final class Program {
   private final boolean contextInArguments;
   private final RootCallTarget target;
   private volatile RootCallTarget controlledTarget;
+  private volatile RootCallTarget traceTarget;
 
   Program(
       String source,
@@ -128,7 +129,10 @@ public final class Program {
     Object value = null;
     CelException error = null;
     try {
-      value = Values.out(controlledTarget().call(null, new Object[] {context}));
+      value =
+          Values.out(
+              (options.trace == null ? controlledTarget() : traceTarget())
+                  .call(null, new Object[] {context}));
     } catch (CelException failure) {
       error = failure;
     }
@@ -156,6 +160,58 @@ public final class Program {
       }
     }
     return controlledTarget;
+  }
+
+  private synchronized RootCallTarget traceTarget() {
+    if (traceTarget == null) {
+      var original = (ExpressionRoot) target.getRootNode();
+      ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body).restoreTrace();
+      body.resolveBlocks(null);
+      body.resolveLazyBindings(Map.of());
+      body.resolveLocals(new ArrayList<>(), null);
+      body.accept(
+          node -> {
+            if (node instanceof ExprNode expression) expression.boundaryReads = true;
+            return true;
+          });
+      body.rootBody = true;
+      traceTarget = new ExpressionRoot(body, environment, true, null, null, null).getCallTarget();
+    }
+    return traceTarget;
+  }
+
+  /** Observe evaluated source nodes without an ambient Polyglot context. */
+  public TracedProgram trace(TraceListener listener) {
+    return new TracedProgram(this, Objects.requireNonNull(listener));
+  }
+
+  /** Snapshot inputs before submission; timeout begins when execution starts on the executor. */
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Map<String, ?> bindings, java.util.concurrent.Executor executor) {
+    return evalAsync(bindings, EvaluationOptions.newBuilder().build(), executor);
+  }
+
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Map<String, ?> bindings, EvaluationOptions options, java.util.concurrent.Executor executor) {
+    return evalAsync(Activation.snapshot(bindings), options, executor);
+  }
+
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Activation activation, EvaluationOptions options, java.util.concurrent.Executor executor) {
+    Objects.requireNonNull(activation);
+    Objects.requireNonNull(options);
+    Objects.requireNonNull(executor);
+    var result = new java.util.concurrent.CompletableFuture<Object>();
+    executor.execute(
+        () -> {
+          if (result.isCancelled()) return;
+          try {
+            result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
+          } catch (RuntimeException failure) {
+            result.completeExceptionally(failure);
+          }
+        });
+    return result;
   }
 
   RootCallTarget callTarget() {

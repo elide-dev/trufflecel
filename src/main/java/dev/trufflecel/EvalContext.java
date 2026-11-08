@@ -93,6 +93,23 @@ final class EvalContext {
     return FunctionOverloads.invoke(implementation, arguments);
   }
 
+  void trace(ExprNode node, Object value, CelException error) {
+    if (evaluation != null && evaluation.trace != null) reportTrace(node, value, error);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private void reportTrace(ExprNode node, Object value, CelException error) {
+    evaluation.trace.onEvent(
+        new TraceEvent(
+            node.canonicalId,
+            node.errorOffset,
+            node.errorLine,
+            node.errorColumn,
+            node.kind.name(),
+            error == null ? Values.out(value) : null,
+            error));
+  }
+
   void checkControl() {
     if (evaluation != null && evaluation.control != null) evaluation.control.check();
   }

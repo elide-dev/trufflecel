@@ -12,6 +12,7 @@ import java.util.function.BooleanSupplier;
 public final class EvaluationOptions {
   final long budget;
   final Map<String, Function<List<Object>, Object>> functions;
+  final TraceListener trace;
   private final Duration timeout;
   private final Instant deadline;
   private final BooleanSupplier cancelled;
@@ -19,6 +20,7 @@ public final class EvaluationOptions {
   private EvaluationOptions(Builder builder) {
     budget = builder.budget;
     functions = Map.copyOf(builder.functions);
+    trace = builder.trace;
     timeout = builder.timeout;
     deadline = builder.deadline;
     cancelled = builder.cancelled;
@@ -26,6 +28,30 @@ public final class EvaluationOptions {
 
   public static Builder newBuilder() {
     return new Builder();
+  }
+
+  EvaluationOptions withTrace(TraceListener listener) {
+    Builder builder = copy();
+    builder.trace = Objects.requireNonNull(listener);
+    return builder.build();
+  }
+
+  EvaluationOptions withCancellation(BooleanSupplier additional) {
+    Builder builder = copy();
+    builder.cancelled =
+        () -> additional.getAsBoolean() || cancelled != null && cancelled.getAsBoolean();
+    return builder.build();
+  }
+
+  private Builder copy() {
+    Builder builder = new Builder();
+    builder.budget = budget;
+    builder.timeout = timeout;
+    builder.deadline = deadline;
+    builder.cancelled = cancelled;
+    builder.functions.putAll(functions);
+    builder.trace = trace;
+    return builder;
   }
 
   Control control() {
@@ -61,6 +87,7 @@ public final class EvaluationOptions {
   public static final class Builder {
     private long budget;
     private final Map<String, Function<List<Object>, Object>> functions = new LinkedHashMap<>();
+    private TraceListener trace;
     private Duration timeout;
     private Instant deadline;
     private BooleanSupplier cancelled;
@@ -96,6 +123,11 @@ public final class EvaluationOptions {
       if (Objects.requireNonNull(overloadId).isEmpty())
         throw new IllegalArgumentException("empty overload id");
       functions.put(overloadId, Objects.requireNonNull(implementation));
+      return this;
+    }
+
+    public Builder trace(TraceListener listener) {
+      trace = Objects.requireNonNull(listener);
       return this;
     }
 

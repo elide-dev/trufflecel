@@ -6,10 +6,12 @@ import java.util.function.Function;
 /** Optional observable execution state; ordinary calls allocate none of this state. */
 final class EvaluationState {
   final EvaluationOptions.Control control;
+  final TraceListener trace;
   final Map<String, Function<List<Object>, Object>> functions;
 
   EvaluationState(Environment environment, EvaluationOptions options) {
     control = options.control();
+    trace = options.trace;
     functions = options.functions;
     for (String id : functions.keySet()) {
       boolean declared = false;

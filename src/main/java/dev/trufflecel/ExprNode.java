@@ -240,6 +240,24 @@ class ExprNode extends CelNode {
     return new LiteralNode(value, offset);
   }
 
+  /** Restore a cloned lowered tree for opt-in source-level observation. */
+  ExprNode restoreTrace() {
+    if (this instanceof InstrumentableNode.WrapperNode wrapper)
+      return com.oracle.truffle.api.nodes.NodeUtil.cloneNode((ExprNode) wrapper.getDelegateNode())
+          .restoreTrace();
+    countResult = false;
+    if (bindings != null)
+      for (int i = 0; i < bindings.length; i++) {
+        if (bindings[i] instanceof InstrumentableNode.WrapperNode wrapper)
+          bindings[i] =
+              com.oracle.truffle.api.nodes.NodeUtil.cloneNode(
+                  (WriteNode) wrapper.getDelegateNode());
+        bindings[i].frameSlot = -1;
+      }
+    for (int i = 0; i < children.length; i++) children[i] = children[i].restoreTrace();
+    return this;
+  }
+
   ExprNode lowerUninstrumented() {
     // A folded subtree is replaced wholesale; lowering inside it would only be discarded.
     if (fold != null) return this;
@@ -306,6 +324,17 @@ class ExprNode extends CelNode {
     }
 
     @Override
+    ExprNode restoreTrace() {
+      ExprNode restored = new ExprNode(Kind.CALL, name, value, offset, children);
+      restored.copyLocation(this);
+      restored.sourceRange(sourceStart, sourceEnd);
+      restored.checkedType = checkedType;
+      restored.optionalEntry = optionalEntry;
+      restored.statement = statement;
+      return restored.restoreTrace();
+    }
+
+    @Override
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       return children[0].execute(frame, ctx);
@@ -328,6 +357,12 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] ids;
 
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final long[] literalIds;
+
+    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
+    private final int[] literalLocations;
+
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
@@ -336,6 +371,8 @@ class ExprNode extends CelNode {
       constants = new long[count];
       positions = new int[count * 3];
       ids = new long[count];
+      literalIds = new long[count];
+      literalLocations = new int[count * 5];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
         positions[i * 3] = node.errorOffset;
@@ -343,7 +380,14 @@ class ExprNode extends CelNode {
         positions[i * 3 + 2] = node.errorColumn;
         ids[i] = node.canonicalId;
         operations[i] = node.name.charAt(0);
-        constants[i] = (Long) node.children[1].value;
+        ExprNode literal = node.children[1];
+        constants[i] = (Long) literal.value;
+        literalIds[i] = literal.canonicalId;
+        literalLocations[i * 5] = literal.errorOffset;
+        literalLocations[i * 5 + 1] = literal.errorLine;
+        literalLocations[i * 5 + 2] = literal.errorColumn;
+        literalLocations[i * 5 + 3] = literal.sourceStart;
+        literalLocations[i * 5 + 4] = literal.sourceEnd;
         node = node.children[0];
       }
       firstOperation =
@@ -356,6 +400,37 @@ class ExprNode extends CelNode {
       copyLocation(outer);
       optionalEntry = outer.optionalEntry;
       statement = outer.statement;
+    }
+
+    @Override
+    ExprNode restoreTrace() {
+      ExprNode restored = children[0].restoreTrace();
+      for (int i = 0; i < operations.length; i++) {
+        ExprNode literal = constant(constants[i], literalLocations[i * 5]);
+        literal.canonicalId = literalIds[i];
+        literal.errorOffset = literalLocations[i * 5];
+        literal.errorLine = literalLocations[i * 5 + 1];
+        literal.errorColumn = literalLocations[i * 5 + 2];
+        literal.sourceRange(literalLocations[i * 5 + 3], literalLocations[i * 5 + 4]);
+        ExprNode next =
+            new ExprNode(
+                Kind.CALL,
+                Character.toString(operations[i]),
+                false,
+                positions[i * 3],
+                restored,
+                literal);
+        next.canonicalId = ids[i];
+        next.errorOffset = positions[i * 3];
+        next.errorLine = positions[i * 3 + 1];
+        next.errorColumn = positions[i * 3 + 2];
+        next.sourceRange(restored.sourceStart, literal.sourceEnd);
+        restored = next;
+      }
+      restored.optionalEntry = optionalEntry;
+      restored.statement = statement;
+      restored.checkedType = checkedType;
+      return restored;
     }
 
     @Override
@@ -458,12 +533,19 @@ class ExprNode extends CelNode {
   }
 
   Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object result;
     try {
-      return doExecute(frame, ctx);
+      result = doExecute(frame, ctx);
     } catch (CelException e) {
-      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      CelException located =
+          e.code() == CelException.Code.RESOURCE_EXHAUSTED
+              ? e
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      ctx.trace(this, null, located);
+      throw located;
     }
+    ctx.trace(this, result, null);
+    return result;
   }
 
   void copyLocation(ExprNode original) {

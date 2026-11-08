@@ -366,3 +366,32 @@ captured outer lexical scope, and its value or CEL error is memoized for that bi
 An unused initializer consumes no evaluation budget and produces no host side effects.
 Debugger scopes show `<lazy>` before the first read; the initializer's source events occur
 when that read evaluates it. Each evaluation and each comprehension iteration has fresh slots.
+
+
+## Context-free tracing and asynchronous calls
+
+`program.trace(listener).evaluate(bindings)` reports one `TraceEvent` after each executed
+source expression, including CEL failures, expression IDs, and source locations. Events follow
+actual evaluation order; short-circuited expressions emit nothing. Values in events are owned
+public values, so a listener may retain them without retaining mutable evaluation state.
+Listeners run synchronously on the evaluation thread and their exceptions propagate. A shared
+listener must provide its own thread safety. `EvaluationOptions.trace(listener)` also supports
+tracing together with per-call budgets and late-bound functions.
+
+The ordinary target keeps its lowering and folding fast paths. A tracing target is created
+lazily and shared by subsequent traced calls. Fold replacements retain their discarded immutable
+source subtrees outside Truffle child edges. Arithmetic chains retain compact literal IDs and
+locations (28 bytes of array payload per operator, plus two array headers), allowing reconstruction
+without retaining the original chain. Comprehension-size nodes restore normal list semantics only
+in the tracing target. Thus an unchanged tree needs no second source tree; a five-node folded
+expression retains those five source nodes plus its single runtime fold node. Requesting tracing
+creates one additional restored tree. This is an explicit retained-memory tradeoff, not a claim
+that tracing is allocation-free or that program retained heap is unchanged.
+
+`program.evalAsync(bindings, options, executor)` returns a `CompletableFuture<Object>`. Inputs
+are snapshotted before submission, and each task has independent controls and scopes. Timeouts
+start when execution begins; absolute deadlines retain their absolute meaning. Cancelling the
+future prevents queued work and requests cooperative cancellation at CEL cost steps for running
+work; it does not interrupt arbitrary host callbacks. The caller chooses and manages the executor.
+Executor rejection is synchronous, and evaluation failures complete the future exceptionally.
+A context-bound embedding must arrange its normal context entry on the executor thread.
