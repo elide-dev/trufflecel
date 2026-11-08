@@ -193,6 +193,10 @@ final class Engines implements AutoCloseable {
       throw new AssertionError("Guest code invalidated");
   }
 
+  Map<String, Object> qualifyRegex(String workload) {
+    return ours ? RegexQualification.verify(truffle, workload) : Map.of("backend", "cel-java");
+  }
+
   public void close() {
     if (context != null) {
       context.leave();

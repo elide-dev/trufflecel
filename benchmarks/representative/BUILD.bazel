@@ -12,11 +12,12 @@ java_library(name = "policy_java", testonly = True, srcs = [":policy_sources"], 
 
 java_library(
     name = "engines", testonly = True,
-    srcs = ["Engines.java", "Workloads.java"],
+    srcs = ["Engines.java", "Workloads.java", "RegexQualification.java"],
     deps = [":policy_java", "//:trufflecel", "//:trufflecel-protobuf",
             "@cel_java//:com_google_guava_guava",
             "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_polyglot_polyglot",
             "@maven//:org_graalvm_truffle_truffle_runtime",
+            "@maven//:org_graalvm_truffle_truffle_api",
             "@cel_java//:dev_cel_cel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime"],
 )
 java_plugin(name = "jmh_generator", testonly = True, processor_class = "org.openjdk.jmh.generators.BenchmarkProcessor", deps = ["@cel_java//:org_openjdk_jmh_jmh_generator_annprocess"])
