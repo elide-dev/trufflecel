@@ -506,7 +506,7 @@ final class Optimizer {
 
   /** {@code matches} with a constant pattern compiled once; the operands are still evaluated. */
   static final class MatchesNode extends ExprNode {
-    private final Regex.Compiled pattern;
+    @Child private Regex.MatchNode matcher;
     private final CelException error;
 
     MatchesNode(ExprNode original, Regex.Compiled pattern, CelException error) {
@@ -517,7 +517,7 @@ final class Optimizer {
       statement = original.statement;
       checkedType = original.checkedType;
       canonicalId = original.canonicalId;
-      this.pattern = pattern;
+      this.matcher = pattern == null ? null : new Regex.MatchNode(pattern);
       this.error =
           error == null
               ? null
@@ -541,7 +541,7 @@ final class Optimizer {
       if (failure != null) throw failure;
       if (!(text instanceof String s)) throw Values.overload("matches");
       if (error != null) throw error;
-      return pattern.find(s);
+      return matcher.find(s);
     }
   }
 }
