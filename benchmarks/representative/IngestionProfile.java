@@ -176,89 +176,112 @@ public final class IngestionProfile {
     }
   }
 
-  public static void main(String[] args) throws Exception {
-    if (args.length == 1 && args[0].equals("smoke")) {
-      for (String name : List.of("ordinary", "unknown64k", "messageset"))
-        try (var fixture = new Fixture(name)) {}
-      return;
-    }
-    if (args.length != 2 && args.length != 4)
-      throw new IllegalArgumentException("allocate FIXTURE | profile FIXTURE STAGE OUTPUT.jfr");
-    try (var fixture = new Fixture(args[1])) {
-      System.out.println(
-          JSON.toJson(
-              Map.of(
-                  "fixture",
-                  fixture.name,
-                  "stages",
-                  fixture.stages,
-                  "wire_lengths",
-                  Arrays.stream(fixture.wire).mapToInt(b -> b.length).toArray(),
-                  "java",
-                  System.getProperty("java.runtime.version"),
-                  "vm",
-                  System.getProperty("java.vm.name"),
-                  "vm_flags",
-                  ManagementFactory.getRuntimeMXBean().getInputArguments(),
-                  "gc",
-                  ManagementFactory.getGarbageCollectorMXBeans().stream()
-                      .map(b -> b.getName())
-                      .toList(),
-                  "guest_compilation",
-                  false)));
-      var bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
-      if (!bean.isThreadAllocatedMemorySupported())
-        throw new IllegalStateException("allocation counter required");
-      bean.setThreadAllocatedMemoryEnabled(true);
+  static void smoke() throws Exception {
+    for (String name : List.of("ordinary", "unknown64k", "messageset"))
+      try (var fixture = new Fixture(name)) {}
+  }
+
+  private static void metadata(Fixture fixture) {
+    System.out.println(
+        JSON.toJson(
+            Map.of(
+                "fixture",
+                fixture.name,
+                "stages",
+                fixture.stages,
+                "wire_lengths",
+                Arrays.stream(fixture.wire).mapToInt(b -> b.length).toArray(),
+                "java",
+                System.getProperty("java.runtime.version"),
+                "vm",
+                System.getProperty("java.vm.name"),
+                "vm_flags",
+                ManagementFactory.getRuntimeMXBean().getInputArguments(),
+                "gc",
+                ManagementFactory.getGarbageCollectorMXBeans().stream()
+                    .map(b -> b.getName())
+                    .toList(),
+                "guest_compilation",
+                false)));
+  }
+
+  private static ThreadMXBean allocationCounter() {
+    var bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
+    if (!bean.isThreadAllocatedMemorySupported())
+      throw new IllegalStateException("allocation counter required");
+    bean.setThreadAllocatedMemoryEnabled(true);
+    long thread = Thread.currentThread().threadId();
+    long before = bean.getThreadAllocatedBytes(thread);
+    sink = new byte[4096];
+    if (bean.getThreadAllocatedBytes(thread) - before < 4096)
+      throw new AssertionError("Allocation counter failed its independent probe");
+    return bean;
+  }
+
+  // A separate entry calls only this path; JFR stays outside its native reachable graph.
+  static void allocate(String name) throws Exception {
+    try (var fixture = new Fixture(name)) {
+      metadata(fixture);
+      var bean = allocationCounter();
       long thread = Thread.currentThread().threadId();
       int iterations = fixture.name.equals("unknown64k") ? 500 : 10000;
-      List<String> stages = args[0].equals("profile") ? List.of(args[2]) : fixture.stages;
-      for (String stage : stages) {
-        if (!fixture.stages.contains(stage)) throw new IllegalArgumentException(stage);
+      for (String stage : fixture.stages) {
         for (int i = 0; i < iterations * 5; i++) sink = fixture.run(stage, i);
-        if (args[0].equals("profile")) {
-          try (var recording = new Recording()) {
-            recording
-                .enable("jdk.ObjectAllocationSample")
-                .withStackTrace()
-                .with("throttle", "1000/s");
-            recording.setMaxSize(32 * 1024 * 1024);
-            recording.start();
-            long start = bean.getThreadAllocatedBytes(thread);
-            long end = System.nanoTime() + 5_000_000_000L;
-            int count = 0;
-            do {
-              for (int i = 0; i < 256; i++) sink = fixture.run(stage, count++);
-            } while (System.nanoTime() < end);
-            long allocated = bean.getThreadAllocatedBytes(thread) - start;
-            recording.stop();
-            recording.dump(Path.of(args[3]));
-            System.out.println(
-                JSON.toJson(
-                    Map.of("stage", stage, "operations", count, "allocated_bytes", allocated)));
-          }
-        } else if (args[0].equals("allocate")) {
-          for (int sample = 0; sample < 7; sample++) {
-            long start = bean.getThreadAllocatedBytes(thread);
-            for (int i = 0; i < iterations; i++) sink = fixture.run(stage, i);
-            long allocated = bean.getThreadAllocatedBytes(thread) - start;
-            fixture.verify(stage, iterations - 1, sink);
-            System.out.println(
-                JSON.toJson(
-                    Map.of(
-                        "stage",
-                        stage,
-                        "sample",
-                        sample,
-                        "operations",
-                        iterations,
-                        "allocated_bytes",
-                        allocated,
-                        "bytes_per_operation",
-                        (double) allocated / iterations)));
-          }
-        } else throw new IllegalArgumentException(args[0]);
+        for (int sample = 0; sample < 7; sample++) {
+          long start = bean.getThreadAllocatedBytes(thread);
+          for (int i = 0; i < iterations; i++) sink = fixture.run(stage, i);
+          long allocated = bean.getThreadAllocatedBytes(thread) - start;
+          fixture.verify(stage, iterations - 1, sink);
+          System.out.println(
+              JSON.toJson(
+                  Map.of(
+                      "stage",
+                      stage,
+                      "sample",
+                      sample,
+                      "operations",
+                      iterations,
+                      "allocated_bytes",
+                      allocated,
+                      "bytes_per_operation",
+                      (double) allocated / iterations)));
+        }
       }
     }
+  }
+
+  private static void profile(String name, String stage, Path output) throws Exception {
+    try (var fixture = new Fixture(name)) {
+      metadata(fixture);
+      if (!fixture.stages.contains(stage)) throw new IllegalArgumentException(stage);
+      var bean = allocationCounter();
+      long thread = Thread.currentThread().threadId();
+      int iterations = fixture.name.equals("unknown64k") ? 500 : 10000;
+      for (int i = 0; i < iterations * 5; i++) sink = fixture.run(stage, i);
+      try (var recording = new Recording()) {
+        recording.enable("jdk.ObjectAllocationSample").withStackTrace().with("throttle", "1000/s");
+        recording.setMaxSize(32 * 1024 * 1024);
+        recording.start();
+        long start = bean.getThreadAllocatedBytes(thread);
+        long end = System.nanoTime() + 5_000_000_000L;
+        int count = 0;
+        do {
+          for (int i = 0; i < 256; i++) sink = fixture.run(stage, count++);
+        } while (System.nanoTime() < end);
+        long allocated = bean.getThreadAllocatedBytes(thread) - start;
+        recording.stop();
+        recording.dump(output);
+        System.out.println(
+            JSON.toJson(Map.of("stage", stage, "operations", count, "allocated_bytes", allocated)));
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    if (args.length == 1 && args[0].equals("smoke")) smoke();
+    else if (args.length == 2 && args[0].equals("allocate")) allocate(args[1]);
+    else if (args.length == 4 && args[0].equals("profile"))
+      profile(args[1], args[2], Path.of(args[3]));
+    else throw new IllegalArgumentException("allocate FIXTURE | profile FIXTURE STAGE OUTPUT.jfr");
   }
 }

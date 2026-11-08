@@ -30,6 +30,22 @@ java_binary(name = "ingestion_profile", testonly = True, main_class = "dev.truff
     jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler", "-Xbatch", "-Xms512m", "-Xmx512m", "-Dpolyglot.engine.Compilation=false"])
 java_test(name = "ingestion_profile_smoke", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"], use_testrunner = False, args = ["smoke"],
     jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.engine.Compilation=false"])
+java_library(name = "ingestion_native_lib", testonly = True, srcs = ["IngestionNativeAllocation.java"], deps = [":ingestion_profile_lib"])
+native_image(
+    name = "ingestion_allocation_svm", testonly = True, executable_name = "ingestion-allocation",
+    main_class = "dev.trufflecel.IngestionNativeAllocation", deps = [":ingestion_native_lib", ":native_config"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    extra_args = ["--gc=serial", "-J-Xmx6g", "--parallelism=4", "-march=compatibility",
+        "--features=dev.trufflecel.UpstreamProtobufFeature",
+        "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
+        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
+        "--initialize-at-run-time=dev.trufflecel.IngestionProfile,dev.trufflecel.IngestionNativeAllocation,dev.trufflecel.Workloads$$Raw,dev.trufflecel.Workloads$$Native",
+        "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+sh_test(name = "ingestion_native_allocation", srcs = ["ingestion_native_allocation.sh"], args = ["$(rootpath :ingestion_allocation_svm)"], data = [":ingestion_allocation_svm"], tags = ["manual"], size = "large", target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
