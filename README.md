@@ -114,6 +114,13 @@ dependencies {
 See [publishing](docs/PUBLISHING.md) for Maven and Bazel consumption, local staging, and
 release operations.
 
+In the `0.10.0` development line, RE2/J is an optional dependency. Compatibility-mode
+regex users must add `com.google.re2j:re2j:1.8` explicitly. Applications can omit it by
+selecting [TruffleRegex-only mode](docs/INTEGRATION.md#omitting-re2j), through the Java
+builder or Polyglot language options. This mode has an explicit context and parser-bound
+contract and reports unsupported regex operations as errors.
+
+
 ## Embed
 
 `Cel.compile(source)` infers free variables as `dyn`. Declare a fixed environment when
