@@ -1,15 +1,17 @@
 # Maven publishing
 
 The release pipeline follows TruffleData's Bazel publications and Komodo's R2/rclone
-upload convention. It produces three thin Maven artifacts under `dev.elide`:
+upload convention. It produces four thin Maven artifacts under `dev.elide`:
 
 | Artifact | Runtime dependencies in addition to core |
 | --- | --- |
 | `trufflecel-core` | Truffle API, RE2/J, TruffleData core |
 | `trufflecel-protobuf` | TruffleData protobuf and protobuf-runtime, protobuf-java, TruffleData core, Truffle API |
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
+| `trufflecel-processor` | None; build-time javac annotation processor only |
 
-Both optional artifacts depend on the same version of `trufflecel-core`. Java 25 is
+The protobuf and JSON adapters depend on the same version of `trufflecel-core`.
+The processor has no runtime dependencies; its generated adapters compile against matching core. Java 25 is
 required. Publications built from the current source tree pin TruffleData `0.9.0` and Elide GraalVM `25.5.5-elide.27`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
@@ -29,7 +31,7 @@ classes in the binary. No separate source inventory is maintained. Bazel adds
 `META-INF/LICENSE`, `LICENSE-MIT`, `LICENSE-APACHE`, and `NOTICE` to binary and
 source JARs. POMs list both licenses and explicitly identify the choice as
 `MIT OR Apache-2.0`. Publication tests verify these files against the repository
-texts for all three modules. Existing published versions remain immutable.
+texts for all four modules. Existing published versions remain immutable.
 
 The Bazel build setting defaults to `0.1.0-SNAPSHOT` for CI validation. The release script
 requires an explicit immutable version and rejects snapshots. The example version is
@@ -61,7 +63,9 @@ No signing keys or Maven Central upload are configured.
 
 `bazel test //...` includes release layout/POM/checksum/metadata checks and a JVM consumer
 test. The consumer compiles against the actual publication JARs via `java_import`, exercises
-the native row and optional adapters, and verifies Polyglot language discovery. POM dependency
+the native row and optional adapters, generates and evaluates a POJO adapter using the published
+processor, and verifies Polyglot language discovery. Processor packaging tests verify its javac
+service registration, and processor source is included in the production coverage gate. POM dependency
 versions are checked against the Maven lock. Core's JAR is checked for optional-code leakage.
 Small repository-layout checks use Python from the pinned RBE image; language and consumer
 tests run on the JVM.
@@ -83,6 +87,7 @@ dependencies {
     implementation("dev.elide:trufflecel-core:<published-version>")
     implementation("dev.elide:trufflecel-protobuf:<published-version>") // optional
     implementation("dev.elide:trufflecel-json:<published-version>") // optional
+    annotationProcessor("dev.elide:trufflecel-processor:<published-version>") // optional
 }
 ```
 
