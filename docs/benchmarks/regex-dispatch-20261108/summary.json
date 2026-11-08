@@ -1,0 +1,1729 @@
+{
+  "schema": 1,
+  "sources": {
+    "baseline": "3fe435cb1c25b8104692a48dc53a69b9e03dc45f",
+    "candidate": "f8b9eab1c4a300245890bef56e13071d0bd15ee7"
+  },
+  "production_revisions": {
+    "baseline": "9cdc03748256b9751fdcefba11be7be273236c9e",
+    "candidate": "f8b9eab1c4a300245890bef56e13071d0bd15ee7"
+  },
+  "process_counts": {
+    "memory": 48,
+    "jvm_timing_forks": 24,
+    "native_timing_forks": 24,
+    "preflight_allocation": 8,
+    "backend_smokes": 16
+  },
+  "cells": [
+    {
+      "revision": "baseline",
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 22.94050584297423,
+        "minimum": 21.66794960506988,
+        "maximum": 22.98638320891317,
+        "forks": [
+          22.98638320891317,
+          21.66794960506988,
+          22.94050584297423
+        ]
+      },
+      "allocation_bytes": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0,
+        "forks": [
+          120.0,
+          120.0,
+          120.0
+        ]
+      },
+      "rss_mib": {
+        "median": 191.11328125,
+        "minimum": 191.046875,
+        "maximum": 191.12109375,
+        "forks": [
+          191.11328125,
+          191.046875,
+          191.12109375
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 191.11328125,
+        "minimum": 191.046875,
+        "maximum": 191.12109375,
+        "forks": [
+          191.11328125,
+          191.046875,
+          191.12109375
+        ]
+      },
+      "measurement_drift_percent": [
+        0.1123307984836952,
+        0.06118258385308106,
+        0.0025859907613279276
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 35.725949498077235,
+        "minimum": 33.93820568313885,
+        "maximum": 35.92209848140455,
+        "forks": [
+          35.725949498077235,
+          33.93820568313885,
+          35.92209848140455
+        ]
+      },
+      "allocation_bytes": {
+        "median": 104.0,
+        "minimum": 104.0,
+        "maximum": 104.0,
+        "forks": [
+          104.0,
+          104.0,
+          104.0
+        ]
+      },
+      "rss_mib": {
+        "median": 104.61328125,
+        "minimum": 104.6015625,
+        "maximum": 104.625,
+        "forks": [
+          104.6015625,
+          104.61328125,
+          104.625
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 104.61328125,
+        "minimum": 104.6015625,
+        "maximum": 104.625,
+        "forks": [
+          104.6015625,
+          104.61328125,
+          104.625
+        ]
+      },
+      "measurement_drift_percent": [
+        0.27904747977602895,
+        -0.03497985629665745,
+        0.12172355665036605
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1096.251835709858,
+        "minimum": 1095.0538311107755,
+        "maximum": 1106.1157463232807,
+        "forks": [
+          1106.1157463232807,
+          1095.0538311107755,
+          1096.251835709858
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1904.0,
+        "minimum": 1904.0,
+        "maximum": 1904.0,
+        "forks": [
+          1904.0,
+          1904.0,
+          1904.0
+        ]
+      },
+      "rss_mib": {
+        "median": 434.69921875,
+        "minimum": 434.671875,
+        "maximum": 434.734375,
+        "forks": [
+          434.734375,
+          434.671875,
+          434.69921875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 434.69921875,
+        "minimum": 434.671875,
+        "maximum": 434.734375,
+        "forks": [
+          434.734375,
+          434.671875,
+          434.69921875
+        ]
+      },
+      "measurement_drift_percent": [
+        0.2819747625963709,
+        -0.04619941558446916,
+        0.32549912833050865
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1605.6529877215096,
+        "minimum": 1599.0946008371498,
+        "maximum": 1606.3337698046287,
+        "forks": [
+          1599.0946008371498,
+          1605.6529877215096,
+          1606.3337698046287
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1804.0,
+        "minimum": 1804.0,
+        "maximum": 1804.0,
+        "forks": [
+          1804.0,
+          1804.0,
+          1804.0
+        ]
+      },
+      "rss_mib": {
+        "median": 144.86328125,
+        "minimum": 144.82421875,
+        "maximum": 144.8671875,
+        "forks": [
+          144.86328125,
+          144.82421875,
+          144.8671875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 156.67578125,
+        "minimum": 156.515625,
+        "maximum": 157.4296875,
+        "forks": [
+          156.67578125,
+          156.515625,
+          157.4296875
+        ]
+      },
+      "measurement_drift_percent": [
+        -0.6928423706560993,
+        -3.6120073764384975,
+        -0.8026560185667053
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 12.50093099659894,
+        "minimum": 12.131151922365037,
+        "maximum": 12.870139674567762,
+        "forks": [
+          12.50093099659894,
+          12.870139674567762,
+          12.131151922365037
+        ]
+      },
+      "allocation_bytes": {
+        "median": 48.0,
+        "minimum": 48.0,
+        "maximum": 48.0,
+        "forks": [
+          48.0,
+          48.0,
+          48.0
+        ]
+      },
+      "rss_mib": {
+        "median": 202.93359375,
+        "minimum": 202.9296875,
+        "maximum": 202.9375,
+        "forks": [
+          202.9375,
+          202.93359375,
+          202.9296875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 202.93359375,
+        "minimum": 202.9296875,
+        "maximum": 202.9375,
+        "forks": [
+          202.9375,
+          202.93359375,
+          202.9296875
+        ]
+      },
+      "measurement_drift_percent": [
+        0.08874440492225855,
+        -5.571996241879629,
+        0.08820611612736506
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 24.48098278480696,
+        "minimum": 23.970375062226225,
+        "maximum": 25.143699352104004,
+        "forks": [
+          25.143699352104004,
+          23.970375062226225,
+          24.48098278480696
+        ]
+      },
+      "allocation_bytes": {
+        "median": 40.0,
+        "minimum": 40.0,
+        "maximum": 40.0,
+        "forks": [
+          40.0,
+          40.0,
+          40.0
+        ]
+      },
+      "rss_mib": {
+        "median": 92.69140625,
+        "minimum": 92.6328125,
+        "maximum": 92.69921875,
+        "forks": [
+          92.69140625,
+          92.6328125,
+          92.69921875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 92.69140625,
+        "minimum": 92.6328125,
+        "maximum": 92.69921875,
+        "forks": [
+          92.69140625,
+          92.6328125,
+          92.69921875
+        ]
+      },
+      "measurement_drift_percent": [
+        0.004906903017865005,
+        0.7669700033712701,
+        1.8689050519699713
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 814.3647813206849,
+        "minimum": 812.6177640903908,
+        "maximum": 828.4200332993731,
+        "forks": [
+          814.3647813206849,
+          828.4200332993731,
+          812.6177640903908
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1732.0,
+        "minimum": 1732.0,
+        "maximum": 1732.0,
+        "forks": [
+          1732.0,
+          1732.0,
+          1732.0
+        ]
+      },
+      "rss_mib": {
+        "median": 537.08203125,
+        "minimum": 536.61328125,
+        "maximum": 537.1484375,
+        "forks": [
+          537.08203125,
+          537.1484375,
+          536.61328125
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 537.08203125,
+        "minimum": 536.61328125,
+        "maximum": 537.1484375,
+        "forks": [
+          537.08203125,
+          537.1484375,
+          536.61328125
+        ]
+      },
+      "measurement_drift_percent": [
+        -0.3635269714718947,
+        -0.4286666818622109,
+        0.6237243685940586
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "baseline",
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1001.700744150104,
+        "minimum": 997.4910369826341,
+        "maximum": 1044.490929165233,
+        "forks": [
+          1001.700744150104,
+          1044.490929165233,
+          997.4910369826341
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1664.0,
+        "minimum": 1664.0,
+        "maximum": 1664.0,
+        "forks": [
+          1664.0,
+          1664.0,
+          1664.0
+        ]
+      },
+      "rss_mib": {
+        "median": 224.31640625,
+        "minimum": 224.23828125,
+        "maximum": 224.390625,
+        "forks": [
+          224.23828125,
+          224.390625,
+          224.31640625
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 236.828125,
+        "minimum": 236.70703125,
+        "maximum": 236.89453125,
+        "forks": [
+          236.828125,
+          236.89453125,
+          236.70703125
+        ]
+      },
+      "measurement_drift_percent": [
+        0.05857274819427438,
+        -0.37362104182198097,
+        -0.2250379420098203
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 22.76003354744002,
+        "minimum": 21.762639461590815,
+        "maximum": 23.60229380630688,
+        "forks": [
+          23.60229380630688,
+          21.762639461590815,
+          22.76003354744002
+        ]
+      },
+      "allocation_bytes": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0,
+        "forks": [
+          120.0,
+          120.0,
+          120.0
+        ]
+      },
+      "rss_mib": {
+        "median": 191.11328125,
+        "minimum": 191.06640625,
+        "maximum": 191.140625,
+        "forks": [
+          191.11328125,
+          191.06640625,
+          191.140625
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 191.11328125,
+        "minimum": 191.06640625,
+        "maximum": 191.140625,
+        "forks": [
+          191.11328125,
+          191.06640625,
+          191.140625
+        ]
+      },
+      "measurement_drift_percent": [
+        0.1755271409680681,
+        -0.11712825466791976,
+        0.03542797827089661
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 33.98045061046638,
+        "minimum": 33.773688145130464,
+        "maximum": 35.69662868557849,
+        "forks": [
+          35.69662868557849,
+          33.773688145130464,
+          33.98045061046638
+        ]
+      },
+      "allocation_bytes": {
+        "median": 104.0,
+        "minimum": 104.0,
+        "maximum": 104.0,
+        "forks": [
+          104.0,
+          104.0,
+          104.0
+        ]
+      },
+      "rss_mib": {
+        "median": 110.4296875,
+        "minimum": 110.33984375,
+        "maximum": 110.5,
+        "forks": [
+          110.33984375,
+          110.5,
+          110.4296875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 110.4296875,
+        "minimum": 110.33984375,
+        "maximum": 110.5,
+        "forks": [
+          110.33984375,
+          110.5,
+          110.4296875
+        ]
+      },
+      "measurement_drift_percent": [
+        -0.17283388789909315,
+        -1.3459429824586255,
+        0.04851167828237024
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1102.9912079597832,
+        "minimum": 1033.5112942830156,
+        "maximum": 1107.1540785232494,
+        "forks": [
+          1033.5112942830156,
+          1102.9912079597832,
+          1107.1540785232494
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1924.0,
+        "minimum": 1924.0,
+        "maximum": 1924.0,
+        "forks": [
+          1924.0,
+          1924.0,
+          1924.0
+        ]
+      },
+      "rss_mib": {
+        "median": 434.92578125,
+        "minimum": 434.8359375,
+        "maximum": 434.98046875,
+        "forks": [
+          434.98046875,
+          434.92578125,
+          434.8359375
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 434.92578125,
+        "minimum": 434.8359375,
+        "maximum": 434.98046875,
+        "forks": [
+          434.98046875,
+          434.92578125,
+          434.8359375
+        ]
+      },
+      "measurement_drift_percent": [
+        -1.5359157114843924,
+        -0.5880140395925992,
+        -0.3813395640496098
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1579.482316739711,
+        "minimum": 1578.2928284605905,
+        "maximum": 1682.9183268845825,
+        "forks": [
+          1578.2928284605905,
+          1579.482316739711,
+          1682.9183268845825
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1820.0,
+        "minimum": 1820.0,
+        "maximum": 1820.0,
+        "forks": [
+          1820.0,
+          1820.0,
+          1820.0
+        ]
+      },
+      "rss_mib": {
+        "median": 151.79296875,
+        "minimum": 151.59375,
+        "maximum": 151.8046875,
+        "forks": [
+          151.59375,
+          151.8046875,
+          151.79296875
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 164.3671875,
+        "minimum": 163.94921875,
+        "maximum": 164.6875,
+        "forks": [
+          164.3671875,
+          163.94921875,
+          164.6875
+        ]
+      },
+      "measurement_drift_percent": [
+        -0.18930915180487284,
+        -0.33174712652549454,
+        -1.3395213146912388
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 12.53229120547049,
+        "minimum": 12.510892403741218,
+        "maximum": 12.60679461166783,
+        "forks": [
+          12.60679461166783,
+          12.53229120547049,
+          12.510892403741218
+        ]
+      },
+      "allocation_bytes": {
+        "median": 48.0,
+        "minimum": 48.0,
+        "maximum": 48.0,
+        "forks": [
+          48.0,
+          48.0,
+          48.0
+        ]
+      },
+      "rss_mib": {
+        "median": 202.93359375,
+        "minimum": 202.9140625,
+        "maximum": 202.93359375,
+        "forks": [
+          202.9140625,
+          202.93359375,
+          202.93359375
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 202.93359375,
+        "minimum": 202.9140625,
+        "maximum": 202.93359375,
+        "forks": [
+          202.9140625,
+          202.93359375,
+          202.93359375
+        ]
+      },
+      "measurement_drift_percent": [
+        -2.8912455161665407,
+        -0.009250736628996226,
+        -0.1321350427518464
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "median": 24.130224623079116,
+        "minimum": 23.823115869163587,
+        "maximum": 25.56413471928909,
+        "forks": [
+          23.823115869163587,
+          24.130224623079116,
+          25.56413471928909
+        ]
+      },
+      "allocation_bytes": {
+        "median": 40.0,
+        "minimum": 40.0,
+        "maximum": 40.0,
+        "forks": [
+          40.0,
+          40.0,
+          40.0
+        ]
+      },
+      "rss_mib": {
+        "median": 103.5,
+        "minimum": 103.34765625,
+        "maximum": 103.62890625,
+        "forks": [
+          103.5,
+          103.62890625,
+          103.34765625
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 103.5,
+        "minimum": 103.34765625,
+        "maximum": 103.62890625,
+        "forks": [
+          103.5,
+          103.62890625,
+          103.34765625
+        ]
+      },
+      "measurement_drift_percent": [
+        0.021130774921229722,
+        0.0024821302775368537,
+        -0.05364490055843607
+      ],
+      "ast_node_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 814.8076511973098,
+        "minimum": 812.932337578263,
+        "maximum": 898.902340423559,
+        "forks": [
+          898.902340423559,
+          812.932337578263,
+          814.8076511973098
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1696.0,
+        "minimum": 1696.0,
+        "maximum": 1696.0,
+        "forks": [
+          1696.0,
+          1696.0,
+          1696.0
+        ]
+      },
+      "rss_mib": {
+        "median": 515.19140625,
+        "minimum": 515.13671875,
+        "maximum": 515.25390625,
+        "forks": [
+          515.19140625,
+          515.13671875,
+          515.25390625
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 515.19140625,
+        "minimum": 515.13671875,
+        "maximum": 515.25390625,
+        "forks": [
+          515.19140625,
+          515.13671875,
+          515.25390625
+        ]
+      },
+      "measurement_drift_percent": [
+        0.3924631878511109,
+        -0.30768909591447624,
+        0.18389007656538503
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    },
+    {
+      "revision": "candidate",
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "median": 1018.5062477507503,
+        "minimum": 962.4620580782437,
+        "maximum": 1039.6464596731787,
+        "forks": [
+          1018.5062477507503,
+          1039.6464596731787,
+          962.4620580782437
+        ]
+      },
+      "allocation_bytes": {
+        "median": 1656.0,
+        "minimum": 1656.0,
+        "maximum": 1656.0,
+        "forks": [
+          1656.0,
+          1656.0,
+          1656.0
+        ]
+      },
+      "rss_mib": {
+        "median": 240.26171875,
+        "minimum": 240.203125,
+        "maximum": 240.62109375,
+        "forks": [
+          240.62109375,
+          240.26171875,
+          240.203125
+        ]
+      },
+      "peak_rss_mib": {
+        "median": 253.07421875,
+        "minimum": 252.890625,
+        "maximum": 253.94921875,
+        "forks": [
+          253.94921875,
+          253.07421875,
+          252.890625
+        ]
+      },
+      "measurement_drift_percent": [
+        -0.26018116903442357,
+        -0.2878337703956846,
+        -0.4870415098678249
+      ],
+      "ast_node_counts": [
+        18,
+        18,
+        18
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "baseline": {
+          "median": 22.94050584297423,
+          "minimum": 21.66794960506988,
+          "maximum": 22.98638320891317,
+          "forks": [
+            22.98638320891317,
+            21.66794960506988,
+            22.94050584297423
+          ]
+        },
+        "candidate": {
+          "median": 22.76003354744002,
+          "minimum": 21.762639461590815,
+          "maximum": 23.60229380630688,
+          "forks": [
+            23.60229380630688,
+            21.762639461590815,
+            22.76003354744002
+          ]
+        },
+        "change_percent": -0.7866971058507866,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 120.0,
+          "minimum": 120.0,
+          "maximum": 120.0,
+          "forks": [
+            120.0,
+            120.0,
+            120.0
+          ]
+        },
+        "candidate": {
+          "median": 120.0,
+          "minimum": 120.0,
+          "maximum": 120.0,
+          "forks": [
+            120.0,
+            120.0,
+            120.0
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 191.11328125,
+          "minimum": 191.046875,
+          "maximum": 191.12109375,
+          "forks": [
+            191.11328125,
+            191.046875,
+            191.12109375
+          ]
+        },
+        "candidate": {
+          "median": 191.11328125,
+          "minimum": 191.06640625,
+          "maximum": 191.140625,
+          "forks": [
+            191.11328125,
+            191.06640625,
+            191.140625
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 191.11328125,
+          "minimum": 191.046875,
+          "maximum": 191.12109375,
+          "forks": [
+            191.11328125,
+            191.046875,
+            191.12109375
+          ]
+        },
+        "candidate": {
+          "median": 191.11328125,
+          "minimum": 191.06640625,
+          "maximum": 191.140625,
+          "forks": [
+            191.11328125,
+            191.06640625,
+            191.140625
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "baseline": {
+          "median": 1096.251835709858,
+          "minimum": 1095.0538311107755,
+          "maximum": 1106.1157463232807,
+          "forks": [
+            1106.1157463232807,
+            1095.0538311107755,
+            1096.251835709858
+          ]
+        },
+        "candidate": {
+          "median": 1102.9912079597832,
+          "minimum": 1033.5112942830156,
+          "maximum": 1107.1540785232494,
+          "forks": [
+            1033.5112942830156,
+            1102.9912079597832,
+            1107.1540785232494
+          ]
+        },
+        "change_percent": 0.6147649682667344,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 1904.0,
+          "minimum": 1904.0,
+          "maximum": 1904.0,
+          "forks": [
+            1904.0,
+            1904.0,
+            1904.0
+          ]
+        },
+        "candidate": {
+          "median": 1924.0,
+          "minimum": 1924.0,
+          "maximum": 1924.0,
+          "forks": [
+            1924.0,
+            1924.0,
+            1924.0
+          ]
+        },
+        "change_percent": 1.0504201680672232,
+        "observed_ranges_overlap": false
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 434.69921875,
+          "minimum": 434.671875,
+          "maximum": 434.734375,
+          "forks": [
+            434.734375,
+            434.671875,
+            434.69921875
+          ]
+        },
+        "candidate": {
+          "median": 434.92578125,
+          "minimum": 434.8359375,
+          "maximum": 434.98046875,
+          "forks": [
+            434.98046875,
+            434.92578125,
+            434.8359375
+          ]
+        },
+        "change_percent": 0.052119371332559616,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 434.69921875,
+          "minimum": 434.671875,
+          "maximum": 434.734375,
+          "forks": [
+            434.734375,
+            434.671875,
+            434.69921875
+          ]
+        },
+        "candidate": {
+          "median": 434.92578125,
+          "minimum": 434.8359375,
+          "maximum": 434.98046875,
+          "forks": [
+            434.98046875,
+            434.92578125,
+            434.8359375
+          ]
+        },
+        "change_percent": 0.052119371332559616,
+        "observed_ranges_overlap": false
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "baseline": {
+          "median": 12.50093099659894,
+          "minimum": 12.131151922365037,
+          "maximum": 12.870139674567762,
+          "forks": [
+            12.50093099659894,
+            12.870139674567762,
+            12.131151922365037
+          ]
+        },
+        "candidate": {
+          "median": 12.53229120547049,
+          "minimum": 12.510892403741218,
+          "maximum": 12.60679461166783,
+          "forks": [
+            12.60679461166783,
+            12.53229120547049,
+            12.510892403741218
+          ]
+        },
+        "change_percent": 0.25086298676539887,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 48.0,
+          "minimum": 48.0,
+          "maximum": 48.0,
+          "forks": [
+            48.0,
+            48.0,
+            48.0
+          ]
+        },
+        "candidate": {
+          "median": 48.0,
+          "minimum": 48.0,
+          "maximum": 48.0,
+          "forks": [
+            48.0,
+            48.0,
+            48.0
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 202.93359375,
+          "minimum": 202.9296875,
+          "maximum": 202.9375,
+          "forks": [
+            202.9375,
+            202.93359375,
+            202.9296875
+          ]
+        },
+        "candidate": {
+          "median": 202.93359375,
+          "minimum": 202.9140625,
+          "maximum": 202.93359375,
+          "forks": [
+            202.9140625,
+            202.93359375,
+            202.93359375
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 202.93359375,
+          "minimum": 202.9296875,
+          "maximum": 202.9375,
+          "forks": [
+            202.9375,
+            202.93359375,
+            202.9296875
+          ]
+        },
+        "candidate": {
+          "median": 202.93359375,
+          "minimum": 202.9140625,
+          "maximum": 202.93359375,
+          "forks": [
+            202.9140625,
+            202.93359375,
+            202.93359375
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      }
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "baseline": {
+          "median": 814.3647813206849,
+          "minimum": 812.6177640903908,
+          "maximum": 828.4200332993731,
+          "forks": [
+            814.3647813206849,
+            828.4200332993731,
+            812.6177640903908
+          ]
+        },
+        "candidate": {
+          "median": 814.8076511973098,
+          "minimum": 812.932337578263,
+          "maximum": 898.902340423559,
+          "forks": [
+            898.902340423559,
+            812.932337578263,
+            814.8076511973098
+          ]
+        },
+        "change_percent": 0.0543822481992251,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 1732.0,
+          "minimum": 1732.0,
+          "maximum": 1732.0,
+          "forks": [
+            1732.0,
+            1732.0,
+            1732.0
+          ]
+        },
+        "candidate": {
+          "median": 1696.0,
+          "minimum": 1696.0,
+          "maximum": 1696.0,
+          "forks": [
+            1696.0,
+            1696.0,
+            1696.0
+          ]
+        },
+        "change_percent": -2.0785219399538146,
+        "observed_ranges_overlap": false
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 537.08203125,
+          "minimum": 536.61328125,
+          "maximum": 537.1484375,
+          "forks": [
+            537.08203125,
+            537.1484375,
+            536.61328125
+          ]
+        },
+        "candidate": {
+          "median": 515.19140625,
+          "minimum": 515.13671875,
+          "maximum": 515.25390625,
+          "forks": [
+            515.19140625,
+            515.13671875,
+            515.25390625
+          ]
+        },
+        "change_percent": -4.075843861142026,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 537.08203125,
+          "minimum": 536.61328125,
+          "maximum": 537.1484375,
+          "forks": [
+            537.08203125,
+            537.1484375,
+            536.61328125
+          ]
+        },
+        "candidate": {
+          "median": 515.19140625,
+          "minimum": 515.13671875,
+          "maximum": 515.25390625,
+          "forks": [
+            515.19140625,
+            515.13671875,
+            515.25390625
+          ]
+        },
+        "change_percent": -4.075843861142026,
+        "observed_ranges_overlap": false
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "baseline": {
+          "median": 35.725949498077235,
+          "minimum": 33.93820568313885,
+          "maximum": 35.92209848140455,
+          "forks": [
+            35.725949498077235,
+            33.93820568313885,
+            35.92209848140455
+          ]
+        },
+        "candidate": {
+          "median": 33.98045061046638,
+          "minimum": 33.773688145130464,
+          "maximum": 35.69662868557849,
+          "forks": [
+            35.69662868557849,
+            33.773688145130464,
+            33.98045061046638
+          ]
+        },
+        "change_percent": -4.885801251285981,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 104.0,
+          "minimum": 104.0,
+          "maximum": 104.0,
+          "forks": [
+            104.0,
+            104.0,
+            104.0
+          ]
+        },
+        "candidate": {
+          "median": 104.0,
+          "minimum": 104.0,
+          "maximum": 104.0,
+          "forks": [
+            104.0,
+            104.0,
+            104.0
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 104.61328125,
+          "minimum": 104.6015625,
+          "maximum": 104.625,
+          "forks": [
+            104.6015625,
+            104.61328125,
+            104.625
+          ]
+        },
+        "candidate": {
+          "median": 110.4296875,
+          "minimum": 110.33984375,
+          "maximum": 110.5,
+          "forks": [
+            110.33984375,
+            110.5,
+            110.4296875
+          ]
+        },
+        "change_percent": 5.559911877823831,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 104.61328125,
+          "minimum": 104.6015625,
+          "maximum": 104.625,
+          "forks": [
+            104.6015625,
+            104.61328125,
+            104.625
+          ]
+        },
+        "candidate": {
+          "median": 110.4296875,
+          "minimum": 110.33984375,
+          "maximum": 110.5,
+          "forks": [
+            110.33984375,
+            110.5,
+            110.4296875
+          ]
+        },
+        "change_percent": 5.559911877823831,
+        "observed_ranges_overlap": false
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "time_ns": {
+        "baseline": {
+          "median": 1605.6529877215096,
+          "minimum": 1599.0946008371498,
+          "maximum": 1606.3337698046287,
+          "forks": [
+            1599.0946008371498,
+            1605.6529877215096,
+            1606.3337698046287
+          ]
+        },
+        "candidate": {
+          "median": 1579.482316739711,
+          "minimum": 1578.2928284605905,
+          "maximum": 1682.9183268845825,
+          "forks": [
+            1578.2928284605905,
+            1579.482316739711,
+            1682.9183268845825
+          ]
+        },
+        "change_percent": -1.6299082791815356,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 1804.0,
+          "minimum": 1804.0,
+          "maximum": 1804.0,
+          "forks": [
+            1804.0,
+            1804.0,
+            1804.0
+          ]
+        },
+        "candidate": {
+          "median": 1820.0,
+          "minimum": 1820.0,
+          "maximum": 1820.0,
+          "forks": [
+            1820.0,
+            1820.0,
+            1820.0
+          ]
+        },
+        "change_percent": 0.8869179600886845,
+        "observed_ranges_overlap": false
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 144.86328125,
+          "minimum": 144.82421875,
+          "maximum": 144.8671875,
+          "forks": [
+            144.86328125,
+            144.82421875,
+            144.8671875
+          ]
+        },
+        "candidate": {
+          "median": 151.79296875,
+          "minimum": 151.59375,
+          "maximum": 151.8046875,
+          "forks": [
+            151.59375,
+            151.8046875,
+            151.79296875
+          ]
+        },
+        "change_percent": 4.783605231225563,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 156.67578125,
+          "minimum": 156.515625,
+          "maximum": 157.4296875,
+          "forks": [
+            156.67578125,
+            156.515625,
+            157.4296875
+          ]
+        },
+        "candidate": {
+          "median": 164.3671875,
+          "minimum": 163.94921875,
+          "maximum": 164.6875,
+          "forks": [
+            164.3671875,
+            163.94921875,
+            164.6875
+          ]
+        },
+        "change_percent": 4.909122640803809,
+        "observed_ranges_overlap": false
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "time_ns": {
+        "baseline": {
+          "median": 24.48098278480696,
+          "minimum": 23.970375062226225,
+          "maximum": 25.143699352104004,
+          "forks": [
+            25.143699352104004,
+            23.970375062226225,
+            24.48098278480696
+          ]
+        },
+        "candidate": {
+          "median": 24.130224623079116,
+          "minimum": 23.823115869163587,
+          "maximum": 25.56413471928909,
+          "forks": [
+            23.823115869163587,
+            24.130224623079116,
+            25.56413471928909
+          ]
+        },
+        "change_percent": -1.432778107035504,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 40.0,
+          "minimum": 40.0,
+          "maximum": 40.0,
+          "forks": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        "candidate": {
+          "median": 40.0,
+          "minimum": 40.0,
+          "maximum": 40.0,
+          "forks": [
+            40.0,
+            40.0,
+            40.0
+          ]
+        },
+        "change_percent": 0.0,
+        "observed_ranges_overlap": true
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 92.69140625,
+          "minimum": 92.6328125,
+          "maximum": 92.69921875,
+          "forks": [
+            92.69140625,
+            92.6328125,
+            92.69921875
+          ]
+        },
+        "candidate": {
+          "median": 103.5,
+          "minimum": 103.34765625,
+          "maximum": 103.62890625,
+          "forks": [
+            103.5,
+            103.62890625,
+            103.34765625
+          ]
+        },
+        "change_percent": 11.66083695056681,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 92.69140625,
+          "minimum": 92.6328125,
+          "maximum": 92.69921875,
+          "forks": [
+            92.69140625,
+            92.6328125,
+            92.69921875
+          ]
+        },
+        "candidate": {
+          "median": 103.5,
+          "minimum": 103.34765625,
+          "maximum": 103.62890625,
+          "forks": [
+            103.5,
+            103.62890625,
+            103.34765625
+          ]
+        },
+        "change_percent": 11.66083695056681,
+        "observed_ranges_overlap": false
+      }
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "time_ns": {
+        "baseline": {
+          "median": 1001.700744150104,
+          "minimum": 997.4910369826341,
+          "maximum": 1044.490929165233,
+          "forks": [
+            1001.700744150104,
+            1044.490929165233,
+            997.4910369826341
+          ]
+        },
+        "candidate": {
+          "median": 1018.5062477507503,
+          "minimum": 962.4620580782437,
+          "maximum": 1039.6464596731787,
+          "forks": [
+            1018.5062477507503,
+            1039.6464596731787,
+            962.4620580782437
+          ]
+        },
+        "change_percent": 1.677697026660896,
+        "observed_ranges_overlap": true
+      },
+      "allocation_bytes": {
+        "baseline": {
+          "median": 1664.0,
+          "minimum": 1664.0,
+          "maximum": 1664.0,
+          "forks": [
+            1664.0,
+            1664.0,
+            1664.0
+          ]
+        },
+        "candidate": {
+          "median": 1656.0,
+          "minimum": 1656.0,
+          "maximum": 1656.0,
+          "forks": [
+            1656.0,
+            1656.0,
+            1656.0
+          ]
+        },
+        "change_percent": -0.48076923076922906,
+        "observed_ranges_overlap": false
+      },
+      "rss_mib": {
+        "baseline": {
+          "median": 224.31640625,
+          "minimum": 224.23828125,
+          "maximum": 224.390625,
+          "forks": [
+            224.23828125,
+            224.390625,
+            224.31640625
+          ]
+        },
+        "candidate": {
+          "median": 240.26171875,
+          "minimum": 240.203125,
+          "maximum": 240.62109375,
+          "forks": [
+            240.62109375,
+            240.26171875,
+            240.203125
+          ]
+        },
+        "change_percent": 7.1084022638223665,
+        "observed_ranges_overlap": false
+      },
+      "peak_rss_mib": {
+        "baseline": {
+          "median": 236.828125,
+          "minimum": 236.70703125,
+          "maximum": 236.89453125,
+          "forks": [
+            236.828125,
+            236.89453125,
+            236.70703125
+          ]
+        },
+        "candidate": {
+          "median": 253.07421875,
+          "minimum": 252.890625,
+          "maximum": 253.94921875,
+          "forks": [
+            253.94921875,
+            253.07421875,
+            252.890625
+          ]
+        },
+        "change_percent": 6.859866728244368,
+        "observed_ranges_overlap": false
+      }
+    }
+  ],
+  "maximum_absolute_measurement_drift_percent": 5.571996241879629,
+  "statistic": "median and observed range of three fork means for timing/allocation; three process RSS checkpoints",
+  "limits": "Descriptive paired point estimates, not confidence intervals or retained heap. RSS includes setup, guest compilation, calibration and untimed probe/traversal overhead that need not allocate identically."
+}
