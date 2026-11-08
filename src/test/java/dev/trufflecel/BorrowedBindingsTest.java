@@ -56,8 +56,7 @@ public class BorrowedBindingsTest {
 
   @Test
   public void inferredRootDoesNotReuseAnUnrelatedSingleDeclaration() {
-    var environment =
-        Cel.newBuilder().inferVariables(true).variable("unused", CelType.INT).build();
+    var environment = Cel.newBuilder().inferVariables(true).variable("unused", CelType.INT).build();
     var program = environment.compile("xs[0] + xs[1]");
     int[] traversals = {0};
     Iterable<Integer> items =
