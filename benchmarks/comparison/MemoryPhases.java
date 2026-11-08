@@ -3,6 +3,7 @@ package dev.trufflecel;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.oracle.truffle.runtime.OptimizedRuntimeOptions;
 import dev.cel.runtime.CelRuntime;
+import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Locale;
 import org.graalvm.polyglot.Context;
@@ -38,7 +39,8 @@ public final class MemoryPhases {
       System.setProperty("polyglot.compiler.TreatPerformanceWarningsAsErrors", "all");
     }
     // Initialize diagnostic bookkeeping before taking the baseline.
-    Runtime.getRuntime().totalMemory();
+    ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+    ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage();
     System.out.flush();
     System.in.available();
     checkpoint("baseline", null, checkpoints);
@@ -143,14 +145,16 @@ public final class MemoryPhases {
       throws Exception {
     if (!enabled) return;
     long now = System.nanoTime();
-    Runtime runtime = Runtime.getRuntime();
+    var heap = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+    var nonHeap = ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage();
     System.out.printf(
         Locale.ROOT,
-        "{\"phase\":\"%s\",\"elapsed_ns\":%d,\"heap_used\":%d,\"heap_committed\":%d,\"last_tier\":%s,\"effective_options\":%s}%n",
+        "{\"phase\":\"%s\",\"elapsed_ns\":%d,\"heap_used\":%d,\"heap_committed\":%d,\"non_heap_used\":%d,\"last_tier\":%s,\"effective_options\":%s}%n",
         phase,
         now - phaseStart,
-        runtime.totalMemory() - runtime.freeMemory(),
-        runtime.totalMemory(),
+        heap.getUsed(),
+        heap.getCommitted(),
+        nonHeap.getUsed(),
         target != null && target.isValidLastTier(),
         effectiveOptions(target));
     System.out.flush();

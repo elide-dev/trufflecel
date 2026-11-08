@@ -22,6 +22,7 @@ VARIANTS = {
     "release-free-chunks": ["-XX:MaxHeapFree=1m"],
     "shared-release-free-chunks": ["-XX:-CompileInIsolates", "-XX:MaxHeapFree=1m"],
     "bounded-release-free-chunks": ["-XX:CompilationIsolateOptions=-Xmx16m", "-XX:MaxHeapFree=1m"],
+    "shared-free-32m": ["-XX:-CompileInIsolates", "-XX:MaxHeapFree=32m"],
 }
 ENGINES = ["trufflecel", "truffle-standalone", "truffle-interpreter", "cel-java"]
 WORKLOADS = ["scalar", "policy", "comprehension"]
@@ -123,7 +124,7 @@ def main():
     model = re.search(r"^model name\s*:\s*(.+)$", cpuinfo, re.MULTILINE)
     artifacts = json.loads(Path("maven_install.json").read_text())["artifacts"]
     report = {
-        "schema": 1,
+        "schema": 2,
         "metadata": {
             "source_revision": os.environ.get("MEMORY_SOURCE_REVISION", "unrecorded"),
             "graalvm": artifacts["org.graalvm.truffle:truffle-runtime"]["version"],
@@ -138,7 +139,7 @@ def main():
             "common_runtime_flags": ["-Xmx512m"],
             "native_image": "serial GC, optimization 3, combined executable containing both engines",
             "timing": "separate process; fixed 524288 evaluation warmup; seven >=150ms samples",
-            "notes": "RSS is current resident process pages; VmHWM is lifetime peak. Runtime heap counters describe application isolate, not compiler isolate. Application System.gc does not collect a separate compiler isolate. Mapping categories do not establish isolate ownership. Forced GC and idle phases are diagnostics, not deployment defaults. Closing the Polyglot context does not necessarily dispose the standalone target's fallback engine.",
+            "notes": "smaps_rollup.Rss is current resident process pages; status.VmHWM is lifetime peak. MemoryMXBean heap counters describe application isolate, not compiler isolate. Native .27 non-heap usage counts RuntimeCodeInfoMemory (generated code and metadata). Application System.gc does not collect a separate compiler isolate. Mapping categories do not establish isolate ownership. Forced GC and idle phases are diagnostics, not deployment defaults. Closing the Polyglot context does not necessarily dispose the standalone target's fallback engine. truffle-standalone means the context-free Java API within the same combined executable, not a standalone binary.",
         },
         "records": [],
     }
@@ -153,8 +154,10 @@ def main():
                     start = time.monotonic()
                     phases = run_profile([*common, "true", str(idle_ms)], output / key)
                     measured = subprocess.run([*common, "false", "0"], capture_output=True,
-                                              text=True, timeout=180, check=True)
+                                              text=True, timeout=180)
                     (output / key / "timing.stderr.txt").write_text(measured.stderr)
+                    (output / key / "timing.stdout.txt").write_text(measured.stdout)
+                    measured.check_returncode()
                     timing = json.loads(measured.stdout)
                     if len(timing["samples_ns"]) != 7 or any(x <= 0 for x in timing["samples_ns"]):
                         raise ValueError("invalid timing samples")
@@ -165,7 +168,7 @@ def main():
                     report["records"].append(record)
                     path.write_text(json.dumps(report, indent=2) + "\n")
                     end = phases[6]
-                    print(f"{key}: evaluated RSS {end['status']['VmRSS'] / 1048576:.2f} MiB, "
+                    print(f"{key}: evaluated RSS {end['smaps_rollup']['Rss'] / 1048576:.2f} MiB, "
                           f"time {statistics.median(timing['samples_ns']):.1f} ns, "
                           f"elapsed {time.monotonic() - start:.1f}s", flush=True)
     report["complete"] = len(report["records"]) == forks * len(variants) * len(engines) * len(workloads)
