@@ -19,6 +19,7 @@
     "io.grpc:grpc-stub": 1508805937,
     "junit:junit": 1633899997,
     "org.graalvm.polyglot:polyglot": -911000915,
+    "org.graalvm.regex:regex": 1573204627,
     "org.graalvm.sdk:nativeimage": 1432929993,
     "org.graalvm.shadowed:json": 1843112104,
     "org.graalvm.truffle:truffle-api": -1596888058,
@@ -61,11 +62,14 @@
     "org.commonmark:commonmark": 127068869,
     "org.commonmark:commonmark-ext-gfm-tables": -2040303003,
     "org.graalvm.polyglot:polyglot": 570840508,
+    "org.graalvm.regex:regex": 1149759159,
     "org.graalvm.sdk:collections": -675922321,
     "org.graalvm.sdk:jniutils": -1774515877,
     "org.graalvm.sdk:nativeimage": 1468200941,
     "org.graalvm.sdk:word": 1503246758,
+    "org.graalvm.shadowed:icu4j": -752292855,
     "org.graalvm.shadowed:json": 142413964,
+    "org.graalvm.shadowed:xz": -1307531224,
     "org.graalvm.truffle:truffle-api": -1352110340,
     "org.graalvm.truffle:truffle-compiler": -1947637326,
     "org.graalvm.truffle:truffle-dsl-processor": -855901528,
@@ -273,6 +277,12 @@
       },
       "version": "25.5.5-elide.27"
     },
+    "org.graalvm.regex:regex": {
+      "shasums": {
+        "jar": "137489ae39c96d30e4f15eae21681107842dbd4d1e41a8e7fc86de3392f914fa"
+      },
+      "version": "25.5.5-elide.27"
+    },
     "org.graalvm.sdk:collections": {
       "shasums": {
         "jar": "292f6d4790a6d7a8388d80030c2054ee49b2984a0ad3f71805c53f478ac0c65e"
@@ -297,9 +307,21 @@
       },
       "version": "25.5.5-elide.27"
     },
+    "org.graalvm.shadowed:icu4j": {
+      "shasums": {
+        "jar": "0eeda941bc0379816f968a2ec91d4427e9f85d2d19ae24c483eb0817fc70099a"
+      },
+      "version": "25.5.5-elide.27"
+    },
     "org.graalvm.shadowed:json": {
       "shasums": {
         "jar": "ff3f63e3c1dc1109cfd0e13f7b74a477bd5fdf34ecf05e8a0b6b0f33c4f122b8"
+      },
+      "version": "25.5.5-elide.27"
+    },
+    "org.graalvm.shadowed:xz": {
+      "shasums": {
+        "jar": "d036e9b7d2aac8b226b8f0264e1c0b5812eb98df2433fa2d98a27ed12ee31a45"
       },
       "version": "25.5.5-elide.27"
     },
@@ -457,12 +479,20 @@
       "org.graalvm.sdk:collections",
       "org.graalvm.sdk:nativeimage"
     ],
+    "org.graalvm.regex:regex": [
+      "org.graalvm.shadowed:icu4j",
+      "org.graalvm.truffle:truffle-api"
+    ],
     "org.graalvm.sdk:jniutils": [
       "org.graalvm.sdk:collections",
       "org.graalvm.sdk:nativeimage"
     ],
     "org.graalvm.sdk:nativeimage": [
       "org.graalvm.sdk:word"
+    ],
+    "org.graalvm.shadowed:icu4j": [
+      "org.graalvm.sdk:nativeimage",
+      "org.graalvm.shadowed:xz"
     ],
     "org.graalvm.truffle:truffle-api": [
       "org.graalvm.polyglot:polyglot",
@@ -815,6 +845,40 @@
       "org.graalvm.polyglot.management",
       "org.graalvm.polyglot.proxy"
     ],
+    "org.graalvm.regex:regex": [
+      "com.oracle.truffle.regex",
+      "com.oracle.truffle.regex.analysis",
+      "com.oracle.truffle.regex.chardata",
+      "com.oracle.truffle.regex.charset",
+      "com.oracle.truffle.regex.dead",
+      "com.oracle.truffle.regex.errors",
+      "com.oracle.truffle.regex.flavor",
+      "com.oracle.truffle.regex.flavor.java",
+      "com.oracle.truffle.regex.flavor.js",
+      "com.oracle.truffle.regex.flavor.oracledb",
+      "com.oracle.truffle.regex.flavor.python",
+      "com.oracle.truffle.regex.flavor.re2",
+      "com.oracle.truffle.regex.flavor.ruby",
+      "com.oracle.truffle.regex.literal",
+      "com.oracle.truffle.regex.result",
+      "com.oracle.truffle.regex.runtime.nodes",
+      "com.oracle.truffle.regex.tregex",
+      "com.oracle.truffle.regex.tregex.automaton",
+      "com.oracle.truffle.regex.tregex.buffer",
+      "com.oracle.truffle.regex.tregex.dfa",
+      "com.oracle.truffle.regex.tregex.nfa",
+      "com.oracle.truffle.regex.tregex.nodes",
+      "com.oracle.truffle.regex.tregex.nodes.dfa",
+      "com.oracle.truffle.regex.tregex.nodes.input",
+      "com.oracle.truffle.regex.tregex.nodes.nfa",
+      "com.oracle.truffle.regex.tregex.parser",
+      "com.oracle.truffle.regex.tregex.parser.ast",
+      "com.oracle.truffle.regex.tregex.parser.ast.visitors",
+      "com.oracle.truffle.regex.tregex.string",
+      "com.oracle.truffle.regex.tregex.util",
+      "com.oracle.truffle.regex.tregex.util.json",
+      "com.oracle.truffle.regex.util"
+    ],
     "org.graalvm.sdk:collections": [
       "org.graalvm.collections"
     ],
@@ -838,8 +902,43 @@
       "org.graalvm.word",
       "org.graalvm.word.impl"
     ],
+    "org.graalvm.shadowed:icu4j": [
+      "org.graalvm.shadowed.com.ibm.icu",
+      "org.graalvm.shadowed.com.ibm.icu.charset",
+      "org.graalvm.shadowed.com.ibm.icu.impl",
+      "org.graalvm.shadowed.com.ibm.icu.impl.breakiter",
+      "org.graalvm.shadowed.com.ibm.icu.impl.coll",
+      "org.graalvm.shadowed.com.ibm.icu.impl.data",
+      "org.graalvm.shadowed.com.ibm.icu.impl.duration",
+      "org.graalvm.shadowed.com.ibm.icu.impl.duration.impl",
+      "org.graalvm.shadowed.com.ibm.icu.impl.locale",
+      "org.graalvm.shadowed.com.ibm.icu.impl.number",
+      "org.graalvm.shadowed.com.ibm.icu.impl.number.parse",
+      "org.graalvm.shadowed.com.ibm.icu.impl.number.range",
+      "org.graalvm.shadowed.com.ibm.icu.impl.personname",
+      "org.graalvm.shadowed.com.ibm.icu.impl.text",
+      "org.graalvm.shadowed.com.ibm.icu.impl.units",
+      "org.graalvm.shadowed.com.ibm.icu.lang",
+      "org.graalvm.shadowed.com.ibm.icu.math",
+      "org.graalvm.shadowed.com.ibm.icu.message2",
+      "org.graalvm.shadowed.com.ibm.icu.number",
+      "org.graalvm.shadowed.com.ibm.icu.segmenter",
+      "org.graalvm.shadowed.com.ibm.icu.text",
+      "org.graalvm.shadowed.com.ibm.icu.util"
+    ],
     "org.graalvm.shadowed:json": [
       "org.graalvm.shadowed.org.json"
+    ],
+    "org.graalvm.shadowed:xz": [
+      "org.graalvm.shadowed.org.tukaani.xz",
+      "org.graalvm.shadowed.org.tukaani.xz.check",
+      "org.graalvm.shadowed.org.tukaani.xz.common",
+      "org.graalvm.shadowed.org.tukaani.xz.delta",
+      "org.graalvm.shadowed.org.tukaani.xz.index",
+      "org.graalvm.shadowed.org.tukaani.xz.lz",
+      "org.graalvm.shadowed.org.tukaani.xz.lzma",
+      "org.graalvm.shadowed.org.tukaani.xz.rangecoder",
+      "org.graalvm.shadowed.org.tukaani.xz.simple"
     ],
     "org.graalvm.truffle:truffle-api": [
       "com.oracle.truffle.api",
@@ -987,11 +1086,14 @@
       "org.commonmark:commonmark",
       "org.commonmark:commonmark-ext-gfm-tables",
       "org.graalvm.polyglot:polyglot",
+      "org.graalvm.regex:regex",
       "org.graalvm.sdk:collections",
       "org.graalvm.sdk:jniutils",
       "org.graalvm.sdk:nativeimage",
       "org.graalvm.sdk:word",
+      "org.graalvm.shadowed:icu4j",
       "org.graalvm.shadowed:json",
+      "org.graalvm.shadowed:xz",
       "org.graalvm.truffle:truffle-api",
       "org.graalvm.truffle:truffle-compiler",
       "org.graalvm.truffle:truffle-dsl-processor",
@@ -1034,11 +1136,14 @@
       "org.commonmark:commonmark",
       "org.commonmark:commonmark-ext-gfm-tables",
       "org.graalvm.polyglot:polyglot",
+      "org.graalvm.regex:regex",
       "org.graalvm.sdk:collections",
       "org.graalvm.sdk:jniutils",
       "org.graalvm.sdk:nativeimage",
       "org.graalvm.sdk:word",
+      "org.graalvm.shadowed:icu4j",
       "org.graalvm.shadowed:json",
+      "org.graalvm.shadowed:xz",
       "org.graalvm.truffle:truffle-api",
       "org.graalvm.truffle:truffle-compiler",
       "org.graalvm.truffle:truffle-dsl-processor",
@@ -1081,11 +1186,14 @@
       "org.commonmark:commonmark",
       "org.commonmark:commonmark-ext-gfm-tables",
       "org.graalvm.polyglot:polyglot",
+      "org.graalvm.regex:regex",
       "org.graalvm.sdk:collections",
       "org.graalvm.sdk:jniutils",
       "org.graalvm.sdk:nativeimage",
       "org.graalvm.sdk:word",
+      "org.graalvm.shadowed:icu4j",
       "org.graalvm.shadowed:json",
+      "org.graalvm.shadowed:xz",
       "org.graalvm.truffle:truffle-api",
       "org.graalvm.truffle:truffle-compiler",
       "org.graalvm.truffle:truffle-dsl-processor",
@@ -1142,6 +1250,11 @@
     "org.graalvm.polyglot:polyglot": {
       "org.graalvm.home.HomeFinder": [
         "org.graalvm.home.impl.DefaultHomeFinder"
+      ]
+    },
+    "org.graalvm.regex:regex": {
+      "com.oracle.truffle.api.provider.TruffleLanguageProvider": [
+        "com.oracle.truffle.regex.RegexLanguageProvider"
       ]
     },
     "org.graalvm.sdk:jniutils": {

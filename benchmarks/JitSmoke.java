@@ -6,6 +6,7 @@ import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.oracle.truffle.api.debug.Breakpoint;
 import com.oracle.truffle.api.debug.Debugger;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,19 @@ public final class JitSmoke {
         }
         if (!sortTarget.isValidLastTier())
           throw new AssertionError("Native sortBy receiver errors must stay compiled");
+        var regexProgram = Cel.compile("s.matches('^[a-z]+@[a-z]+[.]com$')");
+        check(
+            regexProgram,
+            Map.of("s", "alice@example.com"),
+            true,
+            Map.of("s", "not-an-email"),
+            false);
+        if (NodeUtil.findAllNodeInstances(
+                ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                Regex.MatchNode.class)
+            .stream()
+            .noneMatch(Regex.MatchNode::isAccelerated))
+          throw new AssertionError("Native constant matches did not use TruffleRegex");
         check(IMAGE_POLICY.instantiate(), Map.of("x", 2L), 3L, Map.of("x", -1L), 0L);
         var policyEnvironment = EnvironmentYaml.read("variables: [{name: x, type: int}]");
         check(

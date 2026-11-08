@@ -95,6 +95,8 @@ java_library(
         "@maven//:com_google_re2j_re2j",
         "@maven//:dev_elide_truffledata_core",
         "@maven//:org_graalvm_polyglot_polyglot",
+        # The language is loaded through Env.parseInternal, without Java implementation imports.
+        "@maven//:org_graalvm_regex_regex",  # keep
         "@maven//:org_graalvm_truffle_truffle_api",
         "@maven//:org_snakeyaml_snakeyaml_engine",
     ],

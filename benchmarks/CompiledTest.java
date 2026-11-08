@@ -3,6 +3,7 @@ package dev.trufflecel;
 import static org.junit.Assert.*;
 
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.sun.management.ThreadMXBean;
 import java.lang.management.ManagementFactory;
@@ -17,7 +18,7 @@ public final class CompiledTest {
   private static volatile Object sink;
 
   @Test
-  public void compiledScalarAndLazyPathsStayWithinBudgets() {
+  public void compiledScalarAndLazyPathsStayWithinBudgets() throws ReflectiveOperationException {
     try (Context context =
         Context.newBuilder("cel")
             .allowExperimentalOptions(true)
@@ -46,6 +47,37 @@ public final class CompiledTest {
           }
         }
         assertTrue("sortBy receiver errors must stay compiled", sortTarget.isValidLastTier());
+        var regexProgram = Cel.compile("s.matches('^[a-z]+@[a-z]+[.]com$')");
+        check(
+            regexProgram,
+            Map.of("s", "person@example.com"),
+            true,
+            Map.of("s", "person@example.org"),
+            false,
+            4096);
+        assertTrue(
+            "constant matches must exercise TruffleRegex, not only its fallback",
+            NodeUtil.findAllNodeInstances(
+                    ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                    Regex.MatchNode.class)
+                .stream()
+                .anyMatch(Regex.MatchNode::isAccelerated));
+        var regexNode =
+            NodeUtil.findAllNodeInstances(
+                    ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                    Regex.MatchNode.class)
+                .getFirst();
+        CelLanguage.currentScope().clearRegexes();
+        // Exercise loss of a compiled weak-cache referent deterministically, without a GC race.
+        var entryField = Regex.MatchNode.class.getDeclaredField("entry");
+        entryField.setAccessible(true);
+        Object entry = entryField.get(regexNode);
+        var handleField = entry.getClass().getDeclaredField("handle");
+        handleField.setAccessible(true);
+        ((TruffleWeakReference<?>) handleField.get(entry)).clear();
+        assertEquals(true, regexProgram.evaluate(Map.of("s", "person@example.com")));
+        assertEquals(false, regexProgram.evaluate(Map.of("s", "person@example.org")));
+        assertFalse(regexNode.isAccelerated());
         check(
             "regex.replace(s, '(a)', r'\\1x')",
             Map.of("s", "aba"),
@@ -147,13 +179,6 @@ public final class CompiledTest {
             false,
             65536);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
-        check(
-            "s.matches('^[a-z]+@[a-z]+[.]com$')",
-            Map.of("s", "person@example.com"),
-            true,
-            Map.of("s", "person@example.org"),
-            false,
-            4096);
         check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),

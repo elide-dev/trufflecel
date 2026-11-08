@@ -74,8 +74,11 @@ call node, under either policy and for instrumented programs as well. An invalid
 pattern is a strict-validation finding; with the deferred policy the call still evaluates its
 operand (so operand failures and unknowns keep their precedence) and then raises
 `INVALID_ARGUMENT`. Patterns that are only known at evaluation use a bounded cache (256
-entries; keys longer than 4,096 chars bypass it). The engine (RE2J) is referenced only from the
-`Regex` seam, so it can be replaced locally.
+entries; keys longer than 4,096 chars bypass it). The `Regex` seam retains RE2/J for
+syntax validation, exact program-size accounting, dynamic matching and capture extensions.
+Compatible constant boolean matches can use TruffleRegex's RE2 flavor within their
+first evaluation's CEL context. Unsupported or Unicode-sensitive patterns and calls
+outside the owning context use RE2/J; see the [integration contract](INTEGRATION.md).
 
 ## Strict validation
 

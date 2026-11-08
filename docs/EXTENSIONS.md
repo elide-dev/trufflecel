@@ -163,7 +163,9 @@ escapes fail when a match needs replacement.
 `regex.extractAll(text, pattern)` returns a list. With one capture group they return that group;
 with none they return the complete match. Unmatched optional captures are omitted. More than
 one capture group is rejected, except that `extract` returns none when there is no match.
-The functions share the RE2 engine seam and bounded dynamic cache with `matches`.
+The functions share the RE2/J validation and bounded dynamic cache with `matches`.
+Their capture and empty-match behavior remains on RE2/J; TruffleRegex acceleration
+currently applies to compatible constant boolean `matches` calls.
 Input traversal, each match and output expansion consume the evaluation budget.
 
 ## Library and function restrictions
