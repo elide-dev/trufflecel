@@ -57,7 +57,7 @@ public final class Program {
       if (environment.commonSubexpressions) body = CseOptimizer.optimize(body, environment);
       body = Optimizer.rewrite(body.lowerUninstrumented());
     }
-    body.resolveBlocks(null);
+    body.finishPlanning(null);
     boolean hasBindings = body.hasBindings();
     if (hasBindings) body.resolveLazyBindings(Map.of());
     // Attribute qualification is needed only by the lazily restored trace/partial target.

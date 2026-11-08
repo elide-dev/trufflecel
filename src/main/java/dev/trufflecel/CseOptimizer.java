@@ -202,6 +202,12 @@ final class CseOptimizer {
     }
 
     @Override
+    void finishPlanning(ExprNode owner) {
+      super.finishPlanning(owner);
+      original.finishPlanning(null);
+    }
+
+    @Override
     ExprNode restoreTrace() {
       return NodeUtil.cloneNode(original).restoreTrace();
     }
@@ -225,6 +231,12 @@ final class CseOptimizer {
       optionalEntry = original.optionalEntry;
       copyLocation(original);
       sourceRange(original.sourceStart, original.sourceEnd);
+    }
+
+    @Override
+    void finishPlanning(ExprNode owner) {
+      super.finishPlanning(owner);
+      original.finishPlanning(owner);
     }
 
     @Override

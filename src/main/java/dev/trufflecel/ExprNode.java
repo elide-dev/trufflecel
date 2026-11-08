@@ -9,6 +9,7 @@ import java.util.*;
 /** Each parsed expression becomes an adopted Truffle AST node, never a delegated interpreter. */
 @GenerateWrapper
 class ExprNode extends CelNode {
+  private static final ExprNode[] NO_CHILDREN = new ExprNode[0];
   boolean rootBody, statement;
   long canonicalId;
   // Original custom macro syntax is immutable metadata, never a runtime child.
@@ -85,8 +86,20 @@ class ExprNode extends CelNode {
   }
 
   void resolveBlocks(ExprNode owner) {
+    if (children.length == 0) children = NO_CHILDREN;
     if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
     for (ExprNode child : children) child.resolveBlocks(kind == Kind.BLOCK ? this : owner);
+  }
+
+  /** Complete the owned runtime copy once; source templates keep their planning annotations. */
+  void finishPlanning(ExprNode owner) {
+    fold = null;
+    checkedType = null;
+    macroCall = null;
+    // NodeUtil also clones empty @Children arrays when instantiating a prepared template.
+    if (children.length == 0) children = NO_CHILDREN;
+    if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
+    for (ExprNode child : children) child.finishPlanning(kind == Kind.BLOCK ? this : owner);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
@@ -169,7 +182,7 @@ class ExprNode extends CelNode {
     this.name = name;
     this.value = value;
     this.offset = offset;
-    this.children = children;
+    this.children = children.length == 0 ? NO_CHILDREN : children;
   }
 
   private static int scalarCode(String name) {
@@ -372,28 +385,18 @@ class ExprNode extends CelNode {
    */
   private static final class ArithmeticChain extends ExprNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] operations;
+    // Per operator: encoded operation, error offset/line/column, then literal
+    // error offset/line/column and source start/end. IDs remain full-width longs.
+    private final int[] metadata;
 
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] constants;
 
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] positions;
-
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] ids;
 
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final long[] literalIds;
-
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] literalLocations;
-
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final boolean[] codePointPositions;
-
-    private CelException.OffsetEncoding encoding(int index) {
-      return codePointPositions[index]
+    private CelException.OffsetEncoding encoding(int index, boolean literal) {
+      return (metadata[index * 9] & (literal ? 512 : 256)) != 0
           ? CelException.OffsetEncoding.CODE_POINT
           : CelException.OffsetEncoding.UTF16;
     }
@@ -402,35 +405,32 @@ class ExprNode extends CelNode {
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
       super(Kind.CALL, outer.name, false, outer.offset, leaf);
-      operations = new int[count];
+      metadata = new int[count * 9];
       constants = new long[count];
-      positions = new int[count * 3];
-      ids = new long[count];
-      literalIds = new long[count];
-      literalLocations = new int[count * 5];
-      codePointPositions = new boolean[count * 2];
+      ids = new long[count * 2];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
-        positions[i * 3] = node.errorOffset;
-        positions[i * 3 + 1] = node.errorLine;
-        positions[i * 3 + 2] = node.errorColumn;
-        ids[i] = node.canonicalId;
-        codePointPositions[i] = node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
-        operations[i] = node.name.charAt(0);
+        metadata[i * 9 + 1] = node.errorOffset;
+        metadata[i * 9 + 2] = node.errorLine;
+        metadata[i * 9 + 3] = node.errorColumn;
+        ids[i * 2] = node.canonicalId;
+        metadata[i * 9] = node.name.charAt(0);
+        if (node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
+          metadata[i * 9] |= 256;
         ExprNode literal = node.children[1];
         constants[i] = (Long) literal.value;
-        literalIds[i] = literal.canonicalId;
-        codePointPositions[i + count] =
-            literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT;
-        literalLocations[i * 5] = literal.errorOffset;
-        literalLocations[i * 5 + 1] = literal.errorLine;
-        literalLocations[i * 5 + 2] = literal.errorColumn;
-        literalLocations[i * 5 + 3] = literal.sourceStart;
-        literalLocations[i * 5 + 4] = literal.sourceEnd;
+        ids[i * 2 + 1] = literal.canonicalId;
+        if (literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
+          metadata[i * 9] |= 512;
+        metadata[i * 9 + 4] = literal.errorOffset;
+        metadata[i * 9 + 5] = literal.errorLine;
+        metadata[i * 9 + 6] = literal.errorColumn;
+        metadata[i * 9 + 7] = literal.sourceStart;
+        metadata[i * 9 + 8] = literal.sourceEnd;
         node = node.children[0];
       }
       firstOperation =
-          switch (operations[0]) {
+          switch ((metadata[0] & 255)) {
             case '+' -> "+";
             case '-' -> "-";
             default -> "*";
@@ -444,27 +444,27 @@ class ExprNode extends CelNode {
     @Override
     ExprNode restoreTrace() {
       ExprNode restored = children[0].restoreTrace();
-      for (int i = 0; i < operations.length; i++) {
-        ExprNode literal = constant(constants[i], literalLocations[i * 5]);
-        literal.canonicalId = literalIds[i];
-        literal.errorOffset = literalLocations[i * 5];
-        literal.errorLine = literalLocations[i * 5 + 1];
-        literal.errorColumn = literalLocations[i * 5 + 2];
-        literal.errorOffsetEncoding = encoding(i + operations.length);
-        literal.sourceRange(literalLocations[i * 5 + 3], literalLocations[i * 5 + 4]);
+      for (int i = 0; i < constants.length; i++) {
+        ExprNode literal = constant(constants[i], metadata[i * 9 + 4]);
+        literal.canonicalId = ids[i * 2 + 1];
+        literal.errorOffset = metadata[i * 9 + 4];
+        literal.errorLine = metadata[i * 9 + 5];
+        literal.errorColumn = metadata[i * 9 + 6];
+        literal.errorOffsetEncoding = encoding(i, true);
+        literal.sourceRange(metadata[i * 9 + 7], metadata[i * 9 + 8]);
         ExprNode next =
             new ExprNode(
                 Kind.CALL,
-                Character.toString(operations[i]),
+                Character.toString((metadata[i * 9] & 255)),
                 false,
-                positions[i * 3],
+                metadata[i * 9 + 1],
                 restored,
                 literal);
-        next.canonicalId = ids[i];
-        next.errorOffset = positions[i * 3];
-        next.errorLine = positions[i * 3 + 1];
-        next.errorColumn = positions[i * 3 + 2];
-        next.errorOffsetEncoding = encoding(i);
+        next.canonicalId = ids[i * 2];
+        next.errorOffset = metadata[i * 9 + 1];
+        next.errorLine = metadata[i * 9 + 2];
+        next.errorColumn = metadata[i * 9 + 3];
+        next.errorOffsetEncoding = encoding(i, false);
         next.sourceRange(restored.sourceStart, literal.sourceEnd);
         restored = next;
       }
@@ -478,43 +478,47 @@ class ExprNode extends CelNode {
     @com.oracle.truffle.api.nodes.ExplodeLoop
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
-      ctx.charge(operations.length);
+      ctx.charge(constants.length);
       Object left;
       try {
         left = children[0].execute(frame, ctx);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-        ctx.charge(operations.length);
+        ctx.charge(constants.length);
         throw e;
       }
       if (left instanceof Unknown) {
-        ctx.charge(operations.length);
+        ctx.charge(constants.length);
         return left;
       }
       if (left instanceof Long number) {
         long result = number;
-        for (int i = 0; i < operations.length; i++) {
+        for (int i = 0; i < constants.length; i++) {
           ctx.tick(); // The right literal's visit still consumes its original budget.
           try {
             result =
-                switch (operations[i]) {
+                switch ((metadata[i * 9] & 255)) {
                   case '+' -> Functions.add(result, constants[i]);
                   case '-' -> Functions.subtract(result, constants[i]);
                   default -> Functions.multiply(result, constants[i]);
                 };
           } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
-            ctx.charge(operations.length - i - 1);
+            ctx.charge(constants.length - i - 1);
             throw e.at(
-                positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2], encoding(i));
+                metadata[i * 9 + 1],
+                ids[i * 2],
+                metadata[i * 9 + 2],
+                metadata[i * 9 + 3],
+                encoding(i, false));
           }
         }
         return result;
       }
       // These operators require matching numeric types; every right operand is a CEL int.
-      ctx.charge(operations.length);
+      ctx.charge(constants.length);
       throw Values.overload(firstOperation)
-          .at(positions[0], ids[0], positions[1], positions[2], encoding(0));
+          .at(metadata[1], ids[0], metadata[2], metadata[3], encoding(0, false));
     }
   }
 

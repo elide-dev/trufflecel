@@ -16,6 +16,84 @@ import org.junit.Test;
 
 public final class PreparedFieldTest {
   @Test
+  public void runtimeCopiesReleasePlanningDataWithoutMutatingSharedTemplates() throws Exception {
+    var environment =
+        Cel.newBuilder()
+            .variable("x", CelType.INT)
+            .commonSubexpressions(true)
+            .macro(
+                Macro.global(
+                    "twice",
+                    1,
+                    (context, target, arguments) ->
+                        Ast.Node.call("+", arguments.getFirst(), arguments.getFirst())))
+            .build();
+    for (String source :
+        List.of(
+            "[1, 2, 3].map(n, n * 2).size()",
+            "twice(x + 1)",
+            "((x + 1) * (x + 1)) + ((x + 1) * (x + 1))",
+            "x * 2 + 1",
+            "x + (1 / 0)")) {
+      var prepared = environment.prepare(source);
+      var syntax = Ast.snapshot(prepared.expression());
+      var templateNodes = new ArrayList<ExprNode>();
+      prepared
+          .expression()
+          .accept(
+              node -> {
+                if (node instanceof ExprNode expression) templateNodes.add(expression);
+                return true;
+              });
+      var types = templateNodes.stream().map(node -> node.checkedType).toList();
+      var folds = templateNodes.stream().map(node -> node.fold).toList();
+      var bindings = Map.of("x", 42L);
+      var reference = environment.compile(source);
+      var options = EvaluationOptions.newBuilder().budget(10_000).build();
+      var expected = reference.evaluateWithDetails(bindings, options);
+      var expectedEvents = new ArrayList<TraceEvent>();
+      reference.trace(expectedEvents::add).evaluateWithDetails(bindings, options);
+      try (var executor = Executors.newFixedThreadPool(4)) {
+        var jobs = new ArrayList<Future<?>>();
+        for (int i = 0; i < 16; i++)
+          jobs.add(
+              executor.submit(
+                  () -> {
+                    var program = prepared.instantiate();
+                    var result = program.evaluateWithDetails(bindings, options);
+                    assertEquals(source, expected.actualCost(), result.actualCost());
+                    if (expected.error() == null) {
+                      assertNull(result.error());
+                      assertEquals(source, expected.value(), result.value());
+                    } else {
+                      assertEquals(expected.error().code(), result.error().code());
+                      assertEquals(expected.error().offset(), result.error().offset());
+                      assertEquals(expected.error().expressionId(), result.error().expressionId());
+                    }
+                    var events = new ArrayList<TraceEvent>();
+                    program.trace(events::add).evaluateWithDetails(bindings, options);
+                    assertEquals(
+                        expectedEvents.stream().map(TraceEvent::expressionId).toList(),
+                        events.stream().map(TraceEvent::expressionId).toList());
+                    assertEquals(
+                        expectedEvents.stream().map(TraceEvent::offset).toList(),
+                        events.stream().map(TraceEvent::offset).toList());
+                    var activation = PartialActivation.of(bindings, AttributePattern.of("x"));
+                    assertEquals(
+                        reference.partialEvaluate(activation).unknownAttributes(),
+                        program.partialEvaluate(activation).unknownAttributes());
+                  }));
+        for (var job : jobs) job.get();
+      }
+      assertEquals(syntax, Ast.snapshot(prepared.expression()));
+      for (int i = 0; i < templateNodes.size(); i++) {
+        assertSame(types.get(i), templateNodes.get(i).checkedType);
+        assertSame(folds.get(i), templateNodes.get(i).fold);
+      }
+    }
+  }
+
+  @Test
   public void nativeScalarOwnershipAndBuilderTransferStayBounded() {
     var source = new Object[] {1L, 2L};
     var data = new DataArray(source);

@@ -484,6 +484,13 @@ final class Optimizer {
     }
 
     @Override
+    void finishPlanning(ExprNode owner) {
+      super.finishPlanning(owner);
+      // Created after template cloning, before this source copy can be shared by lazy targets.
+      original.finishPlanning(null);
+    }
+
+    @Override
     ExprNode restoreTrace() {
       return com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original).restoreTrace();
     }
