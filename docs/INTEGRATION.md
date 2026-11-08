@@ -327,3 +327,8 @@ Cancellation and deadline checks run at CEL cost steps and before returning the 
 report `RESOURCE_EXHAUSTED`; they do not interrupt arbitrary host callback code. Cancellation
 predicates execute on the evaluating thread. Ordinary evaluation retains its existing call
 target and allocation behavior; calls with observable controls use a separate compiled target.
+
+Repeated unary `!` or `-` tokens are scanned iteratively and collapsed by parity,
+as in CEL's parser semantics. Long runs are bounded by `maxSourceLength`; they do
+not consume AST depth merely because they contain many tokens. The resulting
+expression still obeys `maxDepth`, `maxAstNodes` and evaluation-budget limits.
