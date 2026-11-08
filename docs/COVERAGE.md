@@ -44,8 +44,8 @@ extension construction, defaults, presence, wire round-trips, and registration v
 | Branch hits | 3,665 / 3,669 (99.89%) |
 | CI minimum, each metric | 99.8% |
 
-At that checkpoint, all new production lines and branches were covered. The same four defensive lines and four
-invariant branch outcomes listed below remain. JVM guest-compilation checks add bindings,
+At that checkpoint, all new production lines and branches were covered; four defensive lines
+and four invariant branch outcomes remained. JVM guest-compilation checks add bindings,
 blocks, and sets, with allocation ceilings of 64, 768, and 1,536 bytes per evaluation for the
 representative expressions in `benchmarks/CompiledTest.java`. Existing ceilings are unchanged.
 Native JIT checks exercise the same operations.
@@ -202,31 +202,50 @@ dropped from 3,904 to 96 bytes per evaluation (its ceiling is 192).
 
 ## Remaining paths
 
-Four missed lines remain in defensive paths:
+The full-source audit leaves six missed lines in three exception handlers:
 
 - `DataValues.from`: the checked interop exception handler for native arrays/nulls.
   TruffleData validates their representations before this conversion; arbitrary objects
   are rejected by its constructors before reaching CEL.
 - `ProtobufType.Value.message`: the checked protobuf parse exception handler during host
   export. The wire bytes come from the validated native plan's encoder.
+- `CanonicalAst.LegacySchemas.build`: the descriptor-validation exception handler when
+  converting the bundled `cel.expr` schemas to the legacy package. The suite exercises the
+  conversion using the pinned descriptors, which validate successfully.
 
-Four uncovered branch outcomes follow existing invariants:
+The remaining branch outcomes include both defensive checks and combinations the current
+suite has not exercised. They are not all established as unreachable:
 
-- `Environment.prepare`: built-in type names have already been removed from the free
-  variable set before its additional built-in-name check.
-- `ExprNode.lowerUninstrumented`: `size` is not in the extension dispatch set, so its
-  extension exclusion cannot reject a currently supported extension.
-- `ExprNode.call`: scalar operators and string predicates are disjoint from the extension
-  dispatch set; their extension exclusion remains defensive.
+- Frontend recovery and declaration inference: `Checker.check` preserves resource failures
+  instead of collecting them as recoverable type findings; the resource-limit tests currently
+  fail in earlier validation or later optimization. `Environment.prepare` additionally checks
+  built-in type names after the free-variable traversal has already removed them.
+- Macro dispatch: `Parser.call` retains final name checks after the configured standard-macro
+  set has restricted `cel` calls and protobuf extension calls to the supported names.
+- Runtime specialization: `ExprNode.lowerUninstrumented` excludes extension dispatch from
+  its `size` specialization, and `ExprNode.call` does the same for scalar operators and string
+  predicates. Those functions are disjoint from the current extension dispatch set.
+- Lazy-scope capture: `ExprNode.LazyBinding` tolerates a missing frame when local capture is
+  requested. Source-backed execution and resolved frame slots supply a frame; plan-time
+  evaluation does not request local capture. Nested captures, errors, budgets, tracing and
+  partial-value aliases are exercised through the public APIs.
 - `Parser.string`: `codePointAt` and the checked escape decoder already bound code points
   to the Unicode range. The surrogate rejection is exercised; the additional invalid-range
   check cannot fail for those inputs.
-- `ProtobufType.prepared`: map fields whose value type is a well-known message have no
-  prepared accessor; the corpus and matrix read such maps through the generic path only.
+- Policy source fallback: `PolicyCompiler.expression` can wrap an expression lacking source
+  metadata, while the public YAML loader supplies `ConfigurationData.Expression` objects
+  with locations for policy expression fields.
+- Protobuf specialization and wire normalization: `ProtobufType.prepared` retains a fallback
+  for map key/value types outside its prepared-accessor representation. `ProtobufType.nestedWire`
+  distinguishes a matching field number that is not a message from nested-message payloads.
+  These missed outcomes are adapter coverage gaps, not claims about invalid protobuf inputs.
+- Processor discovery: `PojoProcessor.process` returns without generating code if the
+  `CelPojo` annotation type is unavailable. The processor tests include the annotation API on
+  the compilation classpath.
 
 These paths remain visible in coverage. The suite does not use reflection, mocked static
 methods, or corrupted immutable objects to force them. Revisit this list if dependency
-contracts, supported functions, or parser inputs change.
+contracts, supported functions, processor classpaths, or parser inputs change.
 
 ## Reproduction
 
