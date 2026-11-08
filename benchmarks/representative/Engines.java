@@ -1,6 +1,7 @@
 package dev.trufflecel;
 
 import com.oracle.truffle.runtime.OptimizedCallTarget;
+import com.oracle.truffle.runtime.OptimizedRuntimeOptions;
 import dev.cel.common.CelOptions;
 import dev.cel.common.CelAbstractSyntaxTree;
 import dev.cel.common.types.*;
@@ -153,6 +154,13 @@ final class Engines implements AutoCloseable {
 
   void verifyTier(boolean peak) {
     if (truffle == null || !(truffle.callTarget() instanceof OptimizedCallTarget t)) return;
+    if (t.getOptionValue(OptimizedRuntimeOptions.Compilation) != engine.equals("truffle-jit")
+        || t.getOptionValue(OptimizedRuntimeOptions.BackgroundCompilation)
+        || t.getOptionValue(OptimizedRuntimeOptions.CompilationFailureAction)
+            != OptimizedRuntimeOptions.ExceptionAction.Throw)
+      throw new AssertionError("Target uses incorrect benchmark engine options");
+    if (!"all".equals(t.getCompilerOptions().get("compiler.TreatPerformanceWarningsAsErrors")))
+      throw new AssertionError("Compiler performance warning gate is missing");
     if (engine.equals("truffle-interpreter") && t.isValid())
       throw new AssertionError("Unexpected guest JIT");
     if (peak && engine.equals("truffle-jit") && !t.isValidLastTier())
