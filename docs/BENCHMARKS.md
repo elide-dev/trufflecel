@@ -63,6 +63,83 @@ python3 tools/bench/representative.py lifecycle --java /path/to/pinned-graalvm/b
 Existing measurements below are historical evidence. Their raw files are immutable and use
 their original workload definitions, host configuration, and methodology.
 
+### Complete process startup and first verified result
+
+The [released 0.9.0 evidence matrix](benchmarks/release-0.9.0-20261108/README.md)
+separates small-suite wins, memory losses, historical representative results and
+unmeasured categories. `Startup` and `tools/bench/startup.py` address the previously
+missing launch interval; adding the harness is not a startup performance result.
+
+The parent process starts a monotonic clock immediately before `Popen`. The child
+flushes one readiness marker only after its first evaluation matches an independent
+fixture expectation. The parent records receipt of that marker separately from
+process exit, excluding JSON serialization and context teardown from the readiness
+endpoint. Parent scheduling and pipe delivery remain included. Each process runs
+one expression once; guest compilation is natural, unforced, and its last-tier state
+is recorded. A false last-tier flag does not exclude first-tier code.
+
+All six existing sources, full activations and four input variants remain unchanged.
+The startup fixture constructs the shared raw inputs, serializes one request and
+decodes it through the selected engine's representation, even for the scalar control.
+The internal phase partition includes fixture/wire preparation, adapter construction,
+decode, engine configuration, checked/optimized AST preparation, planning, and first
+evaluation plus verification. These phases are diagnostic, not independently timed
+benchmarks or attribution of all VM initialization. The external interval also includes
+launch, class loading and work preceding `main`.
+
+Runtime-prepared Native Image and image-prepared Native Image use **separate binaries**.
+The runtime artifact leaves the prepared holder uninitialized so embedded ASTs/adapters
+do not prewarm its schema caches. The image artifact embeds checked/optimized ASTs and
+the TruffleCEL protobuf adapter; generated descriptors follow the benchmark's existing
+build-time protobuf policy in both artifacts. Raw inputs and decoded snapshots are
+created at runtime in both. Native runtime preparation therefore means runtime
+expression and adapter construction with image-initialized generated schema classes;
+it is not equivalent to JVM schema class loading. Neither image embeds guest machine
+code. Each native artifact rejects the wrong preparation mode.
+
+An empty-engine control for the JVM and each native binary follows the same entry
+point and emits the marker without fixture or engine initialization. Report controls
+separately; never subtract them to claim isolated engine startup. The shared benchmark
+artifacts contain both engines, so they do not establish standalone deployment size
+or application startup. OS file caches are not flushed; these are fresh processes,
+not a cold-disk experiment.
+
+```sh
+bazel test --config=local //benchmarks/representative:startup_smoke //tools/bench:test
+bazel build --config=local //benchmarks/representative:startup_deploy.jar
+bazel test //benchmarks/representative:startup_native_runtime_smoke \
+  //benchmarks/representative:startup_native_image_smoke
+bazel build //benchmarks/representative:startup_svm \
+  //benchmarks/representative:startup_prepared_svm --remote_download_toplevel
+# Transfer prebuilt artifacts and their source manifest to a reserved Linux x86_64 host.
+python3 tools/bench/startup.py --java /path/to/pinned-graalvm/bin/java \
+  --jar /path/to/startup_deploy.jar --native /path/to/startup-representative \
+  --native-prepared /path/to/startup-prepared-representative \
+  --source-manifest /path/to/source.json --output /new/results/startup \
+  --cpus 2,3,4,5,6,7,8,9 --host-conditions 'Describe actual reservation, load and thermals'
+```
+
+The pinned distribution is GraalVM 25.5.5-elide.27 from `MODULE.bazel`; its Java banner
+uses the JVM build number rather than that distribution filename. Preserve the source
+manifest's commit, dirty state, per-file hashes and exact artifact-build commands,
+including `MODULE.bazel`, lockfiles, `.bazelversion`, `.bazelrc`, `bazel/`, `src/main/`,
+`benchmarks/representative/` and both measurement drivers. Use an explicit tracked-file
+allowlist; do not read or copy `user.bazelrc` or credentials. Preserve build logs separately.
+The driver adds command arrays, source-manifest/driver/artifact hashes, Java banner,
+runtime release metadata, module/libjvm hashes, effective VM flags, CPU affinity,
+kernel, load and raw per-process stdout/stderr. JVM uses C2; both runtimes use explicit
+512 MiB initial/maximum heaps. Native uses serial GC; JVM effective flags identify its GC.
+
+The default full run is 285 fresh processes: five per cell for three engines
+(TruffleCEL interpreter, TruffleCEL guest JIT, optimized cel-java), six workloads,
+JVM runtime preparation and both native preparation modes, plus three controls.
+Forks rotate input index modulo four, paired across engines. Omitting both native
+arguments gives an explicitly JVM-only matrix. Validation rejects incomplete,
+repeated or mislabeled cells, missing/duplicate readiness markers, unverified results,
+invalid phase partitions, timeouts and failed processes. `complete` stays false until
+the entire requested matrix passes. Report per-process samples and ranges; a correct
+smoke run on a shared build host is not a quiet-host timing comparison.
+
 ### Borrowed map inputs
 
 The [borrowed-input report](benchmarks/borrowed-20261105/README.md) records the current

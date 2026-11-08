@@ -39,6 +39,10 @@ final class Engines implements AutoCloseable {
   }
 
   Engines(String engine, boolean enterContext, boolean imagePrepared) {
+    this(engine, enterContext, imagePrepared, null);
+  }
+
+  Engines(String engine, boolean enterContext, boolean imagePrepared, ProtobufType adapter) {
     this.engine = engine;
     ours = engine.startsWith("truffle-");
     optimized = engine.contains("optimized");
@@ -68,7 +72,7 @@ final class Engines implements AutoCloseable {
       environment =
           imagePrepared
               ? null
-              : Workloads.Native.ADAPTER
+              : (adapter == null ? Workloads.Native.ADAPTER : adapter)
                   .register(Cel.newBuilder())
                   .variable("x", CelType.INT)
                   .variable("email", CelType.STRING)
