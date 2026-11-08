@@ -4,8 +4,10 @@ import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.oracle.truffle.runtime.OptimizedRuntimeOptions;
 import dev.cel.runtime.CelRuntime;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Supplier;
 import org.graalvm.polyglot.Context;
 
 /**
@@ -40,7 +42,7 @@ public final class MemoryPhases {
     }
     // Initialize diagnostic bookkeeping before taking the baseline.
     ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-    ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage();
+    nonHeapMeasurement(() -> ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage());
     System.out.flush();
     System.in.available();
     checkpoint("baseline", null, checkpoints);
@@ -146,21 +148,47 @@ public final class MemoryPhases {
     if (!enabled) return;
     long now = System.nanoTime();
     var heap = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-    var nonHeap = ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage();
+    var nonHeap =
+        nonHeapMeasurement(() -> ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage());
     System.out.printf(
         Locale.ROOT,
-        "{\"phase\":\"%s\",\"elapsed_ns\":%d,\"heap_used\":%d,\"heap_committed\":%d,\"non_heap_used\":%d,\"last_tier\":%s,\"effective_options\":%s}%n",
+        "{\"phase\":\"%s\",\"elapsed_ns\":%d,\"heap_used\":%d,\"heap_committed\":%d,\"non_heap_used\":%s,\"non_heap_error\":%s,\"last_tier\":%s,\"effective_options\":%s}%n",
         phase,
         now - phaseStart,
         heap.getUsed(),
         heap.getCommitted(),
-        nonHeap.getUsed(),
+        nonHeap.used(),
+        quote(nonHeap.error()),
         target != null && target.isValidLastTier(),
         effectiveOptions(target));
     System.out.flush();
     if (System.in.read() != '\n')
       throw new AssertionError("parent checkpoint acknowledgement missing");
     phaseStart = System.nanoTime();
+  }
+
+  record NonHeapMeasurement(Long used, String error) {}
+
+  static NonHeapMeasurement nonHeapMeasurement(Supplier<MemoryUsage> read) {
+    try {
+      return new NonHeapMeasurement(read.get().getUsed(), null);
+    } catch (IllegalArgumentException invalidCounter) {
+      // .27 can report a negative RuntimeCodeInfoMemory size after GC with a shared compiler.
+      // Preserve the unavailable measurement and its error; RSS, heap and CEL gates stay strict.
+      return new NonHeapMeasurement(null, invalidCounter.toString());
+    }
+  }
+
+  private static String quote(String value) {
+    if (value == null) return "null";
+    return "\""
+        + value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+        + "\"";
   }
 
   private static String effectiveOptions(OptimizedCallTarget target) {

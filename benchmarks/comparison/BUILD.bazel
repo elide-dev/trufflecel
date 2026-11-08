@@ -87,6 +87,12 @@ java_test(
     jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.compiler.EncodedGraphCache=false"],
 )
 
+java_test(
+    name = "memory_phases_test", srcs = ["MemoryPhasesTest.java"],
+    test_class = "dev.trufflecel.MemoryPhasesTest",
+    deps = [":memory_phases_lib", "@maven//:junit_junit"],
+)
+
 native_image(
     name = "memory_phases", testonly = True, executable_name = "memory-phases",
     main_class = "dev.trufflecel.MemoryPhases", deps = [":memory_phases_lib"],
