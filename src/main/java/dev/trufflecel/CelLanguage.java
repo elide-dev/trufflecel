@@ -134,7 +134,7 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
 
     private record RegexKey(String pattern, int limit, boolean strict) {}
 
-    private final Map<RegexKey, Regex.Handle> regexes = new HashMap<>();
+    private final LinkedHashMap<RegexKey, Object> regexes = new LinkedHashMap<>();
 
     Scope(Env env) {
       this.env = env;
@@ -148,11 +148,18 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     @CompilerDirectives.TruffleBoundary
     synchronized Regex.Handle regex(String pattern, int limit, boolean strict) {
       var key = new RegexKey(pattern, limit, strict);
-      if (regexes.containsKey(key)) return regexes.get(key);
-      Regex.Handle handle = Regex.accelerate(env, regexToken, pattern, limit, strict);
-      if (regexes.size() >= 256) regexes.clear();
-      regexes.put(key, handle);
-      return handle;
+      Object result = regexes.get(key);
+      if (result == null && !regexes.containsKey(key)) {
+        try {
+          result = Regex.accelerate(env, regexToken, pattern, limit, strict);
+        } catch (CelException error) {
+          result = new Regex.Failure(error);
+        }
+        if (regexes.size() >= 256) regexes.pollFirstEntry();
+        regexes.put(key, result);
+      }
+      if (result instanceof Regex.Failure failure) throw failure.exception();
+      return (Regex.Handle) result;
     }
 
     @CompilerDirectives.TruffleBoundary
