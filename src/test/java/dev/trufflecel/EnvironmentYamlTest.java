@@ -8,20 +8,40 @@ import org.junit.Test;
 public class EnvironmentYamlTest {
   @Test
   public void extendedConfigurationRoundTripsWithoutLosingRestrictions() {
-    var env = Cel.newBuilder().evaluationBudget(Long.MAX_VALUE).commonSubexpressions(true)
-        .standardMacros(Set.of("has", "cel.bind")).variable("raw", CelType.of("list"))
-        .variable("opaque", new CelType("custom.Box", List.of(CelType.INT))).build();
+    var env =
+        Cel.newBuilder()
+            .evaluationBudget(Long.MAX_VALUE)
+            .commonSubexpressions(true)
+            .standardMacros(Set.of("has", "cel.bind"))
+            .variable("raw", CelType.of("list"))
+            .variable("opaque", new CelType("custom.Box", List.of(CelType.INT)))
+            .build();
     var restored = EnvironmentYaml.read(EnvironmentYaml.write(env));
     assertEquals(env.variables, restored.variables);
     assertEquals(env.standardMacros, restored.standardMacros);
     assertEquals(Long.MAX_VALUE, restored.budget);
     assertTrue(restored.commonSubexpressions);
-    assertFalse(EnvironmentYaml.read(EnvironmentYaml.write(Cel.newBuilder().macros(false).build())).macros);
-    assertThrows(IllegalArgumentException.class, () -> EnvironmentYaml.write(Cel.newBuilder().validator(context -> List.of()).build()));
-    assertThrows(IllegalArgumentException.class, () -> EnvironmentYaml.write(Cel.newBuilder().macro(Macro.global("m", 0, (c,t,a) -> Ast.Node.literal(true))).build()));
+    assertFalse(
+        EnvironmentYaml.read(EnvironmentYaml.write(Cel.newBuilder().macros(false).build())).macros);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> EnvironmentYaml.write(Cel.newBuilder().validator(context -> List.of()).build()));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            EnvironmentYaml.write(
+                Cel.newBuilder()
+                    .macro(Macro.global("m", 0, (c, t, a) -> Ast.Node.literal(true)))
+                    .build()));
     for (String value : List.of("-1", "false", "'large'"))
-      assertThrows(IllegalArgumentException.class, () -> EnvironmentYaml.read("limits: [{name: trufflecel.evaluation_budget, value: " + value + "}]"));
-    assertThrows(IllegalArgumentException.class, () -> EnvironmentYaml.read("context_variable: {type_name: absent.Message}"));
+      assertThrows(
+          IllegalArgumentException.class,
+          () ->
+              EnvironmentYaml.read(
+                  "limits: [{name: trufflecel.evaluation_budget, value: " + value + "}]"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> EnvironmentYaml.read("context_variable: {type_name: absent.Message}"));
     var limited = EnvironmentYaml.read("stdlib: {disable_macros: true}");
     assertThrows(CelException.class, () -> limited.compile("[1].all(x, true)"));
     assertEquals(2L, limited.compile("cel.bind(x, 1, x+1)").evaluate(Map.of()));

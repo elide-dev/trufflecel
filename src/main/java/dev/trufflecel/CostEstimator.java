@@ -19,9 +19,9 @@ public final class CostEstimator {
   }
 
   /**
-   * Size bounds are caller guarantees for collection-valued activation identifiers/attributes.
-   * They do not apply to a local binding that shadows the same name. Sorting includes a
-   * conservative quadratic comparison bound; host callbacks remain explicitly unbounded.
+   * Size bounds are caller guarantees for collection-valued activation identifiers/attributes. They
+   * do not apply to a local binding that shadows the same name. Sorting includes a conservative
+   * quadratic comparison bound; host callbacks remain explicitly unbounded.
    */
   public static Estimate estimate(
       Environment environment, String source, Map<String, Long> sizeBounds) {
