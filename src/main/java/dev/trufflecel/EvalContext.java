@@ -168,7 +168,8 @@ final class EvalContext {
             node.errorColumn,
             node.kind.name(),
             error == null ? Values.out(consume(value)) : null,
-            error));
+            error,
+            node.errorOffsetEncoding));
   }
 
   void checkControl() {

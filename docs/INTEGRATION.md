@@ -374,7 +374,9 @@ when that read evaluates it. Each evaluation and each comprehension iteration ha
 
 `program.trace(listener).evaluate(bindings)` reports one `TraceEvent` after each executed
 source expression, including CEL failures, expression IDs, and source locations. Events follow
-actual evaluation order; short-circuited expressions emit nothing. Values in events are owned
+actual evaluation order; short-circuited expressions emit nothing. Every event exposes
+`offsetEncoding()` for its offset and column, including successful events without an error:
+source events use `UTF16`, canonical events use `CODE_POINT`. Values in events are owned
 public values, so a listener may retain them without retaining mutable evaluation state.
 Listeners run synchronously on the evaluation thread and their exceptions propagate. A shared
 listener must provide its own thread safety. `EvaluationOptions.trace(listener)` also supports

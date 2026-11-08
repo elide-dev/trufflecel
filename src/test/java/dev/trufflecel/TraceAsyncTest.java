@@ -13,6 +13,14 @@ import org.junit.Test;
 
 public class TraceAsyncTest {
   @Test
+  public void manuallyConstructedTraceEventsDefaultToSourceOffsets() {
+    var event = new TraceEvent(1, 2, 1, 3, "CONSTANT", 42L, null);
+    assertEquals(CelException.OffsetEncoding.UTF16, event.offsetEncoding());
+    assertThrows(
+        NullPointerException.class, () -> new TraceEvent(1, 2, 1, 3, "CONSTANT", 42L, null, null));
+  }
+
+  @Test
   public void restoredPartialTargetCompilesWithoutDynamicAstCalls() {
     try (var context =
         Context.newBuilder("cel")
