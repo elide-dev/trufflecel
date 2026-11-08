@@ -8,6 +8,30 @@ import org.junit.Test;
 
 public class PolicyCompilerTest {
   @Test
+  public void variableMetadataIsTypedAndInitializersAreRequired() {
+    var environment = Cel.newBuilder().build();
+    assertEquals(
+        1L,
+        PolicyCompiler.compile(
+                environment,
+                "name: documented\nrule: {variables: [{name: a, description: value, expression: '1'}], match: [{output: 'variables.a'}]}")
+            .evaluate());
+    for (String variable :
+        List.of("{name: a, description: 1, expression: '1'}", "{name: a, description: missing}")) {
+      var failure =
+          assertThrows(
+              IllegalArgumentException.class,
+              () ->
+                  PolicyCompiler.compile(
+                      environment,
+                      "name: malformed\nrule: {variables: ["
+                          + variable
+                          + "], match: [{output: '1'}]}"));
+      assertTrue(failure.getMessage().contains("string"));
+    }
+  }
+
+  @Test
   public void staticRegexConditionsRemainValidatedAfterNodeSpecialization() {
     for (String condition : List.of("'a'.matches('z')", "'a'.matches('a')")) {
       String fallback = condition.contains("'z'") ? "" : ", {output: '2'}";
