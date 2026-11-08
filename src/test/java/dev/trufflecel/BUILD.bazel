@@ -543,3 +543,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "astLocation",
+    srcs = ["AstLocationTest.java"],
+    test_class = "dev.trufflecel.AstLocationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)

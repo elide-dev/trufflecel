@@ -23,5 +23,12 @@ public interface Validator {
     public CelType type(Ast.Node node) {
       return types.getOrDefault(node.id(), CelType.DYN);
     }
+
+    /** Create a finding with this node's original offset units and available source location. */
+    public CelException.Issue issue(Ast.Node node, CelException.Code code, String message) {
+      return new CelException.Issue(
+              code, message, node.offset(), node.line(), node.column(), node.offsetEncoding())
+          .locate(source);
+    }
   }
 }

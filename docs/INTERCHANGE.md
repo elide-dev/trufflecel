@@ -88,6 +88,14 @@ untouched expression IDs, assign IDs to new nodes, discard stale macro source
 metadata, and recheck structure and types when `prepare` or `compile` is called.
 No mutable Truffle nodes or opaque host constant values are exposed.
 
+Each node exposes `offsetEncoding`, `offset`, `line` and `column`. Source parsing
+uses UTF-16; canonical imports retain the original Unicode code-point positions.
+Unknown positions remain `-1`, including canonical input without `SourceInfo`.
+Edits preserve the locations of retained nodes and may combine nodes with different
+offset units; new factory nodes have unknown UTF-16 locations. Preparing an edited
+tree preserves this provenance in diagnostics. Existing node constructors default
+to UTF-16, and the extended constructors accept explicit units and line/column.
+
 `Macro.global`, `receiver`, `globalVarargs`, and `receiverVarargs` register through
 `Environment.Builder.macro`. Argument counts exclude receivers; variadic counts
 are minimum counts and exact signatures take precedence. At equal arity specificity,
@@ -116,6 +124,10 @@ are resolved with size/depth limits and cycle rejection. Source metadata can
 change reconstructed source text; it never changes evaluation of the supplied
 canonical expression. `CanonicalAst.ast` imports editable trees and `parsed`
 exports them without a dependency from the core artifact on protobuf.
+Checked imports retain resolved names and enum constants from `reference_map`;
+compilation rechecks the imported tree's types against the supplied environment.
+`parsed` omits positional source metadata: sparse node locations do not supply the
+complete source text or line table required to reconstruct a canonical source map.
 
 `CanonicalAst.toV1Alpha1` and `toCelExpr` bridge `cel.expr` and
 `google.api.expr.v1alpha1` AST message identities while preserving wire fields,

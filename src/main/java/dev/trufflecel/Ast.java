@@ -27,6 +27,8 @@ public final class Ast {
    * A structural expression. Zero IDs are assigned when a tree is frozen; positive IDs remain
    * stable. Object/macro/comprehension names use immutable string lists in {@code value}; call,
    * select and index values are receiver/optional booleans. Children are in evaluation order.
+   * Offsets and columns use {@code offsetEncoding}; line and column are one-based or -1 when
+   * unknown. Source syntax uses UTF-16 and imported canonical syntax uses Unicode code points.
    */
   public record Node(
       long id,
@@ -37,11 +39,15 @@ public final class Ast {
       boolean optionalEntry,
       int offset,
       boolean extensionSelect,
-      Node macroCall) {
+      Node macroCall,
+      CelException.OffsetEncoding offsetEncoding,
+      int line,
+      int column) {
     public Node {
       if (id < 0) throw new IllegalArgumentException("negative expression id");
       Objects.requireNonNull(kind);
       Objects.requireNonNull(name);
+      Objects.requireNonNull(offsetEncoding);
       children = List.copyOf(children);
       if (value instanceof List<?> names) {
         for (Object entry : names)
@@ -59,6 +65,59 @@ public final class Ast {
               || value instanceof Instant
               || value instanceof Duration))
         throw new IllegalArgumentException("unsupported AST value");
+    }
+
+    /** Compatibility constructor for source syntax with UTF-16 offsets. */
+    public Node(
+        long id,
+        Kind kind,
+        String name,
+        Object value,
+        List<Node> children,
+        boolean optionalEntry,
+        int offset,
+        boolean extensionSelect,
+        Node macroCall) {
+      this(
+          id,
+          kind,
+          name,
+          value,
+          children,
+          optionalEntry,
+          offset,
+          extensionSelect,
+          macroCall,
+          CelException.OffsetEncoding.UTF16,
+          -1,
+          -1);
+    }
+
+    /** Explicit offset units when line and column are unknown. */
+    public Node(
+        long id,
+        Kind kind,
+        String name,
+        Object value,
+        List<Node> children,
+        boolean optionalEntry,
+        int offset,
+        boolean extensionSelect,
+        Node macroCall,
+        CelException.OffsetEncoding offsetEncoding) {
+      this(
+          id,
+          kind,
+          name,
+          value,
+          children,
+          optionalEntry,
+          offset,
+          extensionSelect,
+          macroCall,
+          offsetEncoding,
+          -1,
+          -1);
     }
 
     public Node(
@@ -148,13 +207,35 @@ public final class Ast {
 
     public Node optional(boolean optional) {
       return new Node(
-          id, kind, name, value, children, optional, offset, extensionSelect, macroCall);
+          id,
+          kind,
+          name,
+          value,
+          children,
+          optional,
+          offset,
+          extensionSelect,
+          macroCall,
+          offsetEncoding,
+          line,
+          column);
     }
 
     /** Edits discard original macro syntax, which no longer describes the edited expansion. */
     public Node withChildren(List<Node> replacements) {
       return new Node(
-          id, kind, name, value, replacements, optionalEntry, offset, extensionSelect, null);
+          id,
+          kind,
+          name,
+          value,
+          replacements,
+          optionalEntry,
+          offset,
+          extensionSelect,
+          null,
+          offsetEncoding,
+          line,
+          column);
     }
   }
 
@@ -185,7 +266,7 @@ public final class Ast {
     environment.checkSource(source);
     try {
       ExprNode tree = new Parser(source, environment).parse();
-      environment.checkDepth(tree);
+      environment.checkDepth(tree, source);
       return new Ast(snapshot(tree), source, environment.maxAstNodes, environment.maxDepth);
     } catch (CelException failure) {
       throw failure.locate(source);
@@ -288,7 +369,10 @@ public final class Ast {
         node.optionalEntry,
         node.offset,
         node.extensionSelect,
-        node.macroCall);
+        node.macroCall,
+        node.offsetEncoding,
+        node.line,
+        node.column);
   }
 
   static List<Node> preorder(Node root) {
@@ -369,6 +453,10 @@ public final class Ast {
 
   static Node snapshot(ExprNode node) {
     Object value = node.value instanceof String[] names ? List.of(names) : node.value;
+    int position =
+        node.errorOffset >= 0 || node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT
+            ? node.errorOffset
+            : node.offset;
     return new Node(
         node.canonicalId,
         Kind.valueOf(node.kind.name()),
@@ -376,9 +464,12 @@ public final class Ast {
         value,
         Arrays.stream(node.children).map(Ast::snapshot).toList(),
         node.optionalEntry,
-        node.offset,
+        position,
         node.extensionSelect,
-        node.macroCall);
+        node.macroCall,
+        node.errorOffsetEncoding,
+        node.errorLine,
+        node.errorColumn);
   }
 
   static ExprNode lower(Node root, Environment environment) {
@@ -399,26 +490,30 @@ public final class Ast {
     ExprNode[] children =
         node.children.stream().map(child -> lower(child, defaultOffset)).toArray(ExprNode[]::new);
     Object value = node.value instanceof List<?> names ? names.toArray(String[]::new) : node.value;
+    // ExprNode.offset is a parser/source-range offset. Canonical offsets belong exclusively to
+    // diagnostic metadata; without source text they cannot be converted to UTF-16 safely.
+    int sourceOffset =
+        node.offsetEncoding == CelException.OffsetEncoding.UTF16 && node.offset >= 0
+            ? node.offset
+            : defaultOffset;
     ExprNode result =
         node.kind == Kind.COMPREHENSION
-            ? new ComprehensionNode(
-                (String[]) value, node.offset < 0 ? defaultOffset : node.offset, children)
+            ? new ComprehensionNode((String[]) value, sourceOffset, children)
             : new ExprNode(
-                ExprNode.Kind.valueOf(node.kind.name()),
-                node.name,
-                value,
-                node.offset < 0 ? defaultOffset : node.offset,
-                children);
+                ExprNode.Kind.valueOf(node.kind.name()), node.name, value, sourceOffset, children);
     result.canonicalId = node.id;
     result.optionalEntry = node.optionalEntry;
     result.extensionSelect = node.extensionSelect;
     result.macroCall = node.macroCall;
     result.errorOffset = node.offset;
+    result.errorOffsetEncoding = node.offsetEncoding;
+    result.errorLine = node.line;
+    result.errorColumn = node.column;
     if (node.kind == Kind.MACRO && !node.name.equals("has")) {
       String[] names = (String[]) value;
       result.bindings = new WriteNode[names.length];
       for (int i = 0; i < names.length; i++)
-        result.bindings[i] = new WriteNode(names[i], node.offset, node.offset);
+        result.bindings[i] = new WriteNode(names[i], sourceOffset, sourceOffset);
     }
     return result;
   }

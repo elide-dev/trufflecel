@@ -152,6 +152,9 @@ public final class CanonicalAst {
       throw new IllegalArgumentException("Expected ParsedExpr or CheckedExpr");
     var reader = new Reader(environment);
     reader.sourceInfo(child(ast, "source_info"));
+    if (name.equals("cel.expr.CheckedExpr"))
+      for (Message entry : messages(ast, "reference_map"))
+        reader.references.put((Long) field(entry, "key"), child(entry, "value"));
     ExprNode tree = reader.expression(child(ast, "expr"), 0);
     attachMacroCalls(tree, reader);
     return Ast.of(Ast.snapshot(tree));

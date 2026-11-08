@@ -8,6 +8,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 public final class AstMacroTest {
+  @Test
+  public void customMacroFixedAritiesShareANameWithoutAmbiguity() {
+    var environment =
+        Cel.newBuilder()
+            .macro(Macro.global("choose", 1, (context, target, arguments) -> arguments.getFirst()))
+            .macro(Macro.global("choose", 2, (context, target, arguments) -> arguments.get(1)))
+            .build();
+    assertEquals(1L, environment.compile("choose(1)").evaluate());
+    assertEquals(2L, environment.compile("choose(1, 2)").evaluate());
+    assertThrows(CelException.class, () -> environment.compile("choose()"));
+  }
+
   private static final Environment DYNAMIC = Cel.newBuilder().inferVariables(true).build();
 
   @Test
