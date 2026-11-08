@@ -40,7 +40,25 @@ public class BorrowedBindingsTest {
 
   @Test
   public void uncheckedUndeclaredBindingsAlsoNormalizeOnlyOnce() {
-    var program = Cel.newBuilder().build().parse("xs[0] + xs[1]");
+    for (String source : List.of("xs[0] + xs[1]", ".xs[0] + .xs[1]")) {
+      var program = Cel.newBuilder().build().parse(source);
+      int[] traversals = {0};
+      Iterable<Integer> items =
+          () -> {
+            assertEquals(0, traversals[0]++);
+            return List.of(1, 2).iterator();
+          };
+      assertEquals(3L, program.evaluate(Map.of("xs", items)));
+      assertEquals(1, traversals[0]);
+      assertTrue(program.variables().isEmpty());
+    }
+  }
+
+  @Test
+  public void inferredRootDoesNotReuseAnUnrelatedSingleDeclaration() {
+    var environment =
+        Cel.newBuilder().inferVariables(true).variable("unused", CelType.INT).build();
+    var program = environment.compile("xs[0] + xs[1]");
     int[] traversals = {0};
     Iterable<Integer> items =
         () -> {
@@ -48,8 +66,8 @@ public class BorrowedBindingsTest {
           return List.of(1, 2).iterator();
         };
     assertEquals(3L, program.evaluate(Map.of("xs", items)));
-    assertEquals(1, traversals[0]);
-    assertTrue(program.variables().isEmpty());
+    assertEquals(Set.of("unused", "xs"), program.variables());
+    assertEquals(Set.of("unused"), environment.compile("unused").variables());
   }
 
   @Test
