@@ -2,6 +2,7 @@ package dev.trufflecel;
 
 import static org.junit.Assert.*;
 
+import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import java.util.List;
@@ -68,7 +69,7 @@ public class RegexAccelerationTest {
   }
 
   @Test
-  public void acceleratorChecksTheOwningContextOnEveryCallAndDisposesItsCache() {
+  public void acceleratorChecksTheOwningContextOnEveryCallAndDisposesItsCache() throws Exception {
     PreparedProgram template = template(EMAIL);
     Program program;
     CelLanguage.Scope ownerScope;
@@ -82,6 +83,15 @@ public class RegexAccelerationTest {
         Regex.Handle handle = ownerScope.regex(EMAIL);
         assertSame(handle, ownerScope.regex(EMAIL));
         assertFalse(handle.isCurrent(new Object()));
+        var targetField = Regex.Handle.class.getDeclaredField("target");
+        targetField.setAccessible(true);
+        var dispatch = (RootCallTarget) targetField.get(handle);
+        assertTrue(
+            "Dispatch must be hidden from guest tooling", dispatch.getRootNode().isInternal());
+        Program second = template.instantiate();
+        assertEquals(false, second.evaluate(Map.of("s", "alice@other.com")));
+        assertTrue(matcher(second).isAccelerated());
+        assertSame(handle, ownerScope.regex(EMAIL));
         try (var other = context()) {
           other.enter();
           try {

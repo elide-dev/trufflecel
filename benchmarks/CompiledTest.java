@@ -3,10 +3,15 @@ package dev.trufflecel;
 import static org.junit.Assert.*;
 
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.nodes.DirectCallNode;
+import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.sun.management.ThreadMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import dev.elide.truffledata.*;
@@ -16,6 +21,81 @@ import org.junit.Test;
 /** Mandatory guest compilation, bounded AST growth, and end-to-end allocation budgets. */
 public final class CompiledTest {
   private static volatile Object sink;
+
+  @Test
+  public void compiledRegexEvictionDoesNotPinContextOwnedCallTargets() throws Exception {
+    try (Context context =
+        Context.newBuilder("cel")
+            .allowExperimentalOptions(true)
+            .option("engine.BackgroundCompilation", "false")
+            .option("engine.CompilationFailureAction", "Throw")
+            .option("compiler.TreatPerformanceWarningsAsErrors", "all")
+            .build()) {
+      context.initialize("cel");
+      context.enter();
+      try {
+        var fixture = compiledRegexOwnershipFixture();
+        for (int attempt = 0;
+            attempt < 10 && fixture.references.stream().anyMatch(ref -> ref.get() != null);
+            attempt++) System.gc();
+        for (var ref : fixture.references)
+          assertNull("Compiled Program retained evicted regex dispatch state", ref.get());
+        assertEquals(true, fixture.program.evaluate(Map.of("s", "alice@example.com")));
+        assertEquals(false, fixture.program.evaluate(Map.of("s", "alice@other.com")));
+        assertFalse(
+            NodeUtil.findAllNodeInstances(
+                    fixture.program.callTarget().getRootNode(), Regex.MatchNode.class)
+                .getFirst()
+                .isAccelerated());
+        Reference.reachabilityFence(fixture.program);
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  private record RegexOwnership(Program program, List<WeakReference<?>> references) {}
+
+  private static RegexOwnership compiledRegexOwnershipFixture() throws Exception {
+    String pattern = "^[a-z]+@example[.]com$";
+    var program = Cel.compile("s.matches('" + pattern + "')");
+    var input = Map.of("s", "alice@example.com");
+    for (int i = 0; i < 2000; i++) assertEquals(true, program.evaluate(input));
+    var target = (OptimizedCallTarget) program.callTarget();
+    target.compile(true);
+    target.waitForCompilation();
+    assertTrue(target.isValidLastTier());
+    assertTrue(
+        NodeUtil.findAllNodeInstances(target.getRootNode(), Regex.MatchNode.class)
+            .getFirst()
+            .isAccelerated());
+    var scope = CelLanguage.currentScope();
+    var handle = scope.regex(pattern);
+    var targetField = Regex.Handle.class.getDeclaredField("target");
+    targetField.setAccessible(true);
+    var adapter = (RootCallTarget) targetField.get(handle);
+    assertTrue("Dispatch must be hidden from guest tooling", adapter.getRootNode().isInternal());
+    var references = new ArrayList<WeakReference<?>>();
+    references.add(new WeakReference<>(handle));
+    references.add(new WeakReference<>(adapter));
+    references.add(new WeakReference<>(adapter.getRootNode()));
+    var calls = NodeUtil.findAllNodeInstances(adapter.getRootNode(), DirectCallNode.class);
+    assertFalse("Cached regex dispatch must have specialized", calls.isEmpty());
+    for (var call : calls) {
+      references.add(new WeakReference<>(call));
+      references.add(new WeakReference<>(call.getCallTarget()));
+      references.add(new WeakReference<>(((RootCallTarget) call.getCallTarget()).getRootNode()));
+    }
+    scope.clearRegexes();
+    // A dummy compilation releases the previous compiler's DebugScope thread-local graph data,
+    // as in Graal's CompilationFinalWeakReferencePartialEvaluationTest. Only Program stays live.
+    var dummyProgram = Cel.compile("x + 1");
+    dummyProgram.evaluate(Map.of("x", 1L));
+    var dummy = (OptimizedCallTarget) dummyProgram.callTarget();
+    dummy.compile(true);
+    dummy.waitForCompilation();
+    return new RegexOwnership(program, references);
+  }
 
   @Test
   public void compiledScalarAndLazyPathsStayWithinBudgets() throws ReflectiveOperationException {
