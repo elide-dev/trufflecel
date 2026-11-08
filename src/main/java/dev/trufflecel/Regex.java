@@ -2,19 +2,16 @@ package dev.trufflecel;
 
 import com.google.re2j.Pattern;
 import com.google.re2j.PatternSyntaxException;
-import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.TruffleContext;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.exception.AbstractTruffleException;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.interop.ExceptionType;
 import com.oracle.truffle.api.interop.InteropException;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.nodes.Node;
-import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,9 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class Regex {
   private Regex() {}
-
-  private static final TruffleLanguage.LanguageReference<CelLanguage> LANGUAGE =
-      TruffleLanguage.LanguageReference.create(CelLanguage.class);
 
   /** A compiled pattern; immutable and safe to share between evaluations and threads. */
   interface Compiled {
@@ -82,7 +76,7 @@ final class Regex {
       }
       Handle handle = current.handle == null ? null : current.handle.get();
       if (handle == null || !handle.isCurrent(current.token)) return fallback.find(text);
-      return handle.find(this, text);
+      return handle.find(text);
     }
 
     @TruffleBoundary
@@ -122,50 +116,23 @@ final class Regex {
   static final class Handle {
     private final Object token;
     private final TruffleContext owner;
-    private final CallTarget target;
+    private final Object regex;
 
-    private Handle(Object token, TruffleContext owner, CallTarget target) {
+    private Handle(Object token, TruffleContext owner, Object regex) {
       this.token = token;
       this.owner = owner;
-      this.target = target;
+      this.regex = regex;
     }
 
     boolean isCurrent(Object expectedToken) {
       return token == expectedToken && owner.isEntered();
     }
 
-    boolean find(Node location, String text) {
-      return (boolean) target.call(location, text, 0);
-    }
-  }
-
-  /** The context owns this complete call tree; it is never adopted by a reusable CEL program. */
-  private static final class DispatchRoot extends RootNode {
-    private final Object regex;
-    @Child private InteropLibrary library;
-
-    private DispatchRoot(Object regex) {
-      super(LANGUAGE.get(null));
-      this.regex = regex;
-      library = InteropLibrary.getFactory().create(regex);
-    }
-
-    @Override
-    public boolean isInternal() {
-      return true;
-    }
-
-    @Override
-    protected boolean isInstrumentable() {
-      return false;
-    }
-
-    @Override
-    public Object execute(VirtualFrame frame) {
+    boolean find(String text) {
       try {
-        // Reuse the call's argument array. The adopted cached library can inline its dispatch,
-        // while the program reaches this root only through its weak context-owned handle.
-        return library.invokeMember(regex, "execBoolean", frame.getArguments());
+        // A cached receiver or DirectCallNode here must never become a child of the CEL program:
+        // it would strongly retain the regex language, engine and its open contexts.
+        return (boolean) InteropLibrary.getUncached().invokeMember(regex, "execBoolean", text, 0);
       } catch (InteropException failure) {
         throw CompilerDirectives.shouldNotReachHere(failure);
       }
@@ -187,7 +154,7 @@ final class Regex {
       Object regex = env.parseInternal(source).call();
       return InteropLibrary.getUncached().isNull(regex)
           ? null
-          : new Handle(token, env.getContext(), new DispatchRoot(regex).getCallTarget());
+          : new Handle(token, env.getContext(), regex);
     } catch (AbstractTruffleException failure) {
       try {
         // A valid RE2/J pattern can exceed TRegex's supported syntax/automaton limits.
