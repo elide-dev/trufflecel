@@ -1,0 +1,391 @@
+diff --git a/src/main/java/dev/trufflecel/CseOptimizer.java b/src/main/java/dev/trufflecel/CseOptimizer.java
+index e5658ab..94e9ad5 100644
+--- a/src/main/java/dev/trufflecel/CseOptimizer.java
++++ b/src/main/java/dev/trufflecel/CseOptimizer.java
+@@ -208,7 +208,7 @@ final class CseOptimizer {
+ 
+     @Override
+     Object doExecute(VirtualFrame frame, EvalContext context) {
+-      EvalContext body = context.fork();
++      var body = context.fork();
+       body.block = new BlockScope(children, null, body, true);
+       return children[children.length - 1].execute(frame, body);
+     }
+@@ -245,9 +245,9 @@ final class CseOptimizer {
+     @Override
+     Object doExecute(VirtualFrame frame, EvalContext context) {
+       int index = Math.toIntExact((Long) value);
+-      Object result = context.block.cached(index);
++      Object result = context.block().cached(index);
+       if (result != null) {
+-        long cost = context.block.cachedCost(index);
++        long cost = context.block().cachedCost(index);
+         if (context.canCharge(cost)) {
+           context.charge(cost);
+           return result;
+@@ -255,7 +255,7 @@ final class CseOptimizer {
+       }
+       long before = context.charged();
+       result = original.execute(frame, context);
+-      context.block.cache(index, result, context.charged() - before);
++      context.block().cache(index, result, context.charged() - before);
+       return result;
+     }
+   }
+diff --git a/src/main/java/dev/trufflecel/EvalContext.java b/src/main/java/dev/trufflecel/EvalContext.java
+index 15d94ae..d27d3bb 100644
+--- a/src/main/java/dev/trufflecel/EvalContext.java
++++ b/src/main/java/dev/trufflecel/EvalContext.java
+@@ -2,66 +2,100 @@ package dev.trufflecel;
+ 
+ import java.util.*;
+ 
+-final class EvalContext {
++sealed class EvalContext {
+   final Environment environment;
++  // Ordinary roots borrow their already allocated call arguments; scoped entries can hold a map.
+   private final Object activation;
+-  private final String singleName;
+-  // Allocate only for expressions with local bindings; reuse slots across loop iterations.
+-  private Object[] scopes;
+-  private int scopeSize;
+-  private long remaining, initialBudget;
++  private long remaining;
+   private EvaluationState evaluation;
+-  private EvalContext budgetParent;
+-  ExprNode.BlockScope block;
+-
+-  EvalContext fork() {
+-    EvalContext copy =
+-        singleName == null
+-            ? new EvalContext(environment, activation)
+-            : new EvalContext(environment, singleName, activation);
+-    copy.scopes = scopes == null ? null : scopes.clone();
+-    copy.scopeSize = scopeSize;
+-    copy.budgetParent = budgetParent == null ? this : budgetParent;
+-    copy.block = block;
+-    copy.evaluation = evaluation;
+-    return copy;
++
++  /** Only escaping or observable evaluation paths need lexical scopes and a budget owner. */
++  static final class Scoped extends EvalContext {
++    private final String singleName;
++    private Object[] scopes;
++    private int scopeSize;
++    private final EvalContext budgetParent;
++    ExprNode.BlockScope block;
++
++    Scoped(Environment environment, Object activation) {
++      this(environment, null, activation);
++    }
++
++    Scoped(Environment environment, String name, Object value) {
++      super(environment, value);
++      singleName = name;
++      budgetParent = null;
++    }
++
++    private Scoped(EvalContext original) {
++      super(original);
++      if (original instanceof Scoped scoped) {
++        singleName = scoped.singleName;
++        scopes = scoped.scopes == null ? null : scoped.scopes.clone();
++        scopeSize = scoped.scopeSize;
++        budgetParent = scoped.budgetParent == null ? original : scoped.budgetParent;
++        block = scoped.block;
++      } else {
++        singleName = null;
++        budgetParent = original;
++      }
++    }
++  }
++
++  final Scoped fork() {
++    return new Scoped(this);
++  }
++
++  final ExprNode.BlockScope block() {
++    return ((Scoped) this).block;
+   }
+ 
+   EvalContext(Environment environment, Object activation) {
+     this.environment = environment;
+     this.activation = activation;
+-    singleName = null;
+-    initialBudget = remaining = environment.budget;
++    remaining = environment.budget;
+   }
+ 
+-  EvalContext(Environment environment, String name, Object value) {
+-    this.environment = environment;
+-    singleName = name;
+-    activation = value;
+-    initialBudget = remaining = environment.budget;
++  private EvalContext(EvalContext original) {
++    environment = original.environment;
++    activation = original.activation;
++    remaining = environment.budget;
++    evaluation = original.evaluation;
+   }
+ 
+   void configure(EvaluationOptions options) {
+-    if (options.budget != 0) initialBudget = remaining = options.budget;
+     evaluation = new EvaluationState(environment, options);
++    remaining = evaluation.budget;
+   }
+ 
+   @SuppressWarnings("unchecked")
+-  private Map<String, Object> activationMap() {
++  private static Map<String, Object> activationMap(Object activation) {
+     return (Map<String, Object>) activation;
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   Map<String, Object> visibleBindings() {
+     var visible = new LinkedHashMap<String, Object>();
+-    if (singleName != null) visible.put(singleName, activation);
+-    else if (activation instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
+-    else visible.putAll(activationMap());
+-    for (int i = 0; i < scopeSize; i += 2) {
+-      Object value = scopes[i + 1];
+-      if (value instanceof PartialState.Slot slot) value = slot.value();
+-      visible.put(
+-          (String) scopes[i], value instanceof ExprNode.LazyBinding lazy ? lazy.display() : value);
++    Object binding = activation;
++    Object value = null;
++    if (activation instanceof Object[] arguments) {
++      binding = arguments[0];
++      value = arguments[1];
++    } else if (this instanceof Scoped scoped && scoped.singleName != null) {
++      binding = scoped.singleName;
++      value = activation;
++    }
++    if (binding instanceof String name) visible.put(name, value);
++    else if (binding instanceof BorrowedBindings borrowed) visible.putAll(borrowed.visible());
++    else visible.putAll(activationMap(binding));
++    if (this instanceof Scoped scoped) {
++      for (int i = 0; i < scoped.scopeSize; i += 2) {
++        Object local = scoped.scopes[i + 1];
++        if (local instanceof PartialState.Slot slot) local = slot.value();
++        visible.put(
++            (String) scoped.scopes[i],
++            local instanceof ExprNode.LazyBinding lazy ? lazy.display() : local);
++      }
+     }
+     return Collections.unmodifiableMap(visible);
+   }
+@@ -72,22 +106,27 @@ final class EvalContext {
+ 
+   /** Budget consumed so far by this root context; plan-time folding records it as node cost. */
+   long charged() {
+-    return budgetParent == null
+-        ? initialBudget - remaining
+-        : budgetParent.initialBudget - budgetParent.remaining;
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      return scoped.budgetParent.chargedOwn();
++    return chargedOwn();
++  }
++
++  private long chargedOwn() {
++    return (evaluation == null ? environment.budget : evaluation.budget) - remaining;
+   }
+ 
+   boolean canCharge(long cost) {
+-    return budgetParent == null ? cost <= remaining : cost <= budgetParent.remaining;
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      return cost <= scoped.budgetParent.remaining;
++    return cost <= remaining;
+   }
+ 
+   void charge(long cost) {
+-    // Dispatch on the owner without merging it into a phi: a phi that mixes the (virtual) root
+-    // context with a loaded parent would force escape analysis to materialize the context in every
+-    // compiled loop, now that error handlers rejoin the main control flow.
+-    EvalContext parent = budgetParent;
+-    if (parent == null) chargeOwn(cost);
+-    else parent.chargeOwn(cost);
++    // Keep root and parent dispatch separate: merging the virtual root with a loaded parent
++    // forces escape analysis to materialize the root in compiled loops.
++    if (this instanceof Scoped scoped && scoped.budgetParent != null)
++      scoped.budgetParent.chargeOwn(cost);
++    else chargeOwn(cost);
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+@@ -199,7 +238,7 @@ final class EvalContext {
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   Object getLocal(int slot) {
+-    return readStored(scopes[slot * 2 + 1]);
++    return readStored(((Scoped) this).scopes[slot * 2 + 1]);
+   }
+ 
+   private Object rootBinding(String name) {
+@@ -207,8 +246,16 @@ final class EvalContext {
+     Object override = attributeRead(path, false);
+     if (override != PartialState.NONE) return override;
+     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
+-    Object value =
+-        singleName == null ? lookup(activation, name) : singleName.equals(name) ? activation : null;
++    Object value;
++    if (activation instanceof Object[] arguments) {
++      Object binding = arguments[0];
++      value =
++          binding instanceof String single
++              ? single.equals(name) ? arguments[1] : null
++              : lookup(binding, name);
++    } else if (this instanceof Scoped scoped && scoped.singleName != null)
++      value = scoped.singleName.equals(name) ? activation : null;
++    else value = lookup(activation, name);
+     if (value != null) return value;
+     if (path != null && evaluation.partial.containsUnknown(path)) return PartialState.MISSING;
+     throw undeclared(name);
+@@ -229,15 +276,18 @@ final class EvalContext {
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   void push(String name, Object value) {
+-    if (scopes == null) scopes = new Object[8];
+-    else if (scopeSize == scopes.length) scopes = Arrays.copyOf(scopes, scopeSize * 2);
+-    scopes[scopeSize++] = name;
+-    scopes[scopeSize++] = value;
++    Scoped scoped = (Scoped) this;
++    if (scoped.scopes == null) scoped.scopes = new Object[8];
++    else if (scoped.scopeSize == scoped.scopes.length)
++      scoped.scopes = Arrays.copyOf(scoped.scopes, scoped.scopeSize * 2);
++    scoped.scopes[scoped.scopeSize++] = name;
++    scoped.scopes[scoped.scopeSize++] = value;
+   }
+ 
+   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+   void pop() {
+-    scopes[--scopeSize] = null;
+-    scopes[--scopeSize] = null;
++    Scoped scoped = (Scoped) this;
++    scoped.scopes[--scoped.scopeSize] = null;
++    scoped.scopes[--scoped.scopeSize] = null;
+   }
+ }
+diff --git a/src/main/java/dev/trufflecel/EvaluationState.java b/src/main/java/dev/trufflecel/EvaluationState.java
+index 3a35bdb..c7a6653 100644
+--- a/src/main/java/dev/trufflecel/EvaluationState.java
++++ b/src/main/java/dev/trufflecel/EvaluationState.java
+@@ -5,12 +5,14 @@ import java.util.function.Function;
+ 
+ /** Optional observable execution state; ordinary calls allocate none of this state. */
+ final class EvaluationState {
++  final long budget;
+   final EvaluationOptions.Control control;
+   final TraceListener trace;
+   final PartialState partial;
+   final Map<String, Function<List<Object>, Object>> functions;
+ 
+   EvaluationState(Environment environment, EvaluationOptions options) {
++    budget = options.budget == 0 ? environment.budget : options.budget;
+     control = options.control();
+     trace = options.trace;
+     partial = options.partial == null ? null : new PartialState(options.partial);
+diff --git a/src/main/java/dev/trufflecel/ExprNode.java b/src/main/java/dev/trufflecel/ExprNode.java
+index aceff27..3b58db3 100644
+--- a/src/main/java/dev/trufflecel/ExprNode.java
++++ b/src/main/java/dev/trufflecel/ExprNode.java
+@@ -627,10 +627,11 @@ class ExprNode extends CelNode {
+     return switch (kind) {
+       case BLOCK -> block(frame, ctx);
+       case BLOCK_INDEX ->
+-          ctx.block.read(
+-              blockOwner.children[Math.toIntExact((Long) value)],
+-              Math.toIntExact((Long) value),
+-              frame);
++          ctx.block()
++              .read(
++                  blockOwner.children[Math.toIntExact((Long) value)],
++                  Math.toIntExact((Long) value),
++                  frame);
+       case CONSTANT -> value;
+       case IDENT ->
+           checkedValue(
+@@ -893,9 +894,9 @@ class ExprNode extends CelNode {
+   private Object block(VirtualFrame frame, EvalContext ctx) {
+     if (getSourceSection() != null) return instrumentedBlock(frame.materialize(), ctx);
+     ctx.charge(children.length);
+-    EvalContext scoped = ctx.fork();
++    var scoped = ctx.fork();
+     scoped.block = new BlockScope(children, null, scoped);
+-    EvalContext body = ctx.fork();
++    var body = ctx.fork();
+     body.block = scoped.block;
+     return children[children.length - 1].execute(frame, body);
+   }
+@@ -904,10 +905,10 @@ class ExprNode extends CelNode {
+   private Object instrumentedBlock(
+       com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
+     ctx.charge(children.length);
+-    EvalContext scoped = ctx.fork();
++    var scoped = ctx.fork();
+     VirtualFrame captured = forkFrame(frame, scoped);
+     scoped.block = new BlockScope(children, captured, scoped);
+-    EvalContext body = ctx.fork();
++    var body = ctx.fork();
+     body.block = scoped.block;
+     return children[children.length - 1].execute(forkFrame(frame, body), body);
+   }
+diff --git a/src/main/java/dev/trufflecel/Optimizer.java b/src/main/java/dev/trufflecel/Optimizer.java
+index bbdbb02..00515e5 100644
+--- a/src/main/java/dev/trufflecel/Optimizer.java
++++ b/src/main/java/dev/trufflecel/Optimizer.java
+@@ -359,7 +359,7 @@ final class Optimizer {
+     // relative to that subtree rather than to any surrounding source comprehension.
+     n.resolveLocals(new ArrayList<>(), null);
+     n.resolveLazyBindings(Map.of());
+-    var context = new EvalContext(env, Map.of());
++    var context = new EvalContext.Scoped(env, Map.of());
+     Object value = null;
+     CelException error = null;
+     try {
+diff --git a/src/main/java/dev/trufflecel/PolicyCompiler.java b/src/main/java/dev/trufflecel/PolicyCompiler.java
+index e2af361..06e61a8 100644
+--- a/src/main/java/dev/trufflecel/PolicyCompiler.java
++++ b/src/main/java/dev/trufflecel/PolicyCompiler.java
+@@ -299,7 +299,7 @@ public final class PolicyCompiler {
+         nodes.put(node.canonicalId, node);
+         Collections.addAll(pending, node.children);
+       }
+-      var analysis = new EvalContext(environment, Map.of());
++      var analysis = new EvalContext.Scoped(environment, Map.of());
+       var known = new IdentityHashMap<ExprNode, Boolean>();
+       for (ExprNode condition : conditions) {
+         // The generated conditional already requires bool during checking.
+diff --git a/src/main/java/dev/trufflecel/Program.java b/src/main/java/dev/trufflecel/Program.java
+index dc481a0..159e3e7 100644
+--- a/src/main/java/dev/trufflecel/Program.java
++++ b/src/main/java/dev/trufflecel/Program.java
+@@ -124,7 +124,8 @@ public final class Program {
+ 
+   public EvaluationResult evaluateWithDetails(Map<String, ?> variables, EvaluationOptions options) {
+     return evaluateWithDetails(
+-        new EvalContext(environment, new BorrowedBindings(variables, bindingLayout)), options);
++        new EvalContext.Scoped(environment, new BorrowedBindings(variables, bindingLayout)),
++        options);
+   }
+ 
+   public EvaluationResult evaluateWithDetails(Activation activation, EvaluationOptions options) {
+@@ -275,8 +276,8 @@ public final class Program {
+ 
+   private static EvalContext context(Environment environment, Object binding, Object value) {
+     return binding instanceof String name
+-        ? new EvalContext(environment, name, value)
+-        : new EvalContext(environment, binding);
++        ? new EvalContext.Scoped(environment, name, value)
++        : new EvalContext.Scoped(environment, binding);
+   }
+ 
+   private static boolean normalizedScalar(Object value) {
+@@ -335,7 +336,7 @@ public final class Program {
+       EvalContext context =
+           contextInArguments
+               ? (EvalContext) frame.getArguments()[0]
+-              : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
++              : new EvalContext(environment, frame.getArguments());
+       try {
+         Object result = body.execute(frame, context);
+         context.checkControl();
