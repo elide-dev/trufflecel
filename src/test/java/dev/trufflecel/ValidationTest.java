@@ -530,11 +530,9 @@ public final class ValidationTest {
     for (String source : List.of("42", "1 + 1", "1 / 0 == 0", "x > 0"))
       assertNull(source, Optimizer.constantBoolean(env.prepare(source).expression(), context));
     assertEquals(
-        Boolean.TRUE,
-        Optimizer.constantBoolean(env.prepare("1 + 1 == 2").expression(), context));
+        Boolean.TRUE, Optimizer.constantBoolean(env.prepare("1 + 1 == 2").expression(), context));
     assertEquals(
-        Boolean.FALSE,
-        Optimizer.constantBoolean(env.prepare("1 + 1 == 3").expression(), context));
+        Boolean.FALSE, Optimizer.constantBoolean(env.prepare("1 + 1 == 3").expression(), context));
   }
 
   @Test
