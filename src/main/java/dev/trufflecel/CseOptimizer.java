@@ -235,6 +235,11 @@ final class CseOptimizer {
     }
 
     @Override
+    void resolveAttributes(boolean defer) {
+      original.resolveAttributes(defer);
+    }
+
+    @Override
     void resolveLocals(ArrayList<String> locals, FrameDescriptor descriptor) {
       original.resolveLocals(locals, descriptor);
     }
