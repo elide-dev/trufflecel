@@ -89,16 +89,26 @@ public final class CanonicalAst {
     ExprNode tree = reader.expression(child(parsed, "expr"), 0);
     environment.prepare("", tree, true);
     if (environment.commonSubexpressions) tree = CseOptimizer.export(tree, environment);
-    var writer = new Writer();
+    var writer = new Writer(true);
     writer.reserved.addAll(reader.ids);
     Message expr = writer.expression(tree);
+    Message originalInfo = child(parsed, "source_info");
+    var sourceInfo = originalInfo.toBuilder();
+    FieldDescriptor positions = originalInfo.getDescriptorForType().findFieldByName("positions");
+    writer.positions.forEach(
+        (id, position) -> {
+          if (!reader.positions.containsKey(id))
+            sourceInfo.addRepeatedField(
+                positions,
+                message("cel.expr.SourceInfo.PositionsEntry", "key", id, "value", position));
+        });
     Message checked =
         message(
             "cel.expr.CheckedExpr",
             "expr",
             expr,
             "source_info",
-            child(parsed, "source_info"),
+            sourceInfo.build(),
             "type_map",
             writer.types,
             "reference_map",
@@ -702,6 +712,16 @@ public final class CanonicalAst {
 
   /** Serializes compiler IR independently of source parsing. */
   static final class Writer {
+    private final boolean importedPositions;
+
+    Writer() {
+      this(false);
+    }
+
+    Writer(boolean importedPositions) {
+      this.importedPositions = importedPositions;
+    }
+
     long nextId = 1;
     final Set<Long> reserved = new HashSet<>();
 
@@ -916,7 +936,11 @@ public final class CanonicalAst {
                 .setField(result.getDescriptorForType().findFieldByName("id"), id)
                 .build();
       }
-      positions.put(id, node.offset);
+      // Imported positions already count code points; parser offsets count UTF-16 chars.
+      // Synthetic CSE slots copy diagnostic provenance, while their parser offset is zero.
+      if (importedPositions) {
+        if (node.errorLine > 0) positions.put(id, node.errorOffset);
+      } else positions.put(id, node.offset);
       Ast.Node original = node.macroCall;
       if (original == null && node.kind == ExprNode.Kind.MACRO)
         original = Unparser.macroCall(Ast.snapshot(node));
