@@ -202,9 +202,11 @@ byte[] roundTrip = value.toBytes().toByteArray();
 
 `input(ProtoRow)` requires the exact plan returned by `type.plan()`. Native decoding retains
 unknown fields and applies protobuf map/oneof semantics. The plan enforces depth, wire-size,
-and value budgets. `Value.message()` explicitly exports a temporary Java message; equality,
-hashing, and zero-value checks currently use that host conversion to preserve their existing
-protobuf semantics. No Java message is retained in the evaluated value graph.
+and value budgets. `Value.message()` explicitly exports a temporary Java message. Equality and
+hashing use that host conversion to preserve protobuf semantics. Zero-value checks use native
+field presence and unknown-field emptiness, with host conversion for map-entry and MessageSet
+descriptors to preserve their special default and unknown-field semantics. No Java message is
+retained in the evaluated value graph.
 
 Registration covers reachable messages and enums. Supply additional descriptors for `Any`
 payload types not reachable through fields; unknown `Any` types fail explicitly. Timestamps,

@@ -138,6 +138,13 @@ forks, five one-second warmups and five one-second measurements, explicit C2 hos
 compilation and JMH's GC profiler. A peak evaluation improvement does not establish
 startup amortization or a complete-request improvement.
 
+### Protobuf zero checks
+
+The [native protobuf zero-check diagnostic](benchmarks/protobuf-zero-20261108/README.md)
+compares native presence checks with the previous message-export implementation on identical
+snapshots, including allocation samples and semantic edge cases. It is a direct adapter
+measurement on a shared host; equality, hashing and ingestion remain separate follow-ups.
+
 ### Prepared-input cold curves and native throughput
 
 `PreparedLifecycle` measures ordinary map entry, explicit snapshot reuse and creation
