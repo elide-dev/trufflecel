@@ -103,6 +103,26 @@ public class LazyBindingTest {
   }
 
   @Test
+  public void capturedLazyReadsPreserveMissingRootErrorsForSingleBindingInputs() {
+    var program = Cel.compile("cel.bind(v, [x].map(n, n + missing), cel.block([], v))");
+    var input = Map.<String, Object>of("x", 1L);
+    var failure = assertThrows(CelException.class, () -> program.evaluate(input));
+    assertEquals(CelException.Code.UNDECLARED, failure.code());
+    assertTrue(failure.getMessage().contains("missing"));
+    assertEquals(List.of(4L), program.evaluate(Map.of("x", 1L, "missing", 3L)));
+    var snapshot = Activation.snapshot(input);
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(CelException.class, () -> program.evaluate(snapshot)).code());
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(
+                CelException.class,
+                () -> program.evaluate(snapshot, EvaluationOptions.newBuilder().build()))
+            .code());
+  }
+
+  @Test
   public void explicitBlocksChargeCachedInitializersOnceAndMemoizeFailures() {
     var calls = new AtomicInteger();
     var env =
