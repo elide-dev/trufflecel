@@ -351,3 +351,11 @@ Errors and unknowns match any parameter type, but ambiguous overloads are never 
 Ordinary strict calls retain CEL unknown/error propagation. Resource exhaustion and cancellation
 always abort before host dispatch. A callback may return an unknown or return/throw a CEL error;
 returned CEL errors propagate as failures rather than successful host values.
+
+## Deriving an environment
+
+`environment.toBuilder()` (or `new Environment.Builder(environment)`) copies the complete
+configuration into an independent builder. Declarations, constants, explicit host callbacks,
+object adapters, aliases, extension restrictions and resource limits are preserved. Adding a
+declaration to the new builder does not change the original environment; registered callbacks
+and adapters retain their existing application-owned lifetime and thread-safety contracts.

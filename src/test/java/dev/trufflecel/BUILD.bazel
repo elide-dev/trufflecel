@@ -351,3 +351,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "diagnostics",
+    srcs = ["DiagnosticsTest.java"],
+    test_class = "dev.trufflecel.DiagnosticsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)

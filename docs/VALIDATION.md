@@ -28,8 +28,12 @@ of its findings together, for example:
 division by zero at offset 7 (line 2, column 4); division by zero at offset 14 (line 2, column 11)
 ```
 
-Parser and checker failures keep their single-issue message format. Evaluation failures also
-carry expression IDs and source locations when available; see [integration](INTEGRATION.md).
+Checker recovery collects independent findings in source order, using `dyn` after a failed
+subexpression so sibling errors remain visible without cascades. Findings are capped at
+`CelException.MAX_ISSUES` (100); resource limits still fail immediately. Single-issue message
+formatting remains unchanged. `error.format(source)` adds bounded source excerpts and caret
+positions without retaining the source in the exception. Evaluation failures also carry
+expression IDs and source locations when available; see [integration](INTEGRATION.md).
 
 ## What is folded
 
