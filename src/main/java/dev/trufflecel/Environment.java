@@ -168,8 +168,9 @@ public final class Environment {
         current.errorOffset = current.offset;
         int line = lines == null ? 0 : Arrays.binarySearch(lines, current.offset);
         if (line < 0) line = -line - 2;
-        current.errorLine = line + 1;
-        current.errorColumn = current.offset - (lines == null ? 0 : lines[line]) + 1;
+        current.errorLine = current.offset < 0 ? -1 : line + 1;
+        current.errorColumn =
+            current.offset < 0 ? -1 : current.offset - (lines == null ? 0 : lines[line]) + 1;
       } else nextId = Math.max(nextId, current.canonicalId + 1);
       for (ExprNode child : current.children) pending.push(new Pending(child, item.depth() + 1));
     }

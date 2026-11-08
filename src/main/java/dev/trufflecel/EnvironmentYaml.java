@@ -22,6 +22,7 @@ public final class EnvironmentYaml {
         "name",
         "description",
         "container",
+        "context_variable",
         "variables",
         "functions",
         "extensions",
@@ -55,6 +56,20 @@ public final class EnvironmentYaml {
       if (!names.add(name)) throw new IllegalArgumentException("duplicate variable: " + name);
       builder.variable(name, type(variable));
     }
+    if (data.containsKey("context_variable")) {
+      CelType contextType = type(data.get("context_variable"));
+      ObjectType adapter = builder.build().objectTypes.get(contextType.name());
+      if (adapter == null)
+        throw new IllegalArgumentException("unregistered context type: " + contextType);
+      adapter
+          .fields()
+          .forEach(
+              (name, fieldType) -> {
+                if (!names.add(name))
+                  throw new IllegalArgumentException("duplicate context variable: " + name);
+                builder.variable(name, fieldType);
+              });
+    }
     for (Object item : list(data, "functions")) {
       var function = object(item);
       keys(function, "name", "description", "overloads");
@@ -84,6 +99,7 @@ public final class EnvironmentYaml {
         var library = object(item);
         keys(library, "name", "version");
         String name = string(library.get("name"));
+        if (name.equals("two-var-comprehensions")) name = "comprehensions";
         Object version = library.getOrDefault("version", 0L);
         Integer number =
             version.equals("latest")
@@ -114,19 +130,21 @@ public final class EnvironmentYaml {
         builder.allowedFunctions(functions);
       }
       boolean noMacros = bool(stdlib.getOrDefault("disable_macros", false));
-      if (stdlib.containsKey("include_macros") || stdlib.containsKey("exclude_macros")) {
-        var macros =
-            new LinkedHashSet<String>(
-                noMacros
-                    ? Set.of()
-                    : Set.of("has", "all", "exists", "exists_one", "map", "filter"));
+      if (noMacros
+          || stdlib.containsKey("include_macros")
+          || stdlib.containsKey("exclude_macros")) {
+        var macros = new LinkedHashSet<String>(Macro.STANDARD);
         if (stdlib.containsKey("include_macros")) {
-          macros.clear();
+          macros.removeAll(
+              Set.of("has", "all", "exists", "exists_one", "existsOne", "map", "filter"));
           for (Object macro : list(stdlib, "include_macros")) macros.add(string(macro));
         }
+        if (noMacros)
+          macros.removeAll(
+              Set.of("has", "all", "exists", "exists_one", "existsOne", "map", "filter"));
         for (Object macro : list(stdlib, "exclude_macros")) macros.remove(string(macro));
         builder.standardMacros(macros);
-      } else if (noMacros) builder.macros(false);
+      }
     }
     for (Object item : list(data, "features")) {
       var feature = object(item);
@@ -134,8 +152,10 @@ public final class EnvironmentYaml {
       String name = string(feature.get("name"));
       boolean enabled = bool(feature.get("enabled"));
       switch (name) {
+        case "trufflecel.macros" -> builder.macros(enabled);
         case "trufflecel.infer_variables" -> builder.inferVariables(enabled);
         case "trufflecel.homogeneous_literals" -> builder.homogeneousLiterals(enabled);
+        case "trufflecel.common_subexpressions" -> builder.commonSubexpressions(enabled);
         case "trufflecel.strict_validation" ->
             builder.validation(
                 enabled ? Environment.Validation.STRICT : Environment.Validation.DEFERRED);
@@ -150,6 +170,13 @@ public final class EnvironmentYaml {
       var limit = object(item);
       keys(limit, "name", "value");
       String name = string(limit.get("name"));
+      if (name.equals("trufflecel.evaluation_budget")) {
+        Object budget = limit.get("value");
+        if (!(budget instanceof Long value) || value < 0)
+          throw new IllegalArgumentException("invalid evaluation budget");
+        builder.evaluationBudget(value);
+        continue;
+      }
       int value = integer(limit.get("value"));
       switch (name) {
         case "cel.limit.expression_code_points" -> builder.maxSourceLength(value);
@@ -157,7 +184,6 @@ public final class EnvironmentYaml {
         case "trufflecel.ast_nodes" -> builder.maxAstNodes(value);
         case "trufflecel.regex_program_size" -> builder.maxRegexProgramSize(value);
         case "trufflecel.comprehension_nesting" -> builder.maxComprehensionNesting(value);
-        case "trufflecel.evaluation_budget" -> builder.evaluationBudget(value);
         default -> throw new IllegalArgumentException("unsupported environment limit: " + name);
       }
     }
@@ -173,6 +199,8 @@ public final class EnvironmentYaml {
     if (!environment.customMacros.isEmpty())
       throw new IllegalArgumentException(
           "custom macro callbacks require explicit host registration");
+    if (!environment.validators.isEmpty())
+      throw new IllegalArgumentException("custom validators require explicit host registration");
     var data = new LinkedHashMap<String, Object>();
     var aliases = new ArrayList<Object>();
     new TreeMap<>(environment.aliases)
@@ -214,8 +242,12 @@ public final class EnvironmentYaml {
                 .toList());
     var stdlib = new LinkedHashMap<String, Object>();
     stdlib.put("disable_macros", !environment.macros);
-    if (environment.macros && !environment.standardMacros.equals(Macro.STANDARD))
+    if (environment.macros && !environment.standardMacros.equals(Macro.STANDARD)) {
       stdlib.put("include_macros", new ArrayList<>(new TreeSet<>(environment.standardMacros)));
+      var excluded = new TreeSet<>(Macro.STANDARD);
+      excluded.removeAll(environment.standardMacros);
+      stdlib.put("exclude_macros", new ArrayList<>(excluded));
+    }
     if (environment.libraryPolicy.functions != null)
       stdlib.put(
           "include_functions",
@@ -226,6 +258,12 @@ public final class EnvironmentYaml {
         "features",
         List.of(
             Map.of("name", "trufflecel.infer_variables", "enabled", environment.inferVariables),
+            Map.of("name", "trufflecel.macros", "enabled", environment.macros),
+            Map.of(
+                "name",
+                "trufflecel.common_subexpressions",
+                "enabled",
+                environment.commonSubexpressions),
             Map.of(
                 "name",
                 "trufflecel.homogeneous_literals",

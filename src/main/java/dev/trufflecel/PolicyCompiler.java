@@ -14,7 +14,7 @@ public final class PolicyCompiler {
 
   /** Policy parsing and type checking can run during Native Image construction. */
   public static PreparedProgram prepare(Environment environment, String yaml) {
-    var data = ConfigurationData.read(yaml);
+    var data = ConfigurationData.policy(yaml);
     keys(data, "name", "description", "imports", "rule", "verification");
     String name = string(data.get("name"));
     if (name.isBlank()) throw new IllegalArgumentException("policy name is empty");
@@ -30,10 +30,31 @@ public final class PolicyCompiler {
       builder.abbreviations(type);
     }
     Environment configured = builder.build();
-    var compiler = new Compiler(configured);
+    var compiler = new Compiler(configured, yaml);
     Rule rule = compiler.rule(object(data.get("rule")), Map.of(), false, 0);
-    ExprNode expression = rule.exhaustive ? call("value", true, rule.expression) : rule.expression;
-    PreparedProgram result = configured.prepare("", expression, true);
+    ExprNode expression =
+        rule.exhaustive
+            ? call("value", true, rule.expression)
+            : bind(
+                "$policy:result",
+                rule.expression,
+                conditional(
+                    call("hasValue", true, identifier("$policy:result")),
+                    call("dyn", false, call("value", true, identifier("$policy:result"))),
+                    call("dyn", false, none())));
+    // Each user expression was checked against the original restrictions. These libraries
+    // implement the compiler's generated optional/lazy scaffolding only.
+    var libraries = new LinkedHashMap<>(configured.libraryPolicy.libraries);
+    libraries.put("optional", 2);
+    libraries.put("bindings", 0);
+    var runtime = configured.toBuilder().libraries(libraries);
+    if (configured.libraryPolicy.functions != null) {
+      var functions = new HashSet<>(configured.libraryPolicy.functions);
+      functions.addAll(
+          Set.of("optional.of", "optional.none", "value", "hasValue", "or", "dyn", "cel.bind"));
+      runtime.allowedFunctions(functions);
+    }
+    PreparedProgram result = runtime.build().prepare(yaml, expression, true);
     compiler.validate();
     if (data.containsKey("verification")) invariants(data);
     return result;
@@ -93,10 +114,14 @@ public final class PolicyCompiler {
     private final List<List<Outcome>> outputs = new ArrayList<>();
     private final List<ExprNode> conditions = new ArrayList<>(), explanations = new ArrayList<>();
     private final Set<String> ruleIds = new HashSet<>();
+    private final Map<String, CelType> localTypes = new HashMap<>();
     private int nextBinding;
 
-    Compiler(Environment environment) {
+    private final String policySource;
+
+    Compiler(Environment environment, String policySource) {
       this.environment = environment;
+      this.policySource = policySource;
     }
 
     Rule rule(
@@ -119,8 +144,9 @@ public final class PolicyCompiler {
         String name = string(variable.get("name"));
         if (!name.matches("[A-Za-z_][A-Za-z_0-9]*") || !names.add(name))
           throw failure("invalid or duplicate policy variable: " + name);
-        ExprNode initializer = expression(string(variable.get("expression")), scope);
+        ExprNode initializer = expression(variable.get("expression"), scope);
         String internal = "$policy:" + nextBinding++;
+        localTypes.put(internal, initializer.checkedType);
         locals.add(Map.entry(internal, initializer));
         scope.put(name, internal);
       }
@@ -130,17 +156,18 @@ public final class PolicyCompiler {
       var outcomes = new ArrayList<Outcome>();
       outputs.add(outcomes);
       boolean exhaustive = aggregate;
+      boolean conditionalAbsence = false;
       for (int i = 0; i < entries.size(); i++) {
         var entry = object(entries.get(i));
         keys(entry, "condition", "output", "rule", "explanation");
         if (entry.containsKey("output") == entry.containsKey("rule"))
           throw failure("choice requires exactly one output or rule");
-        ExprNode condition = expression(string(entry.getOrDefault("condition", "true")), scope);
+        ExprNode condition = expression(entry.getOrDefault("condition", "true"), scope);
         conditions.add(condition);
         boolean unconditional =
             condition.kind == ExprNode.Kind.CONSTANT && Boolean.TRUE.equals(condition.value);
         if (entry.containsKey("explanation")) {
-          ExprNode explanation = expression(string(entry.get("explanation")), scope);
+          ExprNode explanation = expression(entry.get("explanation"), scope);
           explanations.add(explanation);
           locals.add(Map.entry("$explanation:" + nextBinding++, explanation));
         }
@@ -153,7 +180,7 @@ public final class PolicyCompiler {
           complete = child.exhaustive;
           outcomes.add(new Outcome(outcome, true));
         } else {
-          ExprNode output = expression(string(entry.get("output")), scope);
+          ExprNode output = expression(entry.get("output"), scope);
           outcomes.add(new Outcome(output, false));
           outcome = some(output);
         }
@@ -162,6 +189,7 @@ public final class PolicyCompiler {
           if (i != entries.size() - 1)
             throw failure("unreachable choice after an unconditional outcome");
         }
+        if (!unconditional && nested && !complete) conditionalAbsence = true;
         choices.add(new Choice(condition, outcome, unconditional, nested, complete));
       }
       ExprNode result;
@@ -187,18 +215,27 @@ public final class PolicyCompiler {
         var local = locals.get(i);
         result = bind(local.getKey(), local.getValue(), result);
       }
-      return new Rule(result, exhaustive);
+      return new Rule(result, exhaustive && !conditionalAbsence);
     }
 
-    private ExprNode expression(String source, Map<String, String> variables) {
+    private ExprNode expression(Object value, Map<String, String> variables) {
+      var expression =
+          value instanceof ConfigurationData.Expression located
+              ? located
+              : new ConfigurationData.Expression(string(value), 0);
+      String source = expression.text();
       if (source.length() > environment.maxSourceLength)
         throw failure("policy expression length limit exceeded");
       try {
-        ExprNode parsed = new Parser(source, environment).parse();
+        ExprNode parsed = new Parser(source, environment, expression.offset()).parse();
         environment.checkDepth(parsed);
-        return rewrite(parsed, variables, Set.of());
+        ExprNode rewritten = rewrite(parsed, variables, Set.of());
+        rewritten.checkedType =
+            new Checker(environment, environment.variables, true)
+                .check(com.oracle.truffle.api.nodes.NodeUtil.cloneNode(rewritten), localTypes);
+        return rewritten;
       } catch (CelException error) {
-        throw error.locate(source);
+        throw error.locate(policySource);
       }
     }
 
@@ -211,7 +248,18 @@ public final class PolicyCompiler {
         if (name == null) throw failure("undeclared policy variable: " + node.name);
         return new ExprNode(ExprNode.Kind.IDENT, name, null, node.offset);
       }
-      if (node.kind == ExprNode.Kind.MACRO && !node.name.equals("has")) {
+      if (node.kind == ExprNode.Kind.COMPREHENSION) {
+        node.children[0] = rewrite(node.children[0], variables, bound);
+        node.children[1] = rewrite(node.children[1], variables, bound);
+        String[] names = (String[]) node.value;
+        var body = new HashSet<>(bound);
+        body.addAll(Arrays.asList(names));
+        node.children[2] = rewrite(node.children[2], variables, body);
+        node.children[3] = rewrite(node.children[3], variables, body);
+        var result = new HashSet<>(bound);
+        result.add(names[0]);
+        node.children[4] = rewrite(node.children[4], variables, result);
+      } else if (node.kind == ExprNode.Kind.MACRO && !node.name.equals("has")) {
         node.children[0] = rewrite(node.children[0], variables, bound);
         var inner = new HashSet<>(bound);
         inner.addAll(Arrays.asList((String[]) node.value));
@@ -255,6 +303,10 @@ public final class PolicyCompiler {
         new ExprNode(ExprNode.Kind.MACRO, "bind", new String[] {name}, -1, initializer, body);
     node.bindings = new WriteNode[] {new WriteNode(name, -1, -1)};
     return node;
+  }
+
+  private static ExprNode identifier(String name) {
+    return new ExprNode(ExprNode.Kind.IDENT, name, null, -1);
   }
 
   private static ExprNode call(String name, boolean receiver, ExprNode... arguments) {
