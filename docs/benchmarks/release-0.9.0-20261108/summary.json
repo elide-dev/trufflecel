@@ -1,0 +1,1329 @@
+{
+  "commit": "f47ffa6f82ee43f1e12b1882a3d4472ddb4798c1",
+  "artifact_sha256": "9bd80b7bcece688e33181bf136b4735a8fffcacd83b8a7d013df7db0b05ca748",
+  "metrics": {
+    "ns_per_op": {
+      "unit": "ns/op",
+      "lower": 24,
+      "equal": 0,
+      "higher": 0,
+      "overlapping_ranges": 1,
+      "cells": [
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 1266.946858108108,
+              "minimum": 1233.740089156468,
+              "maximum": 1731.1283696454948
+            },
+            "cel-java": {
+              "median": 241521.3814102564,
+              "minimum": 223786.5193452381,
+              "maximum": 248120.6447368421
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 3804.188438133874,
+              "minimum": 3705.5614875543265,
+              "maximum": 3911.3683771380893
+            },
+            "cel-java": {
+              "median": 281115.8125,
+              "minimum": 260874.22569444444,
+              "maximum": 291485.8712121212
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 6362.675076322931,
+              "minimum": 6302.936155913979,
+              "maximum": 6829.78366084425
+            },
+            "cel-java": {
+              "median": 484200.396875,
+              "minimum": 474040.690625,
+              "maximum": 484342.659375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 2185.239177930552,
+              "minimum": 2175.1815400232017,
+              "maximum": 2187.6066408072793
+            },
+            "cel-java": {
+              "median": 199547.76063829788,
+              "minimum": 197247.66276041666,
+              "maximum": 203992.3470744681
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 4138.4903188437775,
+              "minimum": 4084.42081337108,
+              "maximum": 4161.2585164225475
+            },
+            "cel-java": {
+              "median": 208311.36956521738,
+              "minimum": 206823.30163043478,
+              "maximum": 213834.00710227274
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 6789.4031046343225,
+              "minimum": 6715.751298352436,
+              "maximum": 6854.547012061404
+            },
+            "cel-java": {
+              "median": 250120.45394736843,
+              "minimum": 248732.41611842104,
+              "maximum": 255258.84797297296
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 13.609304608945035,
+              "minimum": 13.037236529764819,
+              "maximum": 14.257692832658101
+            },
+            "cel-java": {
+              "median": 36.21437659340235,
+              "minimum": 35.887197940271314,
+              "maximum": 37.15565180128409
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 46.697796088021995,
+              "minimum": 46.29161529126213,
+              "maximum": 48.20892076869329
+            },
+            "cel-java": {
+              "median": 126.28874764278017,
+              "minimum": 123.80388693746039,
+              "maximum": 128.64634844950604
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 92.84532933301648,
+              "minimum": 92.42844045741325,
+              "maximum": 96.02098033241849
+            },
+            "cel-java": {
+              "median": 502.71390571397944,
+              "minimum": 486.5768704616183,
+              "maximum": 518.6478809457965
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 24.028728758714372,
+              "minimum": 23.943458819007436,
+              "maximum": 24.28788957253886
+            },
+            "cel-java": {
+              "median": 124.84557247283766,
+              "minimum": 123.91905083659336,
+              "maximum": 127.83335208060646
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 98.94423930365586,
+              "minimum": 98.78361073942177,
+              "maximum": 99.6625338807398
+            },
+            "cel-java": {
+              "median": 236.20190793782749,
+              "minimum": 235.2528571607788,
+              "maximum": 244.97627508361205
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 109.42035699696545,
+              "minimum": 107.77275999517197,
+              "maximum": 110.42458221452799
+            },
+            "cel-java": {
+              "median": 786.6300125838926,
+              "minimum": 773.175647262533,
+              "maximum": 802.7650096318494
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 24.325988214597086,
+              "minimum": 24.0711175963869,
+              "maximum": 24.91135365072701
+            },
+            "cel-java": {
+              "median": 124.64145594022548,
+              "minimum": 123.51552125052699,
+              "maximum": 125.0979698174637
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 97.56596398393273,
+              "minimum": 96.02405077228778,
+              "maximum": 99.58016341864911
+            },
+            "cel-java": {
+              "median": 238.03630654701462,
+              "minimum": 236.67990679271003,
+              "maximum": 248.23721079521388
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 108.27914241500369,
+              "minimum": 107.82355393284269,
+              "maximum": 109.71144141429508
+            },
+            "cel-java": {
+              "median": 791.812573902027,
+              "minimum": 786.6293519295302,
+              "maximum": 796.5957615064538
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 33.23921859045269,
+              "minimum": 32.45634558996621,
+              "maximum": 36.84489242399233
+            },
+            "cel-java": {
+              "median": 35.84536368485043,
+              "minimum": 35.016420302602484,
+              "maximum": 36.961625707673626
+            }
+          },
+          "ranges_overlap": true
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 92.40892110865794,
+              "minimum": 81.60963668610724,
+              "maximum": 92.59835009086599
+            },
+            "cel-java": {
+              "median": 125.72929628835014,
+              "minimum": 117.0609261074211,
+              "maximum": 127.9235846771993
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 238.6237212438925,
+              "minimum": 224.5468585368774,
+              "maximum": 240.90845278462803
+            },
+            "cel-java": {
+              "median": 518.7248651825221,
+              "minimum": 501.6700188623716,
+              "maximum": 562.9030717158981
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 43.88247227916948,
+              "minimum": 43.81496513758038,
+              "maximum": 43.973877722591176
+            },
+            "cel-java": {
+              "median": 125.26137054430312,
+              "minimum": 123.49556276343519,
+              "maximum": 126.57217366360692
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 148.28363012398785,
+              "minimum": 147.77493657022188,
+              "maximum": 148.69393574758945
+            },
+            "cel-java": {
+              "median": 235.94561757749597,
+              "minimum": 233.9024294817438,
+              "maximum": 244.52249719701712
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 368.8384031820327,
+              "minimum": 358.97244813992654,
+              "maximum": 373.870286591199
+            },
+            "cel-java": {
+              "median": 790.7674806005398,
+              "minimum": 787.5776892221102,
+              "maximum": 796.8120276409646
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 44.35903964626391,
+              "minimum": 43.78178935669456,
+              "maximum": 44.54156659777651
+            },
+            "cel-java": {
+              "median": 124.465028774161,
+              "minimum": 123.88208327827695,
+              "maximum": 125.55382958136919
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 148.56717482251523,
+              "minimum": 148.3693571993671,
+              "maximum": 149.91499684222308
+            },
+            "cel-java": {
+              "median": 239.07850430946553,
+              "minimum": 230.3947907453813,
+              "maximum": 241.74750702609325
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 363.811639218653,
+              "minimum": 359.2594353170956,
+              "maximum": 366.8133604505632
+            },
+            "cel-java": {
+              "median": 777.5181790865385,
+              "minimum": 775.5697699652778,
+              "maximum": 789.5957951295424
+            }
+          },
+          "ranges_overlap": false
+        }
+      ]
+    },
+    "allocated_bytes_per_op": {
+      "unit": "B/op",
+      "lower": 24,
+      "equal": 0,
+      "higher": 0,
+      "overlapping_ranges": 0,
+      "cells": [
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 3288.0,
+              "minimum": 3288.0,
+              "maximum": 3288.0
+            },
+            "cel-java": {
+              "median": 257626.859375,
+              "minimum": 257400.6796875,
+              "maximum": 261920.59375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 4952.0,
+              "minimum": 4952.0,
+              "maximum": 4952.0703125
+            },
+            "cel-java": {
+              "median": 267989.625,
+              "minimum": 267066.03125,
+              "maximum": 268648.4609375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 8136.0,
+              "minimum": 8136.0,
+              "maximum": 8136.0
+            },
+            "cel-java": {
+              "median": 324052.1015625,
+              "minimum": 323555.625,
+              "maximum": 326934.5625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 2832.0,
+              "minimum": 2832.0,
+              "maximum": 2832.0
+            },
+            "cel-java": {
+              "median": 230184.0,
+              "minimum": 230184.0,
+              "maximum": 230184.0
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 4200.0,
+              "minimum": 4200.0,
+              "maximum": 4200.0
+            },
+            "cel-java": {
+              "median": 237872.0,
+              "minimum": 237872.0,
+              "maximum": 237872.0
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 6816.0,
+              "minimum": 6816.0,
+              "maximum": 6816.0
+            },
+            "cel-java": {
+              "median": 285424.0,
+              "minimum": 285424.0,
+              "maximum": 285424.0
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 24.0003662109375,
+              "minimum": 24.0003662109375,
+              "maximum": 24.0003662109375
+            },
+            "cel-java": {
+              "median": 185.36376953125,
+              "minimum": 171.204833984375,
+              "maximum": 193.4857177734375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 48.0003662109375,
+              "minimum": 48.0003662109375,
+              "maximum": 48.0003662109375
+            },
+            "cel-java": {
+              "median": 256.0003662109375,
+              "minimum": 256.0003662109375,
+              "maximum": 256.02783203125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 234.0003662109375,
+              "minimum": 234.0003662109375,
+              "maximum": 234.0003662109375
+            },
+            "cel-java": {
+              "median": 673.999755859375,
+              "minimum": 673.99951171875,
+              "maximum": 674.0003662109375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 16.000244140625,
+              "minimum": 16.000244140625,
+              "maximum": 16.000244140625
+            },
+            "cel-java": {
+              "median": 216.000244140625,
+              "minimum": 216.000244140625,
+              "maximum": 216.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 40.000244140625,
+              "minimum": 40.000244140625,
+              "maximum": 40.000244140625
+            },
+            "cel-java": {
+              "median": 412.000244140625,
+              "minimum": 412.000244140625,
+              "maximum": 412.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 196.000244140625,
+              "minimum": 196.000244140625,
+              "maximum": 196.000244140625
+            },
+            "cel-java": {
+              "median": 648.000244140625,
+              "minimum": 648.000244140625,
+              "maximum": 648.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 16.000244140625,
+              "minimum": 16.000244140625,
+              "maximum": 16.000244140625
+            },
+            "cel-java": {
+              "median": 216.000244140625,
+              "minimum": 216.000244140625,
+              "maximum": 216.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 40.000244140625,
+              "minimum": 40.000244140625,
+              "maximum": 40.000244140625
+            },
+            "cel-java": {
+              "median": 412.000244140625,
+              "minimum": 412.000244140625,
+              "maximum": 412.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 196.000244140625,
+              "minimum": 196.000244140625,
+              "maximum": 196.000244140625
+            },
+            "cel-java": {
+              "median": 648.000244140625,
+              "minimum": 648.000244140625,
+              "maximum": 648.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 128.0003662109375,
+              "minimum": 128.0003662109375,
+              "maximum": 128.0003662109375
+            },
+            "cel-java": {
+              "median": 174.2510986328125,
+              "minimum": 163.972412109375,
+              "maximum": 190.8214111328125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 152.0003662109375,
+              "minimum": 152.0003662109375,
+              "maximum": 152.0003662109375
+            },
+            "cel-java": {
+              "median": 256.0003662109375,
+              "minimum": 256.0003662109375,
+              "maximum": 256.0003662109375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 362.0003662109375,
+              "minimum": 362.0003662109375,
+              "maximum": 362.0003662109375
+            },
+            "cel-java": {
+              "median": 673.999755859375,
+              "minimum": 629.502685546875,
+              "maximum": 674.0003662109375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 104.000244140625,
+              "minimum": 104.000244140625,
+              "maximum": 104.000244140625
+            },
+            "cel-java": {
+              "median": 216.000244140625,
+              "minimum": 216.000244140625,
+              "maximum": 216.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 128.000244140625,
+              "minimum": 128.000244140625,
+              "maximum": 128.000244140625
+            },
+            "cel-java": {
+              "median": 412.000244140625,
+              "minimum": 412.000244140625,
+              "maximum": 412.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 300.000244140625,
+              "minimum": 300.000244140625,
+              "maximum": 300.000244140625
+            },
+            "cel-java": {
+              "median": 648.000244140625,
+              "minimum": 648.000244140625,
+              "maximum": 648.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 104.000244140625,
+              "minimum": 104.000244140625,
+              "maximum": 104.000244140625
+            },
+            "cel-java": {
+              "median": 216.000244140625,
+              "minimum": 216.000244140625,
+              "maximum": 216.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 128.000244140625,
+              "minimum": 128.000244140625,
+              "maximum": 128.000244140625
+            },
+            "cel-java": {
+              "median": 412.000244140625,
+              "minimum": 412.000244140625,
+              "maximum": 412.000244140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 300.000244140625,
+              "minimum": 300.000244140625,
+              "maximum": 300.000244140625
+            },
+            "cel-java": {
+              "median": 648.000244140625,
+              "minimum": 648.000244140625,
+              "maximum": 648.000244140625
+            }
+          },
+          "ranges_overlap": false
+        }
+      ]
+    },
+    "peak_rss_kib": {
+      "unit": "MiB",
+      "lower": 10,
+      "equal": 0,
+      "higher": 14,
+      "overlapping_ranges": 0,
+      "cells": [
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 177.5234375,
+              "minimum": 176.86328125,
+              "maximum": 177.671875
+            },
+            "cel-java": {
+              "median": 413.1640625,
+              "minimum": 411.90625,
+              "maximum": 413.75
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 179.40234375,
+              "minimum": 174.72265625,
+              "maximum": 180.9375
+            },
+            "cel-java": {
+              "median": 415.296875,
+              "minimum": 404.32421875,
+              "maximum": 421.4765625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 215.58203125,
+              "minimum": 214.6015625,
+              "maximum": 216.30859375
+            },
+            "cel-java": {
+              "median": 481.5625,
+              "minimum": 481.04296875,
+              "maximum": 495.77734375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 55.47265625,
+              "minimum": 54.0703125,
+              "maximum": 56.2421875
+            },
+            "cel-java": {
+              "median": 76.1484375,
+              "minimum": 75.07421875,
+              "maximum": 76.19140625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 65.3828125,
+              "minimum": 65.1015625,
+              "maximum": 65.57421875
+            },
+            "cel-java": {
+              "median": 76.1953125,
+              "minimum": 75.375,
+              "maximum": 76.359375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "compile",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 81.28125,
+              "minimum": 80.26953125,
+              "maximum": 81.296875
+            },
+            "cel-java": {
+              "median": 75.99609375,
+              "minimum": 75.296875,
+              "maximum": 76.37890625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 194.9921875,
+              "minimum": 194.7734375,
+              "maximum": 195.8515625
+            },
+            "cel-java": {
+              "median": 234.984375,
+              "minimum": 234.15234375,
+              "maximum": 235.10546875
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 209.9921875,
+              "minimum": 209.640625,
+              "maximum": 212.70703125
+            },
+            "cel-java": {
+              "median": 244.2890625,
+              "minimum": 243.30859375,
+              "maximum": 244.73828125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 307.828125,
+              "minimum": 307.11328125,
+              "maximum": 307.91015625
+            },
+            "cel-java": {
+              "median": 280.1875,
+              "minimum": 279.41015625,
+              "maximum": 280.99609375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 81.26171875,
+              "minimum": 80.96875,
+              "maximum": 82.078125
+            },
+            "cel-java": {
+              "median": 78.2265625,
+              "minimum": 77.92578125,
+              "maximum": 80.0703125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 99.0703125,
+              "minimum": 98.73046875,
+              "maximum": 101.12890625
+            },
+            "cel-java": {
+              "median": 77.875,
+              "minimum": 77.1796875,
+              "maximum": 79.17578125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "evaluate",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 141.03515625,
+              "minimum": 140.5546875,
+              "maximum": 142.31640625
+            },
+            "cel-java": {
+              "median": 75.00390625,
+              "minimum": 74.81640625,
+              "maximum": 75.16796875
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 81.89453125,
+              "minimum": 81.44921875,
+              "maximum": 83.39453125
+            },
+            "cel-java": {
+              "median": 76.28515625,
+              "minimum": 76.10546875,
+              "maximum": 77.30859375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 98.515625,
+              "minimum": 98.40234375,
+              "maximum": 99.50390625
+            },
+            "cel-java": {
+              "median": 74.7109375,
+              "minimum": 73.91796875,
+              "maximum": 75.08203125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-ast",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 141.33984375,
+              "minimum": 140.7890625,
+              "maximum": 142.70703125
+            },
+            "cel-java": {
+              "median": 73.0078125,
+              "minimum": 72.84765625,
+              "maximum": 74.20703125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 191.05859375,
+              "minimum": 190.59765625,
+              "maximum": 191.5390625
+            },
+            "cel-java": {
+              "median": 235.25390625,
+              "minimum": 235.078125,
+              "maximum": 236.15234375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 202.421875,
+              "minimum": 202.35546875,
+              "maximum": 204.7890625
+            },
+            "cel-java": {
+              "median": 243.37890625,
+              "minimum": 243.20703125,
+              "maximum": 244.30859375
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "jvm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 247.34375,
+              "minimum": 247.2578125,
+              "maximum": 248.75390625
+            },
+            "cel-java": {
+              "median": 280.80078125,
+              "minimum": 280.421875,
+              "maximum": 281.515625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 80.44921875,
+              "minimum": 80.03515625,
+              "maximum": 81.48828125
+            },
+            "cel-java": {
+              "median": 78.71484375,
+              "minimum": 78.51171875,
+              "maximum": 78.78125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 80.29296875,
+              "minimum": 79.9609375,
+              "maximum": 80.48828125
+            },
+            "cel-java": {
+              "median": 77.0078125,
+              "minimum": 76.2109375,
+              "maximum": 77.1015625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 81.13671875,
+              "minimum": 80.390625,
+              "maximum": 82.08984375
+            },
+            "cel-java": {
+              "median": 75.19140625,
+              "minimum": 74.7578125,
+              "maximum": 76.00390625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "scalar",
+          "groups": {
+            "trufflecel": {
+              "median": 79.80078125,
+              "minimum": 79.79296875,
+              "maximum": 81.15625
+            },
+            "cel-java": {
+              "median": 76.1015625,
+              "minimum": 75.98828125,
+              "maximum": 76.578125
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "policy",
+          "groups": {
+            "trufflecel": {
+              "median": 80.1796875,
+              "minimum": 79.6171875,
+              "maximum": 81.08984375
+            },
+            "cel-java": {
+              "median": 75.19921875,
+              "minimum": 73.90234375,
+              "maximum": 75.59765625
+            }
+          },
+          "ranges_overlap": false
+        },
+        {
+          "runtime": "svm",
+          "stage": "image-interpret",
+          "workload": "comprehension",
+          "groups": {
+            "trufflecel": {
+              "median": 80.15234375,
+              "minimum": 78.9765625,
+              "maximum": 80.16015625
+            },
+            "cel-java": {
+              "median": 72.984375,
+              "minimum": 72.75390625,
+              "maximum": 74.29296875
+            }
+          },
+          "ranges_overlap": false
+        }
+      ]
+    }
+  }
+}
