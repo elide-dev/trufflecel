@@ -1,0 +1,7 @@
+# Required JVM CI measures every production source and enforces 99.8% lines/branches.
+# Retain patch reporting as review information without a second automatic threshold.
+coverage:
+  status:
+    patch:
+      default:
+        informational: true

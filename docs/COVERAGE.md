@@ -303,3 +303,10 @@ bazel run //tools:coverage --config=local
 
 CI validates and uploads the resulting LCOV report and preserves JUnit results before the
 coverage invocation replaces Bazel's test-log links. See [CI reporting](CI.md#codecov-reporting).
+
+## Patch reporting
+
+Required JVM CI measures every owned production source and enforces 99.8% line
+and branch coverage. Codecov patch reporting is informational: its automatic
+base-relative target is independent of these mandatory full-source floors.
+Upload failures remain errors; no production source is excluded.
