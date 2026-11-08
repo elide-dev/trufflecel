@@ -188,7 +188,12 @@ final class EvalContext {
   }
 
   Object getRoot(String name) {
-    return rootBinding(name.startsWith(".") ? name.substring(1) : name);
+    return rootBinding(name.startsWith(".") ? absoluteName(name) : name);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static String absoluteName(String name) {
+    return name.substring(1);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
