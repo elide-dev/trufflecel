@@ -11,7 +11,7 @@ final class LibraryPolicy {
           Map.entry("math", 2),
           Map.entry("lists", 2),
           Map.entry("optional", 2),
-          Map.entry("strings", 0),
+          Map.entry("strings", 3),
           Map.entry("regex", 0),
           Map.entry("sets", 0),
           Map.entry("encoders", 0),
@@ -56,6 +56,12 @@ final class LibraryPolicy {
           case "lists" -> name.equals("slice") ? 0 : name.equals("flatten") ? 1 : 2;
           case "optional" ->
               Set.of("first", "last").contains(name) ? 2 : name.equals("optFlatMap") ? 1 : 0;
+          case "strings" ->
+              name.equals("reverse")
+                  ? 3
+                  : name.equals("join")
+                      ? 2
+                      : Set.of("format", "strings.quote").contains(name) ? 1 : 0;
           default -> 0;
         };
     if (version < required) throw rejection(name, offset);
@@ -72,7 +78,7 @@ final class LibraryPolicy {
         || Set.of("value", "hasValue", "or", "orValue", "optMap", "optFlatMap", "first", "last")
             .contains(name)) return "optional";
     if (name.equals("reverse")) {
-      if (receiver.isDyn()) return libraries.containsKey("strings") ? "strings" : "lists";
+      if (receiver.isDyn()) return libraries.getOrDefault("strings", -1) >= 3 ? "strings" : "lists";
       return receiver.name().equals("list") ? "lists" : "strings";
     }
     if (name.equals("lists.range")
