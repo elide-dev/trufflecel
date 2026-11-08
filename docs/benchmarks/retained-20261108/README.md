@@ -155,6 +155,40 @@ this report does not claim those gates from a JVM heap measurement.
 
 ## Reproduction
 
+The original AST-only and AST-plus-sharing commit IDs above identify local measurement
+snapshots. Their changes were cherry-picked for integration, so those original commit
+objects may not be fetchable from the published branch. These immutable, production-only
+patches reconstruct their exact `src/main/java` trees from the reachable baseline
+`67921ff`:
+
+- [AST-only patch](baseline-to-ast.patch), originally `4ffe7ea`.
+- [AST plus shared-layout patch](baseline-to-ast-shared.patch), originally `3ea7c78`.
+
+[manifest.json](manifest.json) records each patch's SHA-256 and resulting production
+tree ID. Both patches were applied to separate temporary indexes and their resulting
+production trees matched the original snapshots exactly. They omit tests, harnesses
+and documentation. The integrated harness commit `001908d` is reachable from the
+integration branch and contains the same harness as `4df7775`. For the final combined
+production snapshot, use the separately archived
+[combined patch](../evaluation-allocation-20261108/combined.patch).
+
+For example, start in the repository checkout containing this report and construct an
+isolated AST-only reproduction checkout:
+
+```sh
+retained_repository=$(pwd)
+git worktree add --detach /tmp/trufflecel-retained-ast-repro 67921ff
+git archive 001908d benchmarks/retained | tar -x -C /tmp/trufflecel-retained-ast-repro
+git -C /tmp/trufflecel-retained-ast-repro apply \
+  "$retained_repository/docs/benchmarks/retained-20261108/baseline-to-ast.patch"
+cd /tmp/trufflecel-retained-ast-repro
+```
+
+For the baseline, omit the patch application. For AST plus shared layouts or the final
+combined snapshot, apply its respective patch to a fresh baseline checkout; do not
+apply these cumulative patches on top of each other. Run the following commands in
+each reconstructed checkout:
+
 ```sh
 bazel test --config=local //benchmarks/retained:smoke
 bazel build --config=local //benchmarks/retained:heap
