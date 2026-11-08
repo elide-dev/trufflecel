@@ -153,7 +153,7 @@ public final class Environment {
     return checkDepth(node, null);
   }
 
-  private long checkDepth(ExprNode node, String source) {
+  long checkDepth(ExprNode node, String source) {
     record Pending(ExprNode node, int depth) {}
     boolean parsed = source != null && !source.isEmpty();
     int[] lines = parsed ? lineOffsets(source) : null;
