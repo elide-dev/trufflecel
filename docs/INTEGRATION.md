@@ -338,6 +338,17 @@ Upstream tracking covers [counted-repetition support](https://github.com/elide-d
 also inform the RE2/J fallback for extraction/replacement extensions; constant boolean
 matching always starts from zero and does not expose capture boundaries.
 
+RE2/J remains a required dependency for the current release candidate. Removing it
+also requires a supported [host entry point and lifecycle](https://github.com/elide-dev/graal/issues/207)
+for context-free, concurrent evaluation, plus [analysis and complexity-budget metadata](https://github.com/elide-dev/graal/issues/208)
+that preserves the documented `maxRegexProgramSize` contract or supplies an explicit
+migration. TruffleRegex's `regex.Validate=true` option checks syntax inside an owning
+context, but supplies neither a matcher nor an instruction count. Its parser/DFA
+limits are different metrics. Unicode-sensitive matching also needs a qualified
+compatibility decision: the pinned backends use different Unicode table versions.
+Until these contracts and matching gaps are addressed, the fallback preserves
+CEL errors, bounds and the standalone Java lifecycle.
+
 ## Per-evaluation controls and cost
 
 `EvaluationOptions.newBuilder()` configures a per-call `budget(long)`, `timeout(Duration)`,
