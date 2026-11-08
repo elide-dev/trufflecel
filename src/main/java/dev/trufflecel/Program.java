@@ -58,9 +58,9 @@ public final class Program {
       body = Optimizer.rewrite(body.lowerUninstrumented());
     }
     body.resolveBlocks(null);
-    body.resolveLazyBindings(Map.of());
-    body.resolveAttributes(false);
     boolean hasBindings = body.hasBindings();
+    if (hasBindings) body.resolveLazyBindings(Map.of());
+    // Attribute qualification is needed only by the lazily restored trace/partial target.
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
     FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;
     if (hasBindings) body.resolveLocals(new ArrayList<>(), frameDescriptor);
