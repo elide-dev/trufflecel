@@ -18,7 +18,11 @@ public final class CostEstimator {
     return estimate(environment, source, Map.of());
   }
 
-  /** Size bounds are caller guarantees for collection-valued identifiers/qualified attributes. */
+  /**
+   * Size bounds are caller guarantees for collection-valued activation identifiers/attributes.
+   * They do not apply to a local binding that shadows the same name. Sorting includes a
+   * conservative quadratic comparison bound; host callbacks remain explicitly unbounded.
+   */
   public static Estimate estimate(
       Environment environment, String source, Map<String, Long> sizeBounds) {
     Objects.requireNonNull(source);
@@ -32,7 +36,7 @@ public final class CostEstimator {
       throw new CelException(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
     ExprNode expression = new Parser(source, environment).parse();
     environment.prepare(source, expression, true);
-    var estimator = new Analysis(bounds);
+    var estimator = new Analysis(bounds, environment.overloads.keySet());
     long maximum = estimator.cost(expression);
     return new Estimate(
         0,
@@ -94,10 +98,13 @@ public final class CostEstimator {
             "getSeconds",
             "getMilliseconds");
     private final Map<String, Long> bounds;
+    private final Set<String> hostFunctions;
     private final Set<String> unknowns = new LinkedHashSet<>();
+    private final Deque<Set<String>> scopes = new ArrayDeque<>();
 
-    Analysis(Map<String, Long> bounds) {
+    Analysis(Map<String, Long> bounds, Set<String> hostFunctions) {
       this.bounds = bounds;
+      this.hostFunctions = hostFunctions;
     }
 
     private long unknown(String reason) {
@@ -119,12 +126,12 @@ public final class CostEstimator {
 
     private long cost(ExprNode node) {
       if (node.fold != null) return node.fold.cost();
-      if (node.customOverloads) return unknown("host function: " + node.name);
       return switch (node.kind) {
         case CONSTANT, IDENT -> 1;
         case BLOCK, BLOCK_INDEX -> unknown("explicit lazy block cost is not modeled");
         case OBJECT -> unknown("application object constructor: " + node.name);
         case CALL -> {
+          if (hostFunctions.contains(node.name)) yield unknown("host function: " + node.name);
           if (!FIXED_CALLS.contains(node.name))
             yield unknown("function cost is not modeled: " + node.name);
           yield children(node, 1);
@@ -140,8 +147,9 @@ public final class CostEstimator {
           long range = cost(node.children[0]);
           long size = size(node.children[0]);
           long initial = cost(node.children[1]);
-          long condition = cost(node.children[2]);
-          long step = cost(node.children[3]);
+          String[] names = (String[]) node.value;
+          long condition = scopedCost(node.children[2], names);
+          long step = scopedCost(node.children[3], names);
           yield plus(
               1,
               plus(
@@ -150,7 +158,8 @@ public final class CostEstimator {
                       initial,
                       plus(
                           times(size, plus(1, plus(condition, step))),
-                          plus(condition, cost(node.children[4]))))));
+                          plus(
+                              condition, scopedCost(node.children[4], new String[] {names[0]}))))));
         }
         default -> children(node, 1);
       };
@@ -162,14 +171,30 @@ public final class CostEstimator {
     }
 
     private long macro(ExprNode node) {
-      if (node.name.equals("bind") || node.name.equals("has")) return children(node, 1);
+      if (node.name.equals("has")) return children(node, 1);
+      String[] names = (String[]) node.value;
       long range = cost(node.children[0]);
+      if (node.name.equals("bind"))
+        return plus(1, plus(range, scopedCost(node.children[1], names)));
       long size =
           node.name.equals("optMap") || node.name.equals("optFlatMap") ? 1 : size(node.children[0]);
       if (size == 0) return plus(1, range);
       long body = 1;
-      for (int i = 1; i < node.children.length; i++) body = plus(body, cost(node.children[i]));
-      return plus(1, plus(range, times(size, body)));
+      for (int i = 1; i < node.children.length; i++)
+        body = plus(body, scopedCost(node.children[i], names));
+      long result = plus(1, plus(range, times(size, body)));
+      // Runtime sortBy charges each comparison. n² conservatively bounds the JDK sort's
+      // comparisons without assuming input order or a particular TimSort merge schedule.
+      return node.name.equals("sortBy") ? plus(result, times(size, size)) : result;
+    }
+
+    private long scopedCost(ExprNode node, String[] names) {
+      scopes.push(Set.copyOf(Arrays.asList(names)));
+      try {
+        return cost(node);
+      } finally {
+        scopes.pop();
+      }
     }
 
     private long size(ExprNode node) {
@@ -179,6 +204,11 @@ public final class CostEstimator {
       if (node.kind == ExprNode.Kind.LIST) return node.children.length;
       if (node.kind == ExprNode.Kind.MAP) return node.children.length / 2;
       String name = node.qualifiedName();
+      if (name != null) {
+        String root = name.split("\\.", 2)[0];
+        for (Set<String> scope : scopes)
+          if (scope.contains(root)) return unknown("local collection size: " + name);
+      }
       Long bound = name == null ? null : bounds.get(name);
       return bound == null
           ? unknown("collection size: " + (name == null ? "expression" : name))
