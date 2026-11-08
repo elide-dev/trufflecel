@@ -1,0 +1,259 @@
+diff --git a/benchmarks/representative/BUILD.bazel b/benchmarks/representative/BUILD.bazel
+index 4a58c20..085ee0e 100644
+--- a/benchmarks/representative/BUILD.bazel
++++ b/benchmarks/representative/BUILD.bazel
+@@ -30,6 +30,22 @@ java_binary(name = "ingestion_profile", testonly = True, main_class = "dev.truff
+     jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler", "-Xbatch", "-Xms512m", "-Xmx512m", "-Dpolyglot.engine.Compilation=false"])
+ java_test(name = "ingestion_profile_smoke", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"], use_testrunner = False, args = ["smoke"],
+     jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.engine.Compilation=false"])
++java_library(name = "ingestion_native_lib", testonly = True, srcs = ["IngestionNativeAllocation.java"], deps = [":ingestion_profile_lib"])
++native_image(
++    name = "ingestion_allocation_svm", testonly = True, executable_name = "ingestion-allocation",
++    main_class = "dev.trufflecel.IngestionNativeAllocation", deps = [":ingestion_native_lib", ":native_config"],
++    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
++    extra_args = ["--gc=serial", "-J-Xmx6g", "--parallelism=4", "-march=compatibility",
++        "--features=dev.trufflecel.UpstreamProtobufFeature",
++        "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
++        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
++        "--initialize-at-run-time=dev.trufflecel.IngestionProfile,dev.trufflecel.IngestionNativeAllocation,dev.trufflecel.Workloads$$Raw,dev.trufflecel.Workloads$$Native",
++        "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],
++    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
++    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
++    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
++)
++sh_test(name = "ingestion_native_allocation", srcs = ["ingestion_native_allocation.sh"], args = ["$(rootpath :ingestion_allocation_svm)"], data = [":ingestion_allocation_svm"], tags = ["manual"], size = "large", target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
+ java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+ java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
+     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
+diff --git a/benchmarks/representative/IngestionNativeAllocation.java b/benchmarks/representative/IngestionNativeAllocation.java
+new file mode 100644
+index 0000000..ca41026
+--- /dev/null
++++ b/benchmarks/representative/IngestionNativeAllocation.java
+@@ -0,0 +1,12 @@
++package dev.trufflecel;
++
++/** Native allocation-only entry; recording/profiling APIs are deliberately unreachable. */
++public final class IngestionNativeAllocation {
++  public static void main(String[] args) throws Exception {
++    if (args.length != 1)
++      throw new IllegalArgumentException("ordinary|unknown64k|messageset|smoke");
++    System.setProperty("polyglot.engine.Compilation", "false");
++    if (args[0].equals("smoke")) IngestionProfile.smoke();
++    else IngestionProfile.allocate(args[0]);
++  }
++}
+diff --git a/benchmarks/representative/IngestionProfile.java b/benchmarks/representative/IngestionProfile.java
+index 9bb9c32..d497046 100644
+--- a/benchmarks/representative/IngestionProfile.java
++++ b/benchmarks/representative/IngestionProfile.java
+@@ -176,89 +176,112 @@ public final class IngestionProfile {
+     }
+   }
+ 
+-  public static void main(String[] args) throws Exception {
+-    if (args.length == 1 && args[0].equals("smoke")) {
+-      for (String name : List.of("ordinary", "unknown64k", "messageset"))
+-        try (var fixture = new Fixture(name)) {}
+-      return;
+-    }
+-    if (args.length != 2 && args.length != 4)
+-      throw new IllegalArgumentException("allocate FIXTURE | profile FIXTURE STAGE OUTPUT.jfr");
+-    try (var fixture = new Fixture(args[1])) {
+-      System.out.println(
+-          JSON.toJson(
+-              Map.of(
+-                  "fixture",
+-                  fixture.name,
+-                  "stages",
+-                  fixture.stages,
+-                  "wire_lengths",
+-                  Arrays.stream(fixture.wire).mapToInt(b -> b.length).toArray(),
+-                  "java",
+-                  System.getProperty("java.runtime.version"),
+-                  "vm",
+-                  System.getProperty("java.vm.name"),
+-                  "vm_flags",
+-                  ManagementFactory.getRuntimeMXBean().getInputArguments(),
+-                  "gc",
+-                  ManagementFactory.getGarbageCollectorMXBeans().stream()
+-                      .map(b -> b.getName())
+-                      .toList(),
+-                  "guest_compilation",
+-                  false)));
+-      var bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
+-      if (!bean.isThreadAllocatedMemorySupported())
+-        throw new IllegalStateException("allocation counter required");
+-      bean.setThreadAllocatedMemoryEnabled(true);
++  static void smoke() throws Exception {
++    for (String name : List.of("ordinary", "unknown64k", "messageset"))
++      try (var fixture = new Fixture(name)) {}
++  }
++
++  private static void metadata(Fixture fixture) {
++    System.out.println(
++        JSON.toJson(
++            Map.of(
++                "fixture",
++                fixture.name,
++                "stages",
++                fixture.stages,
++                "wire_lengths",
++                Arrays.stream(fixture.wire).mapToInt(b -> b.length).toArray(),
++                "java",
++                System.getProperty("java.runtime.version"),
++                "vm",
++                System.getProperty("java.vm.name"),
++                "vm_flags",
++                ManagementFactory.getRuntimeMXBean().getInputArguments(),
++                "gc",
++                ManagementFactory.getGarbageCollectorMXBeans().stream()
++                    .map(b -> b.getName())
++                    .toList(),
++                "guest_compilation",
++                false)));
++  }
++
++  private static ThreadMXBean allocationCounter() {
++    var bean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
++    if (!bean.isThreadAllocatedMemorySupported())
++      throw new IllegalStateException("allocation counter required");
++    bean.setThreadAllocatedMemoryEnabled(true);
++    long thread = Thread.currentThread().threadId();
++    long before = bean.getThreadAllocatedBytes(thread);
++    sink = new byte[4096];
++    if (bean.getThreadAllocatedBytes(thread) - before < 4096)
++      throw new AssertionError("Allocation counter failed its independent probe");
++    return bean;
++  }
++
++  // A separate entry calls only this path; JFR stays outside its native reachable graph.
++  static void allocate(String name) throws Exception {
++    try (var fixture = new Fixture(name)) {
++      metadata(fixture);
++      var bean = allocationCounter();
+       long thread = Thread.currentThread().threadId();
+       int iterations = fixture.name.equals("unknown64k") ? 500 : 10000;
+-      List<String> stages = args[0].equals("profile") ? List.of(args[2]) : fixture.stages;
+-      for (String stage : stages) {
+-        if (!fixture.stages.contains(stage)) throw new IllegalArgumentException(stage);
++      for (String stage : fixture.stages) {
+         for (int i = 0; i < iterations * 5; i++) sink = fixture.run(stage, i);
+-        if (args[0].equals("profile")) {
+-          try (var recording = new Recording()) {
+-            recording
+-                .enable("jdk.ObjectAllocationSample")
+-                .withStackTrace()
+-                .with("throttle", "1000/s");
+-            recording.setMaxSize(32 * 1024 * 1024);
+-            recording.start();
+-            long start = bean.getThreadAllocatedBytes(thread);
+-            long end = System.nanoTime() + 5_000_000_000L;
+-            int count = 0;
+-            do {
+-              for (int i = 0; i < 256; i++) sink = fixture.run(stage, count++);
+-            } while (System.nanoTime() < end);
+-            long allocated = bean.getThreadAllocatedBytes(thread) - start;
+-            recording.stop();
+-            recording.dump(Path.of(args[3]));
+-            System.out.println(
+-                JSON.toJson(
+-                    Map.of("stage", stage, "operations", count, "allocated_bytes", allocated)));
+-          }
+-        } else if (args[0].equals("allocate")) {
+-          for (int sample = 0; sample < 7; sample++) {
+-            long start = bean.getThreadAllocatedBytes(thread);
+-            for (int i = 0; i < iterations; i++) sink = fixture.run(stage, i);
+-            long allocated = bean.getThreadAllocatedBytes(thread) - start;
+-            fixture.verify(stage, iterations - 1, sink);
+-            System.out.println(
+-                JSON.toJson(
+-                    Map.of(
+-                        "stage",
+-                        stage,
+-                        "sample",
+-                        sample,
+-                        "operations",
+-                        iterations,
+-                        "allocated_bytes",
+-                        allocated,
+-                        "bytes_per_operation",
+-                        (double) allocated / iterations)));
+-          }
+-        } else throw new IllegalArgumentException(args[0]);
++        for (int sample = 0; sample < 7; sample++) {
++          long start = bean.getThreadAllocatedBytes(thread);
++          for (int i = 0; i < iterations; i++) sink = fixture.run(stage, i);
++          long allocated = bean.getThreadAllocatedBytes(thread) - start;
++          fixture.verify(stage, iterations - 1, sink);
++          System.out.println(
++              JSON.toJson(
++                  Map.of(
++                      "stage",
++                      stage,
++                      "sample",
++                      sample,
++                      "operations",
++                      iterations,
++                      "allocated_bytes",
++                      allocated,
++                      "bytes_per_operation",
++                      (double) allocated / iterations)));
++        }
++      }
++    }
++  }
++
++  private static void profile(String name, String stage, Path output) throws Exception {
++    try (var fixture = new Fixture(name)) {
++      metadata(fixture);
++      if (!fixture.stages.contains(stage)) throw new IllegalArgumentException(stage);
++      var bean = allocationCounter();
++      long thread = Thread.currentThread().threadId();
++      int iterations = fixture.name.equals("unknown64k") ? 500 : 10000;
++      for (int i = 0; i < iterations * 5; i++) sink = fixture.run(stage, i);
++      try (var recording = new Recording()) {
++        recording.enable("jdk.ObjectAllocationSample").withStackTrace().with("throttle", "1000/s");
++        recording.setMaxSize(32 * 1024 * 1024);
++        recording.start();
++        long start = bean.getThreadAllocatedBytes(thread);
++        long end = System.nanoTime() + 5_000_000_000L;
++        int count = 0;
++        do {
++          for (int i = 0; i < 256; i++) sink = fixture.run(stage, count++);
++        } while (System.nanoTime() < end);
++        long allocated = bean.getThreadAllocatedBytes(thread) - start;
++        recording.stop();
++        recording.dump(output);
++        System.out.println(
++            JSON.toJson(Map.of("stage", stage, "operations", count, "allocated_bytes", allocated)));
+       }
+     }
+   }
++
++  public static void main(String[] args) throws Exception {
++    if (args.length == 1 && args[0].equals("smoke")) smoke();
++    else if (args.length == 2 && args[0].equals("allocate")) allocate(args[1]);
++    else if (args.length == 4 && args[0].equals("profile"))
++      profile(args[1], args[2], Path.of(args[3]));
++    else throw new IllegalArgumentException("allocate FIXTURE | profile FIXTURE STAGE OUTPUT.jfr");
++  }
+ }
+diff --git a/benchmarks/representative/ingestion_native_allocation.sh b/benchmarks/representative/ingestion_native_allocation.sh
+new file mode 100755
+index 0000000..4a38e29
+--- /dev/null
++++ b/benchmarks/representative/ingestion_native_allocation.sh
+@@ -0,0 +1,12 @@
++#!/usr/bin/env bash
++set -euo pipefail
++binary="$1"
++output="${TEST_UNDECLARED_OUTPUTS_DIR:?}"
++for fork in 0 1 2; do
++  for fixture in ordinary unknown64k messageset; do
++    "$binary" -Xmx512m "$fixture" > "$output/$fixture-$fork.jsonl"
++  done
++done
++sha256sum "$binary" > "$output/binary.sha256"
++uname -srm > "$output/kernel.txt"
++cat /proc/cpuinfo > "$output/cpuinfo.txt"

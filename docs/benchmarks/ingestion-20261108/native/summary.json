@@ -1,0 +1,330 @@
+{
+  "source": {
+    "production_baseline": "4c5df30",
+    "production_candidate": "67ab33c",
+    "harness": "662ecba",
+    "baseline_artifact_source": "3b61f11",
+    "candidate_artifact_source": "662ecba"
+  },
+  "invocations": {
+    "baseline": "https://app.buildbuddy.io/invocation/e2359482-fc93-416e-9e83-2dfbd9e40a4a",
+    "candidate": "https://app.buildbuddy.io/invocation/9e6371b3-9f45-4dd3-9eeb-c3166893a12e"
+  },
+  "results": {
+    "baseline/ordinary": {
+      "copy-wire": {
+        "median_bytes_per_operation": 222.0,
+        "min": 222.0,
+        "max": 222.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 434.0,
+        "min": 434.0,
+        "max": 434.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 4834.0,
+        "min": 4834.0,
+        "max": 4834.0,
+        "windows": 21
+      },
+      "decode-native": {
+        "median_bytes_per_operation": 4612.0,
+        "min": 4612.0,
+        "max": 4612.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 4076.0,
+        "min": 4076.0,
+        "max": 4076.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 5062.0,
+        "min": 5062.0,
+        "max": 5062.0,
+        "windows": 21
+      },
+      "snapshot-bound": {
+        "median_bytes_per_operation": 5568.0,
+        "min": 5568.0,
+        "max": 5568.0,
+        "windows": 21
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_operation": 9352.0,
+        "min": 9352.0,
+        "max": 9352.0,
+        "windows": 21
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_operation": 11554.0,
+        "min": 11554.0,
+        "max": 11554.0,
+        "windows": 21
+      }
+    },
+    "baseline/unknown64k": {
+      "copy-wire": {
+        "median_bytes_per_operation": 65762.0,
+        "min": 65762.0,
+        "max": 65762.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 65974.0,
+        "min": 65974.0,
+        "max": 65974.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 201574.0,
+        "min": 201574.0,
+        "max": 201574.0,
+        "windows": 21
+      },
+      "decode-native": {
+        "median_bytes_per_operation": 135812.0,
+        "min": 135812.0,
+        "max": 135812.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 70052.0,
+        "min": 70052.0,
+        "max": 70052.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 201802.0,
+        "min": 201802.0,
+        "max": 201802.0,
+        "windows": 21
+      },
+      "snapshot-bound": {
+        "median_bytes_per_operation": 136952.0,
+        "min": 136952.0,
+        "max": 136952.0,
+        "windows": 21
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_operation": 271632.0,
+        "min": 271632.0,
+        "max": 271632.0,
+        "windows": 21
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_operation": 77530.0,
+        "min": 77530.0,
+        "max": 77530.0,
+        "windows": 21
+      }
+    },
+    "baseline/messageset": {
+      "copy-wire": {
+        "median_bytes_per_operation": 32.0,
+        "min": 32.0,
+        "max": 32.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 48.0,
+        "min": 48.0,
+        "max": 48.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 4840.0,
+        "min": 4840.0,
+        "max": 4840.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 4872.0,
+        "min": 4872.0,
+        "max": 4872.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 888.0,
+        "min": 888.0,
+        "max": 888.0,
+        "windows": 21
+      }
+    },
+    "candidate/ordinary": {
+      "copy-wire": {
+        "median_bytes_per_operation": 222.0,
+        "min": 222.0,
+        "max": 222.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 434.0,
+        "min": 434.0,
+        "max": 434.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 4628.0,
+        "min": 4628.0,
+        "max": 4628.0,
+        "windows": 21
+      },
+      "decode-native": {
+        "median_bytes_per_operation": 4612.0,
+        "min": 4612.0,
+        "max": 4612.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 4076.0,
+        "min": 4076.0,
+        "max": 4076.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 5062.0,
+        "min": 5062.0,
+        "max": 5062.0,
+        "windows": 21
+      },
+      "snapshot-bound": {
+        "median_bytes_per_operation": 5568.0,
+        "min": 5568.0,
+        "max": 5568.0,
+        "windows": 21
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_operation": 9146.0,
+        "min": 9146.0,
+        "max": 9146.0,
+        "windows": 21
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_operation": 11554.0,
+        "min": 11554.0,
+        "max": 11554.0,
+        "windows": 21
+      }
+    },
+    "candidate/unknown64k": {
+      "copy-wire": {
+        "median_bytes_per_operation": 65762.0,
+        "min": 65762.0,
+        "max": 65762.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 65974.0,
+        "min": 65974.0,
+        "max": 65974.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 135828.0,
+        "min": 135828.0,
+        "max": 135828.0,
+        "windows": 21
+      },
+      "decode-native": {
+        "median_bytes_per_operation": 135812.0,
+        "min": 135812.0,
+        "max": 135812.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 70052.0,
+        "min": 70052.0,
+        "max": 70052.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 201802.0,
+        "min": 201802.0,
+        "max": 201802.0,
+        "windows": 21
+      },
+      "snapshot-bound": {
+        "median_bytes_per_operation": 136952.0,
+        "min": 136952.0,
+        "max": 136952.0,
+        "windows": 21
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_operation": 205886.0,
+        "min": 205886.0,
+        "max": 205886.0,
+        "windows": 21
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_operation": 77530.0,
+        "min": 77530.0,
+        "max": 77530.0,
+        "windows": 21
+      }
+    },
+    "candidate/messageset": {
+      "copy-wire": {
+        "median_bytes_per_operation": 32.0,
+        "min": 32.0,
+        "max": 32.0,
+        "windows": 21
+      },
+      "serialize": {
+        "median_bytes_per_operation": 48.0,
+        "min": 48.0,
+        "max": 48.0,
+        "windows": 21
+      },
+      "decode-cel": {
+        "median_bytes_per_operation": 4824.0,
+        "min": 4824.0,
+        "max": 4824.0,
+        "windows": 21
+      },
+      "snapshot-cel": {
+        "median_bytes_per_operation": 4872.0,
+        "min": 4872.0,
+        "max": 4872.0,
+        "windows": 21
+      },
+      "decode-stock": {
+        "median_bytes_per_operation": 888.0,
+        "min": 888.0,
+        "max": 888.0,
+        "windows": 21
+      }
+    }
+  },
+  "files": {
+    "harness.patch": "83cec39cb3f798bed9d00040f3c9f4d806e6f9755065f09db04409d8a2986f15",
+    "candidate/unknown64k-0.jsonl": "895de35da090f8c77f5213b67d777f2c3a59a62b58e12481a7d4bce8308da7a8",
+    "candidate/unknown64k-2.jsonl": "895de35da090f8c77f5213b67d777f2c3a59a62b58e12481a7d4bce8308da7a8",
+    "candidate/unknown64k-1.jsonl": "895de35da090f8c77f5213b67d777f2c3a59a62b58e12481a7d4bce8308da7a8",
+    "candidate/binary.sha256": "6f316fa7d8eafc6a771fed9462b663a3d23237486e7bc3fa5deb97fb8282a627",
+    "candidate/ordinary-2.jsonl": "8ef62806c171a40736a4e7f9d7e7f40e16fedbfb1db61d7da7fc67d5f9e32d3a",
+    "candidate/ordinary-0.jsonl": "8ef62806c171a40736a4e7f9d7e7f40e16fedbfb1db61d7da7fc67d5f9e32d3a",
+    "candidate/cpuinfo.txt": "996e79b464cbb47aecdd0256df0af28fe35c8bb85c86b9d2d0b2e45a81f1ffd4",
+    "candidate/messageset-0.jsonl": "90a5c1eaeaa7e4876857443b0ee04056d92a1d66ad6e0338f3e42e3aa8f78af9",
+    "candidate/messageset-2.jsonl": "90a5c1eaeaa7e4876857443b0ee04056d92a1d66ad6e0338f3e42e3aa8f78af9",
+    "candidate/kernel.txt": "5014c30a7f90192fcbdee8489d6d8b2748ff1dde7769290dda468224255a79e0",
+    "candidate/ordinary-1.jsonl": "8ef62806c171a40736a4e7f9d7e7f40e16fedbfb1db61d7da7fc67d5f9e32d3a",
+    "candidate/messageset-1.jsonl": "90a5c1eaeaa7e4876857443b0ee04056d92a1d66ad6e0338f3e42e3aa8f78af9",
+    "baseline/unknown64k-0.jsonl": "eda52c78d1455c04210cfa9afe333f375fbb220287822f7dd976ac66cd006793",
+    "baseline/unknown64k-2.jsonl": "eda52c78d1455c04210cfa9afe333f375fbb220287822f7dd976ac66cd006793",
+    "baseline/unknown64k-1.jsonl": "eda52c78d1455c04210cfa9afe333f375fbb220287822f7dd976ac66cd006793",
+    "baseline/binary.sha256": "2fc6afb1802d7215460e24d3a94617c59da3cbed9661ba22cb660e6f702d5b25",
+    "baseline/ordinary-2.jsonl": "8fc66c15335f01430d3f1da5cd938d31e6fe88000b3a1639f9f4bce9c44f8dda",
+    "baseline/ordinary-0.jsonl": "8fc66c15335f01430d3f1da5cd938d31e6fe88000b3a1639f9f4bce9c44f8dda",
+    "baseline/cpuinfo.txt": "3585cd4d754350cbdc460a6fa7a103b819682481ff5d086342f1fca87116c737",
+    "baseline/messageset-0.jsonl": "8bdca04b5c6267ed8560bc3d2a74c0821b1f52f3eee2c6b345e58a5979e38c1a",
+    "baseline/messageset-2.jsonl": "8bdca04b5c6267ed8560bc3d2a74c0821b1f52f3eee2c6b345e58a5979e38c1a",
+    "baseline/kernel.txt": "5014c30a7f90192fcbdee8489d6d8b2748ff1dde7769290dda468224255a79e0",
+    "baseline/ordinary-1.jsonl": "8fc66c15335f01430d3f1da5cd938d31e6fe88000b3a1639f9f4bce9c44f8dda",
+    "baseline/messageset-1.jsonl": "8bdca04b5c6267ed8560bc3d2a74c0821b1f52f3eee2c6b345e58a5979e38c1a"
+  }
+}

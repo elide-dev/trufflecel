@@ -1,0 +1,41 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library", "java_test")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+java_library(
+    name = "target",
+    testonly = True,
+    srcs = ["FuzzTarget.java"],
+    deps = ["//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java"],
+)
+
+java_test(
+    name = "regression",
+    main_class = "dev.trufflecel.FuzzTarget",
+    use_testrunner = False,
+    runtime_deps = [":target"],
+)
+
+java_binary(
+    name = "seed",
+    testonly = True,
+    main_class = "dev.trufflecel.FuzzTarget",
+    runtime_deps = [":target"],
+)
+
+java_binary(
+    name = "jazzer",
+    testonly = True,
+    main_class = "com.code_intelligence.jazzer.Jazzer",
+    runtime_deps = [":target", "@fuzzing//:com_code_intelligence_jazzer"],
+    jvm_flags = ["-Xmx1g", "-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading", "--enable-native-access=ALL-UNNAMED"],
+)
+
+sh_test(
+    name = "smoke",
+    srcs = ["smoke.sh"],
+    args = ["$(rootpath :seed)", "$(rootpath :jazzer)"],
+    data = [":seed", ":jazzer"],
+    tags = ["manual"],
+    size = "large",
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)

@@ -1,0 +1,1092 @@
+{
+  "schema": 1,
+  "measured_launches": 32,
+  "matched_pairs": 16,
+  "forks": 4,
+  "units": "nanoseconds",
+  "source_commits": {
+    "baseline": "5eb191aa1796c74c4d7e7a00245a278be86186b0",
+    "candidate": "3fe435cb1c25b8104692a48dc53a69b9e03dc45f"
+  },
+  "production_revisions": {
+    "baseline": "67ab33cf89e0f06ad71b0b3c49d32fab53adf2d1",
+    "candidate": "9cdc03748256b9751fdcefba11be7be273236c9e"
+  },
+  "source_manifest_sha256": {
+    "baseline": "9ffe3c7eae0d5881bf0fd1bc21f9d62cde6591ae60c15b35b5a37768ab18eb27",
+    "candidate": "0c45540e36c674ea2f99d5cbf9e399455e16f81c0d4bd834fbc1a71745ba8de3"
+  },
+  "startup_json_sha256": {
+    "baseline": "0f7de00bd68504f9bb7c50ee14c9e3b3bd6ef8f62c09bb94eb5898a57322ba83",
+    "candidate": "faa88bec42b2292123ea01673995f36d3466e7deee14179072ffa993338ae0d6"
+  },
+  "runtime_sha256": {
+    "release": "c9d61fe7318ecc8a970e695b05aaa7e7b8d0f1927331e6590206ffad67b4d5f9",
+    "lib/modules": "19808f396ccae30a3ca9ede9ef2bbc48ea4a31b6fcf721801c955ee71321e4fd",
+    "lib/server/libjvm.so": "4591429bff7bd9a1f3c33d8f0603728c4639ef531d0d5e9187a105c07c0d00cb"
+  },
+  "java_sha256": "1c5062460c28c0e26fbd64a4b45628755e073b370ed30cb6271b841545342ac6",
+  "startup_artifacts_sha256": {
+    "baseline": {
+      "jar": "74393b9a9eed29c3cdc385a42e749828bf3a0f260610080474d5181f4aee1846",
+      "native": "ac7c020c27a6ff44306919347d25fbcadd3a1f7db8a127b0164c50c30af6f8d8"
+    },
+    "candidate": {
+      "jar": "b2dc371abcda7641a1b0dec3d99df1de09cca24c7a4af418ea6e0e174bb276d5",
+      "native": "d78088baee14fd057a732f6424a16065971c0d83d654e265e73f6443998f115e"
+    }
+  },
+  "input_indices": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "bindings_per_input": 69,
+  "fixture": "scalar-wide; shared protobuf fixture/ingestion precedes arithmetic over the full map",
+  "range_definition": "minimum and maximum of four fresh-process observations; not confidence intervals",
+  "pair_definition": "candidate minus baseline for the same runtime, engine and input variant; adjacent launches",
+  "guest_last_tier_at_first_result": false,
+  "cells": [
+    {
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "revisions": {
+        "baseline": {
+          "launch_to_verified_ns": {
+            "median": 256537791.5,
+            "minimum": 253208529,
+            "maximum": 263657132,
+            "by_input_index": [
+              253208529,
+              254555851,
+              263657132,
+              258519732
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 273134643.0,
+            "minimum": 268823166,
+            "maximum": 279381153,
+            "by_input_index": [
+              268823166,
+              270546373,
+              279381153,
+              275722913
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 55213579.5,
+              "minimum": 54908416,
+              "maximum": 60783825,
+              "by_input_index": [
+                54908416,
+                55193424,
+                60783825,
+                55233735
+              ]
+            },
+            "adapter_ns": {
+              "median": 18024109.0,
+              "minimum": 17606436,
+              "maximum": 18720389,
+              "by_input_index": [
+                17748240,
+                17606436,
+                18720389,
+                18299978
+              ]
+            },
+            "decode_ns": {
+              "median": 69602430.5,
+              "minimum": 69509732,
+              "maximum": 72806129,
+              "by_input_index": [
+                69586276,
+                69509732,
+                72806129,
+                69618585
+              ]
+            },
+            "configure_ns": {
+              "median": 74727218.5,
+              "minimum": 72996115,
+              "maximum": 75007124,
+              "by_input_index": [
+                74502396,
+                74952041,
+                72996115,
+                75007124
+              ]
+            },
+            "prepare_ns": {
+              "median": 6220232.0,
+              "minimum": 6127077,
+              "maximum": 6889040,
+              "by_input_index": [
+                6196942,
+                6127077,
+                6243522,
+                6889040
+              ]
+            },
+            "plan_ns": {
+              "median": 2361719.5,
+              "minimum": 2345110,
+              "maximum": 2441624,
+              "by_input_index": [
+                2362876,
+                2360563,
+                2441624,
+                2345110
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 807322.0,
+              "minimum": 799140,
+              "maximum": 832680,
+              "by_input_index": [
+                803466,
+                811178,
+                799140,
+                832680
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 227393351.5,
+              "minimum": 226108612,
+              "maximum": 234790744,
+              "by_input_index": [
+                226108612,
+                226560451,
+                234790744,
+                228226252
+              ]
+            }
+          }
+        },
+        "candidate": {
+          "launch_to_verified_ns": {
+            "median": 258235548.5,
+            "minimum": 257339328,
+            "maximum": 261487826,
+            "by_input_index": [
+              257935824,
+              257339328,
+              258535273,
+              261487826
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 274065048.0,
+            "minimum": 273352484,
+            "maximum": 277804998,
+            "by_input_index": [
+              273871352,
+              273352484,
+              274258744,
+              277804998
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 55742723.0,
+              "minimum": 55303158,
+              "maximum": 57566055,
+              "by_input_index": [
+                55303158,
+                55345702,
+                57566055,
+                56139744
+              ]
+            },
+            "adapter_ns": {
+              "median": 17766918.0,
+              "minimum": 17534399,
+              "maximum": 17928300,
+              "by_input_index": [
+                17629652,
+                17904184,
+                17534399,
+                17928300
+              ]
+            },
+            "decode_ns": {
+              "median": 70710284.0,
+              "minimum": 69630463,
+              "maximum": 72925469,
+              "by_input_index": [
+                70816373,
+                70604195,
+                69630463,
+                72925469
+              ]
+            },
+            "configure_ns": {
+              "median": 75293823.5,
+              "minimum": 74637108,
+              "maximum": 76003490,
+              "by_input_index": [
+                75860685,
+                74726962,
+                74637108,
+                76003490
+              ]
+            },
+            "prepare_ns": {
+              "median": 6190822.0,
+              "minimum": 6109450,
+              "maximum": 6278885,
+              "by_input_index": [
+                6240296,
+                6141348,
+                6278885,
+                6109450
+              ]
+            },
+            "plan_ns": {
+              "median": 2276963.0,
+              "minimum": 2246692,
+              "maximum": 2300693,
+              "by_input_index": [
+                2246692,
+                2294054,
+                2300693,
+                2259872
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 804818.0,
+              "minimum": 800251,
+              "maximum": 814112,
+              "by_input_index": [
+                805079,
+                800251,
+                814112,
+                804557
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 228831825.0,
+              "minimum": 227816696,
+              "maximum": 232170882,
+              "by_input_index": [
+                228901935,
+                227816696,
+                228761715,
+                232170882
+              ]
+            }
+          }
+        }
+      },
+      "paired_delta_ns": {
+        "median": 2875785.5,
+        "minimum": -5121859,
+        "maximum": 4727295,
+        "by_input_index": [
+          4727295,
+          2783477,
+          -5121859,
+          2968094
+        ]
+      },
+      "paired_change_percent": {
+        "median": 1.1207876809405826,
+        "minimum": -1.9426210704590385,
+        "maximum": 1.8669572540346735,
+        "by_input_index": [
+          1.8669572540346735,
+          1.0934641608375317,
+          -1.9426210704590385,
+          1.1481112010436334
+        ]
+      },
+      "difference_of_medians_ns": 1697757.0,
+      "change_of_medians_percent": 0.6617960613417129,
+      "slower_candidate_pairs": 3,
+      "observed_ranges_overlap": true
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "revisions": {
+        "baseline": {
+          "launch_to_verified_ns": {
+            "median": 255785797.5,
+            "minimum": 254721860,
+            "maximum": 258491609,
+            "by_input_index": [
+              256422423,
+              254721860,
+              255149172,
+              258491609
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 273001983.5,
+            "minimum": 269527222,
+            "maximum": 275523454,
+            "by_input_index": [
+              273666325,
+              269527222,
+              272337642,
+              275523454
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 55759498.5,
+              "minimum": 55371952,
+              "maximum": 56110761,
+              "by_input_index": [
+                55815357,
+                56110761,
+                55371952,
+                55703640
+              ]
+            },
+            "adapter_ns": {
+              "median": 17728480.0,
+              "minimum": 17359295,
+              "maximum": 17947399,
+              "by_input_index": [
+                17641870,
+                17359295,
+                17815090,
+                17947399
+              ]
+            },
+            "decode_ns": {
+              "median": 69971019.5,
+              "minimum": 69651034,
+              "maximum": 70689643,
+              "by_input_index": [
+                70689643,
+                69651034,
+                70063263,
+                69878776
+              ]
+            },
+            "configure_ns": {
+              "median": 74966557.5,
+              "minimum": 74563858,
+              "maximum": 75111811,
+              "by_input_index": [
+                75111811,
+                74832301,
+                74563858,
+                75100814
+              ]
+            },
+            "prepare_ns": {
+              "median": 6233126.0,
+              "minimum": 6216431,
+              "maximum": 6299636,
+              "by_input_index": [
+                6247117,
+                6219135,
+                6299636,
+                6216431
+              ]
+            },
+            "plan_ns": {
+              "median": 2333191.5,
+              "minimum": 2318811,
+              "maximum": 2411990,
+              "by_input_index": [
+                2344939,
+                2318811,
+                2321444,
+                2411990
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 819034.5,
+              "minimum": 806450,
+              "maximum": 833542,
+              "by_input_index": [
+                833542,
+                806450,
+                830276,
+                807793
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 227682315.0,
+              "minimum": 227265519,
+              "maximum": 228684279,
+              "by_input_index": [
+                228684279,
+                227297787,
+                227265519,
+                228066843
+              ]
+            }
+          }
+        },
+        "candidate": {
+          "launch_to_verified_ns": {
+            "median": 258755154.5,
+            "minimum": 258013191,
+            "maximum": 267564096,
+            "by_input_index": [
+              259278851,
+              267564096,
+              258231458,
+              258013191
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 276248697.0,
+            "minimum": 274931234,
+            "maximum": 283898122,
+            "by_input_index": [
+              277065027,
+              283898122,
+              274931234,
+              275432367
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 55928622.0,
+              "minimum": 55659954,
+              "maximum": 59089141,
+              "by_input_index": [
+                55659954,
+                59089141,
+                56045282,
+                55811962
+              ]
+            },
+            "adapter_ns": {
+              "median": 18352871.5,
+              "minimum": 17980869,
+              "maximum": 18763653,
+              "by_input_index": [
+                18148119,
+                18763653,
+                18557624,
+                17980869
+              ]
+            },
+            "decode_ns": {
+              "median": 70556223.0,
+              "minimum": 69975532,
+              "maximum": 75345011,
+              "by_input_index": [
+                70491907,
+                75345011,
+                69975532,
+                70620539
+              ]
+            },
+            "configure_ns": {
+              "median": 75869748.5,
+              "minimum": 75258430,
+              "maximum": 76417541,
+              "by_input_index": [
+                76417541,
+                75258430,
+                76148256,
+                75591241
+              ]
+            },
+            "prepare_ns": {
+              "median": 6226150.5,
+              "minimum": 6157202,
+              "maximum": 6270732,
+              "by_input_index": [
+                6270732,
+                6230312,
+                6221989,
+                6157202
+              ]
+            },
+            "plan_ns": {
+              "median": 2301109.0,
+              "minimum": 2283567,
+              "maximum": 2370088,
+              "by_input_index": [
+                2370088,
+                2300483,
+                2301735,
+                2283567
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 817431.5,
+              "minimum": 806741,
+              "maximum": 823466,
+              "by_input_index": [
+                823095,
+                806741,
+                811768,
+                823466
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 230121811.0,
+              "minimum": 229268846,
+              "maximum": 237793771,
+              "by_input_index": [
+                230181436,
+                237793771,
+                230062186,
+                229268846
+              ]
+            }
+          }
+        }
+      },
+      "paired_delta_ns": {
+        "median": 2969357.0,
+        "minimum": -478418,
+        "maximum": 12842236,
+        "by_input_index": [
+          2856428,
+          12842236,
+          3082286,
+          -478418
+        ]
+      },
+      "paired_change_percent": {
+        "median": 1.1609934930046695,
+        "minimum": -0.18508066929167066,
+        "maximum": 5.041670157402267,
+        "by_input_index": [
+          1.1139540632138845,
+          5.041670157402267,
+          1.2080329227954545,
+          -0.18508066929167066
+        ]
+      },
+      "difference_of_medians_ns": 2969357.0,
+      "change_of_medians_percent": 1.1608764165258245,
+      "slower_candidate_pairs": 3,
+      "observed_ranges_overlap": true
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "revisions": {
+        "baseline": {
+          "launch_to_verified_ns": {
+            "median": 1638118.5,
+            "minimum": 1175564,
+            "maximum": 2006221,
+            "by_input_index": [
+              2006221,
+              1175564,
+              2002956,
+              1273281
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 2281689.5,
+            "minimum": 1681463,
+            "maximum": 2737739,
+            "by_input_index": [
+              2737739,
+              1681463,
+              2719181,
+              1844198
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 83510.5,
+              "minimum": 62984,
+              "maximum": 104407,
+              "by_input_index": [
+                104407,
+                62984,
+                99420,
+                67601
+              ]
+            },
+            "adapter_ns": {
+              "median": 70020.0,
+              "minimum": 43976,
+              "maximum": 90837,
+              "by_input_index": [
+                90837,
+                43976,
+                90555,
+                49485
+              ]
+            },
+            "decode_ns": {
+              "median": 47386.0,
+              "minimum": 31037,
+              "maximum": 60600,
+              "by_input_index": [
+                60600,
+                31037,
+                60311,
+                34461
+              ]
+            },
+            "configure_ns": {
+              "median": 272439.5,
+              "minimum": 179319,
+              "maximum": 345850,
+              "by_input_index": [
+                345850,
+                179319,
+                342955,
+                201924
+              ]
+            },
+            "prepare_ns": {
+              "median": 21837.0,
+              "minimum": 11848,
+              "maximum": 30666,
+              "by_input_index": [
+                30515,
+                11848,
+                30666,
+                13159
+              ]
+            },
+            "plan_ns": {
+              "median": 17286.5,
+              "minimum": 9304,
+              "maximum": 24366,
+              "by_input_index": [
+                24227,
+                9304,
+                24366,
+                10346
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 4752.5,
+              "minimum": 2383,
+              "maximum": 7231,
+              "by_input_index": [
+                7231,
+                2383,
+                6891,
+                2614
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 517377.0,
+              "minimum": 340851,
+              "maximum": 663667,
+              "by_input_index": [
+                663667,
+                340851,
+                655164,
+                379590
+              ]
+            }
+          }
+        },
+        "candidate": {
+          "launch_to_verified_ns": {
+            "median": 1732785.5,
+            "minimum": 1256837,
+            "maximum": 2125660,
+            "by_input_index": [
+              2104238,
+              1256837,
+              2125660,
+              1361333
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 2340537.5,
+            "minimum": 1808355,
+            "maximum": 2837599,
+            "by_input_index": [
+              2789106,
+              1808355,
+              2837599,
+              1891969
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 85197.5,
+              "minimum": 66660,
+              "maximum": 113641,
+              "by_input_index": [
+                101422,
+                68973,
+                113641,
+                66660
+              ]
+            },
+            "adapter_ns": {
+              "median": 70916.5,
+              "minimum": 48123,
+              "maximum": 91587,
+              "by_input_index": [
+                90936,
+                50897,
+                91587,
+                48123
+              ]
+            },
+            "decode_ns": {
+              "median": 52844.0,
+              "minimum": 38127,
+              "maximum": 67792,
+              "by_input_index": [
+                66029,
+                39659,
+                67792,
+                38127
+              ]
+            },
+            "configure_ns": {
+              "median": 273085.5,
+              "minimum": 188733,
+              "maximum": 362244,
+              "by_input_index": [
+                353411,
+                192760,
+                362244,
+                188733
+              ]
+            },
+            "prepare_ns": {
+              "median": 20946.0,
+              "minimum": 11317,
+              "maximum": 30646,
+              "by_input_index": [
+                30315,
+                11577,
+                30646,
+                11317
+              ]
+            },
+            "plan_ns": {
+              "median": 19189.0,
+              "minimum": 11327,
+              "maximum": 26610,
+              "by_input_index": [
+                26560,
+                11327,
+                26610,
+                11818
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 4246.5,
+              "minimum": 2033,
+              "maximum": 6780,
+              "by_input_index": [
+                6400,
+                2033,
+                6780,
+                2093
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 526149.5,
+              "minimum": 366871,
+              "maximum": 699300,
+              "by_input_index": [
+                675073,
+                377226,
+                699300,
+                366871
+              ]
+            }
+          }
+        }
+      },
+      "paired_delta_ns": {
+        "median": 93034.5,
+        "minimum": 81273,
+        "maximum": 122704,
+        "by_input_index": [
+          98017,
+          81273,
+          122704,
+          88052
+        ]
+      },
+      "paired_change_percent": {
+        "median": 6.519839062531996,
+        "minimum": 4.885653175796678,
+        "maximum": 6.915362751819898,
+        "by_input_index": [
+          4.885653175796678,
+          6.913532568197045,
+          6.1261455568669465,
+          6.915362751819898
+        ]
+      },
+      "difference_of_medians_ns": 94667.0,
+      "change_of_medians_percent": 5.779008051004864,
+      "slower_candidate_pairs": 4,
+      "observed_ranges_overlap": true
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "revisions": {
+        "baseline": {
+          "launch_to_verified_ns": {
+            "median": 1665295.0,
+            "minimum": 1404558,
+            "maximum": 2023968,
+            "by_input_index": [
+              2023968,
+              1741204,
+              1589386,
+              1404558
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 2225796.5,
+            "minimum": 1934153,
+            "maximum": 2714364,
+            "by_input_index": [
+              2714364,
+              2380073,
+              2071520,
+              1934153
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 90726.5,
+              "minimum": 75464,
+              "maximum": 113060,
+              "by_input_index": [
+                104507,
+                113060,
+                76946,
+                75464
+              ]
+            },
+            "adapter_ns": {
+              "median": 69900.0,
+              "minimum": 51557,
+              "maximum": 101863,
+              "by_input_index": [
+                87812,
+                101863,
+                51988,
+                51557
+              ]
+            },
+            "decode_ns": {
+              "median": 50601.0,
+              "minimum": 37677,
+              "maximum": 66850,
+              "by_input_index": [
+                58458,
+                66850,
+                42744,
+                37677
+              ]
+            },
+            "configure_ns": {
+              "median": 315929.0,
+              "minimum": 199649,
+              "maximum": 367281,
+              "by_input_index": [
+                360401,
+                367281,
+                271457,
+                199649
+              ]
+            },
+            "prepare_ns": {
+              "median": 22483.5,
+              "minimum": 13430,
+              "maximum": 32229,
+              "by_input_index": [
+                31026,
+                32229,
+                13941,
+                13430
+              ]
+            },
+            "plan_ns": {
+              "median": 17761.5,
+              "minimum": 10406,
+              "maximum": 24727,
+              "by_input_index": [
+                24156,
+                24727,
+                11367,
+                10406
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 4672.5,
+              "minimum": 2584,
+              "maximum": 7110,
+              "by_input_index": [
+                6691,
+                7110,
+                2654,
+                2584
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 572074.0,
+              "minimum": 390767,
+              "maximum": 713120,
+              "by_input_index": [
+                673051,
+                713120,
+                471097,
+                390767
+              ]
+            }
+          }
+        },
+        "candidate": {
+          "launch_to_verified_ns": {
+            "median": 1574107.5,
+            "minimum": 1255355,
+            "maximum": 2191049,
+            "by_input_index": [
+              2191049,
+              1654293,
+              1493922,
+              1255355
+            ]
+          },
+          "launch_to_exit_ns": {
+            "median": 2199566.5,
+            "minimum": 1806492,
+            "maximum": 2933403,
+            "by_input_index": [
+              2933403,
+              2283077,
+              2116056,
+              1806492
+            ]
+          },
+          "phases_ns": {
+            "fixture_and_wire_ns": {
+              "median": 91597.0,
+              "minimum": 73210,
+              "maximum": 102714,
+              "by_input_index": [
+                102714,
+                93169,
+                90025,
+                73210
+              ]
+            },
+            "adapter_ns": {
+              "median": 74461.5,
+              "minimum": 51197,
+              "maximum": 113310,
+              "by_input_index": [
+                113310,
+                83896,
+                65027,
+                51197
+              ]
+            },
+            "decode_ns": {
+              "median": 56114.5,
+              "minimum": 42614,
+              "maximum": 82804,
+              "by_input_index": [
+                82804,
+                60461,
+                51768,
+                42614
+              ]
+            },
+            "configure_ns": {
+              "median": 291948.0,
+              "minimum": 195523,
+              "maximum": 409425,
+              "by_input_index": [
+                409425,
+                317106,
+                266790,
+                195523
+              ]
+            },
+            "prepare_ns": {
+              "median": 22424.0,
+              "minimum": 11698,
+              "maximum": 32498,
+              "by_input_index": [
+                32498,
+                29024,
+                15824,
+                11698
+              ]
+            },
+            "plan_ns": {
+              "median": 20525.5,
+              "minimum": 11908,
+              "maximum": 30997,
+              "by_input_index": [
+                30997,
+                25658,
+                15393,
+                11908
+              ]
+            },
+            "evaluate_and_verify_ns": {
+              "median": 4512.0,
+              "minimum": 2133,
+              "maximum": 7000,
+              "by_input_index": [
+                7000,
+                6260,
+                2764,
+                2133
+              ]
+            },
+            "main_to_verified_ns": {
+              "median": 561582.5,
+              "minimum": 388283,
+              "maximum": 778748,
+              "by_input_index": [
+                778748,
+                615574,
+                507591,
+                388283
+              ]
+            }
+          }
+        }
+      },
+      "paired_delta_ns": {
+        "median": -91187.5,
+        "minimum": -149203,
+        "maximum": 167081,
+        "by_input_index": [
+          167081,
+          -86911,
+          -95464,
+          -149203
+        ]
+      },
+      "paired_change_percent": {
+        "median": -5.498887902486944,
+        "minimum": -10.622772430899975,
+        "maximum": 8.255120634318324,
+        "by_input_index": [
+          8.255120634318324,
+          -4.9914312165604935,
+          -6.006344588413393,
+          -10.622772430899975
+        ]
+      },
+      "difference_of_medians_ns": -91187.5,
+      "change_of_medians_percent": -5.47575654763871,
+      "slower_candidate_pairs": 1,
+      "observed_ranges_overlap": true
+    }
+  ]
+}

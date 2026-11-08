@@ -19,19 +19,22 @@ public final class Program {
   private final boolean contextInArguments;
   private final RootCallTarget target;
   private volatile RootCallTarget controlledTarget;
+  private volatile RootCallTarget traceTarget;
 
   Program(
       String source,
       Set<String> variables,
+      Map<String, Integer> bindingLayout,
       CelType resultType,
       ExprNode body,
       Environment environment) {
-    this(source, variables, resultType, body, environment, null, null);
+    this(source, variables, bindingLayout, resultType, body, environment, null, null);
   }
 
   Program(
       String source,
       Set<String> variables,
+      Map<String, Integer> bindingLayout,
       CelType resultType,
       ExprNode body,
       Environment environment,
@@ -39,9 +42,10 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    var layout = new LinkedHashMap<String, Integer>();
-    for (String name : variables) layout.put(name, layout.size());
-    bindingLayout = Map.copyOf(layout);
+    // A debugger can inspect unused declarations repeatedly. Plain evaluation only caches
+    // conversions for referenced roots, independently of the environment's declaration count.
+    this.bindingLayout =
+        truffleSource == null ? bindingLayout : environment.bindingLayout(this.variables);
     String identifier = body.firstIdentifier();
     bindingHint =
         identifier != null
@@ -52,9 +56,14 @@ public final class Program {
     body.instantiateFieldPlans();
     // Tooling receives the complete source tree, including every literal and operator event;
     // plain targets replace folded subtrees with their prebuilt values and failures.
-    if (truffleSource == null) body = Optimizer.rewrite(body.lowerUninstrumented());
-    body.resolveBlocks(null);
+    if (truffleSource == null) {
+      if (environment.commonSubexpressions) body = CseOptimizer.optimize(body, environment);
+      body = Optimizer.rewrite(body.lowerUninstrumented());
+    }
+    body.finishPlanning(null);
     boolean hasBindings = body.hasBindings();
+    if (hasBindings) body.resolveLazyBindings(Map.of());
+    // Attribute qualification is needed only by the lazily restored trace/partial target.
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
     FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;
     if (hasBindings) body.resolveLocals(new ArrayList<>(), frameDescriptor);
@@ -62,7 +71,10 @@ public final class Program {
     if (contextInArguments)
       body.accept(
           node -> {
-            if (node instanceof ExprNode expression) expression.boundaryReads = true;
+            if (node instanceof ExprNode expression) {
+              expression.boundaryReads = true;
+              expression.instrumentedSource = truffleSource != null;
+            }
             return true;
           });
     body.rootBody = true;
@@ -115,7 +127,8 @@ public final class Program {
 
   public EvaluationResult evaluateWithDetails(Map<String, ?> variables, EvaluationOptions options) {
     return evaluateWithDetails(
-        new EvalContext(environment, new BorrowedBindings(variables, bindingLayout)), options);
+        new EvalContext.Scoped(environment, new BorrowedBindings(variables, bindingLayout)),
+        options);
   }
 
   public EvaluationResult evaluateWithDetails(Activation activation, EvaluationOptions options) {
@@ -127,7 +140,12 @@ public final class Program {
     Object value = null;
     CelException error = null;
     try {
-      value = Values.out(controlledTarget().call(null, new Object[] {context}));
+      value =
+          Values.out(
+              (options.trace == null && options.partial == null
+                      ? controlledTarget()
+                      : traceTarget())
+                  .call(null, new Object[] {context}));
     } catch (CelException failure) {
       error = failure;
     }
@@ -147,12 +165,89 @@ public final class Program {
               if (node instanceof ExprNode expression) expression.boundaryReads = true;
               return true;
             });
+        body.resolveBlocks(null);
+        body.resolveLazyBindings(Map.of());
         controlledTarget =
             new ExpressionRoot(body, environment, true, null, null, original.getFrameDescriptor())
                 .getCallTarget();
       }
     }
     return controlledTarget;
+  }
+
+  synchronized RootCallTarget traceTarget() {
+    if (traceTarget == null) {
+      var original = (ExpressionRoot) target.getRootNode();
+      ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body).restoreTrace();
+      body.resolveBlocks(null);
+      body.resolveLazyBindings(Map.of());
+      body.resolveAttributes(false);
+      body.resolveLocals(new ArrayList<>(), null);
+      body.accept(
+          node -> {
+            if (node instanceof ExprNode expression) {
+              expression.boundaryReads = true;
+              expression.observe = true;
+              expression.instrumentedSource = false;
+            }
+            return true;
+          });
+      body.rootBody = true;
+      traceTarget = new ExpressionRoot(body, environment, true, null, null, null).getCallTarget();
+    }
+    return traceTarget;
+  }
+
+  public PartialResult partialEvaluate(PartialActivation activation) {
+    return partialEvaluate(activation, EvaluationOptions.newBuilder().build());
+  }
+
+  public PartialResult partialEvaluate(PartialActivation activation, EvaluationOptions options) {
+    Objects.requireNonNull(activation);
+    Objects.requireNonNull(options);
+    EvaluationResult result =
+        evaluateWithDetails(activation.activation, options.withPartial(activation));
+    return new PartialResult(this, activation, options, result);
+  }
+
+  public PartialResult advanceEvaluation(PartialResult previous, Map<Attribute, ?> values) {
+    if (Objects.requireNonNull(previous).program != this)
+      throw new IllegalArgumentException("partial result belongs to another program");
+    return previous.advanceEvaluation(values);
+  }
+
+  /** Observe evaluated source nodes without an ambient Polyglot context. */
+  public TracedProgram trace(TraceListener listener) {
+    return new TracedProgram(this, Objects.requireNonNull(listener));
+  }
+
+  /** Snapshot inputs before submission; timeout begins when execution starts on the executor. */
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Map<String, ?> bindings, java.util.concurrent.Executor executor) {
+    return evalAsync(bindings, EvaluationOptions.newBuilder().build(), executor);
+  }
+
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Map<String, ?> bindings, EvaluationOptions options, java.util.concurrent.Executor executor) {
+    return evalAsync(Activation.snapshot(bindings), options, executor);
+  }
+
+  public java.util.concurrent.CompletableFuture<Object> evalAsync(
+      Activation activation, EvaluationOptions options, java.util.concurrent.Executor executor) {
+    Objects.requireNonNull(activation);
+    Objects.requireNonNull(options);
+    Objects.requireNonNull(executor);
+    var result = new java.util.concurrent.CompletableFuture<Object>();
+    executor.execute(
+        () -> {
+          if (result.isCancelled()) return;
+          try {
+            result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
+          } catch (RuntimeException failure) {
+            result.completeExceptionally(failure);
+          }
+        });
+    return result;
   }
 
   RootCallTarget callTarget() {
@@ -184,8 +279,8 @@ public final class Program {
 
   private static EvalContext context(Environment environment, Object binding, Object value) {
     return binding instanceof String name
-        ? new EvalContext(environment, name, value)
-        : new EvalContext(environment, binding);
+        ? new EvalContext.Scoped(environment, name, value)
+        : new EvalContext.Scoped(environment, binding);
   }
 
   private static boolean normalizedScalar(Object value) {
@@ -244,14 +339,19 @@ public final class Program {
       EvalContext context =
           contextInArguments
               ? (EvalContext) frame.getArguments()[0]
-              : context(environment, frame.getArguments()[0], frame.getArguments()[1]);
+              : new EvalContext(environment, frame.getArguments());
       try {
         Object result = body.execute(frame, context);
         context.checkControl();
         return result;
       } catch (CelException e) {
         // Budget accounting may aggregate lowered visits; attribute exhaustion to the policy root.
-        throw e.at(body.errorOffset, body.canonicalId, body.errorLine, body.errorColumn);
+        throw e.at(
+            body.errorOffset,
+            body.canonicalId,
+            body.errorLine,
+            body.errorColumn,
+            body.errorOffsetEncoding);
       }
     }
 

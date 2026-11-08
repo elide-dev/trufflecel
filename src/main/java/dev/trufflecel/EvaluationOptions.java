@@ -2,7 +2,8 @@ package dev.trufflecel;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import java.time.*;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -10,12 +11,18 @@ import java.util.function.BooleanSupplier;
  */
 public final class EvaluationOptions {
   final long budget;
+  final Map<String, Function<List<Object>, Object>> functions;
+  final TraceListener trace;
+  final PartialActivation partial;
   private final Duration timeout;
   private final Instant deadline;
   private final BooleanSupplier cancelled;
 
   private EvaluationOptions(Builder builder) {
     budget = builder.budget;
+    functions = Map.copyOf(builder.functions);
+    trace = builder.trace;
+    partial = builder.partial;
     timeout = builder.timeout;
     deadline = builder.deadline;
     cancelled = builder.cancelled;
@@ -23,6 +30,37 @@ public final class EvaluationOptions {
 
   public static Builder newBuilder() {
     return new Builder();
+  }
+
+  EvaluationOptions withPartial(PartialActivation activation) {
+    Builder builder = copy();
+    builder.partial = activation;
+    return builder.build();
+  }
+
+  EvaluationOptions withTrace(TraceListener listener) {
+    Builder builder = copy();
+    builder.trace = Objects.requireNonNull(listener);
+    return builder.build();
+  }
+
+  EvaluationOptions withCancellation(BooleanSupplier additional) {
+    Builder builder = copy();
+    builder.cancelled =
+        () -> additional.getAsBoolean() || cancelled != null && cancelled.getAsBoolean();
+    return builder.build();
+  }
+
+  private Builder copy() {
+    Builder builder = new Builder();
+    builder.budget = budget;
+    builder.timeout = timeout;
+    builder.deadline = deadline;
+    builder.cancelled = cancelled;
+    builder.functions.putAll(functions);
+    builder.trace = trace;
+    builder.partial = partial;
+    return builder;
   }
 
   Control control() {
@@ -57,6 +95,9 @@ public final class EvaluationOptions {
 
   public static final class Builder {
     private long budget;
+    private final Map<String, Function<List<Object>, Object>> functions = new LinkedHashMap<>();
+    private TraceListener trace;
+    private PartialActivation partial;
     private Duration timeout;
     private Instant deadline;
     private BooleanSupplier cancelled;
@@ -84,6 +125,19 @@ public final class EvaluationOptions {
 
     public Builder cancelled(BooleanSupplier predicate) {
       cancelled = Objects.requireNonNull(predicate);
+      return this;
+    }
+
+    /** Supply one declared late-bound overload, identified by its stable overload ID. */
+    public Builder function(String overloadId, Function<List<Object>, Object> implementation) {
+      if (Objects.requireNonNull(overloadId).isEmpty())
+        throw new IllegalArgumentException("empty overload id");
+      functions.put(overloadId, Objects.requireNonNull(implementation));
+      return this;
+    }
+
+    public Builder trace(TraceListener listener) {
+      trace = Objects.requireNonNull(listener);
       return this;
     }
 

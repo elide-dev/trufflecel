@@ -28,12 +28,13 @@ final class FunctionOverloads {
   }
 
   @TruffleBoundary
-  static Environment.FunctionBinding select(
+  static Environment.FunctionOverload select(
       Environment env, String name, boolean receiver, Object[] arguments) {
     var types = new ArrayList<CelType>();
     for (Object argument : arguments) {
       CelType type = Values.type(argument);
-      if (type.isDyn()) type = CelType.of("@unregistered");
+      if (type.isDyn() && !(argument instanceof Unknown) && !(argument instanceof CelException))
+        type = CelType.of("@unregistered");
       for (ObjectType adapter : env.runtimeObjectTypes)
         if (adapter.accepts(argument)) {
           type = CelType.of(adapter.name());
@@ -41,15 +42,23 @@ final class FunctionOverloads {
         }
       types.add(type);
     }
+    Environment.FunctionOverload result = null;
     for (var signature : env.overloads.get(name))
-      if (matches(signature, receiver, types)) return signature.binding();
-    return null;
+      if (matches(signature, receiver, types)) {
+        // Unknown/error arguments can match more than one concrete overload. Never guess.
+        if (result != null) return null;
+        result = signature;
+      }
+    return result;
   }
 
   @TruffleBoundary
-  static Object invoke(Environment.FunctionBinding binding, Object[] arguments) {
+  static Object invoke(
+      java.util.function.Function<List<Object>, Object> implementation, Object[] arguments) {
     try {
-      return Values.in(binding.implementation().apply(List.of(arguments)));
+      Object result = implementation.apply(List.of(arguments));
+      if (result instanceof CelException error) throw error;
+      return Values.in(result);
     } catch (CelException e) {
       throw e;
     } catch (ArithmeticException e) {

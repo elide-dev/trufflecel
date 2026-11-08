@@ -1,0 +1,15 @@
+{
+  "createdUtc": "2026-11-08T16:29:19.249733+00:00",
+  "productionCommit": "b81fa2f",
+  "measuredHead": "a0b28c9",
+  "harnessUnchangedFrom": "4df7775",
+  "method": "same minimum-based GC batch method as README and initial matrix",
+  "host": "same Apple M5 Max / macOS26.6.2; process flags and runtime version in logs",
+  "sourceHashes": {
+    "src/main/java/dev/trufflecel/Checker.java": "f0d76354a441e5c6e233ae3f64c0568976afbf52d03a4eadc4c2aec3ad3537ee",
+    "src/main/java/dev/trufflecel/EvalContext.java": "526d5c47d0a784ef780ad04586a7fd2320f4661c2a90ddfd5fe81970cc985b9b",
+    "src/main/java/dev/trufflecel/ExprNode.java": "278d10a5c559d82dc2330a4f57f4a6595233d841fab7ec0cb1b88dfa6d5b1272",
+    "src/main/java/dev/trufflecel/Program.java": "08724eb51e48b0640a2c43d8650be9390cb40d0a2cfefbf1a17a557390025814",
+    "benchmarks/retained/RetainedHeap.java": "5224eb249c4112a8dea4e4d1fadf2d8bb169b486a6b57dc7dc3624b310111a49"
+  }
+}

@@ -16,7 +16,14 @@ import org.graalvm.shadowed.org.json.JSONObject;
 
 /** JVM consumption test against publication jars, with no source-library dependencies. */
 public final class Consumer {
+  @dev.trufflecel.CelPojo("PublishedRecord")
+  public record PublishedRecord(long id) {}
+
   public static void main(String[] args) {
+    var pojo = Consumer_PublishedRecordCel.INSTANCE;
+    var pojoEnv = pojo.register(Cel.newBuilder()).variable("r", CelType.of(pojo.name())).build();
+    if (!pojoEnv.compile("r.id == 42").test(Map.of("r", pojo.snapshot(new PublishedRecord(42)))))
+      throw new AssertionError("generated POJO publication");
     var schema = Schema.of(Field.requiredLong("id"));
     var row = Batch.copyOf(schema, List.<Object[]>of(new Object[] {42L}), Limits.DEFAULT).row(0);
     var type = new DataType("Row", schema);

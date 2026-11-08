@@ -122,6 +122,25 @@ final class Optimizer {
     return result;
   }
 
+  /** Policy conditions can be hidden under a folded parent; share one bounded analysis budget. */
+  static Boolean constantBoolean(ExprNode node, EvalContext context) {
+    if (node.kind == ExprNode.Kind.CONSTANT && node.value instanceof Boolean value) return value;
+    if (node.fold != null && node.fold.value() instanceof Boolean value) return value;
+    if ((node.analysis & 1) == 0 || !context.canCharge(1)) return null;
+    var free = new HashSet<String>();
+    node.free(Set.of(), free);
+    if (!free.isEmpty()) return null;
+    node.resolveLocals(new ArrayList<>(), null);
+    node.resolveLazyBindings(Map.of());
+    try {
+      Object value = node.execute(null, context);
+      return value instanceof Boolean result ? result : null;
+    } catch (CelException error) {
+      // A failure (including exhausted analysis budget) is not a known Boolean result.
+      return null;
+    }
+  }
+
   /** Replace annotated subtrees with their prebuilt results; used for uninstrumented targets. */
   static ExprNode rewrite(ExprNode node) {
     if (node.fold != null) return new Folded(node);
@@ -129,9 +148,10 @@ final class Optimizer {
     return node;
   }
 
-  private void issue(CelException.Code code, String message, int offset) {
+  private void issue(CelException.Code code, String message, ExprNode node) {
     if (issues == null) issues = new ArrayList<>();
-    issues.add(new CelException.Issue(code, message, offset, -1, -1).locate(source));
+    if (issues.size() < CelException.MAX_ISSUES)
+      issues.add(node.issue(code, message).locate(source));
   }
 
   // Qualified names resolved to identifiers or constants keep parsed children that never execute.
@@ -171,8 +191,7 @@ final class Optimizer {
         || n.kind == ExprNode.Kind.MACRO && NESTING.contains(n.name)) {
       nesting++;
       if (env.comprehensionNesting > 0 && nesting > env.comprehensionNesting)
-        issue(
-            CelException.Code.RESOURCE_EXHAUSTED, "comprehension nesting limit exceeded", n.offset);
+        issue(CelException.Code.RESOURCE_EXHAUSTED, "comprehension nesting limit exceeded", n);
     }
     if (env.homogeneousLiterals) {
       if (n.kind == ExprNode.Kind.LIST) uniform(n.children, 0, 1, "list element");
@@ -233,7 +252,7 @@ final class Optimizer {
       try {
         Functions.apply(n.name, new Object[] {n.children[0].value}, env);
       } catch (CelException e) {
-        issue(e.code(), e.getMessage(), n.offset);
+        issue(e.code(), e.getMessage(), n);
       }
     }
     if (n.kind == ExprNode.Kind.CALL
@@ -246,8 +265,9 @@ final class Optimizer {
         n = new MatchesNode(n, Regex.compile(pattern, env.maxRegexProgramSize), null);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED)
-          throw new CelException(e.code(), e.issues().get(0).message(), n.children[1].offset);
-        if (strict) issue(e.code(), e.getMessage(), n.children[1].offset);
+          throw new CelException(
+              List.of(n.children[1].issue(e.code(), e.issues().get(0).message())));
+        if (strict) issue(e.code(), e.getMessage(), n.children[1]);
         n = new MatchesNode(n, null, e);
       }
     }
@@ -308,7 +328,7 @@ final class Optimizer {
         issue(
             CelException.Code.TYPE,
             "heterogeneous " + what + ": expected " + expected + ", found " + type,
-            child.offset);
+            child);
     }
   }
 
@@ -335,7 +355,11 @@ final class Optimizer {
 
   private boolean attempt(ExprNode n) {
     if (allowance <= 0) return false;
-    var context = new EvalContext(env, Map.of());
+    // Each closed subtree starts with an empty activation; lexical slot numbers must be
+    // relative to that subtree rather than to any surrounding source comprehension.
+    n.resolveLocals(new ArrayList<>(), null);
+    n.resolveLazyBindings(Map.of());
+    var context = new EvalContext.Scoped(env, Map.of());
     Object value = null;
     CelException error = null;
     try {
@@ -370,7 +394,7 @@ final class Optimizer {
     CelException error = n.fold.error();
     // The literal validators already reported this pattern or conversion.
     if (n instanceof MatchesNode matches && matches.error == error || literalConversion(n)) return;
-    if (strictPath) issue(error.code(), error.issues().get(0).message(), n.offset);
+    if (strictPath) issue(error.code(), error.issues().get(0).message(), n);
   }
 
   /** {@code timestamp('...')} and {@code duration('...')} are validated regardless of position. */
@@ -385,14 +409,19 @@ final class Optimizer {
   /** Whether an error in child {@code i} propagates from {@code n} whatever its siblings yield. */
   private boolean strictPosition(ExprNode n, int i, int depth) {
     return switch (n.kind) {
-      case CALL ->
-          switch (n.name) {
-            case "&&", "||", "@not_strictly_false" -> false;
-            case "or", "orValue" -> i == 0;
-            default -> siblingsConstant(n, i, depth);
-          };
+      case CALL -> {
+        boolean nonStrict = false;
+        for (var signature : env.overloads.getOrDefault(n.name, List.of()))
+          nonStrict |= signature.nonStrict();
+        yield !nonStrict
+            && switch (n.name) {
+              case "&&", "||", "@not_strictly_false" -> false;
+              case "or", "orValue" -> i == 0;
+              default -> siblingsConstant(n, i, depth);
+            };
+      }
       case CONDITIONAL -> i == 0;
-      case MACRO -> n.name.equals("has") || n.name.equals("bind") || i == 0;
+      case MACRO -> n.name.equals("bind") ? i == 1 : n.name.equals("has") || i == 0;
       case COMPREHENSION -> i != 2 && i != 3;
       case BLOCK -> i == n.children.length - 1;
       default -> true;
@@ -437,6 +466,8 @@ final class Optimizer {
 
   /** A constant subtree replaced by its value or its certain failure at the original cost. */
   static final class Folded extends ExprNode {
+    // This discarded source subtree is immutable and is not a Truffle child of the fast target.
+    private final ExprNode original;
     private final long cost;
     private final CelException error;
 
@@ -447,8 +478,21 @@ final class Optimizer {
       optionalEntry = original.optionalEntry;
       statement = original.statement;
       checkedType = original.checkedType;
+      this.original = original;
       cost = original.fold.cost();
       error = original.fold.error();
+    }
+
+    @Override
+    void finishPlanning(ExprNode owner) {
+      super.finishPlanning(owner);
+      // Created after template cloning, before this source copy can be shared by lazy targets.
+      original.finishPlanning(null);
+    }
+
+    @Override
+    ExprNode restoreTrace() {
+      return com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original).restoreTrace();
     }
 
     @Override
@@ -462,7 +506,7 @@ final class Optimizer {
 
   /** {@code matches} with a constant pattern compiled once; the operands are still evaluated. */
   static final class MatchesNode extends ExprNode {
-    private final Regex.Compiled pattern;
+    @Child private Regex.MatchNode matcher;
     private final CelException error;
 
     MatchesNode(ExprNode original, Regex.Compiled pattern, CelException error) {
@@ -473,9 +517,11 @@ final class Optimizer {
       statement = original.statement;
       checkedType = original.checkedType;
       canonicalId = original.canonicalId;
-      this.pattern = pattern;
+      this.matcher = pattern == null ? null : new Regex.MatchNode(pattern);
       this.error =
-          error == null ? null : error.at(errorOffset, canonicalId, errorLine, errorColumn);
+          error == null
+              ? null
+              : error.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
     }
 
     @Override
@@ -495,7 +541,7 @@ final class Optimizer {
       if (failure != null) throw failure;
       if (!(text instanceof String s)) throw Values.overload("matches");
       if (error != null) throw error;
-      return pattern.find(s);
+      return matcher.find(s);
     }
   }
 }

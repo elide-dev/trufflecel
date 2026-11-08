@@ -1,8 +1,35 @@
 # Coverage audit
 
+## November 8 memory optimization qualification
+
+The combined memory changes passed
+[69 test targets](https://app.buildbuddy.io/invocation/1d8267df-d34b-4325-8860-54ddfd240c7e),
+including the complete default suite, JVM compilation/allocation checks, native guest
+JIT/blocklist validation, native comparisons, representative native tests, and
+image-prepared programs. The production changes are at `b81fa2f`; subsequent commits
+add diagnostics, evidence, and regression coverage without changing production code.
+
+All [42 source test targets](https://app.buildbuddy.io/invocation/14903df3-890d-4620-a77c-15ba17b0e05c)
+passed under coverage instrumentation. Every one of the 66 owned production sources
+remains measured, including the adapters and annotation processor.
+
+| Metric | Combined memory changes |
+| --- | ---: |
+| Line hits | 8,103 / 8,113 (99.88%) |
+| Branch hits | 7,452 / 7,465 (99.83%) |
+| Required floor, each metric | 99.8% |
+
+Regressions cover concurrent template ownership, independent conversion caches,
+aliases and absolute roots, inferred and unchecked bindings, recursive exact budgets,
+missing captured bindings, debugger scopes, and trace/error/partial-evaluation
+provenance. No coverage exclusions, allocation ceilings, or Codecov settings changed.
+
+## Coverage policy and historical audits
+
 The [Codecov report](https://app.codecov.io/github/elide-dev/trufflecel) and Bazel's LCOV
-report guide tests for missed lines and partially covered conditions. All 34 owned
-production sources remain measured, including the optional protobuf and JSON adapters.
+report guide tests for missed lines and partially covered conditions. All owned
+production sources remain measured, including the optional protobuf and JSON adapters
+and the POJO annotation processor.
 No coverage exclusions were added.
 
 The November 4, 2026 audit improved the JVM suite:
@@ -43,8 +70,8 @@ extension construction, defaults, presence, wire round-trips, and registration v
 | Branch hits | 3,665 / 3,669 (99.89%) |
 | CI minimum, each metric | 99.8% |
 
-At that checkpoint, all new production lines and branches were covered. The same four defensive lines and four
-invariant branch outcomes listed below remain. JVM guest-compilation checks add bindings,
+At that checkpoint, all new production lines and branches were covered; four defensive lines
+and four invariant branch outcomes remained. JVM guest-compilation checks add bindings,
 blocks, and sets, with allocation ceilings of 64, 768, and 1,536 bytes per evaluation for the
 representative expressions in `benchmarks/CompiledTest.java`. Existing ceilings are unchanged.
 Native JIT checks exercise the same operations.
@@ -199,33 +226,73 @@ dropped from 3,904 to 96 bytes per evaluation (its ceiling is 192).
 | Branch hits | 4,912 / 4,917 (99.90%) |
 | CI minimum, each metric | 99.8% |
 
+## 0.10.0 functionality qualification
+
+The combined functionality suite measures all 66 owned production sources, including
+the configuration/policy tooling, editable ASTs, partial evaluation, and annotation
+processor. All 42 source test targets passed at `547c9fc`, including the complete
+CEL and CEL Policy corpora. No source exclusions or coverage floors changed.
+
+| Metric | Measured after functionality completion |
+| --- | ---: |
+| Line hits | 8,027 / 8,035 (99.90%) |
+| Branch hits | 7,391 / 7,403 (99.84%) |
+| CI minimum, each metric | 99.8% |
+
+The [full coverage invocation](https://app.buildbuddy.io/invocation/eaf381f3-814d-4ee4-a2ff-4a5bb4a22671)
+and the local coverage gate passed. Codecov's separate patch check counts partially
+covered lines differently; its result must also be checked before merge.
+
 ## Remaining paths
 
-Four missed lines remain in defensive paths:
+Six of the eight missed lines are in three exception handlers:
 
 - `DataValues.from`: the checked interop exception handler for native arrays/nulls.
   TruffleData validates their representations before this conversion; arbitrary objects
   are rejected by its constructors before reaching CEL.
 - `ProtobufType.Value.message`: the checked protobuf parse exception handler during host
   export. The wire bytes come from the validated native plan's encoder.
+- `CanonicalAst.LegacySchemas.build`: the descriptor-validation exception handler when
+  converting the bundled `cel.expr` schemas to the legacy package. The suite exercises the
+  conversion using the pinned descriptors, which validate successfully.
 
-Four uncovered branch outcomes follow existing invariants:
+The other two lines delegate attribute metadata through a CSE index. Current tracing and
+partial-evaluation paths restore the original source tree before resolving attributes,
+so they do not visit that delegation; ordinary evaluation does not require attribute metadata.
 
-- `Environment.prepare`: built-in type names have already been removed from the free
-  variable set before its additional built-in-name check.
-- `ExprNode.lowerUninstrumented`: `size` is not in the extension dispatch set, so its
-  extension exclusion cannot reject a currently supported extension.
-- `ExprNode.call`: scalar operators and string predicates are disjoint from the extension
-  dispatch set; their extension exclusion remains defensive.
+The remaining branch outcomes include both defensive checks and combinations the current
+suite has not exercised. They are not all established as unreachable:
+
+- Frontend recovery and declaration inference: `Checker.check` preserves resource failures
+  instead of collecting them as recoverable type findings; the resource-limit tests currently
+  fail in earlier validation or later optimization. `Environment.prepare` additionally checks
+  built-in type names after the free-variable traversal has already removed them.
+- Macro dispatch: `Parser.call` retains final name checks after the configured standard-macro
+  set has restricted `cel` calls and protobuf extension calls to the supported names.
+- Runtime specialization: `ExprNode.lowerUninstrumented` excludes extension dispatch from
+  its `size` specialization, and `ExprNode.call` does the same for scalar operators and string
+  predicates. Those functions are disjoint from the current extension dispatch set.
+- Lazy-scope capture: `ExprNode.LazyBinding` tolerates a missing frame when local capture is
+  requested. Source-backed execution and resolved frame slots supply a frame; plan-time
+  evaluation does not request local capture. Nested captures, errors, budgets, tracing and
+  partial-value aliases are exercised through the public APIs.
 - `Parser.string`: `codePointAt` and the checked escape decoder already bound code points
   to the Unicode range. The surrogate rejection is exercised; the additional invalid-range
   check cannot fail for those inputs.
-- `ProtobufType.prepared`: map fields whose value type is a well-known message have no
-  prepared accessor; the corpus and matrix read such maps through the generic path only.
+- Policy source fallback: `PolicyCompiler.expression` can wrap an expression lacking source
+  metadata, while the public YAML loader supplies `ConfigurationData.Expression` objects
+  with locations for policy expression fields.
+- Protobuf specialization and wire normalization: `ProtobufType.prepared` retains a fallback
+  for map key/value types outside its prepared-accessor representation. `ProtobufType.nestedWire`
+  distinguishes a matching field number that is not a message from nested-message payloads.
+  These missed outcomes are adapter coverage gaps, not claims about invalid protobuf inputs.
+- Processor discovery: `PojoProcessor.process` returns without generating code if the
+  `CelPojo` annotation type is unavailable. The processor tests include the annotation API on
+  the compilation classpath.
 
 These paths remain visible in coverage. The suite does not use reflection, mocked static
 methods, or corrupted immutable objects to force them. Revisit this list if dependency
-contracts, supported functions, or parser inputs change.
+contracts, supported functions, processor classpaths, or parser inputs change.
 
 ## Reproduction
 
@@ -236,3 +303,10 @@ bazel run //tools:coverage --config=local
 
 CI validates and uploads the resulting LCOV report and preserves JUnit results before the
 coverage invocation replaces Bazel's test-log links. See [CI reporting](CI.md#codecov-reporting).
+
+## Patch reporting
+
+Required JVM CI measures every owned production source and enforces 99.8% line
+and branch coverage. Codecov patch reporting is informational: its automatic
+base-relative target is independent of these mandatory full-source floors.
+Upload failures remain errors; no production source is excluded.

@@ -1,0 +1,43 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //benchmarks:jit_smoke
+-----------------------------------------------------------------------------
+Native debugger qualification passed
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine] perf info    Program.ExpressionRoot@2bbeedac                             |Partial evaluation could not resolve virtual instanceof to an exact type due to: interface type check: SubstrateType<java.util.List>|Nodes [551|InstanceOf]
+  No stack trace available for [551|InstanceOf].
+[engine] perf info    Program.ExpressionRoot@2bbeedac                             |Partial evaluation could not resolve virtual instanceof to an exact type due to: interface type check: SubstrateType<java.util.List>|Nodes [495|InstanceOf]
+  No stack trace available for [495|InstanceOf].
+NATIVE COMPILED name: image-policy
+rule: {match: [{condition: 'x > 0', output: 'x + 1'}, {output: '0'}]}
+NATIVE COMPILED name: runtime-policy
+rule: {match: [{condition: 'x > 0', output: 'x + 2'}]}
+Native policy and environment tooling qualification passed
+NATIVE COMPILED 
+Native editable AST, macro and v1alpha1 qualification passed
+NATIVE COMPILED optional.ofNonZeroValue(p).hasValue()
+NATIVE COMPILED optional.ofNonZeroValue(p).hasValue()
+NATIVE COMPILED regex.replace(s, '(a)', r'\1x')
+NATIVE COMPILED regex.extractAll(s, '[0-9]+')
+NATIVE COMPILED optional.unwrap([optional.of(x), optional.none()]).last().value() == math.sqrt(9.0)
+NATIVE COMPILED p.number + 1
+NATIVE COMPILED label(x)
+NATIVE COMPILED (x + 1) * (x + 1)
+NATIVE COMPILED p.zip > 100
+NATIVE COMPILED x * 2 + 1 > 100
+NATIVE COMPILED enabled && 10 / x > 1
+[engine] perf info    Program.ExpressionRoot@236f44e9                             |Partial evaluation could not resolve virtual instanceof to an exact type due to: interface type check: SubstrateType<java.util.List>|Nodes [347|InstanceOf]
+  No stack trace available for [347|InstanceOf].
+[engine] perf info    Program.ExpressionRoot@236f44e9                             |Partial evaluation could not resolve virtual instanceof to an exact type due to: interface type check: SubstrateType<java.util.List>|Nodes [291|InstanceOf]
+  No stack trace available for [291|InstanceOf].
+NATIVE COMPILED xs.all(x, x > 0)
+NATIVE COMPILED {'v': x}.v > 5
+NATIVE COMPILED optional.of(x).orValue(0) > 5
+NATIVE COMPILED cel.bind(v, x + 1, v > 5)
+NATIVE COMPILED cel.block([x + 1], cel.index(0) > 5)
+NATIVE COMPILED json.parse(s).value().a == 1
+NATIVE COMPILED yaml.parse(s).value().a == 1
+NATIVE COMPILED sets.contains([1,2,3], [x])
+Native guest-JIT qualification passed

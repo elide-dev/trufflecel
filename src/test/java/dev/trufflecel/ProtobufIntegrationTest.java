@@ -11,6 +11,204 @@ import org.junit.Test;
 
 public class ProtobufIntegrationTest {
   @Test
+  public void concurrentWireDecodesPreserveOwnedInputsAndIndependentExports() throws Exception {
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor);
+    var payload = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
+    var message =
+        DynamicMessage.newBuilder(descriptor)
+            .setField(descriptor.findFieldByName("bytes"), payload)
+            .setField(descriptor.findFieldByName("string"), "owned")
+            .setUnknownFields(
+                UnknownFieldSet.newBuilder()
+                    .addField(
+                        100, UnknownFieldSet.Field.newBuilder().addLengthDelimited(payload).build())
+                    .build())
+            .build();
+    byte[] wire = message.toByteArray();
+    var input = new Bytes(wire);
+    Arrays.fill(wire, (byte) 0);
+    int hash = input.hashCode();
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
+      var jobs = new ArrayList<java.util.concurrent.Callable<Object>>();
+      for (int i = 0; i < 100; i++)
+        jobs.add(
+            () -> {
+              var value = (ProtobufType.Value) type.decode(input);
+              Arrays.fill(value.toBytes().toByteArray(), (byte) 0);
+              Arrays.fill(((Bytes) type.get(value, "bytes")).toByteArray(), (byte) 0);
+              Arrays.fill(value.row().unknownFieldBytes(), (byte) 0);
+              assertEquals(message, value.message());
+              return type.get(value, "bytes");
+            });
+      for (var job : executor.invokeAll(jobs))
+        assertEquals(new Bytes(payload.toByteArray()), job.get());
+    }
+    assertEquals(hash, input.hashCode());
+    assertArrayEquals(message.toByteArray(), input.toByteArray());
+    var invalid = new Bytes(new byte[] {-1});
+    for (int i = 0; i < 2; i++)
+      assertEquals(
+          CelException.Code.INVALID_ARGUMENT,
+          assertThrows(CelException.class, () -> type.decode(invalid)).code());
+    assertArrayEquals(new byte[] {-1}, invalid.toByteArray());
+  }
+
+  @Test
+  public void protobufContextExposesDefaultsAndRetainsNativeSnapshots() throws Exception {
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor);
+    var env = type.registerContext(Cel.newBuilder()).build();
+    var message =
+        DynamicMessage.newBuilder(descriptor)
+            .setField(descriptor.findFieldByName("int64"), 7L)
+            .build();
+    var context = type.context(message);
+    assertEquals(7L, env.compile("int64 + int32").evaluate(context));
+    assertEquals(List.of(), env.compile("items").evaluate(context));
+    assertEquals(7L, env.compile("int64").evaluate(type.context(type.snapshot(message))));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            type.context(
+                new ProtobufType(StringValue.getDescriptor()).snapshot(StringValue.of("x"))));
+  }
+
+  @Test
+  public void fieldMasksCheckNestedPathsAndHideFieldsAtRuntime() throws Exception {
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor);
+    var mask =
+        FieldMask.newBuilder()
+            .addPaths("int64")
+            .addPaths("message.string")
+            .addPaths("items")
+            .build();
+    var view = type.mask("Visible", mask);
+    assertEquals("Visible", view.name());
+    assertEquals(Set.of("int64", "message", "items"), view.fields().keySet());
+    var env = view.register(Cel.newBuilder()).variable("p", CelType.of(view.name())).build();
+    var nested =
+        DynamicMessage.newBuilder(descriptor)
+            .setField(descriptor.findFieldByName("string"), "ok")
+            .setField(descriptor.findFieldByName("int64"), 99L)
+            .build();
+    var message =
+        DynamicMessage.newBuilder(descriptor)
+            .setField(descriptor.findFieldByName("int64"), 7L)
+            .setField(descriptor.findFieldByName("message"), nested)
+            .build();
+    Object projected = view.snapshot(message);
+    assertEquals(
+        true,
+        env.compile("p.int64 == 7 && p.message.string == 'ok' && has(p.message.string)")
+            .evaluate(Map.of("p", projected)));
+    assertThrows(CelException.class, () -> env.compile("p.string"));
+    assertThrows(CelException.class, () -> env.compile("p.message.int64"));
+    assertEquals(
+        CelException.Code.NO_SUCH_FIELD,
+        assertThrows(
+                CelException.class,
+                () -> env.compile("dyn(p).string").evaluate(Map.of("p", projected)))
+            .code());
+    assertEquals(
+        CelException.Code.NO_SUCH_FIELD,
+        assertThrows(CelException.class, () -> view.get(projected, "string")).code());
+    assertThrows(CelException.class, () -> view.has(projected, "string"));
+    assertThrows(CelException.class, () -> view.construct(Map.of("string", "x")));
+    assertEquals(projected, view.decode(new Bytes(message.toByteArray())));
+    assertEquals(projected.hashCode(), view.decode(new Bytes(message.toByteArray())).hashCode());
+    assertFalse(view.accepts(type.snapshot(message)));
+    assertFalse(view.equal(projected, 1L));
+    assertFalse(view.equal(1L, projected));
+    assertTrue(
+        view.equal(
+            projected,
+            view.snapshot(
+                message.toBuilder().setField(descriptor.findFieldByName("bool"), true).build())));
+    assertFalse(
+        view.equal(
+            projected,
+            view.snapshot(
+                message.toBuilder().setField(descriptor.findFieldByName("int64"), 8L).build())));
+    assertFalse(
+        view.equal(
+            projected,
+            view.snapshot(
+                message.toBuilder().clearField(descriptor.findFieldByName("int64")).build())));
+    assertEquals(
+        "ok",
+        view.registerContext(Cel.newBuilder())
+            .build()
+            .compile("message.string")
+            .evaluate(view.context(message)));
+    assertEquals(
+        7L,
+        view.registerContext(Cel.newBuilder())
+            .build()
+            .compile("int64")
+            .evaluate(view.context(projected)));
+    assertThrows(IllegalArgumentException.class, () -> view.context(type.snapshot(message)));
+    assertEquals("test.Record.Masked", type.mask(FieldMask.getDefaultInstance()).name());
+    assertTrue(type.mask(FieldMask.getDefaultInstance()).fields().isEmpty());
+    assertEquals(type.fields(), type.mask(FieldMask.newBuilder().addPaths("*").build()).fields());
+    assertEquals(
+        type.fields().get("message"),
+        type.mask(FieldMask.newBuilder().addPaths("message.string").addPaths("message").build())
+            .fields()
+            .get("message"));
+    for (String invalid :
+        List.of("", "missing", "message.", "int64.value", "items.value", "labels.value"))
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> type.mask(FieldMask.newBuilder().addPaths(invalid).build()));
+    assertThrows(IllegalArgumentException.class, () -> type.mask("bad name", mask));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            type.mask(
+                FieldMask.newBuilder().addAllPaths(Collections.nCopies(4097, "int64")).build()));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> type.mask(FieldMask.newBuilder().addPaths("message.".repeat(100) + "int64").build()));
+    var wkt =
+        new ProtobufType(StringValue.getDescriptor())
+            .mask(FieldMask.newBuilder().addPaths("value").build());
+    assertEquals(
+        "x",
+        wkt.registerContext(Cel.newBuilder())
+            .build()
+            .compile("value")
+            .evaluate(wkt.context(StringValue.of("x"))));
+    Object built =
+        env.compile("Visible{int64: 7, message: Visible.message{string: 'ok'}}").evaluate();
+    assertEquals(projected, built);
+    assertFalse(view.isZero(projected));
+    assertTrue(view.isZero(view.construct(Map.of())));
+  }
+
+  @Test
+  public void partialAttributesHonorProtobufPresenceAndTypedResolvers() throws Exception {
+    var descriptor = descriptor();
+    var type = new ProtobufType(descriptor);
+    var env = type.register(Cel.newBuilder()).variable("p", CelType.of(type.name())).build();
+    var value = type.construct(Map.of("int64", 3L));
+    var activation =
+        PartialActivation.of(Map.of("p", value), AttributePattern.of("p").qualify("string"));
+    assertEquals(3L, env.compile("p.int64").partialEvaluate(activation).value());
+    assertEquals(
+        Unknown.of("p.string"), env.compile("has(p.string)").partialEvaluate(activation).value());
+    var resolved = activation.resolve(Map.of(Attribute.of("p"), value));
+    assertEquals(false, env.compile("has(p.string)").partialEvaluate(resolved).value());
+    assertEquals(true, env.compile("has(p.int64)").partialEvaluate(resolved).value());
+    assertEquals("", env.compile("p.string").partialEvaluate(resolved).value());
+    assertEquals(3L, env.compile("p.int64").partialEvaluate(resolved).value());
+    assertEquals(
+        CelException.Code.NO_SUCH_FIELD,
+        env.compile("dyn(p).missing").partialEvaluate(resolved).error().code());
+  }
+
+  @Test
   public void productionCorpusEdgesKeepBoundsAndCelEquality() throws Exception {
     var d = descriptor();
     var limits = new Limits(32, 64, 2048, 1024);
@@ -51,6 +249,9 @@ public class ProtobufIntegrationTest {
                 .build(),
             new FileDescriptor[] {Any.getDescriptor().getFile()});
     var adapter = new ProtobufType(file.findMessageTypeByName("Envelope"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> adapter.mask(FieldMask.newBuilder().addPaths("payload.type_url").build()));
     for (Object value :
         List.of(
             java.time.Instant.ofEpochSecond(7),
@@ -672,6 +873,26 @@ public class ProtobufIntegrationTest {
       message.setField(field, field.isRepeated() ? List.of(scalar) : scalar);
     }
     ProtobufType.Value value = type.snapshot(message.build());
+    var visible = type.mask(FieldMask.newBuilder().addPaths("*").build());
+    assertEquals(type.extensions(), visible.extensions());
+    assertTrue(type.mask(FieldMask.getDefaultInstance()).extensions().isEmpty());
+    var visibleEnv =
+        visible
+            .register(Cel.newBuilder().container("ext"))
+            .variable("m", CelType.of(visible.name()))
+            .build();
+    Object projection = visible.snapshot(message.build());
+    for (FieldDescriptor field : extensions) {
+      assertTrue(
+          visibleEnv
+              .compile("proto.hasExt(m, " + field.getName() + ")")
+              .test(Map.of("m", projection)));
+      assertEquals(
+          type.get(value, field.getFullName()),
+          visibleEnv
+              .compile("proto.getExt(m, " + field.getName() + ")")
+              .evaluateInternal(Map.of("m", projection)));
+    }
     assertEquals(message.build(), value.message());
     var decoded = (ProtobufType.Value) type.decode(value.toBytes());
     assertEquals(value, decoded);

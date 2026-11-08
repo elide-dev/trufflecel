@@ -1,0 +1,32 @@
+diff --git a/src/main/java/dev/trufflecel/Bytes.java b/src/main/java/dev/trufflecel/Bytes.java
+index 94358cc..ff0620a 100644
+--- a/src/main/java/dev/trufflecel/Bytes.java
++++ b/src/main/java/dev/trufflecel/Bytes.java
+@@ -14,6 +14,12 @@ public final class Bytes implements Comparable<Bytes> {
+     return value.clone();
+   }
+ 
++  // Trusted internal codecs may read this owned array during a call. Never mutate it,
++  // expose it to host code, or use it with a decoder that retains borrowed storage.
++  byte[] arrayForRead() {
++    return value;
++  }
++
+   public int size() {
+     return value.length;
+   }
+diff --git a/src/main/java/dev/trufflecel/ProtobufType.java b/src/main/java/dev/trufflecel/ProtobufType.java
+index 383f46d..d8e438e 100644
+--- a/src/main/java/dev/trufflecel/ProtobufType.java
++++ b/src/main/java/dev/trufflecel/ProtobufType.java
+@@ -1034,7 +1034,9 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
+ 
+   public Object decode(Bytes bytes) {
+     try {
+-      return new Value(this, plan.decode(wire(bytes.toByteArray(), true, 0)));
++      // Bytes already owns its immutable input. Both normalization and the native codec
++      // only read it, and the decoded row owns its strings, bytes and unknown fields.
++      return new Value(this, plan.decode(wire(bytes.arrayForRead(), true, 0)));
+     } catch (ContractViolation e) {
+       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
+     }

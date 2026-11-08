@@ -122,7 +122,7 @@ public class InteropTest {
         () -> lib.getHashEntriesIterator(GuestValue.wrap(List.of())));
     Object iterator = lib.getHashEntriesIterator(GuestValue.wrap(Map.of()));
     assertThrows(StopIterationException.class, () -> lib.getIteratorNextElement(iterator));
-    var scope = new CelLanguage.Scope();
+    var scope = new CelLanguage.Scope(null);
     assertThrows(UnknownIdentifierException.class, () -> lib.readMember(scope, "missing"));
     assertTrue(lib.hasLanguageId(scope));
     assertEquals("cel", lib.getLanguageId(scope));

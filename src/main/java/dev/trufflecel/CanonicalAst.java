@@ -39,6 +39,8 @@ public final class CanonicalAst {
    */
   public static Message prototype(String fullName) {
     Descriptor descriptor = CanonicalSchema.MESSAGES.get(fullName);
+    if (descriptor == null && fullName.startsWith("google.api.expr.v1alpha1."))
+      descriptor = LegacySchemas.MESSAGES.get(fullName);
     if (descriptor == null)
       throw new IllegalArgumentException("Unknown canonical schema: " + fullName);
     return DynamicMessage.getDefaultInstance(descriptor);
@@ -46,8 +48,7 @@ public final class CanonicalAst {
 
   /** Parse source independently; macro expansion is represented as canonical accumulator loops. */
   public static Message parse(Environment environment, String source) {
-    if (source.length() > environment.maxSourceLength)
-      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "source length limit exceeded");
+    environment.checkSource(source);
     ExprNode tree = new Parser(source, environment).parse();
     // Cloning recurses over the tree, so the depth limit applies before the copy.
     environment.checkDepth(tree);
@@ -65,37 +66,61 @@ public final class CanonicalAst {
     writer.positions.replaceAll(
         (id, offset) -> source.codePointCount(0, Math.min(offset, source.length())));
     Message info =
-        message("cel.expr.SourceInfo", "line_offsets", offsets, "positions", writer.positions);
+        message(
+            "cel.expr.SourceInfo",
+            "line_offsets",
+            offsets,
+            "positions",
+            writer.positions,
+            "macro_calls",
+            writer.macroCalls);
     return message("cel.expr.ParsedExpr", "expr", expression, "source_info", info);
   }
 
   /** Check a canonical ParsedExpr and return a canonical CheckedExpr. */
   public static Message check(Environment environment, Message parsed) {
+    boolean legacy =
+        parsed.getDescriptorForType().getFullName().startsWith("google.api.expr.v1alpha1.");
+    parsed = toCelExpr(parsed);
     requireSchema(parsed, "cel.expr.ParsedExpr");
     size(parsed);
     var reader = new Reader(environment);
     reader.sourceInfo(child(parsed, "source_info"));
     ExprNode tree = reader.expression(child(parsed, "expr"), 0);
     environment.prepare("", tree, true);
-    var writer = new Writer();
+    if (environment.commonSubexpressions) tree = CseOptimizer.export(tree, environment);
+    var writer = new Writer(true);
     writer.reserved.addAll(reader.ids);
     Message expr = writer.expression(tree);
-    return message(
-        "cel.expr.CheckedExpr",
-        "expr",
-        expr,
-        "source_info",
-        child(parsed, "source_info"),
-        "type_map",
-        writer.types,
-        "reference_map",
-        writer.references,
-        "expr_version",
-        "1.0");
+    Message originalInfo = child(parsed, "source_info");
+    var sourceInfo = originalInfo.toBuilder();
+    FieldDescriptor positions = originalInfo.getDescriptorForType().findFieldByName("positions");
+    writer.positions.forEach(
+        (id, position) -> {
+          if (!reader.positions.containsKey(id))
+            sourceInfo.addRepeatedField(
+                positions,
+                message("cel.expr.SourceInfo.PositionsEntry", "key", id, "value", position));
+        });
+    Message checked =
+        message(
+            "cel.expr.CheckedExpr",
+            "expr",
+            expr,
+            "source_info",
+            sourceInfo.build(),
+            "type_map",
+            writer.types,
+            "reference_map",
+            writer.references,
+            "expr_version",
+            "1.0");
+    return legacy ? toV1Alpha1(checked) : checked;
   }
 
   /** Import ParsedExpr or CheckedExpr. Checked input is revalidated using this environment. */
   public static Program program(Environment environment, Message ast) {
+    ast = toCelExpr(ast);
     size(ast);
     String schema = ast.getDescriptorForType().getFullName();
     if (!schema.equals("cel.expr.ParsedExpr") && !schema.equals("cel.expr.CheckedExpr"))
@@ -107,6 +132,169 @@ public final class CanonicalAst {
         reader.references.put((Long) field(entry, "key"), child(entry, "value"));
     ExprNode tree = reader.expression(child(ast, "expr"), 0);
     return environment.prepare("", tree, schema.equals("cel.expr.CheckedExpr")).adopt();
+  }
+
+  /** Export an owned editable AST; unknown source text omits positional metadata. */
+  public static Message parsed(Ast ast) {
+    var writer = new Writer();
+    for (Ast.Node node : ast.nodes()) writer.reserved.add(node.id());
+    Message expr = writer.expression(Ast.restore(ast.root()));
+    Message info = message("cel.expr.SourceInfo", "macro_calls", writer.macroCalls);
+    return message("cel.expr.ParsedExpr", "expr", expr, "source_info", info);
+  }
+
+  /** Import a navigable tree. Macro metadata is for reconstruction only, never evaluation. */
+  public static Ast ast(Environment environment, Message input) {
+    Message ast = toCelExpr(input);
+    size(ast);
+    String name = ast.getDescriptorForType().getFullName();
+    if (!name.equals("cel.expr.ParsedExpr") && !name.equals("cel.expr.CheckedExpr"))
+      throw new IllegalArgumentException("Expected ParsedExpr or CheckedExpr");
+    var reader = new Reader(environment);
+    reader.sourceInfo(child(ast, "source_info"));
+    if (name.equals("cel.expr.CheckedExpr"))
+      for (Message entry : messages(ast, "reference_map"))
+        reader.references.put((Long) field(entry, "key"), child(entry, "value"));
+    ExprNode tree = reader.expression(child(ast, "expr"), 0);
+    attachMacroCalls(tree, reader);
+    return Ast.of(Ast.snapshot(tree));
+  }
+
+  public static String unparse(Environment environment, Message ast) {
+    return ast(environment, ast).unparse();
+  }
+
+  private static void attachMacroCalls(ExprNode node, Reader reader) {
+    Message original = reader.macroCalls.get(node.canonicalId);
+    if (original != null) {
+      var source = new MacroSource(reader);
+      Message normalized = source.copy(original, 0, new HashSet<>());
+      var syntax = new Reader(reader.environment);
+      syntax.count = reader.count;
+      ExprNode call = syntax.expression(normalized, 0);
+      reader.count = syntax.count;
+      if (call.kind != ExprNode.Kind.CALL)
+        throw new IllegalArgumentException("macro_calls must contain call expressions");
+      node.macroCall = Ast.snapshot(call);
+    } else for (ExprNode child : node.children) attachMacroCalls(child, reader);
+  }
+
+  /** Rename only schema identity: v1alpha1 AST payloads have the same protobuf wire contract. */
+  public static Message toV1Alpha1(Message ast) {
+    size(ast);
+    String name = ast.getDescriptorForType().getFullName();
+    if (name.startsWith("google.api.expr.v1alpha1.")) return ast;
+    if (!name.startsWith("cel.expr.")) throw new IllegalArgumentException("Expected CEL schema");
+    return decode(
+        "google.api.expr.v1alpha1." + name.substring("cel.expr.".length()),
+        new Bytes(ast.toByteArray()));
+  }
+
+  public static Message toCelExpr(Message ast) {
+    size(ast);
+    String name = ast.getDescriptorForType().getFullName();
+    if (!name.startsWith("google.api.expr.v1alpha1.")) return ast;
+    return decode(
+        "cel.expr." + name.substring("google.api.expr.v1alpha1.".length()),
+        new Bytes(ast.toByteArray()));
+  }
+
+  private static final class LegacySchemas {
+    static final Map<String, Descriptor> MESSAGES = build();
+
+    private static Map<String, Descriptor> build() {
+      try {
+        var files = new HashMap<String, FileDescriptor>();
+        var messages = new HashMap<String, Descriptor>();
+        for (String schema : List.of("cel.expr.Expr", "cel.expr.CheckedExpr"))
+          for (Descriptor descriptor :
+              file(CanonicalSchema.MESSAGES.get(schema).getFile(), files).getMessageTypes())
+            add(descriptor, messages);
+        return Map.copyOf(messages);
+      } catch (DescriptorValidationException impossible) {
+        throw new ExceptionInInitializerError(impossible);
+      }
+    }
+
+    private static FileDescriptor file(FileDescriptor source, Map<String, FileDescriptor> files)
+        throws DescriptorValidationException {
+      if (!source.getPackage().equals("cel.expr")) return source;
+      FileDescriptor existing = files.get(source.getName());
+      if (existing != null) return existing;
+      var dependencies = new ArrayList<FileDescriptor>();
+      for (FileDescriptor dependency : source.getDependencies())
+        dependencies.add(file(dependency, files));
+      var proto = source.toProto().toBuilder().setPackage("google.api.expr.v1alpha1");
+      for (var message : proto.getMessageTypeBuilderList()) rewrite(message);
+      FileDescriptor result =
+          FileDescriptor.buildFrom(proto.build(), dependencies.toArray(FileDescriptor[]::new));
+      files.put(source.getName(), result);
+      return result;
+    }
+
+    private static void rewrite(DescriptorProtos.DescriptorProto.Builder message) {
+      for (var field : message.getFieldBuilderList())
+        if (field.getTypeName().startsWith(".cel.expr."))
+          field.setTypeName(
+              ".google.api.expr.v1alpha1." + field.getTypeName().substring(".cel.expr.".length()));
+      for (var nested : message.getNestedTypeBuilderList()) rewrite(nested);
+    }
+
+    private static void add(Descriptor descriptor, Map<String, Descriptor> messages) {
+      messages.put(descriptor.getFullName(), descriptor);
+      for (Descriptor nested : descriptor.getNestedTypes()) add(nested, messages);
+    }
+  }
+
+  /** Macro source IDs occupy a separate namespace; resolve nested id-only macro references. */
+  private static final class MacroSource {
+    final Reader reader;
+    long next = 1;
+    int count;
+
+    MacroSource(Reader reader) {
+      this.reader = reader;
+    }
+
+    Message copy(Message source, int depth, Set<Long> resolving) {
+      boolean expression = source.getDescriptorForType().getFullName().equals("cel.expr.Expr");
+      if (expression && ++count > reader.environment.maxAstNodes
+          || depth > reader.environment.maxDepth)
+        throw Values.error(
+            CelException.Code.RESOURCE_EXHAUSTED, "macro source size/depth limit exceeded");
+      if (expression
+          && source.getOneofFieldDescriptor(source.getDescriptorForType().getOneofs().get(0))
+              == null) {
+        long id = (Long) field(source, "id");
+        Message target = reader.macroCalls.getOrDefault(id, reader.expressions.get(id));
+        if (target == null || !resolving.add(id))
+          throw new IllegalArgumentException("invalid macro source reference");
+        Message expanded = copy(target, depth + 1, resolving);
+        resolving.remove(id);
+        return expanded;
+      }
+      var builder = source.toBuilder();
+      FieldDescriptor id = source.getDescriptorForType().findFieldByName("id");
+      if (id != null) builder.setField(id, next++);
+      for (var entry : source.getAllFields().entrySet()) {
+        FieldDescriptor field = entry.getKey();
+        if (field.getJavaType() != FieldDescriptor.JavaType.MESSAGE) continue;
+        if (field.isRepeated()) {
+          builder.clearField(field);
+          for (Object value : (List<?>) entry.getValue())
+            builder.addRepeatedField(
+                field, copy((Message) value, childDepth((Message) value, depth), resolving));
+        } else {
+          Message value = (Message) entry.getValue();
+          builder.setField(field, copy(value, childDepth(value, depth), resolving));
+        }
+      }
+      return builder.build();
+    }
+
+    private static int childDepth(Message child, int depth) {
+      return depth + (child.getDescriptorForType().getFullName().equals("cel.expr.Expr") ? 1 : 0);
+    }
   }
 
   /** Parse serialized canonical protobuf data with bounded protobuf recursion and size. */
@@ -288,11 +476,14 @@ public final class CanonicalAst {
     final Environment environment;
     final Set<Long> ids = new HashSet<>();
     final Map<Long, Message> references = new HashMap<>();
+    final Map<Long, Message> macroCalls = new HashMap<>(), expressions = new HashMap<>();
     int count;
     final Map<Long, Integer> positions = new HashMap<>();
     final List<Integer> lineOffsets = new ArrayList<>();
 
     void sourceInfo(Message info) {
+      for (Message entry : messages(info, "macro_calls"))
+        macroCalls.put((Long) field(entry, "key"), child(entry, "value"));
       for (Message entry : messages(info, "positions"))
         positions.put((Long) field(entry, "key"), (Integer) field(entry, "value"));
       for (Object offset : (List<?>) field(info, "line_offsets")) lineOffsets.add((Integer) offset);
@@ -314,6 +505,7 @@ public final class CanonicalAst {
       long id = (Long) field(expr, "id");
       if (id <= 0 || !ids.add(id))
         throw new IllegalArgumentException("AST ids must be positive and unique");
+      expressions.put(id, expr);
       ExprNode node;
       if (has(expr, "const_expr")) node = ExprNode.constant(constant(child(expr, "const_expr")), 0);
       else if (has(expr, "ident_expr"))
@@ -421,6 +613,23 @@ public final class CanonicalAst {
           node =
               new ExprNode(
                   ExprNode.Kind.SELECT, (String) children.get(1).value, true, 0, children.get(0));
+        } else if (function.equals("cel.@lazyBind")) {
+          arity(children, 3);
+          ExprNode variable = children.get(0);
+          if (receiver
+              || variable.kind != ExprNode.Kind.IDENT
+              || variable.name.isEmpty()
+              || variable.name.contains("."))
+            throw new IllegalArgumentException("Invalid lazy binding identifier");
+          node =
+              new ExprNode(
+                  ExprNode.Kind.MACRO,
+                  "bind",
+                  new String[] {variable.name},
+                  0,
+                  children.get(1),
+                  children.get(2));
+          node.bindings = new WriteNode[] {new WriteNode(variable.name, 0, 0)};
         } else if (function.equals("cel.block")) {
           arity(children, 2);
           if (children.get(0).kind != ExprNode.Kind.LIST)
@@ -456,6 +665,7 @@ public final class CanonicalAst {
         }
       }
       node.canonicalId = id;
+      node.errorOffsetEncoding = CelException.OffsetEncoding.CODE_POINT;
       Integer position = positions.get(id);
       if (position != null && position >= 0) {
         node.errorOffset = position;
@@ -506,6 +716,16 @@ public final class CanonicalAst {
 
   /** Serializes compiler IR independently of source parsing. */
   static final class Writer {
+    private final boolean importedPositions;
+
+    Writer() {
+      this(false);
+    }
+
+    Writer(boolean importedPositions) {
+      this.importedPositions = importedPositions;
+    }
+
     long nextId = 1;
     final Set<Long> reserved = new HashSet<>();
 
@@ -516,6 +736,7 @@ public final class CanonicalAst {
 
     final Map<Long, Integer> positions = new LinkedHashMap<>();
     final Map<Long, Message> types = new LinkedHashMap<>(), references = new LinkedHashMap<>();
+    final Map<Long, Message> macroCalls = new LinkedHashMap<>();
 
     Message wrap(String kind, Message value) {
       return message("cel.expr.Expr", "id", freshId(), kind, value);
@@ -555,8 +776,12 @@ public final class CanonicalAst {
         data =
             message(
                 "google.protobuf.Timestamp", "seconds", t.getEpochSecond(), "nanos", t.getNano());
-      } else if (value instanceof CelType t) return ident(t.name());
-      else throw new IllegalArgumentException("Unsupported canonical constant");
+      } else if (value instanceof CelType t) {
+        if (!t.parameters().isEmpty())
+          throw new IllegalArgumentException(
+              "Parameterized type values have no canonical Expr constant");
+        return ident(t.name());
+      } else throw new IllegalArgumentException("Unsupported canonical constant");
       return wrap("const_expr", message("cel.expr.Constant", field, data));
     }
 
@@ -715,7 +940,16 @@ public final class CanonicalAst {
                 .setField(result.getDescriptorForType().findFieldByName("id"), id)
                 .build();
       }
-      positions.put(id, node.offset);
+      // Imported positions already count code points; parser offsets count UTF-16 chars.
+      // Synthetic CSE slots copy diagnostic provenance, while their parser offset is zero.
+      if (importedPositions) {
+        if (node.errorLine > 0) positions.put(id, node.errorOffset);
+      } else positions.put(id, node.offset);
+      Ast.Node original = node.macroCall;
+      if (original == null && node.kind == ExprNode.Kind.MACRO)
+        original = Unparser.macroCall(Ast.snapshot(node));
+      if (original != null)
+        macroCalls.put(id, new Writer().expression(Ast.restore(syntax(original))));
       if (node.checkedType != null) types.put(id, type(node.checkedType.finish()));
       if (node.kind == ExprNode.Kind.IDENT)
         references.put(id, message("cel.expr.Reference", "name", node.name));
@@ -729,6 +963,21 @@ public final class CanonicalAst {
                 "overload_id",
                 node.overloadIds));
       return result;
+    }
+
+    private Ast.Node syntax(Ast.Node node) {
+      if (node.macroCall() != null) return syntax(node.macroCall());
+      if (node.kind() == Ast.Kind.MACRO) return syntax(Unparser.macroCall(node));
+      return new Ast.Node(
+          0,
+          node.kind(),
+          node.name(),
+          node.value(),
+          node.children().stream().map(this::syntax).toList(),
+          node.optionalEntry(),
+          node.offset(),
+          node.extensionSelect(),
+          null);
     }
 
     Message macro(ExprNode node) {
@@ -750,14 +999,10 @@ public final class CanonicalAst {
       String[] names = (String[]) node.value;
       String acc = "@trufflecel_acc_" + nextId;
       if (node.name.equals("bind"))
-        return loop(
-            "@unused",
-            "",
-            list(),
-            names[0],
-            expression(node.children[0]),
-            literal(false),
+        return call(
+            "cel.@lazyBind",
             ident(names[0]),
+            expression(node.children[0]),
             expression(node.children[1]));
       Message range = expression(node.children[0]);
       Message init, condition, step, result;

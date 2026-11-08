@@ -1,0 +1,3914 @@
+{
+  "purpose": "Shared-host current-thread allocation diagnostic; no timing, RSS, retained-heap, or cel-java comparison claim",
+  "captured_utc": "2026-11-08T16:31:41.718929+00:00",
+  "host": {
+    "os": "26.6.2",
+    "architecture": "arm64",
+    "cpu": "Apple M5 Max",
+    "physical_cores": 18,
+    "memory_bytes": 51539607552,
+    "reserved": false,
+    "affinity": null
+  },
+  "bazel": "9.3.2",
+  "graalvm_toolchain": "25.5.5-elide.27",
+  "host_compiler": "C2",
+  "flags": [
+    "-Xbatch",
+    "-XX:-UseJVMCICompiler",
+    "--enable-native-access=ALL-UNNAMED",
+    "-Xms512m",
+    "-Xmx512m"
+  ],
+  "modes": {
+    "optimized": {
+      "engine.Compilation": "false"
+    },
+    "fallback": {
+      "truffle.UseFallbackRuntime": "true"
+    }
+  },
+  "warmup_operations": 100000,
+  "operations_per_window": 50000,
+  "windows": 7,
+  "processes_per_revision_and_mode": 1,
+  "measurement": "com.sun.management.ThreadMXBean.getThreadAllocatedBytes",
+  "lock": "atomic mkdir /tmp/trufflecel-010-local-measurement.lock, removed in EXIT trap",
+  "harness_commit": "8f9760c931d2b89ab6c22c6a19c05129140d08c6",
+  "harness_sha256": "3190d17db65ce7241063d8b302f72ac2331d4f7934f7ecd6b6dbad293de7c622",
+  "inputs": {
+    "scalar": "Map.of(x,42L); source x * 2 + 1",
+    "wide": "same x plus unused List.of(1L,2L,3L); two map entries",
+    "controlled": "budget20, options reused",
+    "converted": "Map.of(x,Integer42); source x + x;1/69/1000 declared int variables",
+    "snapshots": "Activation.snapshot once before warmup; snapshot construction excluded",
+    "compile": "source x * 2 + 1; inferred environment or reused explicitly declared x:int environment"
+  },
+  "sources": {
+    "baseline": {
+      "commit": "67921ff133f00c4045075ae543efbb5af7b67531",
+      "production_tree": "ee6b8b51b21f767dd2fab58602dd8d77a3a57d29",
+      "library_sha256": "94396ec79e72dad9053c348fef30ce466e247f11c0bf1a0f9b201605147a105e",
+      "diagnostic_jar_sha256": "93b860f94e2b19313b23b0bf5123be2d5911e6bd835e75857bc46a7f95a52356"
+    },
+    "context-only": {
+      "commit": "c8555b31ceaf84d2f6e22140ba954eb900e81ec2",
+      "production_tree": "5d97e1b0045c31c1a060efe85e4999a84d6aeecd",
+      "library_sha256": "0a9214f50abeea6f3ac1ef0bccd871576c52aa2496d343671600918e716223ad",
+      "diagnostic_jar_sha256": "93b860f94e2b19313b23b0bf5123be2d5911e6bd835e75857bc46a7f95a52356"
+    },
+    "combined": {
+      "commit": "a0b28c997c45b74d3bab6d9274d66169d1bee92f",
+      "production_tree": "0c0bbd526dddd882a39097634130bf5ba65727a0",
+      "library_sha256": "9a2a370044ed8fc4d5c67fa05c52f69756b9e5b5c3bb6f87700253ae55beb2e3",
+      "diagnostic_jar_sha256": "93b860f94e2b19313b23b0bf5123be2d5911e6bd835e75857bc46a7f95a52356"
+    }
+  },
+  "samples": {
+    "baseline-optimized": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.00144,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 480.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 304.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3783.66464,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3801.48288,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3772.69488,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3784.70544,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3783.98688,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3791.09088,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3787.85408,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3463.01312,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3469.66816,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3453.11632,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3468.49712,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3461.14112,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3474.28096,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3472.94272,
+          "result": "85"
+        }
+      ]
+    },
+    "baseline-fallback": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.00272,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 512.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 408.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 336.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 232.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 504.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 4224.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3504.0,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3184.0,
+          "result": "85"
+        }
+      ]
+    },
+    "context-only-optimized": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.00144,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 440.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 4160.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3736.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3761.42784,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3736.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3760.14304,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3758.11136,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3742.69232,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3753.564,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3437.26272,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3428.068,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3428.67872,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3437.10704,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3434.92352,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3426.2528,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3436.39664,
+          "result": "85"
+        }
+      ]
+    },
+    "context-only-fallback": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.00272,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 192.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 472.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 4192.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3472.0,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3152.0,
+          "result": "85"
+        }
+      ]
+    },
+    "combined-optimized": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.00144,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 120.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 96.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 216.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 160.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 440.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 344.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 264.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 168.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3376.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3394.552,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3383.73056,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3405.60832,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3383.3256,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3399.73488,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3381.38832,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3051.13312,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3034.4288,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3036.4288,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3048.64896,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3026.83312,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3056.46544,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3029.13184,
+          "result": "85"
+        }
+      ]
+    },
+    "combined-fallback": {
+      "scalar-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.00272,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-map": [
+        {
+          "window": 0,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 152.0,
+          "result": "85"
+        }
+      ],
+      "scalar-wide-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 128.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled": [
+        {
+          "window": 0,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 248.0,
+          "result": "85"
+        }
+      ],
+      "scalar-controlled-snapshot": [
+        {
+          "window": 0,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 224.0,
+          "result": "85"
+        }
+      ],
+      "simple-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 184.0,
+          "result": "85"
+        }
+      ],
+      "captured-lazy": [
+        {
+          "window": 0,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 472.0,
+          "result": "85"
+        }
+      ],
+      "comprehension": [
+        {
+          "window": 0,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 376.0,
+          "result": "2"
+        }
+      ],
+      "cse": [
+        {
+          "window": 0,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 296.0,
+          "result": "1849"
+        }
+      ],
+      "converted-1-declaration": [
+        {
+          "window": 0,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        }
+      ],
+      "converted-69-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        }
+      ],
+      "converted-1000-declarations": [
+        {
+          "window": 0,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 200.0,
+          "result": "84"
+        }
+      ],
+      "compile-scalar-inferred": [
+        {
+          "window": 0,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 3112.0,
+          "result": "85"
+        }
+      ],
+      "compile-scalar-reused-environment": [
+        {
+          "window": 0,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 1,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 2,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 3,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 4,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 5,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        },
+        {
+          "window": 6,
+          "bytes_per_operation": 2760.0,
+          "result": "85"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "baseline-optimized": {
+      "scalar-map": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.00144
+      },
+      "scalar-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-wide-map": {
+        "median": 152.0,
+        "minimum": 152.0,
+        "maximum": 152.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-controlled": {
+        "median": 216.0,
+        "minimum": 216.0,
+        "maximum": 216.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.0
+      },
+      "simple-lazy": {
+        "median": 184.0,
+        "minimum": 184.0,
+        "maximum": 184.0
+      },
+      "captured-lazy": {
+        "median": 480.0,
+        "minimum": 480.0,
+        "maximum": 480.0
+      },
+      "comprehension": {
+        "median": 376.0,
+        "minimum": 376.0,
+        "maximum": 376.0
+      },
+      "cse": {
+        "median": 304.0,
+        "minimum": 304.0,
+        "maximum": 304.0
+      },
+      "converted-1-declaration": {
+        "median": 200.0,
+        "minimum": 200.0,
+        "maximum": 200.0
+      },
+      "converted-69-declarations": {
+        "median": 472.0,
+        "minimum": 472.0,
+        "maximum": 472.0
+      },
+      "converted-1000-declarations": {
+        "median": 4192.0,
+        "minimum": 4192.0,
+        "maximum": 4192.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3784.70544,
+        "minimum": 3772.69488,
+        "maximum": 3801.48288
+      },
+      "compile-scalar-reused-environment": {
+        "median": 3468.49712,
+        "minimum": 3453.11632,
+        "maximum": 3474.28096
+      }
+    },
+    "baseline-fallback": {
+      "scalar-map": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.00272
+      },
+      "scalar-snapshot": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.0
+      },
+      "scalar-wide-map": {
+        "median": 184.0,
+        "minimum": 184.0,
+        "maximum": 184.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.0
+      },
+      "scalar-controlled": {
+        "median": 248.0,
+        "minimum": 248.0,
+        "maximum": 248.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 224.0,
+        "minimum": 224.0,
+        "maximum": 224.0
+      },
+      "simple-lazy": {
+        "median": 216.0,
+        "minimum": 216.0,
+        "maximum": 216.0
+      },
+      "captured-lazy": {
+        "median": 512.0,
+        "minimum": 512.0,
+        "maximum": 512.0
+      },
+      "comprehension": {
+        "median": 408.0,
+        "minimum": 408.0,
+        "maximum": 408.0
+      },
+      "cse": {
+        "median": 336.0,
+        "minimum": 336.0,
+        "maximum": 336.0
+      },
+      "converted-1-declaration": {
+        "median": 232.0,
+        "minimum": 232.0,
+        "maximum": 232.0
+      },
+      "converted-69-declarations": {
+        "median": 504.0,
+        "minimum": 504.0,
+        "maximum": 504.0
+      },
+      "converted-1000-declarations": {
+        "median": 4224.0,
+        "minimum": 4224.0,
+        "maximum": 4224.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3504.0,
+        "minimum": 3504.0,
+        "maximum": 3504.0
+      },
+      "compile-scalar-reused-environment": {
+        "median": 3184.0,
+        "minimum": 3184.0,
+        "maximum": 3184.0
+      }
+    },
+    "context-only-optimized": {
+      "scalar-map": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.00144
+      },
+      "scalar-snapshot": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.0
+      },
+      "scalar-wide-map": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.0
+      },
+      "scalar-controlled": {
+        "median": 216.0,
+        "minimum": 216.0,
+        "maximum": 216.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.0
+      },
+      "simple-lazy": {
+        "median": 152.0,
+        "minimum": 152.0,
+        "maximum": 152.0
+      },
+      "captured-lazy": {
+        "median": 440.0,
+        "minimum": 440.0,
+        "maximum": 440.0
+      },
+      "comprehension": {
+        "median": 344.0,
+        "minimum": 344.0,
+        "maximum": 344.0
+      },
+      "cse": {
+        "median": 264.0,
+        "minimum": 264.0,
+        "maximum": 264.0
+      },
+      "converted-1-declaration": {
+        "median": 168.0,
+        "minimum": 168.0,
+        "maximum": 168.0
+      },
+      "converted-69-declarations": {
+        "median": 440.0,
+        "minimum": 440.0,
+        "maximum": 440.0
+      },
+      "converted-1000-declarations": {
+        "median": 4160.0,
+        "minimum": 4160.0,
+        "maximum": 4160.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3753.564,
+        "minimum": 3736.0,
+        "maximum": 3761.42784
+      },
+      "compile-scalar-reused-environment": {
+        "median": 3434.92352,
+        "minimum": 3426.2528,
+        "maximum": 3437.26272
+      }
+    },
+    "context-only-fallback": {
+      "scalar-map": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.00272
+      },
+      "scalar-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-wide-map": {
+        "median": 152.0,
+        "minimum": 152.0,
+        "maximum": 152.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-controlled": {
+        "median": 248.0,
+        "minimum": 248.0,
+        "maximum": 248.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 192.0,
+        "minimum": 192.0,
+        "maximum": 192.0
+      },
+      "simple-lazy": {
+        "median": 184.0,
+        "minimum": 184.0,
+        "maximum": 184.0
+      },
+      "captured-lazy": {
+        "median": 472.0,
+        "minimum": 472.0,
+        "maximum": 472.0
+      },
+      "comprehension": {
+        "median": 376.0,
+        "minimum": 376.0,
+        "maximum": 376.0
+      },
+      "cse": {
+        "median": 296.0,
+        "minimum": 296.0,
+        "maximum": 296.0
+      },
+      "converted-1-declaration": {
+        "median": 200.0,
+        "minimum": 200.0,
+        "maximum": 200.0
+      },
+      "converted-69-declarations": {
+        "median": 472.0,
+        "minimum": 472.0,
+        "maximum": 472.0
+      },
+      "converted-1000-declarations": {
+        "median": 4192.0,
+        "minimum": 4192.0,
+        "maximum": 4192.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3472.0,
+        "minimum": 3472.0,
+        "maximum": 3472.0
+      },
+      "compile-scalar-reused-environment": {
+        "median": 3152.0,
+        "minimum": 3152.0,
+        "maximum": 3152.0
+      }
+    },
+    "combined-optimized": {
+      "scalar-map": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.00144
+      },
+      "scalar-snapshot": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.0
+      },
+      "scalar-wide-map": {
+        "median": 120.0,
+        "minimum": 120.0,
+        "maximum": 120.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 96.0,
+        "minimum": 96.0,
+        "maximum": 96.0
+      },
+      "scalar-controlled": {
+        "median": 216.0,
+        "minimum": 216.0,
+        "maximum": 216.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 160.0,
+        "minimum": 160.0,
+        "maximum": 160.0
+      },
+      "simple-lazy": {
+        "median": 152.0,
+        "minimum": 152.0,
+        "maximum": 152.0
+      },
+      "captured-lazy": {
+        "median": 440.0,
+        "minimum": 440.0,
+        "maximum": 440.0
+      },
+      "comprehension": {
+        "median": 344.0,
+        "minimum": 344.0,
+        "maximum": 344.0
+      },
+      "cse": {
+        "median": 264.0,
+        "minimum": 264.0,
+        "maximum": 264.0
+      },
+      "converted-1-declaration": {
+        "median": 168.0,
+        "minimum": 168.0,
+        "maximum": 168.0
+      },
+      "converted-69-declarations": {
+        "median": 168.0,
+        "minimum": 168.0,
+        "maximum": 168.0
+      },
+      "converted-1000-declarations": {
+        "median": 168.0,
+        "minimum": 168.0,
+        "maximum": 168.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3383.73056,
+        "minimum": 3376.0,
+        "maximum": 3405.60832
+      },
+      "compile-scalar-reused-environment": {
+        "median": 3036.4288,
+        "minimum": 3026.83312,
+        "maximum": 3056.46544
+      }
+    },
+    "combined-fallback": {
+      "scalar-map": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.00272
+      },
+      "scalar-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-wide-map": {
+        "median": 152.0,
+        "minimum": 152.0,
+        "maximum": 152.0
+      },
+      "scalar-wide-snapshot": {
+        "median": 128.0,
+        "minimum": 128.0,
+        "maximum": 128.0
+      },
+      "scalar-controlled": {
+        "median": 248.0,
+        "minimum": 248.0,
+        "maximum": 248.0
+      },
+      "scalar-controlled-snapshot": {
+        "median": 224.0,
+        "minimum": 224.0,
+        "maximum": 224.0
+      },
+      "simple-lazy": {
+        "median": 184.0,
+        "minimum": 184.0,
+        "maximum": 184.0
+      },
+      "captured-lazy": {
+        "median": 472.0,
+        "minimum": 472.0,
+        "maximum": 472.0
+      },
+      "comprehension": {
+        "median": 376.0,
+        "minimum": 376.0,
+        "maximum": 376.0
+      },
+      "cse": {
+        "median": 296.0,
+        "minimum": 296.0,
+        "maximum": 296.0
+      },
+      "converted-1-declaration": {
+        "median": 200.0,
+        "minimum": 200.0,
+        "maximum": 200.0
+      },
+      "converted-69-declarations": {
+        "median": 200.0,
+        "minimum": 200.0,
+        "maximum": 200.0
+      },
+      "converted-1000-declarations": {
+        "median": 200.0,
+        "minimum": 200.0,
+        "maximum": 200.0
+      },
+      "compile-scalar-inferred": {
+        "median": 3112.0,
+        "minimum": 3112.0,
+        "maximum": 3112.0
+      },
+      "compile-scalar-reused-environment": {
+        "median": 2760.0,
+        "minimum": 2760.0,
+        "maximum": 2760.0
+      }
+    }
+  },
+  "dependency_sha256": {
+    ".bazelversion": "4d9dfd02f463b487bd0bff68cf9292b3626b31c81febb54e8911e493f64793d0",
+    "MODULE.bazel": "19edef33c25b09d2957f7a9c4adf7479fbba49ff4f02063821a0daab208d90d1",
+    "MODULE.bazel.lock": "9f6534ffc790b1d5413c4fe25e909be85876b97c3efcda77d0a4610273d666c8",
+    "maven_install.json": "c19b6eec7d5c05dd15461b37ac1178c781668a2ebb2449857ca8eae91e6b0fce"
+  },
+  "qualification": {
+    "context_only": {
+      "source_suites": 42,
+      "jvm_compiled": "passed; raw allocation lines in context-only-compiled.txt",
+      "reentrant_regression": "passed; maps, snapshots, controlled and tracing calls with independent exact budgets",
+      "native_jit": "passed",
+      "native_invocation": "https://app.buildbuddy.io/invocation/ef22397b-4098-46be-822a-19f9b3b569e7"
+    },
+    "combined": {
+      "source": "a0b28c9",
+      "production_commit": "b81fa2f",
+      "test_targets": 68,
+      "status": "passed",
+      "invocation": "https://app.buildbuddy.io/invocation/3c17e2b3-d2b9-4a85-a946-357fbe3bef3e",
+      "scope": "full suite, native guest-JIT, native comparison, representative native and prepared-native tests"
+    }
+  },
+  "artifacts_sha256": {
+    "EvaluationAllocation.java.txt": "3190d17db65ce7241063d8b302f72ac2331d4f7934f7ecd6b6dbad293de7c622",
+    "README.md": "bd45b28827ebc78012b5baea5d0e82cc78598060c9639affb9ce9c6564fa67f0",
+    "baseline-fallback.txt": "f457462f8c1b1e4fb1db9ebd3499156839259cd76ff5cb7dc9a20c3e34e81499",
+    "baseline-optimized.txt": "7fef5c8dbe22ace9a192c32daff9c262520b22693ee1c2143c3ff1f1c5a8fe33",
+    "combined-fallback.txt": "6e18ff1b4a65f4adc464aeb9bfbb1f0bf6addca84916aab3caeac1bb53a7a02d",
+    "combined-optimized.txt": "0b1c2ba6eb5593f31318b9b289967e3bdc674af62c7028e6f88e02276d0cdd16",
+    "combined.patch": "5dd7212018c966855ad550731efb174112c092f7a74772d02e629d762184587a",
+    "compact-context.patch": "a47e121cdf70fd72923fb86599e5b6de9d14d6633f048ad35fc91703e71e7867",
+    "context-only-compiled.txt": "1a5705acf07e8cea1c4ff01e82d73db13836f0089d3826734af477ff900c4dd1",
+    "context-only-fallback.txt": "8c5a9faf15c28ada73f93ac3db95768ea11dacb3338dedce917c14d752aea7da",
+    "context-only-native.txt": "0eb8eba787521f6d6fdfce5051192a3e4166c2b6090b126bdd4937c2ebc2ad01",
+    "context-only-optimized.txt": "e724171c2990763a70b760354de9e6847684d5f83b05a22894f954a0b359b0b2",
+    "tables.md": "f686967fdff4a9cda818115c33b2316e19c25238906da7923bb1f990ee9b0f47",
+    "target.bazel.txt": "754b849d3036e99141da45ea23517d315129490d694cac22f160176d568326cd"
+  }
+}

@@ -18,9 +18,13 @@ of this while building a native image.
 
 ## Diagnostics
 
-Every compile-time `CelException` carries a `CelException.Code`, a char offset, and a
-one-based line and column resolved against the source (`line()`, `column()`, `-1` when the
-position is unknown, for example for canonical AST input). `issues()` lists every finding in
+Every compile-time `CelException` carries a `CelException.Code`, an offset, and a
+one-based line and column (`line()`, `column()`, `-1` when source metadata is absent).
+`offsetEncoding()` identifies offset and column units: `UTF16` for ordinary source parsing,
+`CODE_POINT` for canonical `SourceInfo`. Each `Issue` carries the same explicit metadata;
+the five-argument `Issue` constructor keeps the `UTF16` default. Formatting converts these
+units when selecting the excerpt and counts code points for caret placement, without
+changing the numeric offset or column. `issues()` lists every finding in
 source order; `code()` and `offset()` describe the first one. Strict validation reports all
 of its findings together, for example:
 
@@ -28,8 +32,12 @@ of its findings together, for example:
 division by zero at offset 7 (line 2, column 4); division by zero at offset 14 (line 2, column 11)
 ```
 
-Parser and checker failures keep their single-issue message format. Evaluation failures also
-carry expression IDs and source locations when available; see [integration](INTEGRATION.md).
+Checker recovery collects independent findings in source order, using `dyn` after a failed
+subexpression so sibling errors remain visible without cascades. Findings are capped at
+`CelException.MAX_ISSUES` (100); resource limits still fail immediately. Single-issue message
+formatting remains unchanged. `error.format(source)` adds bounded source excerpts and caret
+positions without retaining the source in the exception. Evaluation failures also carry
+expression IDs and source locations when available; see [integration](INTEGRATION.md).
 
 ## What is folded
 
@@ -66,8 +74,11 @@ call node, under either policy and for instrumented programs as well. An invalid
 pattern is a strict-validation finding; with the deferred policy the call still evaluates its
 operand (so operand failures and unknowns keep their precedence) and then raises
 `INVALID_ARGUMENT`. Patterns that are only known at evaluation use a bounded cache (256
-entries; keys longer than 4,096 chars bypass it). The engine (RE2J) is referenced only from the
-`Regex` seam, so it can be replaced locally.
+entries; keys longer than 4,096 chars bypass it). The `Regex` seam retains RE2/J for
+syntax validation, exact program-size accounting, dynamic matching and capture extensions.
+Compatible constant boolean matches can use TruffleRegex's RE2 flavor within their
+first evaluation's CEL context. Unsupported or Unicode-sensitive patterns and calls
+outside the owning context use RE2/J; see the [integration contract](INTEGRATION.md).
 
 ## Strict validation
 
@@ -80,7 +91,8 @@ could yield an unknown that would win over the error:
 | `?:` | the condition |
 | `or`, `orValue` | the receiver |
 | other calls, including host functions | an argument whose other arguments are all constant (an unknown sibling wins over an error) |
-| `has`, `cel.bind` | all |
+| `has` | all |
+| `cel.bind` | the body; initializer is lazy |
 | other macros | the range; bodies may never run |
 | canonical comprehensions | range, accumulator initializer and result |
 | `cel.block` | the result; slots are lazy |
@@ -94,8 +106,58 @@ types, so a mismatch hidden by `dyn` (for example `xs[dyn('a')]` on a list) is a
 finding, as it is for cel-java's optimizer.
 
 Against the negative matrix in `NegativeCases`, strict validation rejects at compile time all
-41 cases that cel-java's constant-folding optimizer rejects, plus seven more (an invalid
-constant pattern with a variable receiver, an invalid timestamp literal, a `cel.bind`
-initializer failure, constant duplicate and invalid map keys, and the range cap). A failing
+41 cases that cel-java's constant-folding optimizer rejects, plus six more (an invalid
+constant pattern with a variable receiver, an invalid timestamp literal, constant duplicate
+and invalid map keys, and the range cap). A failing
 `cel.block` slot that the result always reads is not reported, because slot evaluation is
-lazy. A custom validator hook is not provided yet.
+lazy.
+
+## Application validators
+
+`Environment.Builder.validator(Validator)` registers a thread-safe compile-time callback.
+Its immutable `Validator.Context` provides source text, the expanded source AST before constant
+substitution/folding, the result type, and checked types keyed by expression ID. A source-only
+qualifier removed during resolution has no checked type; `context.type(node)` returns `dyn`
+for it. Host constants are represented by their source identifier, so application objects do
+not enter the public syntax tree.
+
+Return a list of `CelException.Issue` findings, or an empty list to accept. Findings are enforced
+under both validation policies, including unchecked parsing; they are combined with built-in
+validation findings, sorted by source offset and capped at 100. Resource failures remain
+immediate. Callbacks run once per preparation and may run concurrently; like host evaluation
+callbacks, their own execution time is controlled by the embedder. `toBuilder()` preserves
+registered validators and macro selections. Custom validators also run on imported ASTs,
+whose source text may be empty.
+Use `context.issue(node, code, message)` to preserve a node's original offset units
+and available line/column. This works for imported canonical trees without source
+text and for edited trees containing nodes with different offset encodings.
+
+Parser recovery reports independent syntax failures in list/map/message entries
+and function arguments together. Recovery synchronizes at nesting-aware entry
+boundaries and stops after 100 findings; source, node and depth limits remain in
+force. A recovered tree is never compiled or evaluated. Lexical failures and
+resource exhaustion can stop recovery early. Custom macro callbacks are not run
+on argument lists already known to contain syntax errors.
+
+## Common subexpressions
+
+`commonSubexpressions(true)` enables conservative, lazy common-subexpression elimination;
+it is off by default and copied by `toBuilder()`. Repeated arithmetic, logical, comparison,
+string-predicate and size expressions with pure operands can share a cached value in a
+`cel.block`. Slots are evaluated on first use, so unused branches stay unevaluated. Each
+comprehension or macro body gets its own scope. Explicit blocks, presence tests and lazy
+`cel.bind` scopes are left intact. Host calls, object access and object-sensitive equality
+are not coalesced; this does not assume that an application callback is pure.
+
+Successful cache reads replay the original operation cost. Errors are evaluated at their
+actual occurrence, retaining expression IDs and source positions. The generated administrative
+nodes add no source-evaluation cost; configured budgets therefore accept or reject the same
+source evaluations. A rewrite that would exceed AST size/depth bounds is skipped. This is an
+opt-in optimization whose benefit depends on the expression; cache/context allocation can cost
+more than repeating very small expressions.
+
+Instrumented programs and `Program.trace` retain every original source event. Canonical checked
+AST export emits ordinary `cel.block`/`cel.index` expressions with distinct IDs, so another CEL
+implementation can execute the shared expression. Imported explicit blocks use their normal
+execution/cost rules; the source-budget replay metadata is an internal runtime optimization,
+not an extension to the canonical wire format.

@@ -9,9 +9,13 @@ import java.util.*;
 /** Each parsed expression becomes an adopted Truffle AST node, never a delegated interpreter. */
 @GenerateWrapper
 class ExprNode extends CelNode {
+  private static final ExprNode[] NO_CHILDREN = new ExprNode[0];
   boolean rootBody, statement;
   long canonicalId;
+  // Original custom macro syntax is immutable metadata, never a runtime child.
+  Ast.Node macroCall;
   int errorOffset = -1, errorLine = -1, errorColumn = -1;
+  CelException.OffsetEncoding errorOffsetEncoding = CelException.OffsetEncoding.UTF16;
   CelType checkedType;
   FieldPlan fieldPlan;
   // Plan-time constant fold; uninstrumented targets replace the subtree with its prebuilt result.
@@ -19,6 +23,7 @@ class ExprNode extends CelNode {
   // Plan-time purity and binding depth, packed by Optimizer; avoids per-node analysis maps.
   int analysis;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean customOverloads;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean standardOverload;
   List<String> overloadIds = List.of();
   @Child private FieldPlan.ReadNode fieldRead;
 
@@ -28,10 +33,73 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode lazyInitializer;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean isolatedInitializer;
+
+  void resolveLazyBindings(Map<String, ExprNode> owners) {
+    if (kind == Kind.IDENT) {
+      lazyInitializer = owners.get(name);
+      return;
+    }
+    if (kind == Kind.MACRO && bindings != null) {
+      children[0].resolveLazyBindings(owners);
+      var nested = new HashMap<>(owners);
+      for (String variable : (String[]) value) nested.remove(variable);
+      if (name.equals("bind")) {
+        nested.put(((String[]) value)[0], children[0]);
+        isolatedInitializer = children[0].hasBindings();
+      }
+      for (int i = 1; i < children.length; i++) children[i].resolveLazyBindings(nested);
+    } else if (kind == Kind.COMPREHENSION) {
+      children[0].resolveLazyBindings(owners);
+      children[1].resolveLazyBindings(owners);
+      var nested = new HashMap<>(owners);
+      String[] names = (String[]) value;
+      for (String variable : names) nested.remove(variable);
+      children[2].resolveLazyBindings(nested);
+      children[3].resolveLazyBindings(nested);
+      var result = new HashMap<>(owners);
+      result.remove(names[0]);
+      children[4].resolveLazyBindings(result);
+    } else for (ExprNode child : children) child.resolveLazyBindings(owners);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean deferAttribute;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean observe;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean instrumentedSource;
+
+  void resolveAttributes(boolean defer) {
+    deferAttribute = defer;
+    for (int i = 0; i < children.length; i++) {
+      boolean childDefer =
+          switch (kind) {
+            case SELECT, INDEX -> i == 0;
+            case BLOCK -> true;
+            case CONDITIONAL -> i != 0;
+            case MACRO -> name.equals("bind") || i == 0 && !name.equals("has");
+            case COMPREHENSION -> i != 2;
+            case CALL -> name.equals("dyn") && !customOverloads;
+            default -> false;
+          };
+      children[i].resolveAttributes(childDefer);
+    }
+  }
 
   void resolveBlocks(ExprNode owner) {
+    if (children.length == 0) children = NO_CHILDREN;
     if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
     for (ExprNode child : children) child.resolveBlocks(kind == Kind.BLOCK ? this : owner);
+  }
+
+  /** Complete the owned runtime copy once; source templates keep their planning annotations. */
+  void finishPlanning(ExprNode owner) {
+    fold = null;
+    checkedType = null;
+    macroCall = null;
+    // NodeUtil also clones empty @Children arrays when instantiating a prepared template.
+    if (children.length == 0) children = NO_CHILDREN;
+    if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
+    for (ExprNode child : children) child.finishPlanning(kind == Kind.BLOCK ? this : owner);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean boundaryReads;
@@ -114,7 +182,7 @@ class ExprNode extends CelNode {
     this.name = name;
     this.value = value;
     this.offset = offset;
-    this.children = children;
+    this.children = children.length == 0 ? NO_CHILDREN : children;
   }
 
   private static int scalarCode(String name) {
@@ -211,6 +279,24 @@ class ExprNode extends CelNode {
     return new LiteralNode(value, offset);
   }
 
+  /** Restore a cloned lowered tree for opt-in source-level observation. */
+  ExprNode restoreTrace() {
+    if (this instanceof InstrumentableNode.WrapperNode wrapper)
+      return com.oracle.truffle.api.nodes.NodeUtil.cloneNode((ExprNode) wrapper.getDelegateNode())
+          .restoreTrace();
+    countResult = false;
+    if (bindings != null)
+      for (int i = 0; i < bindings.length; i++) {
+        if (bindings[i] instanceof InstrumentableNode.WrapperNode wrapper)
+          bindings[i] =
+              com.oracle.truffle.api.nodes.NodeUtil.cloneNode(
+                  (WriteNode) wrapper.getDelegateNode());
+        bindings[i].frameSlot = -1;
+      }
+    for (int i = 0; i < children.length; i++) children[i] = children[i].restoreTrace();
+    return this;
+  }
+
   ExprNode lowerUninstrumented() {
     // A folded subtree is replaced wholesale; lowering inside it would only be discarded.
     if (fold != null) return this;
@@ -277,6 +363,17 @@ class ExprNode extends CelNode {
     }
 
     @Override
+    ExprNode restoreTrace() {
+      ExprNode restored = new ExprNode(Kind.CALL, name, value, offset, children);
+      restored.copyLocation(this);
+      restored.sourceRange(sourceStart, sourceEnd);
+      restored.checkedType = checkedType;
+      restored.optionalEntry = optionalEntry;
+      restored.statement = statement;
+      return restored.restoreTrace();
+    }
+
+    @Override
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       ctx.tick();
       return children[0].execute(frame, ctx);
@@ -288,37 +385,52 @@ class ExprNode extends CelNode {
    */
   private static final class ArithmeticChain extends ExprNode {
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] operations;
+    // Per operator: encoded operation, error offset/line/column, then literal
+    // error offset/line/column and source start/end. IDs remain full-width longs.
+    private final int[] metadata;
 
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] constants;
 
     @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
-    private final int[] positions;
-
-    @com.oracle.truffle.api.CompilerDirectives.CompilationFinal(dimensions = 1)
     private final long[] ids;
+
+    private CelException.OffsetEncoding encoding(int index, boolean literal) {
+      return (metadata[index * 9] & (literal ? 512 : 256)) != 0
+          ? CelException.OffsetEncoding.CODE_POINT
+          : CelException.OffsetEncoding.UTF16;
+    }
 
     private final String firstOperation;
 
     ArithmeticChain(ExprNode outer, int count, ExprNode leaf) {
       super(Kind.CALL, outer.name, false, outer.offset, leaf);
-      operations = new int[count];
+      metadata = new int[count * 9];
       constants = new long[count];
-      positions = new int[count * 3];
-      ids = new long[count];
+      ids = new long[count * 2];
       ExprNode node = outer;
       for (int i = count - 1; i >= 0; i--) {
-        positions[i * 3] = node.errorOffset;
-        positions[i * 3 + 1] = node.errorLine;
-        positions[i * 3 + 2] = node.errorColumn;
-        ids[i] = node.canonicalId;
-        operations[i] = node.name.charAt(0);
-        constants[i] = (Long) node.children[1].value;
+        metadata[i * 9 + 1] = node.errorOffset;
+        metadata[i * 9 + 2] = node.errorLine;
+        metadata[i * 9 + 3] = node.errorColumn;
+        ids[i * 2] = node.canonicalId;
+        metadata[i * 9] = node.name.charAt(0);
+        if (node.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
+          metadata[i * 9] |= 256;
+        ExprNode literal = node.children[1];
+        constants[i] = (Long) literal.value;
+        ids[i * 2 + 1] = literal.canonicalId;
+        if (literal.errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT)
+          metadata[i * 9] |= 512;
+        metadata[i * 9 + 4] = literal.errorOffset;
+        metadata[i * 9 + 5] = literal.errorLine;
+        metadata[i * 9 + 6] = literal.errorColumn;
+        metadata[i * 9 + 7] = literal.sourceStart;
+        metadata[i * 9 + 8] = literal.sourceEnd;
         node = node.children[0];
       }
       firstOperation =
-          switch (operations[0]) {
+          switch ((metadata[0] & 255)) {
             case '+' -> "+";
             case '-' -> "-";
             default -> "*";
@@ -330,44 +442,83 @@ class ExprNode extends CelNode {
     }
 
     @Override
+    ExprNode restoreTrace() {
+      ExprNode restored = children[0].restoreTrace();
+      for (int i = 0; i < constants.length; i++) {
+        ExprNode literal = constant(constants[i], metadata[i * 9 + 4]);
+        literal.canonicalId = ids[i * 2 + 1];
+        literal.errorOffset = metadata[i * 9 + 4];
+        literal.errorLine = metadata[i * 9 + 5];
+        literal.errorColumn = metadata[i * 9 + 6];
+        literal.errorOffsetEncoding = encoding(i, true);
+        literal.sourceRange(metadata[i * 9 + 7], metadata[i * 9 + 8]);
+        ExprNode next =
+            new ExprNode(
+                Kind.CALL,
+                Character.toString((metadata[i * 9] & 255)),
+                false,
+                metadata[i * 9 + 1],
+                restored,
+                literal);
+        next.canonicalId = ids[i * 2];
+        next.errorOffset = metadata[i * 9 + 1];
+        next.errorLine = metadata[i * 9 + 2];
+        next.errorColumn = metadata[i * 9 + 3];
+        next.errorOffsetEncoding = encoding(i, false);
+        next.sourceRange(restored.sourceStart, literal.sourceEnd);
+        restored = next;
+      }
+      restored.optionalEntry = optionalEntry;
+      restored.statement = statement;
+      restored.checkedType = checkedType;
+      return restored;
+    }
+
+    @Override
     @com.oracle.truffle.api.nodes.ExplodeLoop
     Object doExecute(VirtualFrame frame, EvalContext ctx) {
       // The original outer-to-inner operator visits all precede evaluation of the left operand.
-      ctx.charge(operations.length);
+      ctx.charge(constants.length);
       Object left;
       try {
         left = children[0].execute(frame, ctx);
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-        ctx.charge(operations.length);
+        ctx.charge(constants.length);
         throw e;
       }
       if (left instanceof Unknown) {
-        ctx.charge(operations.length);
+        ctx.charge(constants.length);
         return left;
       }
       if (left instanceof Long number) {
         long result = number;
-        for (int i = 0; i < operations.length; i++) {
+        for (int i = 0; i < constants.length; i++) {
           ctx.tick(); // The right literal's visit still consumes its original budget.
           try {
             result =
-                switch (operations[i]) {
+                switch ((metadata[i * 9] & 255)) {
                   case '+' -> Functions.add(result, constants[i]);
                   case '-' -> Functions.subtract(result, constants[i]);
                   default -> Functions.multiply(result, constants[i]);
                 };
           } catch (CelException e) {
             // Outer constants are evaluated even when an inner operation fails.
-            ctx.charge(operations.length - i - 1);
-            throw e.at(positions[i * 3], ids[i], positions[i * 3 + 1], positions[i * 3 + 2]);
+            ctx.charge(constants.length - i - 1);
+            throw e.at(
+                metadata[i * 9 + 1],
+                ids[i * 2],
+                metadata[i * 9 + 2],
+                metadata[i * 9 + 3],
+                encoding(i, false));
           }
         }
         return result;
       }
       // These operators require matching numeric types; every right operand is a CEL int.
-      ctx.charge(operations.length);
-      throw Values.overload(firstOperation).at(positions[0], ids[0], positions[1], positions[2]);
+      ctx.charge(constants.length);
+      throw Values.overload(firstOperation)
+          .at(metadata[1], ids[0], metadata[2], metadata[3], encoding(0, false));
     }
   }
 
@@ -429,12 +580,33 @@ class ExprNode extends CelNode {
   }
 
   Object execute(VirtualFrame frame, EvalContext ctx) {
+    Object result;
     try {
-      return doExecute(frame, ctx);
+      result = doExecute(frame, ctx);
+      if (observe) {
+        boolean alias =
+            switch (kind) {
+              case IDENT, SELECT, INDEX, BLOCK, BLOCK_INDEX, CONDITIONAL, COMPREHENSION -> true;
+              case MACRO -> name.equals("bind");
+              case CALL -> name.equals("dyn") && !customOverloads;
+              default -> false;
+            };
+        if (!alias) ctx.attribute(null);
+        if (!deferAttribute) result = ctx.consume(result);
+      }
     } catch (CelException e) {
-      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      CelException located =
+          e.code() == CelException.Code.RESOURCE_EXHAUSTED
+              ? e
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
+      if (observe) {
+        ctx.attribute(null);
+        ctx.trace(this, null, located);
+      }
+      throw located;
     }
+    if (observe) ctx.trace(this, result, null);
+    return result;
   }
 
   void copyLocation(ExprNode original) {
@@ -442,6 +614,16 @@ class ExprNode extends CelNode {
     errorOffset = original.errorOffset;
     errorLine = original.errorLine;
     errorColumn = original.errorColumn;
+    errorOffsetEncoding = original.errorOffsetEncoding;
+  }
+
+  CelException.Issue issue(CelException.Code code, String message) {
+    int position =
+        errorOffset >= 0 || errorOffsetEncoding == CelException.OffsetEncoding.CODE_POINT
+            ? errorOffset
+            : offset;
+    return new CelException.Issue(
+        code, message, position, errorLine, errorColumn, errorOffsetEncoding);
   }
 
   Object doExecute(VirtualFrame frame, EvalContext ctx) {
@@ -449,19 +631,33 @@ class ExprNode extends CelNode {
     return switch (kind) {
       case BLOCK -> block(frame, ctx);
       case BLOCK_INDEX ->
-          ctx.block.read(
-              blockOwner.children[Math.toIntExact((Long) value)],
-              Math.toIntExact((Long) value),
-              frame);
+          ctx.block()
+              .read(
+                  blockOwner.children[Math.toIntExact((Long) value)],
+                  Math.toIntExact((Long) value),
+                  frame);
       case CONSTANT -> value;
       case IDENT ->
           checkedValue(
               localSlot >= 0
-                  ? (frameLocalReads ? frame.getAuxiliarySlot(localSlot) : ctx.getLocal(localSlot))
-                  : boundaryReads ? ctx.getBoundary(name) : ctx.get(name));
+                  ? (frameLocalReads
+                      ? ctx.readStored(frame.getAuxiliarySlot(localSlot))
+                      : ctx.getLocal(localSlot))
+                  : boundaryReads ? ctx.getRootBoundary(name) : ctx.getRoot(name),
+              frame);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
-        Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
+        Object a = children[0].execute(frame, ctx);
+        Attribute parent = ctx.attribute();
+        Object b = children[1].execute(frame, ctx);
+        Attribute path = ctx.qualify(parent, b);
+        Object override = ctx.attributeRead(path, false);
+        if (override != PartialState.NONE)
+          yield !(override instanceof Unknown)
+                  && (Boolean.TRUE.equals(value) || a instanceof OptionalValue)
+              ? OptionalValue.of(override)
+              : override;
+        if (a == PartialState.MISSING) throw missingAttribute(parent);
         if (a instanceof Unknown u) yield u;
         if (b instanceof Unknown u) yield u;
         boolean optional = Boolean.TRUE.equals(value) || a instanceof OptionalValue;
@@ -494,25 +690,48 @@ class ExprNode extends CelNode {
     };
   }
 
-  private static Object checkedValue(Object value) {
+  private Object checkedValue(Object value, VirtualFrame frame) {
+    if (lazyInitializer != null) value = ((LazyBinding) value).read(lazyInitializer, frame);
     if (value instanceof CelException error) throw error;
     return value;
   }
 
   Object executePresence(VirtualFrame frame, EvalContext ctx) {
     try {
-      return select(frame, ctx, true);
+      Object result = select(frame, ctx, true);
+      ctx.trace(this, result, null);
+      return result;
     } catch (CelException e) {
-      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      CelException located =
+          e.code() == CelException.Code.RESOURCE_EXHAUSTED
+              ? e
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn, errorOffsetEncoding);
+      ctx.attribute(null);
+      ctx.trace(this, null, located);
+      throw located;
     }
   }
 
   private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
     Object operand = children[0].execute(frame, ctx);
+    Attribute parent = ctx.attribute();
+    Object override = ctx.attributeRead(ctx.qualify(parent, name), presence);
+    if (presence) ctx.attribute(null);
+    if (override != PartialState.NONE)
+      return !presence
+              && !(override instanceof Unknown)
+              && (Boolean.TRUE.equals(value) || operand instanceof OptionalValue)
+          ? OptionalValue.of(override)
+          : override;
+    if (operand == PartialState.MISSING) throw missingAttribute(parent);
     if (fieldRead != null && fieldRead.accepts(operand))
       return presence ? fieldRead.has(operand) : fieldRead.read(operand);
     return selectValue(ctx, presence, operand);
+  }
+
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  private static CelException missingAttribute(Attribute attribute) {
+    return Values.error(CelException.Code.UNDECLARED, "no value for attribute: " + attribute);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -588,15 +807,19 @@ class ExprNode extends CelNode {
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
         error = e;
+        args[i] = e;
       }
     }
+    Environment.FunctionOverload binding =
+        customOverloads
+            ? FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args)
+            : null;
+    if (binding != null && binding.nonStrict()) return ctx.invoke(binding, args);
     if (unknown != null) return unknown;
     if (error != null) throw error;
     if (customOverloads) {
-      var binding =
-          FunctionOverloads.select(ctx.environment, name, Boolean.TRUE.equals(value), args);
-      if (binding != null) return FunctionOverloads.invoke(binding, args);
-      if (!FunctionOverloads.standard(name)) throw Values.overload(name);
+      if (binding != null) return ctx.invoke(binding, args);
+      if (!standardOverload) throw Values.overload(name);
     }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
     return Functions.apply(name, args, ctx.environment);
@@ -675,9 +898,9 @@ class ExprNode extends CelNode {
   private Object block(VirtualFrame frame, EvalContext ctx) {
     if (getSourceSection() != null) return instrumentedBlock(frame.materialize(), ctx);
     ctx.charge(children.length);
-    EvalContext scoped = ctx.fork();
+    var scoped = ctx.fork();
     scoped.block = new BlockScope(children, null, scoped);
-    EvalContext body = ctx.fork();
+    var body = ctx.fork();
     body.block = scoped.block;
     return children[children.length - 1].execute(frame, body);
   }
@@ -686,10 +909,10 @@ class ExprNode extends CelNode {
   private Object instrumentedBlock(
       com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext ctx) {
     ctx.charge(children.length);
-    EvalContext scoped = ctx.fork();
+    var scoped = ctx.fork();
     VirtualFrame captured = forkFrame(frame, scoped);
     scoped.block = new BlockScope(children, captured, scoped);
-    EvalContext body = ctx.fork();
+    var body = ctx.fork();
     body.block = scoped.block;
     return children[children.length - 1].execute(forkFrame(frame, body), body);
   }
@@ -706,17 +929,41 @@ class ExprNode extends CelNode {
     private final VirtualFrame frame;
     private final EvalContext context;
     private final Object[] results;
+    private final long[] costs;
+    private Attribute[] attributes;
     private int depth;
 
     BlockScope(ExprNode[] expressions, VirtualFrame frame, EvalContext context) {
+      this(expressions, frame, context, false);
+    }
+
+    BlockScope(
+        ExprNode[] expressions, VirtualFrame frame, EvalContext context, boolean replayCost) {
       this.frame = frame;
       this.context = context;
       results = new Object[expressions.length - 1];
+      costs = replayCost ? new long[results.length] : null;
     }
 
     Object read(ExprNode initializer, int index, VirtualFrame callerFrame) {
       if (frame != null) return readInstrumented(initializer, index);
       return readValue(initializer, index, callerFrame);
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    Object cached(int index) {
+      return results[index];
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    long cachedCost(int index) {
+      return costs[index];
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    void cache(int index, Object value, long cost) {
+      results[index] = value;
+      costs[index] = cost;
     }
 
     @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -748,25 +995,89 @@ class ExprNode extends CelNode {
           depth--;
         }
         results[index] = result;
+        Attribute path = context.attribute();
+        if (path != null) {
+          if (attributes == null) attributes = new Attribute[results.length];
+          attributes[index] = path;
+        }
       }
+      context.attribute(attributes == null ? null : attributes[index]);
       if (result instanceof CelException error) throw error;
       return result;
     }
   }
 
+  /** A binding owns one lexical snapshot and evaluates its initializer at most once. */
+  static final class LazyBinding {
+    private final EvalContext context;
+    private final VirtualFrame frame;
+    private Object result;
+    private Attribute attribute;
+
+    LazyBinding(VirtualFrame frame, EvalContext context, boolean capture, boolean captureLocals) {
+      // Initializer-local slots overlap body-local slots. Capture them only when the initializer
+      // declares locals (or instrumentation observes the lexical scope); simple reads stay virtual.
+      this.context = capture ? context.fork() : context;
+      this.frame =
+          captureLocals && frame != null ? captureFrame(frame.materialize(), this.context) : null;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private static VirtualFrame captureFrame(
+        com.oracle.truffle.api.frame.MaterializedFrame frame, EvalContext context) {
+      VirtualFrame copy = forkFrame(frame, context);
+      for (int i = 0; i < frame.getFrameDescriptor().getNumberOfAuxiliarySlots(); i++)
+        copy.setAuxiliarySlot(i, frame.getAuxiliarySlot(i));
+      return copy;
+    }
+
+    Object read(ExprNode initializer, VirtualFrame caller) {
+      if (result == null) {
+        try {
+          result = frame == null ? initializer.execute(caller, context) : readCaptured(initializer);
+          attribute = context.attribute();
+        } catch (CelException error) {
+          result = error;
+        }
+      }
+      context.attribute(attribute);
+      if (result instanceof CelException error) throw error;
+      return result;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private Object readCaptured(ExprNode initializer) {
+      return initializer.execute(frame, context);
+    }
+
+    Object display() {
+      return result == null ? "<lazy>" : result;
+    }
+  }
+
   private Object macro(VirtualFrame frame, EvalContext ctx) {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
-    Object range = children[0].execute(frame, ctx);
-    if (range instanceof Unknown) return range;
-    String[] variables = (String[]) value;
     if (name.equals("bind")) {
-      bindings[0].execute(frame, ctx, range);
+      ctx.attribute(null);
+      bindings[0].execute(
+          frame,
+          ctx,
+          new LazyBinding(
+              frame,
+              ctx,
+              instrumentedSource || isolatedInitializer,
+              instrumentedSource || isolatedInitializer && bindings[0].frameSlot >= 0));
       try {
         return children[1].execute(frame, ctx);
       } finally {
         bindings[0].clear(frame, ctx);
       }
     }
+    Object range = children[0].execute(frame, ctx);
+    Attribute rangeAttribute = ctx.attribute();
+    if (range == PartialState.MISSING) return ctx.consume(range);
+    if (range instanceof Unknown) return range;
+    String[] variables = (String[]) value;
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;
@@ -798,10 +1109,20 @@ class ExprNode extends CelNode {
       Object item = values.get(position);
       ctx.tick();
       Object key = range instanceof List<?> && variables.length == 2 ? index : item;
-      bindings[0].execute(frame, ctx, key);
-      if (variables.length == 2)
+      ctx.attribute(
+          range instanceof List<?> && variables.length == 1
+              ? ctx.qualify(rangeAttribute, index)
+              : null);
+      bindings[0].execute(frame, ctx, ctx.iterationValue(key, ctx.attribute()));
+      if (variables.length == 2) {
+        ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
         bindings[1].execute(
-            frame, ctx, range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
+            frame,
+            ctx,
+            ctx.iterationValue(
+                range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item,
+                ctx.attribute()));
+      }
       index++;
       try {
         Object predicate = children[1].execute(frame, ctx);
@@ -811,7 +1132,10 @@ class ExprNode extends CelNode {
         }
         if (sorting) {
           HostCollections.add(sortKeys, predicate);
-          HostCollections.add(result, item);
+          ctx.attribute(range instanceof List<?> ? ctx.qualify(rangeAttribute, position) : null);
+          Object selected = ctx.consume(ctx.iterationValue(item, ctx.attribute()));
+          if (selected instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
+          else HostCollections.add(result, selected);
           continue;
         }
         if (mapping) {
@@ -837,7 +1161,12 @@ class ExprNode extends CelNode {
         if (name.equals("exists") && b) return true;
         if (b) {
           count++;
-          if (filtering && !countResult) HostCollections.add(result, item);
+          if (filtering && !countResult) {
+            ctx.attribute(range instanceof List<?> ? ctx.qualify(rangeAttribute, position) : null);
+            Object selected = ctx.consume(ctx.iterationValue(item, ctx.attribute()));
+            if (selected instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
+            else HostCollections.add(result, selected);
+          }
         }
       } catch (CelException e) {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
@@ -855,7 +1184,12 @@ class ExprNode extends CelNode {
       case "exists" -> false;
       case "exists_one", "existsOne" -> count == 1;
       case "transformMap", "transformMapEntry" -> HostCollections.freezeMap(mapped);
-      case "sortBy" -> ExtensionFunctions.sortBy(result, sortKeys, ctx);
+      case "sortBy" -> {
+        // The canonical expansion evaluates keys before dispatching the list-only sort overload.
+        // Keep its key-error/unknown precedence for dynamic and unchecked receivers.
+        if (!(range instanceof List<?>)) throw Values.overload(name);
+        yield ExtensionFunctions.sortBy(result, sortKeys, ctx);
+      }
       default -> HostCollections.freezeList(result);
     };
   }

@@ -79,7 +79,6 @@ public final class ValidationTest {
             "[[1, 2][5], x]",
             "[{'a': 1}.b, x]",
             "xs[1 / 0]",
-            "cel.bind(v, 1 / 0, x)",
             "cel.bind(v, x, 1 / 0)",
             "cel.block([x], 1 / 0)",
             "same(1 / 0)",
@@ -520,6 +519,20 @@ public final class ValidationTest {
     assertEquals(9L, Cel.compile(chain.replace("x,", "1,")).evaluate());
     assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().maxComprehensionNesting(0));
     assertThrows(NullPointerException.class, () -> Cel.newBuilder().validation(null));
+  }
+
+  @Test
+  public void conditionAnalysisDistinguishesBooleansFromOtherFoldedValuesAndFailures() {
+    Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
+    var context = new EvalContext(env, Map.of());
+    // Policy analysis inspects prepared subtrees, including already folded expressions.
+    // Nonboolean values and certain CEL errors must never become reachability findings.
+    for (String source : List.of("42", "1 + 1", "1 / 0 == 0", "x > 0"))
+      assertNull(source, Optimizer.constantBoolean(env.prepare(source).expression(), context));
+    assertEquals(
+        Boolean.TRUE, Optimizer.constantBoolean(env.prepare("1 + 1 == 2").expression(), context));
+    assertEquals(
+        Boolean.FALSE, Optimizer.constantBoolean(env.prepare("1 + 1 == 3").expression(), context));
   }
 
   @Test

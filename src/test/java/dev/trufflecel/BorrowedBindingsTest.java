@@ -8,6 +8,115 @@ import org.junit.Test;
 
 public class BorrowedBindingsTest {
   @Test
+  public void conversionCachesResolveAliasesAndAbsoluteRootsWithoutCachingLocals() {
+    var builder =
+        Cel.newBuilder()
+            .container("example")
+            .alias("items", "example.values")
+            .variable("example.values", CelType.list(CelType.INT));
+    for (int i = 0; i < 100; i++) builder.variable("unused" + i, CelType.DYN);
+    var environment = builder.build();
+    var prepared =
+        environment.prepare("cel.bind(values, [9], values[0] + items[0] + .example.values[0])");
+    for (boolean controlled : List.of(false, true)) {
+      int[] traversals = {0};
+      Iterable<Integer> items =
+          () -> {
+            assertEquals("one conversion for both spellings of the root", 0, traversals[0]++);
+            return List.of(2).iterator();
+          };
+      var program = prepared.instantiate();
+      assertEquals(101, program.variables().size());
+      assertTrue(program.variables().contains("unused99"));
+      var input = Map.of("example.values", items);
+      assertEquals(
+          13L,
+          controlled
+              ? program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build())
+              : program.evaluate(input));
+      assertEquals(1, traversals[0]);
+    }
+  }
+
+  @Test
+  public void uncheckedUndeclaredBindingsAlsoNormalizeOnlyOnce() {
+    for (String source : List.of("xs[0] + xs[1]", ".xs[0] + .xs[1]")) {
+      var program = Cel.newBuilder().build().parse(source);
+      int[] traversals = {0};
+      Iterable<Integer> items =
+          () -> {
+            assertEquals(0, traversals[0]++);
+            return List.of(1, 2).iterator();
+          };
+      assertEquals(3L, program.evaluate(Map.of("xs", items)));
+      assertEquals(1, traversals[0]);
+      assertTrue(program.variables().isEmpty());
+    }
+  }
+
+  @Test
+  public void inferredRootDoesNotReuseAnUnrelatedSingleDeclaration() {
+    var environment = Cel.newBuilder().inferVariables(true).variable("unused", CelType.INT).build();
+    var program = environment.compile("xs[0] + xs[1]");
+    int[] traversals = {0};
+    Iterable<Integer> items =
+        () -> {
+          assertEquals(0, traversals[0]++);
+          return List.of(1, 2).iterator();
+        };
+    assertEquals(3L, program.evaluate(Map.of("xs", items)));
+    assertEquals(Set.of("unused", "xs"), program.variables());
+    assertEquals(Set.of("unused"), environment.compile("unused").variables());
+  }
+
+  @Test
+  public void preparedAndSeparatelyCompiledProgramsKeepIndependentConversionCaches()
+      throws Exception {
+    var environment =
+        Cel.newBuilder()
+            .variable("left", CelType.list(CelType.INT))
+            .variable("right", CelType.list(CelType.INT))
+            .variable("unused", CelType.DYN)
+            .build();
+    var prepared = environment.prepare("left[0] + right[0] + left[0]");
+    var programs =
+        List.of(
+            prepared.instantiate(),
+            prepared.instantiate(),
+            environment.compile("right[0] + left[0] + left[0]"));
+    try (var executor = Executors.newFixedThreadPool(4)) {
+      var calls = new ArrayList<Callable<Object>>();
+      for (int i = 0; i < 100; i++) {
+        int n = i;
+        Program program = programs.get(i % programs.size());
+        calls.add(
+            () -> {
+              int[] traversals = {0};
+              Iterable<Integer> left =
+                  () -> {
+                    assertEquals("one conversion per evaluation", 0, traversals[0]++);
+                    return List.of(n).iterator();
+                  };
+              var input = Map.of("left", left, "right", List.of(n + 1));
+              return n % 2 == 0
+                  ? program.evaluate(input)
+                  : program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build());
+            });
+      }
+      var answers = executor.invokeAll(calls);
+      for (int i = 0; i < answers.size(); i++) assertEquals(3L * i + 1, answers.get(i).get());
+    }
+    var inferred = Cel.newBuilder().inferVariables(true).variable("base", CelType.INT).build();
+    var first = inferred.prepare("base + x[0]");
+    var second = inferred.prepare("base + y[0]");
+    assertEquals(3L, first.instantiate().evaluate(Map.of("base", 1, "x", List.of(2))));
+    assertEquals(6L, second.instantiate().evaluate(Map.of("base", 2, "y", List.of(4))));
+    assertEquals(Set.of("base", "x"), first.instantiate().variables());
+    assertEquals(Set.of("base", "y"), second.instantiate().variables());
+    assertEquals(Set.of("base"), inferred.compile("base").variables());
+  }
+
+  @Test
   public void evaluationDoesNotEnumerateBindingsAndConversionsAreEvaluationLocal() {
     int[] reads = {0};
     int[] value = {2};
@@ -83,12 +192,12 @@ public class BorrowedBindingsTest {
     source.put(null, null);
     var bindings = new BorrowedBindings(source, Map.of("x", 0));
     var context = new EvalContext(Cel.newBuilder().build(), bindings);
-    assertEquals(1L, context.get("x"));
+    assertEquals(1L, context.getRoot("x"));
     var visible = context.visibleBindings();
     assertEquals(Arrays.asList("x", "extra", null), new ArrayList<>(visible.keySet()));
     assertEquals(List.of(2L), visible.get("extra"));
     assertEquals(CelNull.INSTANCE, visible.get(null));
-    assertEquals(1L, context.fork().get("x"));
+    assertEquals(1L, context.fork().getRoot("x"));
     assertEquals(Integer.valueOf(1), source.get("x"));
   }
 

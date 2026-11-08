@@ -1,0 +1,8 @@
+java_test(
+    name = "compile_profile",
+    srcs = ["CompileProfile.java"],
+    main_class = "dev.trufflecel.CompileProfile",
+    use_testrunner = False,
+    jvm_flags = ["-Xbatch", "-XX:-UseJVMCICompiler", "-Dtruffle.UseFallbackRuntime=true", "-Xms512m", "-Xmx512m"],
+    deps = ["//:trufflecel"],
+)

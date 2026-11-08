@@ -2,7 +2,7 @@ alias(name = "trufflecel", actual = "//src/main/java/dev/trufflecel:trufflecel",
 
 alias(name = "gazelle", actual = "//bazel/gazelle:update", tags = ["manual"])
 
-exports_files(["maven_install.json", "cel_java_install.json", "LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "NOTICE"])
+exports_files(["maven_install.json", "cel_java_install.json", "fuzzing_install.json", "LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "NOTICE"])
 
 alias(name = "trufflecel-protobuf", actual = "//src/main/java/dev/trufflecel:protobuf", visibility = ["//visibility:public"])
 alias(name = "trufflecel-json", actual = "//src/main/java/dev/trufflecel:json", visibility = ["//visibility:public"])
@@ -15,3 +15,5 @@ filegroup(
     ],
     visibility = ["//visibility:public"],
 )
+
+alias(name = "trufflecel-processor", actual = "//src/main/java/dev/trufflecel/processor:processor", visibility = ["//visibility:public"])

@@ -15,6 +15,7 @@ public class InstrumentationTest {
     final Set<Class<? extends Tag>> tags = new HashSet<>();
     final List<String> sections = new ArrayList<>();
     final List<Long> localValues = new ArrayList<>();
+    final List<Long> returnedValues = new ArrayList<>();
     int failures;
   }
 
@@ -64,7 +65,8 @@ public class InstrumentationTest {
                         var library = NodeLibrary.getUncached();
                         Object scope = library.getScope(context.getInstrumentedNode(), frame, true);
                         Object value = InteropLibrary.getUncached().readMember(scope, "x");
-                        events.localValues.add(InteropLibrary.getUncached().asLong(value));
+                        if (InteropLibrary.getUncached().fitsInLong(value))
+                          events.localValues.add(InteropLibrary.getUncached().asLong(value));
                       }
                     } catch (InteropException e) {
                       throw new AssertionError(e);
@@ -73,8 +75,17 @@ public class InstrumentationTest {
                 }
 
                 @Override
-                public void onReturnValue(
-                    EventContext context, VirtualFrame frame, Object result) {}
+                @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+                public void onReturnValue(EventContext context, VirtualFrame frame, Object result) {
+                  if (context.hasTag(StandardTags.ReadVariableTag.class)
+                      && InteropLibrary.getUncached().fitsInLong(result)) {
+                    try {
+                      events.returnedValues.add(InteropLibrary.getUncached().asLong(result));
+                    } catch (InteropException e) {
+                      throw new AssertionError(e);
+                    }
+                  }
+                }
 
                 @Override
                 public void onReturnExceptional(
@@ -83,6 +94,62 @@ public class InstrumentationTest {
                 }
               });
     }
+  }
+
+  @Test
+  public void repeatedScopeInspectionCachesUnusedDeclaredBindings() {
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", "x + x", "scopes.cel").build();
+        var program =
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .variable("unused", CelType.list(CelType.INT))
+                .build()
+                .prepare("x + x")
+                .instantiate(source);
+        int[] traversals = {0};
+        Iterable<Integer> unused =
+            () -> {
+              assertEquals(0, traversals[0]++);
+              return List.of(1, 2).iterator();
+            };
+        assertEquals(4L, program.evaluate(Map.of("x", 2, "unused", unused)));
+        assertEquals(List.of(2L, 2L), events.localValues);
+        assertEquals(1, traversals[0]);
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
+  public void sourceTraceRestoresInstrumentedBindingAndReadWrappers() {
+    Program program;
+    var trace = new ArrayList<TraceEvent>();
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder(
+                    "cel", "cel.bind(x, 2, [3].map(y, x + y))", "trace-wrapped.cel")
+                .build();
+        program = Cel.newBuilder().build().compile(source);
+        assertEquals(List.of(5L), program.evaluate());
+      } finally {
+        context.leave();
+      }
+    }
+    assertEquals(List.of(5L), program.trace(trace::add).evaluate());
+    assertTrue(
+        trace.stream().anyMatch(e -> e.kind().equals("IDENT") && Objects.equals(e.value(), 2L)));
   }
 
   @Test
@@ -254,7 +321,8 @@ public class InstrumentationTest {
       assertTrue(events.tags.contains(StandardTags.CallTag.class));
       assertTrue(events.tags.contains(StandardTags.ReadVariableTag.class));
       assertTrue(events.tags.contains(StandardTags.WriteVariableTag.class));
-      assertTrue(events.localValues.contains(5L));
+      // A lazy initializer is absent on entry to its first read, then visible on return.
+      assertTrue(events.returnedValues.contains(5L));
       assertTrue(events.localValues.contains(2L));
     }
   }

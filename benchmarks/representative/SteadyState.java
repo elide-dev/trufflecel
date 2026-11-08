@@ -43,6 +43,7 @@ public class SteadyState {
     for (int i = 0; i < 4; i++)
       if (!Workloads.expected(workload, i).equals(evaluation.run(i)))
         throw new AssertionError(workload + "/" + i);
+    engines.qualifyRegex(workload);
     engines.peak(evaluation);
   }
 
@@ -59,6 +60,7 @@ public class SteadyState {
   @TearDown(Level.Trial)
   public void teardown() {
     engines.verifyTier(true);
+    if (engines.ours) System.err.println(RegexQualification.marker(engines.qualifyRegex(workload)));
     engines.close();
   }
 }
