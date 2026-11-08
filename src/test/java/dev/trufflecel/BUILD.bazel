@@ -582,3 +582,18 @@ java_test(
         "@maven//:org_graalvm_polyglot_polyglot",
     ],
 )
+
+# Packaged classpath regression belongs to the standard coverage suite.
+# keep
+java_test(
+    name = "noRe2jConsumer",
+    testonly = True,
+    jvm_flags = [
+        "--enable-native-access=ALL-UNNAMED",
+        "-XX:-UseJVMCICompiler",
+    ],
+    main_class = "dev.trufflecel.NoRe2jConsumer",
+    use_testrunner = False,
+    visibility = ["//tools/release:__pkg__"],
+    runtime_deps = ["//tools/release:no_re2j_consumer_lib"],
+)

@@ -6,6 +6,8 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 /** Optional compatibility engine; no RE2/J types occur in the core regex seam. */
 final class Re2Regex {
+  private Re2Regex() {}
+
   static Regex.Compiled compile(String source) {
     try {
       return new Re2(Pattern.compile(source));

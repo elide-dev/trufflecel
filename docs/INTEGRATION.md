@@ -564,3 +564,18 @@ validation policy. The mode uses TruffleRegex's Unicode tables and does not prom
 RE2/J compatibility for patterns excluded from the default accelerator subset.
 
 The default compatibility mode and accelerated constant-match hot path are preserved.
+
+For the Polyglot language entry point, configure the context instead:
+
+```java
+Context context = Context.newBuilder("cel")
+    .allowExperimentalOptions(true)
+    .option("cel.TruffleRegexOnly", "true")
+    .option("cel.RegexParserTreeLimit", "10000")
+    .build();
+boolean result = context.eval("cel", "'abc'.matches('[a-z]+')").asBoolean();
+```
+
+These language options apply to `Context.eval`/`parse`. Direct Java environments
+select their own policy through `truffleRegexOnly`. Engines keep parsed programs
+separate when contexts select different regex policies or parser bounds.

@@ -100,10 +100,9 @@ java_import(
     jars = [":core_binary"],
     deps = ["@maven//:" + c.split(":")[0].replace(".", "_").replace("-", "_") + "_" + c.split(":")[1].replace("-", "_") for c in DEPENDENCIES["core"] if not c.startswith("com.google.re2j:")],
 )
-java_library(name = "no_re2j_consumer_lib", testonly = True, srcs = ["NoRe2jConsumer.java"],
+java_library(name = "no_re2j_consumer_lib", testonly = True, visibility = ["//src/test/java/dev/trufflecel:__pkg__"], srcs = ["NoRe2jConsumer.java"],
     deps = [":core_without_re2j", "@maven//:org_graalvm_polyglot_polyglot", "@maven//:org_graalvm_truffle_truffle_runtime"])
-java_test(name = "no_re2j_consumer", testonly = True, main_class = "dev.trufflecel.NoRe2jConsumer", use_testrunner = False,
-    runtime_deps = [":no_re2j_consumer_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler"])
+alias(name = "no_re2j_consumer", actual = "//src/test/java/dev/trufflecel:noRe2jConsumer")
 native_image(name = "no_re2j_native", testonly = True, main_class = "dev.trufflecel.NoRe2jConsumer", executable_name = "no-re2j",
     deps = [":no_re2j_consumer_lib"], graalvm_sdk = "@graalvm_linux_amd64//:gvm",
     extra_args = ["--gc=serial", "-J-Xmx4g", "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--parallelism=4", "-march=compatibility", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata", "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],

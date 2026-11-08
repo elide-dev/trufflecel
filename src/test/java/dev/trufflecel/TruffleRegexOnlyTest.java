@@ -79,4 +79,40 @@ public class TruffleRegexOnlyTest {
       assertThrows(CelException.class, () -> program.test(Map.of("s", "abc")));
     }
   }
+
+  @Test
+  public void sharedEngineDoesNotReuseProgramsAcrossRegexPolicies() {
+    try (var engine = org.graalvm.polyglot.Engine.create();
+        var compatibility =
+            Context.newBuilder("cel").engine(engine).allowExperimentalOptions(true).build();
+        var only =
+            Context.newBuilder("cel")
+                .engine(engine)
+                .allowExperimentalOptions(true)
+                .option("cel.TruffleRegexOnly", "true")
+                .build()) {
+      var source = org.graalvm.polyglot.Source.create("cel", "'Ა'.matches('\\\\p{Lu}')");
+      assertFalse(compatibility.eval(source).asBoolean());
+      assertTrue(only.eval(source).asBoolean());
+      assertFalse(compatibility.eval(source).asBoolean());
+      try (var same =
+              Context.newBuilder("cel")
+                  .engine(engine)
+                  .allowExperimentalOptions(true)
+                  .option("cel.TruffleRegexOnly", "true")
+                  .build();
+          var tiny =
+              Context.newBuilder("cel")
+                  .engine(engine)
+                  .allowExperimentalOptions(true)
+                  .option("cel.TruffleRegexOnly", "true")
+                  .option("cel.RegexParserTreeLimit", "1")
+                  .build()) {
+        assertTrue(same.eval(source).asBoolean());
+        var complex = org.graalvm.polyglot.Source.create("cel", "'abc'.matches('(a|b)+c')");
+        assertTrue(same.eval(complex).asBoolean());
+        assertThrows(org.graalvm.polyglot.PolyglotException.class, () -> tiny.eval(complex));
+      }
+    }
+  }
 }
