@@ -309,8 +309,7 @@ final class ExtensionFunctions {
       if (name.startsWith("math.")) return math(name.substring(5), args, ctx);
       if (name.startsWith("regex.")) {
         if (name.equals("regex.replace") && args.length == 4 && (Long) args[3] == 0) return args[0];
-        return Regex.cached((String) args[1], ctx.environment.maxRegexProgramSize)
-            .apply(name, args, ctx);
+        return Regex.cached((String) args[1], ctx.environment).apply(name, args, ctx);
       }
       if (NetworkValue.supports(name)) return NetworkValue.apply(name, args);
       if (name.startsWith("json.") || name.startsWith("yaml."))

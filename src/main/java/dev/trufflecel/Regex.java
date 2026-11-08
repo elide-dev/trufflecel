@@ -1,7 +1,5 @@
 package dev.trufflecel;
 
-import com.google.re2j.Pattern;
-import com.google.re2j.PatternSyntaxException;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -27,6 +25,8 @@ final class Regex {
 
   /** A compiled pattern; immutable and safe to share between evaluations and threads. */
   interface Compiled {
+    String source();
+
     boolean find(String text);
 
     int programSize();
@@ -42,10 +42,65 @@ final class Regex {
   @TruffleBoundary
   static Compiled compile(String pattern, int limit) {
     try {
-      return bounded(new Re2(Pattern.compile(pattern)), limit);
-    } catch (PatternSyntaxException e) {
-      throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
+      return bounded(Re2Regex.compile(pattern), limit);
+    } catch (LinkageError missing) {
+      throw Values.error(
+          CelException.Code.INVALID_ARGUMENT,
+          "RE2/J backend is unavailable; add com.google.re2j:re2j:1.8 or select truffleRegexOnly");
     }
+  }
+
+  static Compiled compile(String pattern, Environment environment) {
+    if (environment.regexParserTreeLimit == 0)
+      return compile(pattern, environment.maxRegexProgramSize);
+    var compiled = only(pattern, environment);
+    compiled.handle(); // Validate constants during preparation, under the caller's policy.
+    return compiled;
+  }
+
+  private static TruffleOnly only(String pattern, Environment environment) {
+    if (pattern.length() > CACHE_KEY_LENGTH)
+      throw Values.error(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          "TruffleRegex-only pattern length exceeds 4096 UTF-16 code units");
+    return new TruffleOnly(pattern, environment.regexParserTreeLimit);
+  }
+
+  private record TruffleOnly(String source, int parserLimit) implements Compiled {
+    private Handle handle() {
+      CelLanguage.Scope scope = CelLanguage.currentScope();
+      if (scope == null)
+        throw Values.error(
+            CelException.Code.INVALID_ARGUMENT,
+            "TruffleRegex-only mode requires an initialized, entered CEL context");
+      Handle handle = scope.regex(source, parserLimit, true);
+      if (handle == null)
+        throw Values.error(
+            CelException.Code.INVALID_ARGUMENT, "pattern is unsupported by TruffleRegex RE2");
+      return handle;
+    }
+
+    public boolean find(String text) {
+      return handle().find(text);
+    }
+
+    public int programSize() {
+      throw Values.error(
+          CelException.Code.INVALID_ARGUMENT,
+          "RE2 instruction counts are unavailable in TruffleRegex-only mode");
+    }
+
+    public Object apply(String name, Object[] arguments, EvalContext context) {
+      throw Values.error(
+          CelException.Code.INVALID_ARGUMENT,
+          "regex extraction and replacement are unavailable in TruffleRegex-only mode");
+    }
+  }
+
+  static Compiled cached(String pattern, Environment environment) {
+    return environment.regexParserTreeLimit == 0
+        ? cached(pattern, environment.maxRegexProgramSize)
+        : only(pattern, environment);
   }
 
   private static Compiled bounded(Compiled compiled, int limit) {
@@ -63,8 +118,8 @@ final class Regex {
 
     MatchNode(Compiled fallback) {
       this.fallback = fallback;
-      String pattern = ((Re2) fallback).pattern.pattern();
-      source = eligible(pattern) ? pattern : null;
+      String pattern = fallback.source();
+      source = fallback instanceof TruffleOnly || eligible(pattern) ? pattern : null;
     }
 
     boolean find(String text) {
@@ -83,7 +138,12 @@ final class Regex {
     private synchronized Entry initialize() {
       if (entry == null) {
         CelLanguage.Scope scope = CelLanguage.currentScope();
-        Handle handle = scope == null ? null : scope.regex(source);
+        Handle handle =
+            scope == null
+                ? null
+                : fallback instanceof TruffleOnly only
+                    ? scope.regex(source, only.parserLimit(), true)
+                    : scope.regex(source);
         entry =
             handle == null
                 ? UNAVAILABLE
@@ -140,7 +200,8 @@ final class Regex {
   }
 
   @TruffleBoundary
-  static Handle accelerate(TruffleLanguage.Env env, Object token, String pattern) {
+  static Handle accelerate(
+      TruffleLanguage.Env env, Object token, String pattern, int parserLimit, boolean strict) {
     Source source =
         Source.newBuilder("regex", "/" + pattern + "/", "CEL regular expression")
             .internal(true)
@@ -148,7 +209,7 @@ final class Regex {
             .option("regex.Flavor", "RE2")
             .option("regex.Encoding", "UTF-16")
             .option("regex.BooleanMatch", "true")
-            .option("regex.MaxParserTreeSize", "100000")
+            .option("regex.MaxParserTreeSize", Integer.toString(parserLimit))
             .build();
     try {
       Object regex = env.parseInternal(source).call();
@@ -158,86 +219,15 @@ final class Regex {
     } catch (AbstractTruffleException failure) {
       try {
         // A valid RE2/J pattern can exceed TRegex's supported syntax/automaton limits.
-        if (InteropLibrary.getUncached().getExceptionType(failure) == ExceptionType.PARSE_ERROR)
+        if (InteropLibrary.getUncached().getExceptionType(failure) == ExceptionType.PARSE_ERROR) {
+          if (strict)
+            throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
           return null;
+        }
       } catch (InteropException invalidException) {
         throw CompilerDirectives.shouldNotReachHere(invalidException);
       }
       throw failure;
-    }
-  }
-
-  private record Re2(Pattern pattern) implements Compiled {
-    @Override
-    public int programSize() {
-      return pattern.programSize();
-    }
-
-    @Override
-    @TruffleBoundary
-    public boolean find(String text) {
-      return pattern.matcher(text).find();
-    }
-
-    @Override
-    @TruffleBoundary
-    public Object apply(String name, Object[] arguments, EvalContext context) {
-      String text = (String) arguments[0];
-      var matcher = pattern.matcher(text);
-      if (name.equals("regex.replace")) {
-        long limit = arguments.length == 4 ? (Long) arguments[3] : -1;
-        String replacement = (String) arguments[2];
-        var output = new StringBuilder();
-        int end = 0;
-        for (long count = 0; (limit < 0 || count < limit) && matcher.find(); count++) {
-          context.tick();
-          context.charge(matcher.start() - end);
-          output.append(text, end, matcher.start());
-          for (int i = 0; i < replacement.length(); i++) {
-            char c = replacement.charAt(i);
-            if (c == '\\') {
-              if (++i == replacement.length())
-                throw new IllegalArgumentException("trailing replacement escape");
-              c = replacement.charAt(i);
-              if (Character.isDigit(c)) {
-                int group = Character.digit(c, 10);
-                if (group > matcher.groupCount())
-                  throw new IllegalArgumentException("unknown replacement group");
-                String value = matcher.group(group);
-                if (value != null) {
-                  context.charge(value.length());
-                  output.append(value);
-                }
-                continue;
-              }
-              if (c != '\\') throw new IllegalArgumentException("invalid replacement escape");
-            }
-            context.tick();
-            output.append(c);
-          }
-          end = matcher.end();
-        }
-        context.charge(text.length() - end);
-        return output.append(text, end, text.length()).toString();
-      }
-      boolean all = name.equals("regex.extractAll");
-      // extract reports no match before checking capture count; extractAll checks it eagerly.
-      boolean found = matcher.find();
-      if (!all && !found) return OptionalValue.none();
-      if (matcher.groupCount() > 1) throw new IllegalArgumentException("too many capture groups");
-      int group = matcher.groupCount();
-      var output = new java.util.ArrayList<String>();
-      while (found) {
-        context.tick();
-        String value = matcher.group(group);
-        if (value != null) {
-          context.charge(value.length());
-          if (!all) return OptionalValue.of(value);
-          output.add(value);
-        } else if (!all) return OptionalValue.none();
-        found = matcher.find();
-      }
-      return java.util.List.copyOf(output);
     }
   }
 

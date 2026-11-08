@@ -8,6 +8,7 @@ import com.oracle.truffle.api.interop.*;
 import com.oracle.truffle.api.library.*;
 import java.util.*;
 import org.graalvm.polyglot.Context;
+import org.graalvm.options.*;
 
 /** Polyglot registration; the direct Java API does not require a Polyglot Context. */
 @TruffleLanguage.Registration(
@@ -27,6 +28,32 @@ import org.graalvm.polyglot.Context;
   StandardTags.WriteVariableTag.class
 })
 public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
+  @Option(
+      name = "TruffleRegexOnly",
+      help = "Use TruffleRegex without RE2/J compatibility fallback.",
+      category = OptionCategory.USER,
+      stability = OptionStability.EXPERIMENTAL)
+  static final OptionKey<Boolean> TRUFFLE_REGEX_ONLY = new OptionKey<>(false);
+
+  @Option(
+      name = "RegexParserTreeLimit",
+      help = "Parser-tree node bound in TruffleRegex-only mode.",
+      category = OptionCategory.USER,
+      stability = OptionStability.EXPERIMENTAL)
+  static final OptionKey<Integer> REGEX_PARSER_TREE_LIMIT = new OptionKey<>(10000);
+
+  @Override
+  protected OptionDescriptors getOptionDescriptors() {
+    return new CelLanguageOptionDescriptors();
+  }
+
+  @Override
+  protected boolean areOptionsCompatible(OptionValues first, OptionValues second) {
+    if (!first.get(TRUFFLE_REGEX_ONLY).equals(second.get(TRUFFLE_REGEX_ONLY))) return false;
+    return !first.get(TRUFFLE_REGEX_ONLY)
+        || first.get(REGEX_PARSER_TREE_LIMIT).equals(second.get(REGEX_PARSER_TREE_LIMIT));
+  }
+
   private static final LanguageReference<CelLanguage> LANGUAGE =
       LanguageReference.create(CelLanguage.class);
 
@@ -70,9 +97,12 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     final String sourceName = request.getSource().getName();
     final Program program;
     try {
+      var builder = Cel.newBuilder().inferVariables(true);
+      var scope = CONTEXT.get(null);
+      if (scope.env.getOptions().get(TRUFFLE_REGEX_ONLY))
+        builder.truffleRegexOnly(scope.env.getOptions().get(REGEX_PARSER_TREE_LIMIT));
       program =
-          Cel.newBuilder()
-              .inferVariables(true)
+          builder
               .build()
               .prepare(request.getSource().getCharacters().toString())
               .adopt(this, request.getSource());
@@ -101,7 +131,10 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     final Map<String, Object> values = new LinkedHashMap<>();
     final Object regexToken = new Object();
     private final Env env;
-    private final Map<String, Regex.Handle> regexes = new HashMap<>();
+
+    private record RegexKey(String pattern, int limit, boolean strict) {}
+
+    private final Map<RegexKey, Regex.Handle> regexes = new HashMap<>();
 
     Scope(Env env) {
       this.env = env;
@@ -109,10 +142,16 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
 
     @CompilerDirectives.TruffleBoundary
     synchronized Regex.Handle regex(String pattern) {
-      if (regexes.containsKey(pattern)) return regexes.get(pattern);
-      Regex.Handle handle = Regex.accelerate(env, regexToken, pattern);
+      return regex(pattern, 100000, false);
+    }
+
+    @CompilerDirectives.TruffleBoundary
+    synchronized Regex.Handle regex(String pattern, int limit, boolean strict) {
+      var key = new RegexKey(pattern, limit, strict);
+      if (regexes.containsKey(key)) return regexes.get(key);
+      Regex.Handle handle = Regex.accelerate(env, regexToken, pattern, limit, strict);
       if (regexes.size() >= 256) regexes.clear();
-      regexes.put(pattern, handle);
+      regexes.put(key, handle);
       return handle;
     }
 

@@ -65,6 +65,8 @@ final class Workloads {
   }
 
   static String source(String name) {
+    if (name.equals("map-regex-dynamic"))
+      return "labels['env'] == 'prod' && email.matches(email) && xs.exists(v, v > 100)";
     int index = Arrays.asList(NAMES).indexOf(name);
     if (index < 0) throw new IllegalArgumentException(name);
     return SOURCES[index];
@@ -79,6 +81,7 @@ final class Workloads {
           ((List<?>) Raw.INPUTS.get(i).get("xs"))
               .stream().map(v -> (Long) v).filter(v -> v > 50).map(v -> v * 2).toList();
       case "map-regex" -> i == 0;
+      case "map-regex-dynamic" -> i < 2;
       case "optimizer-policy" -> i % 2 == 0;
       default -> throw new IllegalArgumentException(workload);
     };

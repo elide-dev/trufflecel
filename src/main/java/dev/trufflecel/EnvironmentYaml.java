@@ -193,6 +193,7 @@ public final class EnvironmentYaml {
         case "cel.limit.parse_recursion_depth" -> builder.maxDepth(value);
         case "trufflecel.ast_nodes" -> builder.maxAstNodes(value);
         case "trufflecel.regex_program_size" -> builder.maxRegexProgramSize(value);
+        case "trufflecel.regex_parser_tree_size" -> builder.truffleRegexOnly(value);
         case "trufflecel.comprehension_nesting" -> builder.maxComprehensionNesting(value);
         default -> throw new IllegalArgumentException("unsupported environment limit: " + name);
       }
@@ -290,7 +291,9 @@ public final class EnvironmentYaml {
                 limit("cel.limit.expression_code_points", environment.maxSourceLength),
                 limit("cel.limit.parse_recursion_depth", environment.maxDepth),
                 limit("trufflecel.ast_nodes", environment.maxAstNodes),
-                limit("trufflecel.regex_program_size", environment.maxRegexProgramSize),
+                environment.regexParserTreeLimit == 0
+                    ? limit("trufflecel.regex_program_size", environment.maxRegexProgramSize)
+                    : limit("trufflecel.regex_parser_tree_size", environment.regexParserTreeLimit),
                 limit("trufflecel.evaluation_budget", environment.budget)));
     if (environment.comprehensionNesting > 0)
       limits.add(limit("trufflecel.comprehension_nesting", environment.comprehensionNesting));

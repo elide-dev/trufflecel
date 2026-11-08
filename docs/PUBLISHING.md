@@ -5,7 +5,7 @@ upload convention. It produces four thin Maven artifacts under `dev.elide`:
 
 | Artifact | Runtime dependencies in addition to core |
 | --- | --- |
-| `trufflecel-core` | Truffle API, TruffleRegex, RE2/J, TruffleData core |
+| `trufflecel-core` | Truffle API, TruffleRegex, optional RE2/J, TruffleData core |
 | `trufflecel-protobuf` | TruffleData protobuf and protobuf-runtime, protobuf-java, TruffleData core, Truffle API |
 | `trufflecel-json` | Oracle's shaded Truffle JSON |
 | `trufflecel-processor` | None; build-time javac annotation processor only |

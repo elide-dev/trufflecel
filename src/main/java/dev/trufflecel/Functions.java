@@ -294,7 +294,9 @@ final class Functions {
         return stringPredicate(name, a, b);
       case "matches":
         if (a instanceof String x && b instanceof String y)
-          return matches(x, y, env.maxRegexProgramSize);
+          return env.regexParserTreeLimit == 0
+              ? matches(x, y, env.maxRegexProgramSize)
+              : Regex.cached(y, env).find(x);
         break;
       default:
         if (name.startsWith("get") && b instanceof String zone) return timePart(name, a, zone);

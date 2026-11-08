@@ -338,7 +338,7 @@ Upstream tracking covers [counted-repetition support](https://github.com/elide-d
 also inform the RE2/J fallback for extraction/replacement extensions; constant boolean
 matching always starts from zero and does not expose capture boundaries.
 
-RE2/J remains a required dependency for the current release candidate. Removing it
+The default compatibility mode requires RE2/J. Removing it from that mode
 also requires a supported [host entry point and lifecycle](https://github.com/elide-dev/graal/issues/207)
 for context-free, concurrent evaluation, plus [analysis and complexity-budget metadata](https://github.com/elide-dev/graal/issues/208)
 that preserves the documented `maxRegexProgramSize` contract or supplies an explicit
@@ -539,3 +539,43 @@ field names and nested value types and counts existing snapshot subgraphs agains
 and node limits. Null map keys are rejected in both snapshots and CEL construction. Evaluating a raw host POJO does not implicitly snapshot it;
 only generated snapshots are accepted by these adapters. Policy execution never invokes bean
 getters or constructs host objects.
+
+### Omitting RE2/J
+
+RE2/J is an optional Maven dependency. Applications using the default compatibility
+mode must declare `com.google.re2j:re2j:1.8` explicitly. To omit it, opt in to:
+
+```java
+var environment = Cel.newBuilder().truffleRegexOnly(10_000).build();
+```
+
+Create and initialize a Polyglot `cel` context, enter it, then prepare/instantiate
+and evaluate regex programs there. This mode never creates a hidden context or
+loads RE2/J. Both constant and dynamic boolean `matches` use TruffleRegex RE2;
+unsupported patterns and extraction/replacement operations fail explicitly. Missing
+or closed contexts also report CEL errors. A zero-count replacement remains a no-op.
+
+Patterns are limited to 4,096 UTF-16 code units, bounding context-cache key storage.
+The argument bounds TruffleRegex parser-tree nodes. It is a different resource
+metric from RE2 instructions; `maxRegexProgramSize` cannot be combined with this
+mode. Existing CEL source/value bounds and the backend's non-backtracking execution
+remain enforced. Syntax/unsupported-backend failures follow the environment's
+validation policy. The mode uses TruffleRegex's Unicode tables and does not promise
+RE2/J compatibility for patterns excluded from the default accelerator subset.
+
+The default compatibility mode and accelerated constant-match hot path are preserved.
+
+For the Polyglot language entry point, configure the context instead:
+
+```java
+Context context = Context.newBuilder("cel")
+    .allowExperimentalOptions(true)
+    .option("cel.TruffleRegexOnly", "true")
+    .option("cel.RegexParserTreeLimit", "10000")
+    .build();
+boolean result = context.eval("cel", "'abc'.matches('[a-z]+')").asBoolean();
+```
+
+These language options apply to `Context.eval`/`parse`. Direct Java environments
+select their own policy through `truffleRegexOnly`. Engines keep parsed programs
+separate when contexts select different regex policies or parser bounds.
