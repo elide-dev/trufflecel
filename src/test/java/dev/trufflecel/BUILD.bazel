@@ -139,6 +139,7 @@ java_test(
     deps = [
         ":test_support",
         "//:trufflecel",
+        "//:trufflecel-protobuf",
         "@maven//:junit_junit",
     ],
 )

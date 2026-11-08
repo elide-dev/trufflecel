@@ -29,6 +29,23 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        var sorting = Cel.compile("xs.sortBy(x, x)");
+        var mapReceiver = Map.of("xs", Map.of("a", 1L));
+        var listReceiver = Map.of("xs", List.of(2L, 1L));
+        var sortTarget = (OptimizedCallTarget) sorting.callTarget();
+        for (int phase = 0; phase < 2; phase++) {
+          if (phase == 1) {
+            sortTarget.compile(true);
+            sortTarget.waitForCompilation();
+          }
+          for (int i = 0; i < 1000; i++) {
+            assertEquals(List.of(1L, 2L), sorting.evaluate(listReceiver));
+            assertEquals(
+                CelException.Code.NO_OVERLOAD,
+                assertThrows(CelException.class, () -> sorting.evaluate(mapReceiver)).code());
+          }
+        }
+        assertTrue("sortBy receiver errors must stay compiled", sortTarget.isValidLastTier());
         check(
             "regex.replace(s, '(a)', r'\\1x')",
             Map.of("s", "aba"),
