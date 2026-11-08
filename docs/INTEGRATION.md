@@ -264,7 +264,8 @@ or read application resources. The optional protobuf bridge uses explicit descri
 temporary DynamicMessage exports for host equality/interoperability, so its reachable dependency surface is larger than core; it does not scan
 classes or descriptor resources. The optional JSON bridge uses explicit JSONObject/JSONArray
 access, never reflective bean conversion. The sole generated language-discovery service is produced at build time by
-the Truffle registration processor. RE2/J supplies bounded regular-expression semantics.
+the Truffle registration processor. TruffleRegex supplies scoped acceleration for compatible
+constant regular expressions; RE2/J preserves validation, size limits and fallback semantics.
 Date/time functions use the JDK time-zone database.
 
 The benchmark native image and workload smoke checks are qualified separately from the
@@ -312,6 +313,22 @@ exceptions outside CEL's normalized callback errors retain their existing propag
 patterns and regex extension calls are checked before matching. Cached patterns are rechecked
 against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXHAUSTED`.
 A zero-count regex replacement still returns its input without compiling the pattern.
+
+Constant `matches` patterns in a conservative ASCII subset can use the pinned
+TruffleRegex RE2 flavor. The Program's first evaluation must occur in an initialized,
+entered CEL context. The accelerator remains owned by that context; the Program
+holds only a weak reference and checks the owning context on every accelerated call.
+Evaluation outside that context, after its closure, or after cache eviction uses
+RE2/J. A Program first evaluated without a CEL context stays on RE2/J and never
+creates a hidden context. Dynamic patterns and capture/replacement extensions also
+remain on RE2/J. No caller context is required by the standalone Java API.
+
+The initial accelerated subset excludes escapes, non-ASCII pattern characters and
+special groups. Unicode properties and case folding differ between the two engines'
+Unicode tables, and some nullable capture loops have different match boundaries.
+Unsupported TruffleRegex patterns fall back after the same RE2/J syntax and program-size
+validation. The context's accelerator cache is bounded to 256 entries and cleared on
+disposal; the separate dynamic-pattern cache retains its existing bounds.
 
 ## Per-evaluation controls and cost
 
