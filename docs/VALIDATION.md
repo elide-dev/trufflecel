@@ -103,4 +103,21 @@ Against the negative matrix in `NegativeCases`, strict validation rejects at com
 constant pattern with a variable receiver, an invalid timestamp literal, constant duplicate
 and invalid map keys, and the range cap). A failing
 `cel.block` slot that the result always reads is not reported, because slot evaluation is
-lazy. A custom validator hook is not provided yet.
+lazy.
+
+## Application validators
+
+`Environment.Builder.validator(Validator)` registers a thread-safe compile-time callback.
+Its immutable `Validator.Context` provides source text, the expanded source AST before constant
+substitution/folding, the result type, and checked types keyed by expression ID. A source-only
+qualifier removed during resolution has no checked type; `context.type(node)` returns `dyn`
+for it. Host constants are represented by their source identifier, so application objects do
+not enter the public syntax tree.
+
+Return a list of `CelException.Issue` findings, or an empty list to accept. Findings are enforced
+under both validation policies, including unchecked parsing; they are combined with built-in
+validation findings, sorted by source offset and capped at 100. Resource failures remain
+immediate. Callbacks run once per preparation and may run concurrently; like host evaluation
+callbacks, their own execution time is controlled by the embedder. `toBuilder()` preserves
+registered validators and macro selections. Custom validators also run on imported ASTs,
+whose source text may be empty.
