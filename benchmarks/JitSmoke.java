@@ -6,6 +6,7 @@ import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.oracle.truffle.api.debug.Breakpoint;
 import com.oracle.truffle.api.debug.Debugger;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,11 @@ import org.graalvm.polyglot.Context;
 
 /** Native Image must include a working guest compiler, not just build successfully. */
 public final class JitSmoke {
+  private static final PreparedProgram IMAGE_POLICY =
+      PolicyCompiler.prepare(
+          EnvironmentYaml.read("variables: [{name: x, type: int}]"),
+          "name: image-policy\nrule: {match: [{condition: 'x > 0', output: 'x + 1'}, {output: '0'}]}");
+
   public static void main(String[] args) throws Exception {
     dev.trufflecel.bench.SimulationBenchmark.main(new String[] {"--smoke"});
     try (Context context =
@@ -52,6 +58,85 @@ public final class JitSmoke {
       System.out.println("Native debugger qualification passed");
       context.enter();
       try {
+        var sorting = Cel.compile("xs.sortBy(x, x)");
+        var sortTarget = (OptimizedCallTarget) sorting.callTarget();
+        var mapReceiver = Map.of("xs", Map.of("a", 1L));
+        var listReceiver = Map.of("xs", List.of(2L, 1L));
+        for (int phase = 0; phase < 2; phase++) {
+          if (phase == 1) {
+            sortTarget.compile(true);
+            sortTarget.waitForCompilation();
+          }
+          for (int i = 0; i < 1000; i++) {
+            if (!sorting.evaluate(listReceiver).equals(List.of(1L, 2L)))
+              throw new AssertionError("Native sortBy list result");
+            try {
+              sorting.evaluate(mapReceiver);
+              throw new AssertionError("Native sortBy accepted a map");
+            } catch (CelException error) {
+              if (error.code() != CelException.Code.NO_OVERLOAD) throw error;
+            }
+          }
+        }
+        if (!sortTarget.isValidLastTier())
+          throw new AssertionError("Native sortBy receiver errors must stay compiled");
+        var regexProgram = Cel.compile("s.matches('^[a-z]+@[a-z]+[.]com$')");
+        check(
+            regexProgram,
+            Map.of("s", "alice@example.com"),
+            true,
+            Map.of("s", "not-an-email"),
+            false);
+        if (NodeUtil.findAllNodeInstances(
+                ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                Regex.MatchNode.class)
+            .stream()
+            .noneMatch(Regex.MatchNode::isAccelerated))
+          throw new AssertionError("Native constant matches did not use TruffleRegex");
+        check(IMAGE_POLICY.instantiate(), Map.of("x", 2L), 3L, Map.of("x", -1L), 0L);
+        var policyEnvironment = EnvironmentYaml.read("variables: [{name: x, type: int}]");
+        check(
+            PolicyCompiler.compile(
+                policyEnvironment,
+                "name: runtime-policy\nrule: {match: [{condition: 'x > 0', output: 'x + 2'}]}"),
+            Map.of("x", 2L),
+            4L,
+            Map.of("x", -1L),
+            OptionalValue.none());
+        if (CostEstimator.estimate(policyEnvironment, "x + 1").maximum().isEmpty())
+          throw new AssertionError("Native static cost estimation");
+        System.out.println("Native policy and environment tooling qualification passed");
+        var macros =
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .macro(
+                    Macro.global(
+                        "twice", 1, (c, t, a) -> Ast.Node.call("*", a.get(0), Ast.Node.literal(2))))
+                .build();
+        Ast syntax = Ast.parse(macros, "twice(x) + 1");
+        if (!syntax.unparse().contains("twice"))
+          throw new AssertionError("Native macro source reconstruction");
+        Ast edited =
+            syntax
+                .editor()
+                .transform(
+                    n ->
+                        n.kind() == Ast.Kind.CONSTANT && Long.valueOf(1).equals(n.value())
+                            ? Ast.Node.literal(3)
+                            : n)
+                .freeze();
+        var legacy = CanonicalAst.toV1Alpha1(CanonicalAst.parsed(edited));
+        var checked = CanonicalAst.check(macros, legacy);
+        if (!checked
+            .getDescriptorForType()
+            .getFullName()
+            .equals("google.api.expr.v1alpha1.CheckedExpr"))
+          throw new AssertionError("Native legacy AST schema");
+        check(CanonicalAst.program(macros, checked), Map.of("x", 2L), 7L, Map.of("x", 4L), 11L);
+        var original = CanonicalAst.toV1Alpha1(CanonicalAst.parse(macros, "twice(x)"));
+        if (!CanonicalAst.unparse(macros, original).equals("twice(x)"))
+          throw new AssertionError("Native canonical macro source reconstruction");
+        System.out.println("Native editable AST, macro and v1alpha1 qualification passed");
         var file =
             FileDescriptor.buildFrom(
                 FileDescriptorProto.newBuilder()
@@ -101,6 +186,57 @@ public final class JitSmoke {
             true,
             Map.of("x", 2.0),
             false);
+        var masked =
+            protobuf.mask(com.google.protobuf.FieldMask.newBuilder().addPaths("number").build());
+        var maskedProgram =
+            masked
+                .register(Cel.newBuilder())
+                .variable("p", CelType.of(masked.name()))
+                .build()
+                .compile("p.number + 1");
+        check(
+            maskedProgram,
+            Map.of("p", masked.construct(Map.of("number", 1L))),
+            2L,
+            Map.of("p", masked.construct(Map.of("number", 3L))),
+            4L);
+        var partialProgram = Cel.compile("cel.bind(x, data, x.known + x.secret)");
+        var partialInput =
+            PartialActivation.of(
+                Map.of("data", Map.of("known", 2L)), AttributePattern.of("data").qualify("secret"));
+        for (int i = 0; i < 2000; i++) {
+          var pending = partialProgram.partialEvaluate(partialInput);
+          if (!pending.unknownAttributes().equals(java.util.Set.of("data.secret")))
+            throw new AssertionError("partial unknown");
+          if (!pending
+              .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 3L))
+              .value()
+              .equals(5L)) throw new AssertionError("partial advance");
+        }
+        var partialTarget = (OptimizedCallTarget) partialProgram.traceTarget();
+        partialTarget.compile(true);
+        partialTarget.waitForCompilation();
+        if (!partialProgram
+                .partialEvaluate(partialInput)
+                .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 4L))
+                .value()
+                .equals(6L)
+            || !partialTarget.isValidLastTier())
+          throw new AssertionError("compiled partial target");
+        var traceCount = new java.util.concurrent.atomic.AtomicInteger();
+        if (!Cel.compile("1 + 2").trace(event -> traceCount.incrementAndGet()).evaluate().equals(3L)
+            || traceCount.get() != 3) throw new AssertionError("native source trace");
+        var late =
+            Cel.newBuilder()
+                .lateFunction("inc", "inc_int", false, List.of(CelType.INT), CelType.INT)
+                .build()
+                .compile("inc(1)");
+        var functions =
+            EvaluationOptions.newBuilder()
+                .function("inc_int", a -> (Long) a.getFirst() + 1)
+                .build();
+        if (!late.evalAsync(Map.of(), functions, Runnable::run).join().equals(2L))
+          throw new AssertionError("native async late function");
         var controlled = Cel.newBuilder().variable("x", CelType.INT).build().compile("x + 1");
         var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
         var controls = EvaluationOptions.newBuilder().budget(10).cancelled(cancelled::get).build();
@@ -145,6 +281,26 @@ public final class JitSmoke {
                 .build()
                 .compile("label(x)");
         check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text");
+        check(
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .commonSubexpressions(true)
+                .build()
+                .compile("(x + 1) * (x + 1)"),
+            Map.of("x", 2L),
+            9L,
+            Map.of("x", 3L),
+            16L);
+        var pojo = PojoFixtures_AddressCel.INSTANCE;
+        check(
+            pojo.register(Cel.newBuilder())
+                .variable("p", CelType.of(pojo.name()))
+                .build()
+                .compile("p.zip > 100"),
+            Map.of("p", pojo.snapshot(new PojoFixtures.Address(123, "Main"))),
+            true,
+            Map.of("p", pojo.snapshot(new PojoFixtures.Address(1, "Other"))),
+            false);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false);
         check(
             "enabled && 10 / x > 1",

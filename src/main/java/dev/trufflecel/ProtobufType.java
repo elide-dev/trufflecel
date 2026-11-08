@@ -300,6 +300,218 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return builder;
   }
 
+  /** Declare this message's fields as top-level CEL variables, including protobuf defaults. */
+  public Environment.Builder registerContext(Environment.Builder builder) {
+    register(builder);
+    fields.forEach(builder::variable);
+    return builder;
+  }
+
+  /** Snapshot a protobuf context without retaining the host Message or its builder. */
+  public Activation context(Message message) {
+    return context(snapshot(message));
+  }
+
+  public Activation context(Value value) {
+    if (!accepts(value))
+      throw new IllegalArgumentException("context descriptor differs from adapter");
+    var bindings = new LinkedHashMap<String, Object>();
+    for (String field : fields.keySet()) bindings.put(field, get(value, field));
+    return Activation.snapshot(bindings);
+  }
+
+  /** Create a typed field projection. An empty mask exposes no fields; '*' exposes all fields. */
+  public Masked mask(FieldMask mask) {
+    return mask(name() + ".Masked", mask);
+  }
+
+  /** Use a distinct CEL type name when registering several projections in one environment. */
+  public Masked mask(String name, FieldMask mask) {
+    if (!name.matches("[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*"))
+      throw new IllegalArgumentException("invalid masked type name: " + name);
+    if (mask.getPathsCount() > 4096)
+      throw new IllegalArgumentException("field mask path limit exceeded");
+    var root = new MaskNode();
+    for (String path : mask.getPathsList()) {
+      if (path.equals("*")) {
+        root.all = true;
+        continue;
+      }
+      String[] segments = path.split("\\.", -1);
+      if (segments.length > 100)
+        throw new IllegalArgumentException("field mask depth limit exceeded");
+      Descriptor current = descriptor;
+      MaskNode node = root;
+      for (int i = 0; i < segments.length; i++) {
+        FieldDescriptor field = current.findFieldByName(segments[i]);
+        if (field == null) throw new IllegalArgumentException("unknown field mask path: " + path);
+        node = node.children.computeIfAbsent(field.getName(), ignored -> new MaskNode());
+        if (i + 1 < segments.length) {
+          if (field.isRepeated()
+              || field.getJavaType() != FieldDescriptor.JavaType.MESSAGE
+              || WELL_KNOWN.containsKey(field.getMessageType().getFullName()))
+            throw new IllegalArgumentException(
+                "field mask traverses a repeated, mapped or scalar field: " + path);
+          current = field.getMessageType();
+        }
+      }
+      node.all = true;
+    }
+    return new Masked(this, name, root);
+  }
+
+  private static final class MaskNode {
+    boolean all;
+    final Map<String, MaskNode> children = new LinkedHashMap<>();
+  }
+
+  /** A descriptor-checked projection; hidden fields are unavailable even through dyn(). */
+  public static final class Masked implements ObjectType {
+    private final ProtobufType source;
+    private final String name;
+    private final Map<String, CelType> fields;
+    private final Map<String, Masked> nested;
+    private final Map<String, CelType> extensions;
+
+    private Masked(ProtobufType source, String name, MaskNode mask) {
+      this.source = source;
+      this.name = name;
+      var types = new LinkedHashMap<String, CelType>();
+      var children = new LinkedHashMap<String, Masked>();
+      for (var entry : source.fields.entrySet()) {
+        MaskNode selected = mask.children.get(entry.getKey());
+        if (!mask.all && selected == null) continue;
+        CelType type = entry.getValue();
+        if (!mask.all && !selected.all) {
+          Descriptor descriptor = source.descriptors.get(entry.getKey()).getMessageType();
+          var projection =
+              new Masked(source.graph.get(descriptor), name + "." + entry.getKey(), selected);
+          children.put(entry.getKey(), projection);
+          type = new CelType(projection.name(), List.of());
+        }
+        types.put(entry.getKey(), type);
+      }
+      fields = Map.copyOf(types);
+      nested = Map.copyOf(children);
+      var selectedExtensions = new LinkedHashMap<String, CelType>();
+      for (var entry : source.extensionTypes.entrySet())
+        if (fields.containsKey(entry.getKey()))
+          selectedExtensions.put(entry.getKey(), entry.getValue());
+      extensions = Map.copyOf(selectedExtensions);
+    }
+
+    public String name() {
+      return name;
+    }
+
+    public Map<String, CelType> fields() {
+      return fields;
+    }
+
+    public Map<String, CelType> extensions() {
+      return extensions;
+    }
+
+    public Environment.Builder register(Environment.Builder builder) {
+      source.register(builder);
+      registerViews(builder);
+      return builder;
+    }
+
+    private void registerViews(Environment.Builder builder) {
+      builder.objectType(this);
+      for (Masked child : nested.values()) child.registerViews(builder);
+    }
+
+    public Environment.Builder registerContext(Environment.Builder builder) {
+      register(builder);
+      fields.forEach(builder::variable);
+      return builder;
+    }
+
+    public Activation context(Message message) {
+      return context(snapshot(message));
+    }
+
+    public Activation context(Object value) {
+      if (!accepts(value))
+        throw new IllegalArgumentException("context belongs to a different projection");
+      var bindings = new LinkedHashMap<String, Object>();
+      for (String field : fields.keySet()) bindings.put(field, get(value, field));
+      return Activation.snapshot(bindings);
+    }
+
+    public Object snapshot(Message message) {
+      return new Projected(this, source.snapshot(message));
+    }
+
+    public Object decode(Bytes bytes) {
+      return new Projected(this, (Value) source.decode(bytes));
+    }
+
+    public boolean accepts(Object value) {
+      return value instanceof Projected p && p.type == this;
+    }
+
+    public Object get(Object value, String field) {
+      require(field);
+      Object result = source.get(((Projected) value).value, field);
+      Masked projection = nested.get(field);
+      return projection == null ? result : new Projected(projection, (Value) result);
+    }
+
+    public boolean has(Object value, String field) {
+      require(field);
+      return source.has(((Projected) value).value, field);
+    }
+
+    private void require(String field) {
+      if (!fields.containsKey(field))
+        throw Values.error(
+            CelException.Code.NO_SUCH_FIELD, "field is outside protobuf mask: " + field);
+    }
+
+    public Object construct(Map<String, Object> values) {
+      var unwrapped = new LinkedHashMap<String, Object>();
+      for (var entry : values.entrySet()) {
+        require(entry.getKey());
+        Object value = entry.getValue();
+        unwrapped.put(entry.getKey(), value instanceof Projected p ? p.value : value);
+      }
+      return new Projected(this, (Value) source.construct(unwrapped));
+    }
+
+    public boolean equal(Object a, Object b) {
+      if (!accepts(a) || !accepts(b)) return false;
+      for (String field : fields.keySet())
+        if (has(a, field) != has(b, field) || !Values.equal(get(a, field), get(b, field)))
+          return false;
+      return true;
+    }
+  }
+
+  // No host Message, reflection or resource lookup is retained on the evaluation path.
+  private static final class Projected {
+    private final Masked type;
+    private final Value value;
+
+    private Projected(Masked type, Value value) {
+      this.type = type;
+      this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      return type.equal(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+      // CEL numeric equality crosses Java numeric classes, so a type-only hash is consistent.
+      return System.identityHashCode(type);
+    }
+  }
+
   public Value snapshot(Message message) {
     if (message.getDescriptorForType() != descriptor)
       throw Values.error(
@@ -822,7 +1034,9 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   public Object decode(Bytes bytes) {
     try {
-      return new Value(this, plan.decode(wire(bytes.toByteArray(), true, 0)));
+      // Bytes already owns its immutable input. Both normalization and the native codec
+      // only read it, and the decoded row owns its strings, bytes and unknown fields.
+      return new Value(this, plan.decode(wire(bytes.arrayForRead(), true, 0)));
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
     }

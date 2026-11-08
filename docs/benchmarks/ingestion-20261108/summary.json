@@ -1,0 +1,2353 @@
+{
+  "allocation": {
+    "baseline/ordinary": {
+      "copy-wire": {
+        "median_bytes_per_op": 230.0,
+        "min": 230.0,
+        "max": 230.0,
+        "windows": 21,
+        "samples": [
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 514.0,
+        "min": 514.0,
+        "max": 514.0,
+        "windows": 21,
+        "samples": [
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 5366.0,
+        "min": 5366.0,
+        "max": 5366.0,
+        "windows": 21,
+        "samples": [
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0,
+          5366.0
+        ]
+      },
+      "decode-native": {
+        "median_bytes_per_op": 5128.0,
+        "min": 5128.0,
+        "max": 5128.0,
+        "windows": 21,
+        "samples": [
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 4300.0,
+        "min": 4300.0,
+        "max": 4300.0,
+        "windows": 21,
+        "samples": [
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 5666.0,
+        "min": 5666.0,
+        "max": 5666.0,
+        "windows": 21,
+        "samples": [
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0
+        ]
+      },
+      "snapshot-bound": {
+        "median_bytes_per_op": 4012.0,
+        "min": 4012.0,
+        "max": 4012.0,
+        "windows": 21,
+        "samples": [
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0
+        ]
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_op": 10656.0,
+        "min": 10656.0,
+        "max": 10656.0,
+        "windows": 21,
+        "samples": [
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0,
+          10656.0
+        ]
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_op": 12892.0,
+        "min": 12892.0,
+        "max": 12892.0,
+        "windows": 21,
+        "samples": [
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0
+        ]
+      }
+    },
+    "baseline/unknown64k": {
+      "copy-wire": {
+        "median_bytes_per_op": 65770.0,
+        "min": 65770.0,
+        "max": 65770.24,
+        "windows": 21,
+        "samples": [
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 66126.0,
+        "min": 66086.0,
+        "max": 66131.504,
+        "windows": 21,
+        "samples": [
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0,
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0,
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 202098.0,
+        "min": 202098.0,
+        "max": 202101.632,
+        "windows": 21,
+        "samples": [
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202101.632,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202101.632,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202098.0,
+          202101.632,
+          202098.0
+        ]
+      },
+      "decode-native": {
+        "median_bytes_per_op": 136320.0,
+        "min": 136320.0,
+        "max": 136320.0,
+        "windows": 21,
+        "samples": [
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 70356.0,
+        "min": 70332.0,
+        "max": 70398.96,
+        "windows": 21,
+        "samples": [
+          70398.96,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.384,
+          70332.0,
+          70398.96,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.384,
+          70332.0,
+          70398.96,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.384,
+          70332.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 202430.0,
+        "min": 202430.0,
+        "max": 202430.0,
+        "windows": 21,
+        "samples": [
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0
+        ]
+      },
+      "snapshot-bound": {
+        "median_bytes_per_op": 135516.0,
+        "min": 135492.0,
+        "max": 135529.248,
+        "windows": 21,
+        "samples": [
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0,
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0,
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0
+        ]
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_op": 272928.0,
+        "min": 272928.0,
+        "max": 272938.736,
+        "windows": 21,
+        "samples": [
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272938.736,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272938.736,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272928.0,
+          272938.736,
+          272928.0
+        ]
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_op": 79100.0,
+        "min": 79084.0,
+        "max": 79201.984,
+        "windows": 21,
+        "samples": [
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79197.888,
+          79084.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79201.984,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79197.888,
+          79084.0
+        ]
+      }
+    },
+    "baseline/messageset": {
+      "copy-wire": {
+        "median_bytes_per_op": 40.0,
+        "min": 40.0,
+        "max": 40.0,
+        "windows": 21,
+        "samples": [
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 64.0,
+        "min": 64.0,
+        "max": 64.0,
+        "windows": 21,
+        "samples": [
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 4824.0,
+        "min": 4760.0,
+        "max": 4824.8256,
+        "windows": 21,
+        "samples": [
+          4760.0,
+          4824.8256,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0,
+          4760.0,
+          4824.8256,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0,
+          4760.0,
+          4824.8256,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0,
+          4824.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 4864.0,
+        "min": 4864.0,
+        "max": 4864.0,
+        "windows": 21,
+        "samples": [
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 872.0,
+        "min": 872.0,
+        "max": 872.0,
+        "windows": 21,
+        "samples": [
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0
+        ]
+      }
+    },
+    "candidate/ordinary": {
+      "copy-wire": {
+        "median_bytes_per_op": 230.0,
+        "min": 230.0,
+        "max": 230.0,
+        "windows": 21,
+        "samples": [
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0,
+          230.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 514.0,
+        "min": 514.0,
+        "max": 514.0,
+        "windows": 21,
+        "samples": [
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0,
+          514.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 5152.0,
+        "min": 5152.0,
+        "max": 5152.0,
+        "windows": 21,
+        "samples": [
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0,
+          5152.0
+        ]
+      },
+      "decode-native": {
+        "median_bytes_per_op": 5128.0,
+        "min": 5128.0,
+        "max": 5128.0,
+        "windows": 21,
+        "samples": [
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0,
+          5128.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 4300.0,
+        "min": 4300.0,
+        "max": 4300.0,
+        "windows": 21,
+        "samples": [
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0,
+          4300.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 5666.0,
+        "min": 5666.0,
+        "max": 5666.0,
+        "windows": 21,
+        "samples": [
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0,
+          5666.0
+        ]
+      },
+      "snapshot-bound": {
+        "median_bytes_per_op": 4012.0,
+        "min": 4012.0,
+        "max": 4012.0,
+        "windows": 21,
+        "samples": [
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0,
+          4012.0
+        ]
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_op": 10442.0,
+        "min": 10442.0,
+        "max": 10442.0,
+        "windows": 21,
+        "samples": [
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0,
+          10442.0
+        ]
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_op": 12892.0,
+        "min": 12892.0,
+        "max": 12892.0,
+        "windows": 21,
+        "samples": [
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0,
+          12892.0
+        ]
+      }
+    },
+    "candidate/unknown64k": {
+      "copy-wire": {
+        "median_bytes_per_op": 65770.0,
+        "min": 65770.0,
+        "max": 65770.24,
+        "windows": 21,
+        "samples": [
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.0,
+          65770.24,
+          65770.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 66126.0,
+        "min": 66086.0,
+        "max": 66131.504,
+        "windows": 21,
+        "samples": [
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0,
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0,
+          66126.896,
+          66126.0,
+          66126.0,
+          66126.0,
+          66126.0,
+          66131.504,
+          66086.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 136344.0,
+        "min": 136344.0,
+        "max": 136347.632,
+        "windows": 21,
+        "samples": [
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136347.632,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136347.632,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136344.0,
+          136347.632,
+          136344.0
+        ]
+      },
+      "decode-native": {
+        "median_bytes_per_op": 136320.0,
+        "min": 136320.0,
+        "max": 136320.0,
+        "windows": 21,
+        "samples": [
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0,
+          136320.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 70356.0,
+        "min": 70332.0,
+        "max": 70398.992,
+        "windows": 21,
+        "samples": [
+          70398.992,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.4,
+          70332.0,
+          70398.992,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.4,
+          70332.0,
+          70398.992,
+          70356.0,
+          70356.0,
+          70377.248,
+          70356.0,
+          70356.4,
+          70332.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 202430.0,
+        "min": 202430.0,
+        "max": 202430.0,
+        "windows": 21,
+        "samples": [
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0,
+          202430.0
+        ]
+      },
+      "snapshot-bound": {
+        "median_bytes_per_op": 135516.0,
+        "min": 135492.0,
+        "max": 135529.248,
+        "windows": 21,
+        "samples": [
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0,
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0,
+          135529.248,
+          135516.0,
+          135516.0,
+          135516.0,
+          135516.0,
+          135508.336,
+          135492.0
+        ]
+      },
+      "decode-evaluate-cel": {
+        "median_bytes_per_op": 207174.0,
+        "min": 207174.0,
+        "max": 207184.736,
+        "windows": 21,
+        "samples": [
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207184.736,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207184.736,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207174.0,
+          207184.736,
+          207174.0
+        ]
+      },
+      "decode-evaluate-stock": {
+        "median_bytes_per_op": 79100.0,
+        "min": 79084.0,
+        "max": 79197.888,
+        "windows": 21,
+        "samples": [
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79197.888,
+          79084.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79197.888,
+          79084.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79100.0,
+          79197.888,
+          79084.0
+        ]
+      }
+    },
+    "candidate/messageset": {
+      "copy-wire": {
+        "median_bytes_per_op": 40.0,
+        "min": 40.0,
+        "max": 40.0,
+        "windows": 21,
+        "samples": [
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0,
+          40.0
+        ]
+      },
+      "serialize": {
+        "median_bytes_per_op": 64.0,
+        "min": 64.0,
+        "max": 64.0,
+        "windows": 21,
+        "samples": [
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0
+        ]
+      },
+      "decode-cel": {
+        "median_bytes_per_op": 4800.0,
+        "min": 4736.0,
+        "max": 4800.8256,
+        "windows": 21,
+        "samples": [
+          4736.0,
+          4800.8256,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0,
+          4736.0,
+          4800.8256,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0,
+          4736.0,
+          4800.8256,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0,
+          4800.0
+        ]
+      },
+      "snapshot-cel": {
+        "median_bytes_per_op": 4864.0,
+        "min": 4864.0,
+        "max": 4864.0,
+        "windows": 21,
+        "samples": [
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0,
+          4864.0
+        ]
+      },
+      "decode-stock": {
+        "median_bytes_per_op": 872.0,
+        "min": 872.0,
+        "max": 872.0,
+        "windows": 21,
+        "samples": [
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0,
+          872.0
+        ]
+      }
+    }
+  },
+  "timing": {
+    "baseline": {
+      "decodeCel": {
+        "mean_fork_ns": 2226.8283974342776,
+        "min_fork_ns": 2193.1879916065877,
+        "max_fork_ns": 2280.9904626150715,
+        "fork_means_ns": [
+          2280.9904626150715,
+          2193.1879916065877,
+          2206.306738081174
+        ]
+      },
+      "decodeNative": {
+        "mean_fork_ns": 2205.36138670556,
+        "min_fork_ns": 2176.6319146728933,
+        "max_fork_ns": 2234.168503725699,
+        "fork_means_ns": [
+          2234.168503725699,
+          2176.6319146728933,
+          2205.2837417180885
+        ]
+      },
+      "decodeStock": {
+        "mean_fork_ns": 488.6831448527578,
+        "min_fork_ns": 465.06372349608614,
+        "max_fork_ns": 501.85202911239327,
+        "fork_means_ns": [
+          465.06372349608614,
+          501.85202911239327,
+          499.133681949794
+        ]
+      },
+      "snapshotBound": {
+        "mean_fork_ns": 3846.239950317777,
+        "min_fork_ns": 3786.4355018039787,
+        "max_fork_ns": 3941.915783997761,
+        "fork_means_ns": [
+          3941.915783997761,
+          3786.4355018039787,
+          3810.368565151592
+        ]
+      },
+      "snapshotCel": {
+        "mean_fork_ns": 2662.111002617631,
+        "min_fork_ns": 2598.732559348634,
+        "max_fork_ns": 2734.716927954371,
+        "fork_means_ns": [
+          2652.883520549889,
+          2598.732559348634,
+          2734.716927954371
+        ]
+      }
+    },
+    "candidate": {
+      "decodeCel": {
+        "mean_fork_ns": 2226.238464823079,
+        "min_fork_ns": 2167.8400504846045,
+        "max_fork_ns": 2281.6830270448354,
+        "fork_means_ns": [
+          2281.6830270448354,
+          2167.8400504846045,
+          2229.192316939798
+        ]
+      },
+      "decodeNative": {
+        "mean_fork_ns": 2278.9056580792426,
+        "min_fork_ns": 2168.947759793384,
+        "max_fork_ns": 2337.427758477524,
+        "fork_means_ns": [
+          2337.427758477524,
+          2330.3414559668195,
+          2168.947759793384
+        ]
+      },
+      "decodeStock": {
+        "mean_fork_ns": 481.6407999133026,
+        "min_fork_ns": 465.1006194772126,
+        "max_fork_ns": 508.09354812483645,
+        "fork_means_ns": [
+          465.1006194772126,
+          508.09354812483645,
+          471.7282321378588
+        ]
+      },
+      "snapshotBound": {
+        "mean_fork_ns": 3912.5142948058715,
+        "min_fork_ns": 3754.2658408058765,
+        "max_fork_ns": 4010.9036459664803,
+        "fork_means_ns": [
+          3972.3733976452572,
+          4010.9036459664803,
+          3754.2658408058765
+        ]
+      },
+      "snapshotCel": {
+        "mean_fork_ns": 2698.7837110296505,
+        "min_fork_ns": 2629.600045350267,
+        "max_fork_ns": 2753.9117420693487,
+        "fork_means_ns": [
+          2753.9117420693487,
+          2629.600045350267,
+          2712.839345669336
+        ]
+      }
+    }
+  },
+  "profiles": {
+    "baseline/ordinary-decode-cel": {
+      "all_events": 5070,
+      "selected_events": 2606,
+      "selected_weight_bytes": 5567222328,
+      "stacks": [
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.LinkedHashMap$LinkedValues.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 1047,
+          "weight_bytes": 2401043696,
+          "selected_weight_percent": 43.12821645228895
+        },
+        {
+          "class": "java/util/LinkedHashMap$LinkedValues",
+          "stack": [
+            "java.util.LinkedHashMap.sequencedValues",
+            "java.util.LinkedHashMap.values",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 530,
+          "weight_bytes": 1274322648,
+          "selected_weight_percent": 22.889738776748203
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.util.ArrayList.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 525,
+          "weight_bytes": 1185521088,
+          "selected_weight_percent": 21.29466039172704
+        },
+        {
+          "class": "dev/elide/truffledata/PayloadBudget",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 249,
+          "weight_bytes": 572381984,
+          "selected_weight_percent": 10.281284818126272
+        },
+        {
+          "class": "dev/elide/truffledata/Batch",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 124,
+          "weight_bytes": 64883744,
+          "selected_weight_percent": 1.16545990401122
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "dev.elide.truffledata.Batch$Column.<init>",
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded"
+          ],
+          "samples": 124,
+          "weight_bytes": 64882752,
+          "selected_weight_percent": 1.1654420854305785
+        },
+        {
+          "class": "dev/elide/truffledata/DataArray",
+          "stack": [
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 1570168,
+          "selected_weight_percent": 0.028203795492465555
+        },
+        {
+          "class": "[Ljava/util/HashMap$Node;",
+          "stack": [
+            "java.util.HashMap.resize",
+            "java.util.HashMap.putVal",
+            "java.util.HashMap.put",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 3,
+          "weight_bytes": 1569768,
+          "selected_weight_percent": 0.02819661058091661
+        },
+        {
+          "class": "[B",
+          "stack": [
+            "java.util.Arrays.copyOfRange",
+            "java.lang.String.<init>",
+            "java.lang.String.<init>",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.scalar",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message"
+          ],
+          "samples": 1,
+          "weight_bytes": 523256,
+          "selected_weight_percent": 0.00939887019363887
+        },
+        {
+          "class": "java/util/LinkedHashMap$Entry",
+          "stack": [
+            "java.util.LinkedHashMap.newNode",
+            "java.util.HashMap.putVal",
+            "java.util.HashMap.put",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 1,
+          "weight_bytes": 523224,
+          "selected_weight_percent": 0.009398295400714953
+        }
+      ]
+    },
+    "baseline/unknown64k-decode-cel": {
+      "all_events": 5022,
+      "selected_events": 5019,
+      "selected_weight_bytes": 126894206616,
+      "stacks": [
+        {
+          "class": "[B",
+          "stack": [
+            "dev.trufflecel.Bytes.toByteArray",
+            "dev.trufflecel.ProtobufType.decode",
+            "dev.trufflecel.IngestionProfile$Fixture.run",
+            "dev.trufflecel.IngestionProfile.main"
+          ],
+          "samples": 1728,
+          "weight_bytes": 45210014168,
+          "selected_weight_percent": 35.62811524155075
+        },
+        {
+          "class": "[B",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.io.ByteArrayOutputStream.toByteArray",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 1502,
+          "weight_bytes": 43571241224,
+          "selected_weight_percent": 34.33666704410927
+        },
+        {
+          "class": "[B",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.io.ByteArrayOutputStream.ensureCapacity",
+            "java.io.ByteArrayOutputStream.write",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.retain",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message"
+          ],
+          "samples": 1786,
+          "weight_bytes": 38091044272,
+          "selected_weight_percent": 30.017953764641867
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 3,
+          "weight_bytes": 21906952,
+          "selected_weight_percent": 0.017263949698108415
+        }
+      ]
+    },
+    "baseline/ordinary-snapshot-cel": {
+      "all_events": 5008,
+      "selected_events": 3203,
+      "selected_weight_bytes": 5623876944,
+      "stacks": [
+        {
+          "class": "java/util/LinkedHashMap",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot"
+          ],
+          "samples": 688,
+          "weight_bytes": 1248826512,
+          "selected_weight_percent": 22.205793697750583
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$Reader",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 215,
+          "weight_bytes": 973618984,
+          "selected_weight_percent": 17.312238402348655
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Column",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 115,
+          "weight_bytes": 944203248,
+          "selected_weight_percent": 16.789187555167814
+        },
+        {
+          "class": "[B",
+          "stack": [
+            "com.google.protobuf.AbstractMessageLite.toByteArray",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run",
+            "dev.trufflecel.IngestionProfile.main"
+          ],
+          "samples": 334,
+          "weight_bytes": 593269592,
+          "selected_weight_percent": 10.549121147342088
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.ArrayList.grow",
+            "java.util.ArrayList.grow",
+            "java.util.ArrayList.add",
+            "java.util.ArrayList.add",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.add"
+          ],
+          "samples": 169,
+          "weight_bytes": 389075984,
+          "selected_weight_percent": 6.918287648791769
+        },
+        {
+          "class": "java/util/ArrayList",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.add",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 163,
+          "weight_bytes": 388199272,
+          "selected_weight_percent": 6.902698545247543
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow$Budget",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 465,
+          "weight_bytes": 347420528,
+          "selected_weight_percent": 6.177598326909623
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.util.ArrayList.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 335,
+          "weight_bytes": 209764648,
+          "selected_weight_percent": 3.7298939875239205
+        },
+        {
+          "class": "[Ldev/elide/truffledata/Batch$Column;",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 133,
+          "weight_bytes": 165327496,
+          "selected_weight_percent": 2.9397424169528557
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Row",
+          "stack": [
+            "dev.elide.truffledata.Batch.row",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 250,
+          "weight_bytes": 152258072,
+          "selected_weight_percent": 2.7073507033691597
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$State",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 249,
+          "weight_bytes": 147558600,
+          "selected_weight_percent": 2.6237878507890766
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "dev.elide.truffledata.Batch$Column.<init>",
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded"
+          ],
+          "samples": 85,
+          "weight_bytes": 62260664,
+          "selected_weight_percent": 1.1070772817393282
+        },
+        {
+          "class": "dev/elide/truffledata/PayloadBudget",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 1,
+          "weight_bytes": 1569680,
+          "selected_weight_percent": 0.027910994775137456
+        },
+        {
+          "class": "dev/elide/truffledata/DataArray",
+          "stack": [
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 1,
+          "weight_bytes": 523664,
+          "selected_weight_percent": 0.0093114412924466
+        }
+      ]
+    },
+    "candidate/ordinary-decode-cel": {
+      "all_events": 5048,
+      "selected_events": 3104,
+      "selected_weight_bytes": 6274997632,
+      "stacks": [
+        {
+          "class": "java/nio/HeapByteBuffer",
+          "stack": [
+            "java.nio.ByteBuffer.wrap",
+            "java.nio.ByteBuffer.wrap",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.decode"
+          ],
+          "samples": 392,
+          "weight_bytes": 1253639480,
+          "selected_weight_percent": 19.97832594560571
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$Reader",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.decode",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 390,
+          "weight_bytes": 1211922648,
+          "selected_weight_percent": 19.313515623012748
+        },
+        {
+          "class": "java/util/Collections$SingletonList",
+          "stack": [
+            "java.util.Collections.singletonList",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 380,
+          "weight_bytes": 906369112,
+          "selected_weight_percent": 14.444134725691
+        },
+        {
+          "class": "java/lang/Long",
+          "stack": [
+            "java.lang.Long.valueOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.scalar",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 390,
+          "weight_bytes": 899293576,
+          "selected_weight_percent": 14.331377137322878
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Column",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 387,
+          "weight_bytes": 624688792,
+          "selected_weight_percent": 9.95520362931031
+        },
+        {
+          "class": "dev/trufflecel/ProtobufType$Value",
+          "stack": [
+            "dev.trufflecel.ProtobufType.decode",
+            "dev.trufflecel.IngestionProfile$Fixture.run",
+            "dev.trufflecel.IngestionProfile.main"
+          ],
+          "samples": 378,
+          "weight_bytes": 617337216,
+          "selected_weight_percent": 9.838046995457416
+        },
+        {
+          "class": "java/lang/String",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.scalar",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 391,
+          "weight_bytes": 416463824,
+          "selected_weight_percent": 6.636876193804435
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.util.ArrayList.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 383,
+          "weight_bytes": 335343704,
+          "selected_weight_percent": 5.344124789623506
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Row",
+          "stack": [
+            "dev.elide.truffledata.Batch.row",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 3,
+          "weight_bytes": 3138744,
+          "selected_weight_percent": 0.0500198435772095
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 2615608,
+          "selected_weight_percent": 0.041683011745875985
+        },
+        {
+          "class": "[Ldev/elide/truffledata/Batch$Column;",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 2,
+          "weight_bytes": 1046552,
+          "selected_weight_percent": 0.016678125815745327
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$State",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 1046448,
+          "selected_weight_percent": 0.016676468444601956
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 1045456,
+          "selected_weight_percent": 0.016660659673695954
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow$Budget",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.retained",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.retained",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 1,
+          "weight_bytes": 523240,
+          "selected_weight_percent": 0.008338489202476882
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.<init>",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 1,
+          "weight_bytes": 523232,
+          "selected_weight_percent": 0.00833836171238893
+        }
+      ]
+    },
+    "candidate/unknown64k-decode-cel": {
+      "all_events": 5004,
+      "selected_events": 5001,
+      "selected_weight_bytes": 105287243424,
+      "stacks": [
+        {
+          "class": "[B",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.io.ByteArrayOutputStream.ensureCapacity",
+            "java.io.ByteArrayOutputStream.write",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.retain",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message"
+          ],
+          "samples": 2635,
+          "weight_bytes": 54018638048,
+          "selected_weight_percent": 51.30596669765843
+        },
+        {
+          "class": "[B",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.io.ByteArrayOutputStream.toByteArray",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 2131,
+          "weight_bytes": 43012803488,
+          "selected_weight_percent": 40.8528156775689
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.util.ArrayList.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 235,
+          "weight_bytes": 8255801888,
+          "selected_weight_percent": 7.8412176247726775
+        }
+      ]
+    },
+    "candidate/ordinary-snapshot-cel": {
+      "all_events": 5001,
+      "selected_events": 3192,
+      "selected_weight_bytes": 5643785280,
+      "stacks": [
+        {
+          "class": "[B",
+          "stack": [
+            "com.google.protobuf.AbstractMessageLite.toByteArray",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run",
+            "dev.trufflecel.IngestionProfile.main"
+          ],
+          "samples": 664,
+          "weight_bytes": 1155599848,
+          "selected_weight_percent": 20.475616818646934
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow$Budget",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 331,
+          "weight_bytes": 929687088,
+          "selected_weight_percent": 16.47275794305201
+        },
+        {
+          "class": "java/util/LinkedHashMap",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot"
+          ],
+          "samples": 487,
+          "weight_bytes": 843362584,
+          "selected_weight_percent": 14.943208186687073
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Column",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 353,
+          "weight_bytes": 591197784,
+          "selected_weight_percent": 10.475199793568333
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.Arrays.copyOf",
+            "java.util.ArrayList.toArray",
+            "dev.elide.truffledata.DataArray.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion"
+          ],
+          "samples": 267,
+          "weight_bytes": 574296464,
+          "selected_weight_percent": 10.175731986742061
+        },
+        {
+          "class": "java/util/ArrayList",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.add",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 133,
+          "weight_bytes": 388194656,
+          "selected_weight_percent": 6.878267629628886
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$Reader",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 151,
+          "weight_bytes": 370409968,
+          "selected_weight_percent": 6.563147774466714
+        },
+        {
+          "class": "[Ldev/elide/truffledata/Batch$Column;",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 176,
+          "weight_bytes": 368319848,
+          "selected_weight_percent": 6.526113764554841
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$State",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot",
+            "dev.trufflecel.IngestionProfile$Fixture.run"
+          ],
+          "samples": 182,
+          "weight_bytes": 110930288,
+          "selected_weight_percent": 1.9655299147029208
+        },
+        {
+          "class": "dev/elide/truffledata/Batch$Row",
+          "stack": [
+            "dev.elide.truffledata.Batch.row",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 176,
+          "weight_bytes": 107782952,
+          "selected_weight_percent": 1.9097635124772145
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "java.util.ArrayList.grow",
+            "java.util.ArrayList.grow",
+            "java.util.ArrayList.add",
+            "java.util.ArrayList.add",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.add"
+          ],
+          "samples": 130,
+          "weight_bytes": 102024496,
+          "selected_weight_percent": 1.8077317073267536
+        },
+        {
+          "class": "[Ljava/lang/Object;",
+          "stack": [
+            "dev.elide.truffledata.Batch$Column.<init>",
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded"
+          ],
+          "samples": 136,
+          "weight_bytes": 96796048,
+          "selected_weight_percent": 1.7150909043796931
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$State",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode",
+            "dev.trufflecel.ProtobufType.snapshot"
+          ],
+          "samples": 1,
+          "weight_bytes": 2045176,
+          "selected_weight_percent": 0.03623766494532549
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoCodec$State",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec$Reader.message",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode",
+            "dev.elide.truffledata.protobuf.ProtoPlan.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 1568352,
+          "selected_weight_percent": 0.027789009010633373
+        },
+        {
+          "class": "dev/elide/truffledata/protobuf/ProtoRow",
+          "stack": [
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decodeRegion",
+            "dev.elide.truffledata.protobuf.ProtoCodec.decode"
+          ],
+          "samples": 2,
+          "weight_bytes": 1046496,
+          "selected_weight_percent": 0.018542448872186718
+        },
+        {
+          "class": "dev/elide/truffledata/Batch",
+          "stack": [
+            "dev.elide.truffledata.Batch.copyOf",
+            "dev.elide.truffledata.protobuf.ProtoPlan.storage",
+            "dev.elide.truffledata.protobuf.ProtoRow.<init>",
+            "dev.elide.truffledata.protobuf.ProtoRow.decoded",
+            "dev.elide.truffledata.protobuf.ProtoCodec$State.finish"
+          ],
+          "samples": 1,
+          "weight_bytes": 523232,
+          "selected_weight_percent": 0.009270940938419259
+        }
+      ]
+    }
+  },
+  "files": {
+    "IngestionProfile.java.txt": "ade5d1a3c68246c9cce0ae20c2ee9ad2e3b62bafa70c2f1c8cc550c8aface148",
+    "timing-metadata.json": "be6a9b249bb199307605bfa4125f236fa21a4de6bc4006d5059823d1130173d7",
+    "profile-harness.patch": "535be4f019b396eee88a455ea0524bf8dd6c5444e142d5bd217c37e30845d61e",
+    "run-timing.py": "66fb0241ca2f88106ba9651f724e3aad27107b1e78b3c89f643746634c824159",
+    "IngestionStages.java.txt": "3f5a89cade692a9e7d65bb050a1bf5f7bf74af2f604e80614b44594378fd4d5b",
+    "production.patch": "ebbedeaca3198b108a055f316cab3c848f8c8582d98354dd7c1851294f0bd495",
+    "run-allocation.py": "a492b776c4de1515354e6cfcade6f1d01fab1e26c7eebeccea3ac7549da7fa51",
+    "allocation-metadata.json": "ca5ae8f2deaf404246193e7302a2a1e4e642e2e77e31569e884ee8688f9bd5a7",
+    "candidate/timing-0.log.gz": "40dacae5d9b61808048f99dd0eb0ce31448835f0f951b4002aa98b1fff260715",
+    "candidate/timing-0.json": "fdcaea9c72b960a674852ee181911499106110ce6b9a6823da67794db281a957",
+    "candidate/allocation-ordinary-1.jsonl": "bc4855edd26085f41d7c7666d15f8ff50b830f4ab83af254eaa5a1157847d012",
+    "candidate/ordinary-snapshot-cel.jfr": "5c180bfba8c28f67cb7baba01eae7ce600213e2f2ac0411716cdec77a33eb9a9",
+    "candidate/allocation-unknown64k-2.jsonl": "125db60475df438af43ca3b4a72775487e4d8bcf3e4813bf338fe32c96cbd7aa",
+    "candidate/timing-1.json": "fc75b598b6ad802192c7fb2784e667356f83ec53c0d4b050bec45faecb736fdd",
+    "candidate/timing-2.log.gz": "129eabc55edac5f782eb6c031038386c5bd1d928b7fa6cd19cff7b031ce2c83a",
+    "candidate/unknown64k-decode-cel.jfr": "03f750e805129c7c3d4282cf37f899fe52b71474853ffaa326023073c56e75a0",
+    "candidate/allocation-unknown64k-0.jsonl": "676457bfc817cd689c738b6c0aff6577ac11a7ad6a8aa9e3007ee61ffe94428f",
+    "candidate/allocation-ordinary-0.jsonl": "f02441f1849fcc426631577b6fd1340bb0cc961fc651bde6f6b689e52422caba",
+    "candidate/ordinary-decode-cel.jsonl": "ce9b1d41b213089a6017d9178f6656fba44842b2545a303feb4043f479133ecf",
+    "candidate/allocation-ordinary-2.jsonl": "768a4fdd0df4337bee3b34ca5d2e6c45c4330e5882d6b2c7380bfe16d86b3f5e",
+    "candidate/allocation-unknown64k-1.jsonl": "e627f198d3568a8519b48ca96f6f0125d8c1908b7be13f7316e4d86335b5396f",
+    "candidate/unknown64k-decode-cel.jsonl": "ba1f31533f8f3165b9449637954946aaac5874ac078e38e6fd97a86c92fb2505",
+    "candidate/timing-1.log.gz": "809c4c4a6303648fd61785479463656eb5e8a763350863f47303650c019fda02",
+    "candidate/ordinary-snapshot-cel.jsonl": "7cac668cda2162f61608a91b3e85188ec79f7cdd2984b18e8a53b4e18d191f79",
+    "candidate/allocation-messageset-2.jsonl": "722fe559b2bc22b60ab381c777d1b0f48ee8df617d6150d02501f45c0d5b6132",
+    "candidate/ordinary-decode-cel.jfr": "3e5e5830552e7d74355d2e177e86ea305a74e2737fe90a36c72b87c67a1c0ce3",
+    "candidate/allocation-messageset-0.jsonl": "9403888091582b21b93dfac0da1de828c8247a95c4e0fa01b1a53031590358e4",
+    "candidate/timing-2.json": "ec71b342c2048d030582dee3b169b1e7775459e19f8b9dbffce1a278e4e30f97",
+    "candidate/allocation-messageset-1.jsonl": "6b72dbe0f482801458148f51f83a5aa8359082f12799fa6db1a507188a3bc1f3",
+    "baseline/timing-0.log.gz": "17eedac0076a199b1f090b952eff09eb31f25c06dcd7a672ccb3986567781991",
+    "baseline/timing-0.json": "c9c49b5c93de6fbae312536b83b5dea0e6aaab387aa8d3bb853120ce5e851cab",
+    "baseline/allocation-ordinary-1.jsonl": "36d07b12eb66877949292713742b77018c2a27b782843b3bdfeeb244b6c362d2",
+    "baseline/ordinary-snapshot-cel.jfr": "1cf32addc4d4bed0d4aac60c8abd3f4b757436541583e11d3cf1e8835cb6c62f",
+    "baseline/allocation-unknown64k-2.jsonl": "0f83bff17fa0b779d4b32727d804b725a296cfe91043548d6d722a2e8709a646",
+    "baseline/timing-1.json": "3a04ea9eaa208df4ffb65007405d42780d280c15b0d1f208111b6342516b0c20",
+    "baseline/timing-2.log.gz": "07ebd0122f30d6b16640afa205dc24f0dbada498364cf6fcfe84389e61fe8406",
+    "baseline/unknown64k-decode-cel.jfr": "6b0f347edf37f576bc0f3de2e8b3747469d2b45a173443cb5f5545f658b28ffa",
+    "baseline/allocation-unknown64k-0.jsonl": "7b11390eb4449909e3582eebc51bdc9f6481016491d2ed1f26c22c7d3044d771",
+    "baseline/allocation-ordinary-0.jsonl": "0f4f0be33e662cab07134e5eef855118607b491c1b240e09d3dbc64994ba7c84",
+    "baseline/ordinary-decode-cel.jsonl": "e55667eb7762b7696b126f21fdcce9653292641b2251c2a748ba3fbeff5cf621",
+    "baseline/allocation-ordinary-2.jsonl": "36d07b12eb66877949292713742b77018c2a27b782843b3bdfeeb244b6c362d2",
+    "baseline/allocation-unknown64k-1.jsonl": "701e20b23902d362029f7ecdae86401c4933f76aa35e5f1d172b59696aedb8f7",
+    "baseline/unknown64k-decode-cel.jsonl": "fe1b5065f4d939deb6ac84146faca9779272b09c2342b4a6e53a09b3176d802c",
+    "baseline/timing-1.log.gz": "81d5bb59348d09bc87e61ccec492b97fe6947c4195970279279ebb43149b6f1f",
+    "baseline/ordinary-snapshot-cel.jsonl": "18e63c7a83b7b6a90e69e2ea1064017aaf70caa0dde2e81b7a85ab1a9e9dd917",
+    "baseline/allocation-messageset-2.jsonl": "edc9073c9f3a8818edd5adfb5514bfaccc54d9ed318c69fe94386668bc2f9ef4",
+    "baseline/ordinary-decode-cel.jfr": "50be7512f0f9aef708f1ab43f1e02814e7efac14409c0f59be2a7200afd7d5c5",
+    "baseline/allocation-messageset-0.jsonl": "9527698ec155178272ffac5823b1147f5cee13aaeb4f7ada6e663c5f97ed9971",
+    "baseline/timing-2.json": "520746eb17914ffdccab915b42cf5ba3ad275108da00b918d3e7c8d9cad50c78",
+    "baseline/allocation-messageset-1.jsonl": "1ae1109d0f903bc752347cfb6df118027e0a549f1f0577a6ebd04f477029b101"
+  }
+}

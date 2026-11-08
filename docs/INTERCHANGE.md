@@ -20,11 +20,14 @@ Messages implement protobuf's `Message` API with the canonical descriptors. Gene
 and `message` also expose the pinned schema for integrations that do not generate classes.
 `type` converts between `CelType` and canonical `Type` messages.
 
-Parsing expands macros into canonical comprehensions, including two-variable loops and
+Parsing expands iteration macros into canonical comprehensions, including two-variable loops and
 optional local bindings. Import handles arbitrary accumulator comprehensions, optional
 aggregate entries, namespaces, object constructors and block extensions. Parsed input uses
 dynamic evaluation; checked input is checked again against the receiving environment.
 Imported annotations cannot bypass declarations, type checking or execution budgets.
+Canonical diagnostics retain `SourceInfo` code-point offsets and columns, exposed by
+`CelException.OffsetEncoding.CODE_POINT`. `format(source)` converts those offsets to Java
+string indexes for excerpts without changing the reported numeric positions.
 Expression ids must be positive and unique. Import bounds node count, depth and serialized
 size (8 MiB); source parsing retains the environment's source/depth limits.
 Opaque host constants that have no canonical CEL literal representation cannot be exported.
@@ -67,3 +70,72 @@ The transport test exercises a real loopback channel, including concurrent reuse
 unknown propagation and the Parse/Check/Eval sequence. Native guest compilation remains a
 separate Linux gate; passing the JVM interoperability tests does not establish Native Image
 compatibility.
+
+Lazy `cel.bind` uses the explicit canonical intrinsic
+`cel.@lazyBind(identifier, initializer, body)`. Import validates its arity and binding
+identifier and preserves lexical scope, including enclosing lazy block slots. This
+is a TruffleCEL extension: consumers must support it or reject it; cel-java is not
+claimed to execute this intrinsic. Ordinary imported accumulator comprehensions
+retain eager accumulator initialization. Removing or modifying `SourceInfo`,
+including `macro_calls`, never changes evaluation semantics.
+
+## Owned ASTs, macros and source reconstruction
+
+The core artifact exposes `Ast.parse(environment, source)`, immutable `Ast.Node`
+values, preorder `nodes()` / ID `find()` navigation, and a thread-confined
+`editor()` with `replace`, bottom-up `transform`, and `freeze`. Edits preserve
+untouched expression IDs, assign IDs to new nodes, discard stale macro source
+metadata, and recheck structure and types when `prepare` or `compile` is called.
+No mutable Truffle nodes or opaque host constant values are exposed.
+
+Each node exposes `offsetEncoding`, `offset`, `line` and `column`. Source parsing
+uses UTF-16; canonical imports retain the original Unicode code-point positions.
+Unknown positions remain `-1`, including canonical input without `SourceInfo`.
+Edits preserve the locations of retained nodes and may combine nodes with different
+offset units; new factory nodes have unknown UTF-16 locations. Preparing an edited
+tree preserves this provenance in diagnostics. Existing node constructors default
+to UTF-16, and the extended constructors accept explicit units and line/column.
+
+`Macro.global`, `receiver`, `globalVarargs`, and `receiverVarargs` register through
+`Environment.Builder.macro`. Argument counts exclude receivers; variadic counts
+are minimum counts and exact signatures take precedence. At equal arity specificity,
+a qualified global macro takes precedence over a receiver macro, independently of
+registration order. Qualified global macro
+names are supported. Expanders receive immutable syntax and return `Ast.Node`
+trees. `Macro.Context.freshName()` supplies identifiers that cannot collide with
+source identifiers, for hygienic comprehensions. Expansions share the parser's
+node limit and pass the same depth, checker, policy and runtime planning gates.
+Callbacks execute at compile time and are trusted embedder code; CEL budgets do
+not interrupt arbitrary callback code. Generated calls are already-expanded
+syntax, so they do not recursively invoke custom expanders.
+
+`standardMacros(Set<String>)` chooses built-in expansions independently of custom
+registrations; `macros(false)` disables both. Custom expansion source and built-in
+macro calls are exported in canonical `SourceInfo.macro_calls`.
+
+`Ast.unparse()` and `CanonicalAst.unparse(environment, message)` reconstruct CEL
+source, including optional entries, quoted fields and original macro calls.
+Imported comprehensions without original macro metadata have no general CEL
+surface spelling and are rejected explicitly. Parameterized runtime type constants
+also have no source literal or canonical `Expr` constant; exporting them fails
+instead of dropping their parameters. Type declarations remain supported by the
+canonical `Type` conversion APIs. Nested id-only macro references
+are resolved with size/depth limits and cycle rejection. Source metadata can
+change reconstructed source text; it never changes evaluation of the supplied
+canonical expression. `CanonicalAst.ast` imports editable trees and `parsed`
+exports them without a dependency from the core artifact on protobuf.
+Checked imports retain resolved names and enum constants from `reference_map`;
+compilation rechecks the imported tree's types against the supplied environment.
+`parsed` omits positional source metadata: sparse node locations do not supply the
+complete source text or line table required to reconstruct a canonical source map.
+
+`CanonicalAst.toV1Alpha1` and `toCelExpr` bridge `cel.expr` and
+`google.api.expr.v1alpha1` AST message identities while preserving wire fields,
+unknown fields and source metadata. `prototype`, `decode`, `check` and `program`
+accept the legacy AST family; checking returns the input schema family. The
+legacy descriptors are derived in memory from the pinned schema, with no runtime
+resource loading. The compatible field contract is defined by the upstream
+[syntax](https://github.com/googleapis/googleapis/blob/master/google/api/expr/v1alpha1/syntax.proto)
+and [checked-expression](https://github.com/googleapis/googleapis/blob/master/google/api/expr/v1alpha1/checked.proto)
+schemas. Schema conversion does not give other engines support for TruffleCEL
+intrinsics such as `cel.@lazyBind`.

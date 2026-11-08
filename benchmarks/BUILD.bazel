@@ -72,7 +72,7 @@ java_library(
     name = "jit_support",
     testonly = True,
     srcs = ["JitSmoke.java"],
-    deps = [":benchmarks", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_truffle_truffle_api", "@maven//:org_graalvm_truffle_truffle_runtime",
+    deps = [":benchmarks", "//src/test/java/dev/trufflecel:test_support", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_truffle_truffle_api", "@maven//:org_graalvm_truffle_truffle_runtime",
             "@maven//:org_graalvm_polyglot_polyglot"],
 )
 native_image(
@@ -84,7 +84,7 @@ native_image(
     exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB", "EstimatedFreeDiskBytes": "16GB"},
     executable_name = "trufflecel-jit",
     extra_args = ["--gc=serial", "-J-Xmx4g",
-                  "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata",
+                  "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED", "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,com.google.protobuf",
                   "--initialize-at-run-time=dev.trufflecel.bench", "--parallelism=4", "-march=compatibility",
                   "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-DeleteLocalSymbols", "-H:+PreserveFramePointer",
                   "-H:-UnlockExperimentalVMOptions"],
@@ -103,4 +103,15 @@ sh_test(
     size = "large",
     tags = ["manual"],
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+
+# Shared-host allocation diagnostic; engine.Compilation=false, with optional fallback runtime.
+java_test(
+    name = "evaluation_allocation",
+    srcs = ["EvaluationAllocation.java"],
+    main_class = "dev.trufflecel.EvaluationAllocation",
+    use_testrunner = False,
+    tags = ["manual"],
+    jvm_flags = ["-Xbatch", "-XX:-UseJVMCICompiler", "--enable-native-access=ALL-UNNAMED", "-Xms512m", "-Xmx512m"],
+    deps = ["//:trufflecel", "@maven//:org_graalvm_polyglot_polyglot", "@maven//:org_graalvm_truffle_truffle_runtime"],
 )

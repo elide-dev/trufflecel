@@ -11,4 +11,9 @@ The conformance fixtures are not included in runtime JARs. The optional protobuf
 JAR embeds descriptors generated from the pinned CEL schemas (Copyright Google LLC),
 under Apache-2.0. The Apache-2.0 license is included as META-INF/LICENSE-APACHE.
 
+The source repository also includes CEL Policy conformance data from
+https://github.com/cel-expr/cel-policy under Apache-2.0. Its license and provenance
+are retained in third_party/cel-policy/LICENSE and third_party/cel-policy/UPSTREAM.md.
+The CEL Policy fixtures are not included in runtime JARs.
+
 Dependencies are distributed separately and retain their own licenses.

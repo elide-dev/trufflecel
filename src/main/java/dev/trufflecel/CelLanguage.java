@@ -39,9 +39,25 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
 
   private static final ContextReference<Scope> CONTEXT = ContextReference.create(CelLanguage.class);
 
+  @CompilerDirectives.TruffleBoundary
+  static Scope currentScope() {
+    try {
+      // ContextReference.get is undefined without an entered context, including with assertions.
+      Context.getCurrent();
+      return CONTEXT.get(null);
+    } catch (IllegalStateException noContext) {
+      return null;
+    }
+  }
+
   @Override
   protected Scope createContext(Env env) {
-    return new Scope();
+    return new Scope(env);
+  }
+
+  @Override
+  protected void disposeContext(Scope scope) {
+    scope.clearRegexes();
   }
 
   @Override
@@ -83,6 +99,31 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
   @ExportLibrary(InteropLibrary.class)
   static final class Scope implements TruffleObject {
     final Map<String, Object> values = new LinkedHashMap<>();
+    final Object regexToken = new Object();
+    private final Env env;
+    private final Map<String, Regex.Handle> regexes = new HashMap<>();
+
+    Scope(Env env) {
+      this.env = env;
+    }
+
+    @CompilerDirectives.TruffleBoundary
+    synchronized Regex.Handle regex(String pattern) {
+      if (regexes.containsKey(pattern)) return regexes.get(pattern);
+      Regex.Handle handle = Regex.accelerate(env, regexToken, pattern);
+      if (regexes.size() >= 256) regexes.clear();
+      regexes.put(pattern, handle);
+      return handle;
+    }
+
+    @CompilerDirectives.TruffleBoundary
+    synchronized void clearRegexes() {
+      regexes.clear();
+    }
+
+    synchronized int regexCount() {
+      return regexes.size();
+    }
 
     @ExportMessage
     boolean hasMembers() {

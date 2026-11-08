@@ -1,0 +1,38 @@
+diff --git a/src/main/java/dev/trufflecel/Parser.java b/src/main/java/dev/trufflecel/Parser.java
+index 8528019..3f731e4 100644
+--- a/src/main/java/dev/trufflecel/Parser.java
++++ b/src/main/java/dev/trufflecel/Parser.java
+@@ -28,0 +29 @@ final class Parser {
++  private static final Set<String> EXPRESSION_ENDS = Set.of(",", ")", "]", "}", "EOF");
+@@ -34 +35 @@ final class Parser {
+-  private final List<CelException.Issue> issues = new ArrayList<>();
++  private List<CelException.Issue> issues;
+@@ -55 +56 @@ final class Parser {
+-      if (issues.isEmpty() || failure.code() != CelException.Code.SYNTAX) throw failure;
++      if (issues == null || failure.code() != CelException.Code.SYNTAX) throw failure;
+@@ -59 +60 @@ final class Parser {
+-    if (!issues.isEmpty()) throw new CelException(issues);
++    if (issues != null) throw new CelException(issues);
+@@ -64,0 +66 @@ final class Parser {
++    if (issues == null) issues = new ArrayList<>();
+@@ -175 +177 @@ final class Parser {
+-    if (Set.of(",", ")", "]", "}", "EOF").contains(token.kind))
++    if (EXPRESSION_ENDS.contains(token.kind))
+@@ -282 +284 @@ final class Parser {
+-    if (!issues.isEmpty())
++    if (issues != null)
+@@ -541 +543,3 @@ final class Parser {
+-    return new Token(next.kind, next.text, next.value, next.offset + baseOffset);
++    return baseOffset == 0
++        ? next
++        : new Token(next.kind, next.text, next.value, next.offset + baseOffset);
+diff --git a/src/main/java/dev/trufflecel/Program.java b/src/main/java/dev/trufflecel/Program.java
+index 4dfd1ed..dc481a0 100644
+--- a/src/main/java/dev/trufflecel/Program.java
++++ b/src/main/java/dev/trufflecel/Program.java
+@@ -61,2 +60,0 @@ public final class Program {
+-    body.resolveLazyBindings(Map.of());
+-    body.resolveAttributes(false);
+@@ -63,0 +62,2 @@ public final class Program {
++    if (hasBindings) body.resolveLazyBindings(Map.of());
++    // Attribute qualification is needed only by the lazily restored trace/partial target.

@@ -3,6 +3,7 @@ package dev.trufflecel;
 import static org.junit.Assert.*;
 
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.utilities.TruffleWeakReference;
 import com.oracle.truffle.runtime.OptimizedCallTarget;
 import com.sun.management.ThreadMXBean;
 import java.lang.management.ManagementFactory;
@@ -17,7 +18,7 @@ public final class CompiledTest {
   private static volatile Object sink;
 
   @Test
-  public void compiledScalarAndLazyPathsStayWithinBudgets() {
+  public void compiledScalarAndLazyPathsStayWithinBudgets() throws ReflectiveOperationException {
     try (Context context =
         Context.newBuilder("cel")
             .allowExperimentalOptions(true)
@@ -29,6 +30,54 @@ public final class CompiledTest {
       context.initialize("cel");
       context.enter();
       try {
+        var sorting = Cel.compile("xs.sortBy(x, x)");
+        var mapReceiver = Map.of("xs", Map.of("a", 1L));
+        var listReceiver = Map.of("xs", List.of(2L, 1L));
+        var sortTarget = (OptimizedCallTarget) sorting.callTarget();
+        for (int phase = 0; phase < 2; phase++) {
+          if (phase == 1) {
+            sortTarget.compile(true);
+            sortTarget.waitForCompilation();
+          }
+          for (int i = 0; i < 1000; i++) {
+            assertEquals(List.of(1L, 2L), sorting.evaluate(listReceiver));
+            assertEquals(
+                CelException.Code.NO_OVERLOAD,
+                assertThrows(CelException.class, () -> sorting.evaluate(mapReceiver)).code());
+          }
+        }
+        assertTrue("sortBy receiver errors must stay compiled", sortTarget.isValidLastTier());
+        var regexProgram = Cel.compile("s.matches('^[a-z]+@[a-z]+[.]com$')");
+        check(
+            regexProgram,
+            Map.of("s", "person@example.com"),
+            true,
+            Map.of("s", "person@example.org"),
+            false,
+            4096);
+        assertTrue(
+            "constant matches must exercise TruffleRegex, not only its fallback",
+            NodeUtil.findAllNodeInstances(
+                    ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                    Regex.MatchNode.class)
+                .stream()
+                .anyMatch(Regex.MatchNode::isAccelerated));
+        var regexNode =
+            NodeUtil.findAllNodeInstances(
+                    ((OptimizedCallTarget) regexProgram.callTarget()).getRootNode(),
+                    Regex.MatchNode.class)
+                .getFirst();
+        CelLanguage.currentScope().clearRegexes();
+        // Exercise loss of a compiled weak-cache referent deterministically, without a GC race.
+        var entryField = Regex.MatchNode.class.getDeclaredField("entry");
+        entryField.setAccessible(true);
+        Object entry = entryField.get(regexNode);
+        var handleField = entry.getClass().getDeclaredField("handle");
+        handleField.setAccessible(true);
+        ((TruffleWeakReference<?>) handleField.get(entry)).clear();
+        assertEquals(true, regexProgram.evaluate(Map.of("s", "person@example.com")));
+        assertEquals(false, regexProgram.evaluate(Map.of("s", "person@example.org")));
+        assertFalse(regexNode.isAccelerated());
         check(
             "regex.replace(s, '(a)', r'\\1x')",
             Map.of("s", "aba"),
@@ -87,6 +136,17 @@ public final class CompiledTest {
                 .build()
                 .compile("label(x)");
         check(overloaded, Map.of("x", 1L), "integer", Map.of("x", "one"), "text", 512);
+        check(
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .commonSubexpressions(true)
+                .build()
+                .compile("(x + 1) * (x + 1)"),
+            Map.of("x", 2L),
+            9L,
+            Map.of("x", 3L),
+            16L,
+            512);
         check("x * 2 + 1 > 100", Map.of("x", 60L), true, Map.of("x", 2L), false, 64);
         check(
             "enabled && 10 / x > 1",
@@ -119,13 +179,6 @@ public final class CompiledTest {
             false,
             65536);
         check("sets.contains([1,2,3], [x])", Map.of("x", 2L), true, Map.of("x", 4L), false, 1536);
-        check(
-            "s.matches('^[a-z]+@[a-z]+[.]com$')",
-            Map.of("s", "person@example.com"),
-            true,
-            Map.of("s", "person@example.org"),
-            false,
-            4096);
         check(
             "xs.all(x, x > 0)",
             Map.of("xs", List.of(1L, 2L, 3L)),

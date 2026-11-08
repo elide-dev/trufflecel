@@ -1,0 +1,309 @@
+[
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "dev.trufflecel.IngestionStages.decodeCel",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/sam/trufflecel-010-bench-20261108/toolchain/graalvm-ce-25.5.5-elide.27-linux-amd64/bin/java",
+        "jvmArgs" : [
+            "-XX:ThreadPriorityPolicy=1",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+EnableJVMCIProduct",
+            "-XX:+EnableJVMCI",
+            "-XX:-UnlockExperimentalVMOptions",
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.4.1.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.4.1.1+1-jvmci-25.5-b24",
+        "warmupIterations" : 3,
+        "warmupTime" : "500 ms",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "500 ms",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 2229.192316939798,
+            "scoreError" : 202.65537740897966,
+            "scoreConfidence" : [
+                2026.5369395308182,
+                2431.8476943487776
+            ],
+            "scorePercentiles" : {
+                "0.0" : 2219.50637725667,
+                "50.0" : 2226.753144689093,
+                "90.0" : 2241.317428873631,
+                "95.0" : 2241.317428873631,
+                "99.0" : 2241.317428873631,
+                "99.9" : 2241.317428873631,
+                "99.99" : 2241.317428873631,
+                "99.999" : 2241.317428873631,
+                "99.9999" : 2241.317428873631,
+                "100.0" : 2241.317428873631
+            },
+            "scoreUnit" : "ns/op",
+            "rawData" : [
+                [
+                    2226.753144689093,
+                    2241.317428873631,
+                    2219.50637725667
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "dev.trufflecel.IngestionStages.decodeNative",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/sam/trufflecel-010-bench-20261108/toolchain/graalvm-ce-25.5.5-elide.27-linux-amd64/bin/java",
+        "jvmArgs" : [
+            "-XX:ThreadPriorityPolicy=1",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+EnableJVMCIProduct",
+            "-XX:+EnableJVMCI",
+            "-XX:-UnlockExperimentalVMOptions",
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.4.1.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.4.1.1+1-jvmci-25.5-b24",
+        "warmupIterations" : 3,
+        "warmupTime" : "500 ms",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "500 ms",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 2168.947759793384,
+            "scoreError" : 344.29291848477226,
+            "scoreConfidence" : [
+                1824.654841308612,
+                2513.2406782781563
+            ],
+            "scorePercentiles" : {
+                "0.0" : 2148.523502474397,
+                "50.0" : 2172.5808112182176,
+                "90.0" : 2185.7389656875384,
+                "95.0" : 2185.7389656875384,
+                "99.0" : 2185.7389656875384,
+                "99.9" : 2185.7389656875384,
+                "99.99" : 2185.7389656875384,
+                "99.999" : 2185.7389656875384,
+                "99.9999" : 2185.7389656875384,
+                "100.0" : 2185.7389656875384
+            },
+            "scoreUnit" : "ns/op",
+            "rawData" : [
+                [
+                    2185.7389656875384,
+                    2172.5808112182176,
+                    2148.523502474397
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "dev.trufflecel.IngestionStages.decodeStock",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/sam/trufflecel-010-bench-20261108/toolchain/graalvm-ce-25.5.5-elide.27-linux-amd64/bin/java",
+        "jvmArgs" : [
+            "-XX:ThreadPriorityPolicy=1",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+EnableJVMCIProduct",
+            "-XX:+EnableJVMCI",
+            "-XX:-UnlockExperimentalVMOptions",
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.4.1.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.4.1.1+1-jvmci-25.5-b24",
+        "warmupIterations" : 3,
+        "warmupTime" : "500 ms",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "500 ms",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 471.7282321378588,
+            "scoreError" : 18.486744514739982,
+            "scoreConfidence" : [
+                453.2414876231188,
+                490.2149766525988
+            ],
+            "scorePercentiles" : {
+                "0.0" : 471.1003407111698,
+                "50.0" : 471.1871144574397,
+                "90.0" : 472.89724124496695,
+                "95.0" : 472.89724124496695,
+                "99.0" : 472.89724124496695,
+                "99.9" : 472.89724124496695,
+                "99.99" : 472.89724124496695,
+                "99.999" : 472.89724124496695,
+                "99.9999" : 472.89724124496695,
+                "100.0" : 472.89724124496695
+            },
+            "scoreUnit" : "ns/op",
+            "rawData" : [
+                [
+                    472.89724124496695,
+                    471.1871144574397,
+                    471.1003407111698
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "dev.trufflecel.IngestionStages.snapshotBound",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/sam/trufflecel-010-bench-20261108/toolchain/graalvm-ce-25.5.5-elide.27-linux-amd64/bin/java",
+        "jvmArgs" : [
+            "-XX:ThreadPriorityPolicy=1",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+EnableJVMCIProduct",
+            "-XX:+EnableJVMCI",
+            "-XX:-UnlockExperimentalVMOptions",
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.4.1.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.4.1.1+1-jvmci-25.5-b24",
+        "warmupIterations" : 3,
+        "warmupTime" : "500 ms",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "500 ms",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 3754.2658408058765,
+            "scoreError" : 442.6410220480855,
+            "scoreConfidence" : [
+                3311.6248187577908,
+                4196.906862853962
+            ],
+            "scorePercentiles" : {
+                "0.0" : 3740.1892829117,
+                "50.0" : 3740.3264178177983,
+                "90.0" : 3782.281821688132,
+                "95.0" : 3782.281821688132,
+                "99.0" : 3782.281821688132,
+                "99.9" : 3782.281821688132,
+                "99.99" : 3782.281821688132,
+                "99.999" : 3782.281821688132,
+                "99.9999" : 3782.281821688132,
+                "100.0" : 3782.281821688132
+            },
+            "scoreUnit" : "ns/op",
+            "rawData" : [
+                [
+                    3782.281821688132,
+                    3740.3264178177983,
+                    3740.1892829117
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "dev.trufflecel.IngestionStages.snapshotCel",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/home/sam/trufflecel-010-bench-20261108/toolchain/graalvm-ce-25.5.5-elide.27-linux-amd64/bin/java",
+        "jvmArgs" : [
+            "-XX:ThreadPriorityPolicy=1",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+EnableJVMCIProduct",
+            "-XX:+EnableJVMCI",
+            "-XX:-UnlockExperimentalVMOptions",
+            "--enable-native-access=ALL-UNNAMED",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m",
+            "-XX:-UseJVMCICompiler",
+            "-Xms512m",
+            "-Xmx512m"
+        ],
+        "jdkVersion" : "25.0.4.1.1",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.4.1.1+1-jvmci-25.5-b24",
+        "warmupIterations" : 3,
+        "warmupTime" : "500 ms",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 3,
+        "measurementTime" : "500 ms",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 2712.839345669336,
+            "scoreError" : 347.6151678995379,
+            "scoreConfidence" : [
+                2365.224177769798,
+                3060.454513568874
+            ],
+            "scorePercentiles" : {
+                "0.0" : 2691.3392945557875,
+                "50.0" : 2719.5440954944665,
+                "90.0" : 2727.6346469577547,
+                "95.0" : 2727.6346469577547,
+                "99.0" : 2727.6346469577547,
+                "99.9" : 2727.6346469577547,
+                "99.99" : 2727.6346469577547,
+                "99.999" : 2727.6346469577547,
+                "99.9999" : 2727.6346469577547,
+                "100.0" : 2727.6346469577547
+            },
+            "scoreUnit" : "ns/op",
+            "rawData" : [
+                [
+                    2691.3392945557875,
+                    2719.5440954944665,
+                    2727.6346469577547
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+

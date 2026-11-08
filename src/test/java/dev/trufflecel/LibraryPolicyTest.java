@@ -41,7 +41,7 @@ public class LibraryPolicyTest {
     var env =
         Cel.newBuilder()
             .libraries(
-                Map.of("lists", 2, "strings", 0, "comprehensions", 0, "bindings", 0, "optional", 2))
+                Map.of("lists", 2, "strings", 3, "comprehensions", 0, "bindings", 0, "optional", 2))
             .build();
     assertEquals(List.of(0L, 1L), env.compile("lists.range(2)").evaluate());
     assertEquals("\"x\"", env.compile("strings.quote('x')").evaluate());
@@ -140,14 +140,14 @@ public class LibraryPolicyTest {
     disabled(
         Cel.newBuilder().libraries(Map.of("optional", 0)).build(),
         "optional.of(1).optFlatMap(x, optional.of(x))");
-    for (var bad : List.of(Map.of("unknown", 0), Map.of("math", -1), Map.of("strings", 1)))
+    for (var bad : List.of(Map.of("unknown", 0), Map.of("math", -1), Map.of("strings", 4)))
       assertThrows(IllegalArgumentException.class, () -> Cel.newBuilder().libraries(bad));
   }
 
   @Test
   public void dynamicReceiverCannotBypassLibraryRestriction() {
     var strings =
-        Cel.newBuilder().libraries(Map.of("strings", 0)).variable("x", CelType.DYN).build();
+        Cel.newBuilder().libraries(Map.of("strings", 3)).variable("x", CelType.DYN).build();
     var program = strings.compile("x.reverse()");
     assertEquals("ba", program.evaluate(Map.of("x", "ab")));
     assertEquals(
@@ -157,6 +157,33 @@ public class LibraryPolicyTest {
     assertEquals(
         List.of(2L, 1L), lists.compile("x.reverse()").evaluate(Map.of("x", List.of(1L, 2L))));
     disabled(strings, "[1].reverse()");
+    var mixed =
+        Cel.newBuilder()
+            .libraries(Map.of("lists", 2, "strings", 2))
+            .variable("x", CelType.DYN)
+            .build()
+            .compile("x.reverse()");
+    assertEquals(List.of(2L, 1L), mixed.evaluate(Map.of("x", List.of(1, 2))));
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(CelException.class, () -> mixed.evaluate(Map.of("x", "ab"))).code());
+  }
+
+  @Test
+  public void stringVersionsGateIntroducedFunctions() {
+    String[] expressions = {
+      "'A'.lowerAscii()", "'%s'.format(['a'])", "['a'].join()", "'a'.reverse()"
+    };
+    for (int version = 0; version <= 3; version++) {
+      var env = Cel.newBuilder().libraries(Map.of("strings", version)).build();
+      for (int introduced = 0; introduced <= 3; introduced++) {
+        if (introduced <= version)
+          assertEquals("a", env.compile(expressions[introduced]).evaluate());
+        else disabled(env, expressions[introduced]);
+      }
+      if (version == 0) disabled(env, "strings.quote('a')");
+      else assertEquals("\"a\"", env.compile("strings.quote('a')").evaluate());
+    }
   }
 
   @Test

@@ -22,10 +22,12 @@ java_library(
     testonly = True,
     srcs = [
         "NegativeCases.java",
+        "PojoFixtures.java",
         "ProductionCorpus.java",
         "ProtoSchema.java",
         "TestObjects.java",
     ],
+    plugins = ["//src/main/java/dev/trufflecel/processor:plugin"],
     visibility = ["//benchmarks:__subpackages__"],
     deps = [
         "//:trufflecel",
@@ -137,6 +139,7 @@ java_test(
     deps = [
         ":test_support",
         "//:trufflecel",
+        "//:trufflecel-protobuf",
         "@maven//:junit_junit",
     ],
 )
@@ -338,5 +341,232 @@ java_test(
         ":test_support",
         "//:trufflecel",
         "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "lateFunction",
+    srcs = ["LateFunctionTest.java"],
+    test_class = "dev.trufflecel.LateFunctionTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "diagnostics",
+    srcs = ["DiagnosticsTest.java"],
+    test_class = "dev.trufflecel.DiagnosticsTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "astMacro",
+    srcs = ["AstMacroTest.java"],
+    test_class = "dev.trufflecel.AstMacroTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "lazyBinding",
+    srcs = ["LazyBindingTest.java"],
+    test_class = "dev.trufflecel.LazyBindingTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "environmentYaml",
+    srcs = ["EnvironmentYamlTest.java"],
+    test_class = "dev.trufflecel.EnvironmentYamlTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "policyCompiler",
+    srcs = ["PolicyCompilerTest.java"],
+    test_class = "dev.trufflecel.PolicyCompilerTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "customValidator",
+    srcs = ["CustomValidatorTest.java"],
+    test_class = "dev.trufflecel.CustomValidatorTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "traceAsync",
+    srcs = ["TraceAsyncTest.java"],
+    test_class = "dev.trufflecel.TraceAsyncTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_graalvm_truffle_truffle_runtime",
+    ],
+)
+
+java_test(
+    name = "costEstimator",
+    srcs = ["CostEstimatorTest.java"],
+    test_class = "dev.trufflecel.CostEstimatorTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "astInterchange",
+    srcs = ["AstInterchangeTest.java"],
+    test_class = "dev.trufflecel.AstInterchangeTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "parserRecovery",
+    srcs = ["ParserRecoveryTest.java"],
+    test_class = "dev.trufflecel.ParserRecoveryTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "cse",
+    srcs = ["CseTest.java"],
+    test_class = "dev.trufflecel.CseTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
+    name = "policyConformance",
+    srcs = ["PolicyConformanceTest.java"],
+    data = [
+        "//third_party/cel-policy:corpus",
+        "//third_party/cel-spec:schemas.json",
+    ],
+    test_class = "dev.trufflecel.PolicyConformanceTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "astValidation",
+    srcs = ["AstValidationTest.java"],
+    test_class = "dev.trufflecel.AstValidationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "partialEvaluation",
+    srcs = ["PartialEvaluationTest.java"],
+    test_class = "dev.trufflecel.PartialEvaluationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "pojoProcessor",
+    srcs = ["PojoProcessorTest.java"],
+    test_class = "dev.trufflecel.PojoProcessorTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-processor",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "pojo",
+    srcs = ["PojoTest.java"],
+    test_class = "dev.trufflecel.PojoTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "astLocation",
+    srcs = ["AstLocationTest.java"],
+    test_class = "dev.trufflecel.AstLocationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "regexAcceleration",
+    srcs = ["RegexAccelerationTest.java"],
+    test_class = "dev.trufflecel.RegexAccelerationTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
     ],
 )

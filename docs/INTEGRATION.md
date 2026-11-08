@@ -264,7 +264,8 @@ or read application resources. The optional protobuf bridge uses explicit descri
 temporary DynamicMessage exports for host equality/interoperability, so its reachable dependency surface is larger than core; it does not scan
 classes or descriptor resources. The optional JSON bridge uses explicit JSONObject/JSONArray
 access, never reflective bean conversion. The sole generated language-discovery service is produced at build time by
-the Truffle registration processor. RE2/J supplies bounded regular-expression semantics.
+the Truffle registration processor. TruffleRegex supplies scoped acceleration for compatible
+constant regular expressions; RE2/J preserves validation, size limits and fallback semantics.
 Date/time functions use the JDK time-zone database.
 
 The benchmark native image and workload smoke checks are qualified separately from the
@@ -293,14 +294,16 @@ retains its existing source-length-derived node cap as well as the explicit node
 
 ## Runtime error locations
 
-`CelException` exposes `expressionId()`, `offset()`, `line()` and `column()` for runtime
+`CelException` exposes `expressionId()`, `offset()`, `offsetEncoding()`, `line()` and `column()` for runtime
 failures as well as compile-time diagnostics. Runtime IDs are stable within a prepared
 program; canonical imports preserve supplied expression IDs. The innermost failing
 operation retains its location through folding, arithmetic lowering and error propagation.
 Exception instances supplied by host callbacks are never mutated.
 
 For source programs, offsets count Java chars and line/column are one-based. Imported
-canonical `SourceInfo` uses CEL's code-point positions; absent position metadata remains
+canonical `SourceInfo` uses CEL's code-point positions. `offsetEncoding()` preserves this
+distinction through optimization and tracing; `format(source)` uses it to place source carets.
+Absent position metadata remains
 `-1` while the expression ID is still available. Budget exhaustion identifies the policy
 root because optimized evaluation can charge multiple original visits together. Arbitrary
 exceptions outside CEL's normalized callback errors retain their existing propagation.
@@ -310,6 +313,41 @@ exceptions outside CEL's normalized callback errors retain their existing propag
 patterns and regex extension calls are checked before matching. Cached patterns are rechecked
 against the calling environment's limit. Exceeding the cap reports `RESOURCE_EXHAUSTED`.
 A zero-count regex replacement still returns its input without compiling the pattern.
+
+Constant `matches` patterns in a conservative ASCII subset can use the pinned
+TruffleRegex RE2 flavor. The constant match's first execution must occur in an initialized,
+entered CEL context. Instantiate the Program within its execution context; a reusable
+PreparedProgram may be prepared outside it. The accelerator remains owned by that
+context; the Program holds only a weak reference and checks the owning context on every accelerated call.
+Evaluation outside that context, after its closure, or after the weak handle is collected
+uses RE2/J. A match first executed without a CEL context stays on RE2/J and never
+creates a hidden context. Cache eviction removes strong ownership; an evicted handle
+can continue accelerating matches in its owning context until collected. Dynamic
+patterns and capture/replacement extensions also remain on RE2/J. No caller context is required by the standalone Java API.
+
+The initial accelerated subset excludes escapes, non-ASCII pattern characters and
+special groups. Unicode properties and case folding differ between the two engines'
+Unicode tables, and some nullable capture loops have different match boundaries.
+Unsupported TruffleRegex patterns fall back after the same RE2/J syntax and program-size
+validation. The context's accelerator cache is bounded to 256 entries and cleared on
+disposal; the separate dynamic-pattern cache retains its existing bounds.
+
+Upstream tracking covers [counted-repetition support](https://github.com/elide-dev/graal/issues/205),
+[nullable-loop match boundaries](https://github.com/elide-dev/graal/issues/206), and
+[UTF-16 search progress](https://github.com/elide-dev/graal/issues/204). The latter two
+also inform the RE2/J fallback for extraction/replacement extensions; constant boolean
+matching always starts from zero and does not expose capture boundaries.
+
+RE2/J remains a required dependency for the current release candidate. Removing it
+also requires a supported [host entry point and lifecycle](https://github.com/elide-dev/graal/issues/207)
+for context-free, concurrent evaluation, plus [analysis and complexity-budget metadata](https://github.com/elide-dev/graal/issues/208)
+that preserves the documented `maxRegexProgramSize` contract or supplies an explicit
+migration. TruffleRegex's `regex.Validate=true` option checks syntax inside an owning
+context, but supplies neither a matcher nor an instruction count. Its parser/DFA
+limits are different metrics. Unicode-sensitive matching also needs a qualified
+compatibility decision: the pinned backends use different Unicode table versions.
+Until these contracts and matching gaps are addressed, the fallback preserves
+CEL errors, bounds and the standalone Java lifecycle.
 
 ## Per-evaluation controls and cost
 
@@ -334,3 +372,170 @@ Repeated unary `!` or `-` tokens are scanned iteratively and collapsed by parity
 as in CEL's parser semantics. Long runs are bounded by `maxSourceLength`; they do
 not consume AST depth merely because they contain many tokens. The resulting
 expression still obeys `maxDepth`, `maxAstNodes` and evaluation-budget limits.
+
+
+## Per-evaluation host functions
+
+Declare `lateFunction(name, overloadId, receiver, arguments, result)` on the environment,
+then supply `EvaluationOptions.newBuilder().function(overloadId, implementation)` for each
+call. The implementation receives the same normalized CEL arguments as an ordinary registered
+function. Options are immutable; concurrent calls may bind the same overload differently.
+An undeclared or non-late-bound ID is rejected before evaluation. A reached, unbound overload
+raises `UNDECLARED`; type checking still uses its declared signature.
+
+`nonStrictFunction(...)` registers a callback that may receive `CelException` or `Unknown`
+arguments. `lateFunction(..., true)` declares the same behavior for a late-bound overload.
+Errors and unknowns match any parameter type, but ambiguous overloads are never guessed.
+Ordinary strict calls retain CEL unknown/error propagation. Resource exhaustion and cancellation
+always abort before host dispatch. A callback may return an unknown or return/throw a CEL error;
+returned CEL errors propagate as failures rather than successful host values.
+
+## Deriving an environment
+
+`environment.toBuilder()` (or `new Environment.Builder(environment)`) copies the complete
+configuration into an independent builder. Declarations, constants, explicit host callbacks,
+object adapters, aliases, extension restrictions and resource limits are preserved. Adding a
+declaration to the new builder does not change the original environment; registered callbacks
+and adapters retain their existing application-owned lifetime and thread-safety contracts.
+
+
+`cel.bind(name, initializer, body)` is lazy: the initializer runs on the first read, in the
+captured outer lexical scope, and its value or CEL error is memoized for that binding only.
+An unused initializer consumes no evaluation budget and produces no host side effects.
+Debugger scopes show `<lazy>` before the first read; the initializer's source events occur
+when that read evaluates it. Each evaluation and each comprehension iteration has fresh slots.
+
+
+## Context-free tracing and asynchronous calls
+
+`program.trace(listener).evaluate(bindings)` reports one `TraceEvent` after each executed
+source expression, including CEL failures, expression IDs, and source locations. Events follow
+actual evaluation order; short-circuited expressions emit nothing. Every event exposes
+`offsetEncoding()` for its offset and column, including successful events without an error:
+source events use `UTF16`, canonical events use `CODE_POINT`. Values in events are owned
+public values, so a listener may retain them without retaining mutable evaluation state.
+Listeners run synchronously on the evaluation thread and their exceptions propagate. A shared
+listener must provide its own thread safety. `EvaluationOptions.trace(listener)` also supports
+tracing together with per-call budgets and late-bound functions.
+
+The ordinary target keeps its lowering and folding fast paths. A tracing target is created
+lazily and shared by subsequent traced calls. Fold replacements retain their discarded immutable
+source subtrees outside Truffle child edges. Arithmetic chains retain compact literal IDs and
+locations with encoding flags (30 bytes of array payload per operator, plus three array headers), allowing reconstruction
+without retaining the original chain. Comprehension-size nodes restore normal list semantics only
+in the tracing target. Thus an unchanged tree needs no second source tree; a five-node folded
+expression retains those five source nodes plus its single runtime fold node. Requesting tracing
+creates one additional restored tree. This is an explicit retained-memory tradeoff, not a claim
+that tracing is allocation-free or that program retained heap is unchanged.
+
+`program.evalAsync(bindings, options, executor)` returns a `CompletableFuture<Object>`. Inputs
+are snapshotted before submission, and each task has independent controls and scopes. Timeouts
+start when execution begins; absolute deadlines retain their absolute meaning. Cancelling the
+future prevents queued work and requests cooperative cancellation at CEL cost steps for running
+work; it does not interrupt arbitrary host callbacks. The caller chooses and manages the executor.
+Executor rejection is synchronous, and evaluation failures complete the future exceptionally.
+A context-bound embedding must arrange its normal context entry on the executor thread.
+
+Field-level partial evaluation uses owned activations and typed attribute paths:
+
+```java
+var inputs = PartialActivation.of(
+    Map.of("request", Map.of("region", "us")),
+    AttributePattern.of("request").qualify("approved"));
+var pending = program.partialEvaluate(inputs);
+var finished = pending.advanceEvaluation(
+    Map.of(Attribute.of("request").qualify("approved"), true));
+```
+
+Patterns can contain `.wildcard()` qualifiers for individual map keys, list indices,
+or object fields. Known sibling fields remain available, including through local
+bindings and comprehensions. `has()` preserves unknown presence. Resolutions are
+immutable snapshots; resolving a parent replaces previous child resolutions.
+Reading a whole aggregate with an unresolved descendant produces an unknown for
+that aggregate. Supply the complete parent value to resolve such a whole-object
+read; individual child resolutions do not reconstruct arbitrary host objects.
+Each advance evaluates the original expression afresh, with a new operation budget
+and fresh lazy scopes. Host callbacks may therefore run again. Results expose
+`isComplete()`, `unknownAttributes()`, `error()` and `actualCost()`; a failed result's
+`value()` throws its CEL error. Partial execution uses the same lazily restored
+source target as tracing, preserving source semantics through optimization.
+
+A protobuf message can also supply the entire evaluation context:
+
+```java
+var type = new ProtobufType(Request.getDescriptor());
+var environment = type.registerContext(Cel.newBuilder()).build();
+var program = environment.compile("region == 'us' && approved");
+var result = program.evaluate(type.context(request));
+```
+
+`context(Message)` snapshots before evaluation; `context(ProtobufType.Value)` reuses
+an existing native snapshot. Every declared root field is bound, including protobuf
+defaults. The message wrapper is not retained.
+
+`type.mask(FieldMask)` creates a typed projection. Register it and snapshot through
+that view, or use its `registerContext` and `context` methods. Selected singular
+message subpaths receive distinct projected CEL types; hidden fields fail both
+static checking and dynamic selection. Repeated fields, maps and automatically
+mapped well-known messages can be selected as whole fields but cannot be traversed
+by a mask. Empty masks expose no fields; `*` exposes every field. Masks use protobuf
+field names. Use `mask("DistinctViewName", mask)` when several views share one
+environment. Projection equality compares visible fields and their presence;
+projection values retain native rows, not host messages. Field masks govern CEL
+field visibility; they do not redact the original host message or its serialized
+bytes.
+
+
+## Generated POJO, JavaBean and record snapshots
+
+Add `dev.elide:trufflecel-processor` at the same version as core to your Java annotation
+processor path. With javac, use `-processor dev.trufflecel.processor.PojoProcessor` (or enable
+processor discovery with `-proc:full`). Bazel consumers can use
+`//src/main/java/dev/trufflecel/processor:plugin` in their Java target's `plugins`.
+The processor has no runtime dependencies and does not belong in a Native Image runtime classpath.
+
+```java
+@CelPojo("app.User")
+public record User(long id, @CelField("display_name") String displayName) {}
+
+var type = UserCel.INSTANCE;
+var environment = type.register(Cel.newBuilder())
+    .variable("user", CelType.of(type.name())).build();
+var policy = environment.compile("user.id > 0 && has(user.display_name)");
+var snapshot = type.snapshot(new User(42, "Ada"));
+boolean allowed = policy.test(Map.of("user", snapshot));
+```
+
+An adapter is generated beside the annotated Java type, named `<Type>Cel`; nested Java types
+use enclosing names joined with underscores, such as `Models_UserCel`. The default CEL type name
+is the qualified Java name. The generator reads public instance fields, ordinary JavaBean
+`getX()`/boolean `isX()` accessors, or record components. `@CelField` can rename a property,
+expose a zero-argument accessor, or exclude it with `ignore = true`. Duplicate CEL field names
+are rejected rather than choosing between a public field and a getter. Static members and
+unannotated non-getter methods are not exposed. Both annotations have class-file retention so
+already compiled nested types and inherited annotated members remain available to the processor;
+no runtime reflection is used.
+
+Supported properties are primitive/boxed booleans and numbers, characters and strings, `UInt`,
+`Bytes`, `byte[]`, `Instant`, `Duration`, enums (their declared names as CEL strings), typed `List`
+and `Map`, and other annotated classes or records. Map keys must map to CEL string, integer, uint
+or boolean types. Raw collections, unresolved wildcard/generic properties, other arrays and arbitrary host
+objects receive compile-time diagnostics. Inherited generic members are resolved against the concrete
+annotated subclass before their types are checked. Register nested adapters explicitly when their fields
+are selected or their CEL constructors are used.
+
+Call `adapter.snapshot(host)` before evaluation. Generated accessors run once during this call,
+copying nested objects, collections and bytes into immutable `PojoType.Value` objects. The caller
+must keep the host graph stable during copying. Subsequent host mutation is invisible; snapshots
+can be shared by concurrent evaluations and `Activation.snapshot`. They contain no original POJO
+references. The default traversal limits are depth 100 and one million values, shared across all
+nested adapters and containers; `snapshot(host, maxDepth, maxNodes)` selects tighter limits.
+Cycles fail with `INVALID_ARGUMENT`, and exceeded limits fail with `RESOURCE_EXHAUSTED`.
+
+Every generated property is present in a host snapshot, including null properties, represented
+as CEL null. CEL constructors produce the same owned value type; omitted constructor fields are
+absent, so `has()` is false and an ordinary read raises `NO_SUCH_KEY`. Construction validates
+field names and nested value types and counts existing snapshot subgraphs against the same depth
+and node limits. Null map keys are rejected in both snapshots and CEL construction. Evaluating a raw host POJO does not implicitly snapshot it;
+only generated snapshots are accepted by these adapters. Policy execution never invokes bean
+getters or constructs host objects.

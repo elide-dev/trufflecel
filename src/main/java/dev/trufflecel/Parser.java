@@ -7,7 +7,7 @@ import java.util.*;
 final class Parser {
   private record Token(String kind, String text, Object value, int offset) {}
 
-  private static final Set<String> RESERVED =
+  static final Set<String> RESERVED =
       Set.of(
           "as",
           "break",
@@ -26,21 +26,67 @@ final class Parser {
           "var",
           "void",
           "while");
+  private static final Set<String> EXPRESSION_ENDS = Set.of(",", ")", "]", "}", "EOF");
   private final String source;
   private final Environment env;
+  private final int baseOffset;
   private int cursor, depth, consumedEnd;
   private Token token;
+  private List<CelException.Issue> issues;
 
   Parser(String source, Environment env) {
+    this(source, env, 0);
+  }
+
+  Parser(String source, Environment env, int baseOffset) {
+    if (baseOffset < 0 || baseOffset > Integer.MAX_VALUE - source.length())
+      throw new IllegalArgumentException("invalid source base offset");
     this.source = source;
     this.env = env;
+    this.baseOffset = baseOffset;
     token = next();
   }
 
   ExprNode parse() {
-    ExprNode result = expression(0);
-    expect("EOF");
+    ExprNode result;
+    try {
+      result = expression(0);
+      expect("EOF");
+    } catch (CelException failure) {
+      if (issues == null || failure.code() != CelException.Code.SYNTAX) throw failure;
+      record(failure);
+      throw new CelException(issues);
+    }
+    if (issues != null) throw new CelException(issues);
     return result;
+  }
+
+  private void record(CelException failure) {
+    if (failure.code() != CelException.Code.SYNTAX || failure.issues().size() > 1) throw failure;
+    if (issues == null) issues = new ArrayList<>();
+    issues.add(failure.issues().get(0));
+    if (issues.size() == 100) throw new CelException(issues);
+  }
+
+  /** Resume at the next entry boundary, retaining nesting and all configured work limits. */
+  private void recover(CelException failure, String end) {
+    record(failure);
+    int nesting = 0;
+    while (!token.kind.equals("EOF")) {
+      if (nesting == 0 && (token.kind.equals(",") || token.kind.equals(end))) return;
+      if (Set.of("(", "[", "{").contains(token.kind)) nesting++;
+      else if (nesting > 0 && Set.of(")", "]", "}").contains(token.kind)) nesting--;
+      take();
+    }
+  }
+
+  private ExprNode entryExpression(String end) {
+    try {
+      return expression(0);
+    } catch (CelException failure) {
+      recover(failure, end);
+      return constant(CelNull.INSTANCE, failure.offset());
+    }
   }
 
   private int nodeCount;
@@ -128,6 +174,8 @@ final class Parser {
   }
 
   private ExprNode primaryValue() {
+    if (EXPRESSION_ENDS.contains(token.kind))
+      throw error("expected expression, found " + token.text);
     Token t = take();
     switch (t.kind) {
       case "NUMBER":
@@ -156,12 +204,17 @@ final class Parser {
           if (accept(",")) expect("}");
           else if (!accept("}"))
             do {
-              boolean optional = accept("?");
-              entries.add(expression(0));
-              expect(":");
-              ExprNode entry = expression(0);
-              entry.optionalEntry = optional;
-              entries.add(entry);
+              try {
+                boolean optional = accept("?");
+                ExprNode key = expression(0);
+                expect(":");
+                ExprNode entry = entryExpression("}");
+                entry.optionalEntry = optional;
+                entries.add(key);
+                entries.add(entry);
+              } catch (CelException failure) {
+                recover(failure, "}");
+              }
               if (accept("}")) break;
               expect(",");
               if (accept("}")) break;
@@ -199,14 +252,18 @@ final class Parser {
         if (accept(",")) expect("}");
         else if (!accept("}"))
           do {
-            boolean optional = accept("?");
-            String field = identifier(true);
-            if (names.contains(field)) throw error("duplicate field: " + field);
-            names.add(field);
-            expect(":");
-            ExprNode entry = expression(0);
-            entry.optionalEntry = optional;
-            values.add(entry);
+            try {
+              boolean optional = accept("?");
+              String field = identifier(true);
+              if (names.contains(field)) throw error("duplicate field: " + field);
+              expect(":");
+              ExprNode entry = entryExpression("}");
+              entry.optionalEntry = optional;
+              names.add(field);
+              values.add(entry);
+            } catch (CelException failure) {
+              recover(failure, "}");
+            }
             if (accept("}")) break;
             expect(",");
             if (accept("}")) break;
@@ -224,9 +281,14 @@ final class Parser {
   }
 
   private ExprNode call(String name, boolean receiver, int offset, ArrayList<ExprNode> args) {
+    if (issues != null)
+      return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
     if (env.macros) {
       String prefix = receiver ? args.get(0).qualifiedName() : null;
-      if ("cel".equals(prefix) || ".cel".equals(prefix)) {
+      ExprNode custom = customMacro(name, receiver, prefix, offset, args);
+      if (custom != null) return custom;
+      if (("cel".equals(prefix) || ".cel".equals(prefix))
+          && env.standardMacros.contains("cel." + name)) {
         if (name.equals("index") || name.equals("iterVar")) {
           int count = name.equals("index") ? 2 : 3;
           if (args.size() != count) throw error("invalid cel." + name + " arguments");
@@ -272,6 +334,7 @@ final class Parser {
         }
       }
       if (("proto".equals(prefix) || ".proto".equals(prefix))
+          && env.standardMacros.contains("proto." + name)
           && (name.equals("getExt") || name.equals("hasExt"))) {
         env.libraryPolicy.name("proto." + name, offset);
         if (args.size() != 3 || args.get(2).qualifiedName() == null)
@@ -283,11 +346,15 @@ final class Parser {
             ? select
             : node(ExprNode.Kind.MACRO, "has", null, offset, select);
       }
-      if (name.equals("has") && !receiver && args.size() == 1) {
+      if (env.standardMacros.contains(name)
+          && name.equals("has")
+          && !receiver
+          && args.size() == 1) {
         if (args.get(0).kind != ExprNode.Kind.SELECT) throw error("has requires a field selection");
         return node(ExprNode.Kind.MACRO, name, null, offset, args.toArray(ExprNode[]::new));
       }
       if (receiver
+          && env.standardMacros.contains(name)
           && Set.of(
                   "all",
                   "exists",
@@ -331,11 +398,63 @@ final class Parser {
     return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
   }
 
+  private long macroNames;
+
+  private ExprNode customMacro(
+      String name, boolean receiver, String prefix, int offset, List<ExprNode> args) {
+    Macro selected = null;
+    int selectedRank = -1;
+    boolean globalNamespace = false;
+    int count = args.size() - (receiver ? 1 : 0);
+    for (Macro macro : env.customMacros) {
+      boolean namespace =
+          receiver
+              && !macro.receiver()
+              && prefix != null
+              && macro
+                  .name()
+                  .equals((prefix.startsWith(".") ? prefix.substring(1) : prefix) + "." + name);
+      String function = !receiver && name.startsWith(".") ? name.substring(1) : name;
+      if (!(namespace || macro.receiver() == receiver && macro.name().equals(function))) continue;
+      if (macro.variadic() ? count < macro.argumentCount() : count != macro.argumentCount())
+        continue;
+      // Prefer fixed arity, then a qualified global match, independently of registration order.
+      int rank = (macro.variadic() ? 0 : 2) + (namespace ? 1 : 0);
+      if (rank > selectedRank) {
+        selected = macro;
+        selectedRank = rank;
+        globalNamespace = namespace;
+      }
+    }
+    if (selected == null) return null;
+    var original = new ArrayList<Ast.Node>();
+    for (ExprNode argument : args) {
+      env.checkDepth(argument);
+      original.add(Ast.snapshot(argument));
+    }
+    boolean target = receiver && !globalNamespace;
+    List<Ast.Node> arguments = List.copyOf(original.subList(receiver ? 1 : 0, original.size()));
+    Ast.Node expansion =
+        Objects.requireNonNull(
+            selected
+                .expander()
+                .expand(
+                    new Macro.Context(offset, () -> ++macroNames),
+                    target ? original.get(0) : null,
+                    arguments),
+            "macro expansion");
+    int added = Ast.validate(expansion, env.maxAstNodes - nodeCount, env.maxDepth);
+    nodeCount += added;
+    ExprNode result = Ast.lower(expansion, env, offset);
+    result.macroCall = new Ast.Node(0, Ast.Kind.CALL, name, receiver, original, false, offset);
+    return result;
+  }
+
   private ArrayList<ExprNode> arguments(String end) {
     var result = new ArrayList<ExprNode>();
     if (!accept(end)) {
       do {
-        result.add(expression(0));
+        result.add(entryExpression(end));
       } while (accept(","));
       expect(end);
     }
@@ -352,7 +471,7 @@ final class Parser {
     if (!accept(end))
       do {
         boolean optional = accept("?");
-        ExprNode entry = expression(0);
+        ExprNode entry = entryExpression(end);
         entry.optionalEntry = optional;
         result.add(entry);
         if (accept(end)) break;
@@ -403,14 +522,14 @@ final class Parser {
 
   private Token take() {
     Token result = token;
-    consumedEnd = cursor;
+    consumedEnd = cursor + baseOffset;
     token = next();
     return result;
   }
 
   private CelException error(String message) {
     return new CelException(
-        CelException.Code.SYNTAX, message, token == null ? cursor : token.offset);
+        CelException.Code.SYNTAX, message, token == null ? cursor + baseOffset : token.offset);
   }
 
   // Nesting limits are resource controls, categorized like the other configured limits. They are
@@ -420,6 +539,13 @@ final class Parser {
   }
 
   private Token next() {
+    Token next = nextRaw();
+    return baseOffset == 0
+        ? next
+        : new Token(next.kind, next.text, next.value, next.offset + baseOffset);
+  }
+
+  private Token nextRaw() {
     while (cursor < source.length()) {
       char c = source.charAt(cursor);
       if (" \t\r\n\f".indexOf(c) >= 0) {
@@ -534,7 +660,8 @@ final class Parser {
       cursor += op.length();
       return new Token(op, op, null, start);
     }
-    throw new CelException(CelException.Code.SYNTAX, "unexpected character: " + c, cursor);
+    throw new CelException(
+        CelException.Code.SYNTAX, "unexpected character: " + c, cursor + baseOffset);
   }
 
   private boolean followedBy(char expected) {

@@ -1,0 +1,12 @@
+CompileCommand: dontinline dev/trufflecel/bench/RetainedHeap.populate bool dontinline = true
+CompileCommand: dontinline dev/trufflecel/bench/RetainedHeap.release bool dontinline = true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime (file:/Users/sam/Library/Caches/bazel/_bazel_sam/86bebb8996e180bd48703c3148b42eb0/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin/external/rules_jvm_external++maven+maven/org/graalvm/truffle/truffle-runtime/25.5.5-elide.27/processed_truffle-runtime-25.5.5-elide.27.jar)
+WARNING: Please consider reporting this to the maintainers of class com.oracle.truffle.runtime.hotspot.HotSpotTruffleRuntime
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Diagnostic live-heap delta, shared host; not peak RSS or a timing benchmark.
+# OpenJDK 64-Bit Server VM 25.0.4.1.1+1-jvmci-25.5-b24
+# JVM [-XX:ThreadPriorityPolicy=1, -XX:+UnlockExperimentalVMOptions, -XX:+EnableJVMCIProduct, -XX:+EnableJVMCI, -XX:-UnlockExperimentalVMOptions, --enable-native-access=ALL-UNNAMED, -XX:-UseJVMCICompiler, -XX:+UseSerialGC, -Xms512m, -Xmx512m, -XX:CompileCommand=dontinline,dev.trufflecel.bench.RetainedHeap::populate, -XX:CompileCommand=dontinline,dev.trufflecel.bench.RetainedHeap::release]
+{"case":"cse","mode":"partial","sharing":"distinct","declarations":2,"count":10000,"round":0,"before":[7162360, 7162360, 7162304, 7162304, 7162304],"live":[102614424, 102022312, 102022312, 102022312, 102022312],"released":[8143152, 8143152, 8143152, 8143152, 8143152],"retainedBytes":94860008,"bytesPerProgram":9486.001,"baselineDrift":980848,"loadAverage":6.375}
+{"case":"cse","mode":"partial","sharing":"distinct","declarations":2,"count":10000,"round":1,"before":[8322280, 8322280, 8322280, 8321264, 8321264],"live":[103824416, 103824416, 102348256, 102348256, 102348256],"released":[8469096, 8469096, 8469096, 8469096, 8469096],"retainedBytes":94026992,"bytesPerProgram":9402.699,"baselineDrift":147832,"loadAverage":6.375}
+{"case":"cse","mode":"partial","sharing":"distinct","declarations":2,"count":10000,"round":2,"before":[8468984, 8468984, 8468984, 8468984, 8468984],"live":[103885272, 103885272, 103885272, 102316440, 102316440],"released":[8437280, 8437280, 8437280, 8437280, 8437280],"retainedBytes":93847456,"bytesPerProgram":9384.746,"baselineDrift":-31704,"loadAverage":6.375}

@@ -1,0 +1,19 @@
+package dev.trufflecel;
+import java.util.Map;
+import java.lang.management.ManagementFactory;
+public final class CompileProfile {
+  private static volatile long sink;
+  public static void main(String[] args) {
+    var bean = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();
+    long id = Thread.currentThread().threadId();
+    var activation = Map.<String,Object>of("x",42L);
+    String source = args.length == 0 ? "x * 2 + 1" : args[0];
+    for (int i=0;i<20_000;i++) sink = (Long)Cel.compile(source).evaluate(activation);
+    for (int r=0;r<7;r++) {
+      long allocated = bean.getThreadAllocatedBytes(id), start = System.nanoTime();
+      for (int i=0;i<20_000;i++) sink = (Long)Cel.compile(source).evaluate(activation);
+      long elapsed = System.nanoTime()-start, bytes = bean.getThreadAllocatedBytes(id)-allocated;
+      System.out.println("sample="+r+" ns/op="+(elapsed/20_000.0)+" bytes/op="+(bytes/20_000.0)+" checksum="+sink);
+    }
+  }
+}

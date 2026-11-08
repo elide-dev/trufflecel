@@ -90,7 +90,9 @@ Nested bindings have lexical scope and are restored even on errors and early ret
 List extensions include `slice(start, end)`, `flatten([depth])`, `distinct()`, `reverse()`,
 `sort()`, `sortBy(variable, keyExpression)`, and `lists.range(count)`. Slice ends are exclusive;
 flattening defaults to one level. Distinct preserves first-occurrence order. Sorting requires
-comparable keys of the same runtime type and computes each sortBy key once.
+comparable keys of the same runtime type and computes each sortBy key once. `sortBy` requires
+a list receiver, including in dynamic and unchecked programs; maps are rejected with
+`NO_OVERLOAD` after key-expression errors or unknowns are propagated.
 
 ## Strings and math
 
@@ -161,7 +163,9 @@ escapes fail when a match needs replacement.
 `regex.extractAll(text, pattern)` returns a list. With one capture group they return that group;
 with none they return the complete match. Unmatched optional captures are omitted. More than
 one capture group is rejected, except that `extract` returns none when there is no match.
-The functions share the RE2 engine seam and bounded dynamic cache with `matches`.
+The functions share the RE2/J validation and bounded dynamic cache with `matches`.
+Their capture and empty-match behavior remains on RE2/J; TruffleRegex acceleration
+currently applies to compatible constant boolean `matches` calls.
 Input traversal, each match and output expansion consume the evaluation budget.
 
 ## Library and function restrictions
@@ -175,11 +179,16 @@ only `math.abs` among callable functions. Core literals, selection, types and co
 syntax remain available. Restrictions apply before folding, to unchecked programs and
 when canonical ASTs are imported; dynamic extension dispatch rechecks library membership.
 
-Supported library versions: `math`, `lists`, `optional` 0–2; `strings`, `regex`, `sets`,
+Supported library versions: `math`, `lists`, `optional` 0–2; `strings` 0–3; `regex`, `sets`,
 `encoders`, `json`, `yaml`, `net`, `bindings`, `protos`, `comprehensions` 0. Unknown libraries
 and versions fail at registration. Math 0 exposes extrema, 1 adds the other numeric and
 bit functions, and 2 adds sqrt. Lists 0 exposes slice, 1 adds flatten, and 2 adds the
-remaining list helpers. Optional 1 adds optFlatMap and 2 adds first/last. Host functions
+remaining list helpers. Optional 1 adds optFlatMap and 2 adds first/last. String versions
+follow the [CEL extension function introduction versions](https://github.com/cel-expr/cel-go/blob/master/ext/strings.go):
+0 exposes the original character/search/case/replace/split/substring/trim helpers,
+1 adds format and strings.quote, 2 adds join, and 3 adds string reverse. These versions
+gate function availability; formatting always uses TruffleCEL's documented CEL formatting
+behavior, without legacy locale-dependent rendering. Host functions
 are explicitly supplied capabilities and are not removed by library version restrictions;
 the function allow-list still applies to them.
 

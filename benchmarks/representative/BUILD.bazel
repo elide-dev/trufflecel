@@ -12,15 +12,42 @@ java_library(name = "policy_java", testonly = True, srcs = [":policy_sources"], 
 
 java_library(
     name = "engines", testonly = True,
-    srcs = ["Engines.java", "Workloads.java"],
+    srcs = ["Engines.java", "Workloads.java", "RegexQualification.java"],
     deps = [":policy_java", "//:trufflecel", "//:trufflecel-protobuf",
+            "@cel_java//:com_google_guava_guava",
             "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_polyglot_polyglot",
             "@maven//:org_graalvm_truffle_truffle_runtime",
+            "@maven//:org_graalvm_truffle_truffle_api",
             "@cel_java//:dev_cel_cel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime"],
 )
 java_plugin(name = "jmh_generator", testonly = True, processor_class = "org.openjdk.jmh.generators.BenchmarkProcessor", deps = ["@cel_java//:org_openjdk_jmh_jmh_generator_annprocess"])
 java_library(name = "jmh_benchmarks", testonly = True, srcs = ["SteadyState.java", "FrontendStages.java", "ActivationPreparation.java", "ActivationEvaluation.java", "StructuredAccess.java", "IngestionStages.java", "ProtobufZero.java"], plugins = [":jmh_generator"], deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime", "@maven//:dev_elide_truffledata_protobuf", "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:org_openjdk_jmh_jmh_core", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel"])
 java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", runtime_deps = [":jmh_benchmarks", "@cel_java//:org_openjdk_jmh_jmh_core"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+java_library(name = "ingestion_profile_lib", testonly = True, srcs = ["IngestionProfile.java"],
+    deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf",
+        "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:dev_cel_runtime",
+        "@maven//:dev_elide_truffledata_protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime",
+        "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
+java_binary(name = "ingestion_profile", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-XX:-UseJVMCICompiler", "-Xbatch", "-Xms512m", "-Xmx512m", "-Dpolyglot.engine.Compilation=false"])
+java_test(name = "ingestion_profile_smoke", testonly = True, main_class = "dev.trufflecel.IngestionProfile", runtime_deps = [":ingestion_profile_lib"], use_testrunner = False, args = ["smoke"],
+    jvm_flags = ["--enable-native-access=ALL-UNNAMED", "-Dpolyglot.engine.Compilation=false"])
+java_library(name = "ingestion_native_lib", testonly = True, srcs = ["IngestionNativeAllocation.java"], deps = [":ingestion_profile_lib"])
+native_image(
+    name = "ingestion_allocation_svm", testonly = True, executable_name = "ingestion-allocation",
+    main_class = "dev.trufflecel.IngestionNativeAllocation", deps = [":ingestion_native_lib", ":native_config"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    extra_args = ["--gc=serial", "-J-Xmx6g", "--parallelism=4", "-march=compatibility",
+        "--features=dev.trufflecel.UpstreamProtobufFeature",
+        "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
+        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
+        "--initialize-at-run-time=dev.trufflecel.IngestionProfile,dev.trufflecel.IngestionNativeAllocation,dev.trufflecel.Workloads$$Raw,dev.trufflecel.Workloads$$Native",
+        "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
+sh_test(name = "ingestion_native_allocation", srcs = ["ingestion_native_allocation.sh"], args = ["$(rootpath :ingestion_allocation_svm)"], data = [":ingestion_allocation_svm"], tags = ["manual"], size = "large", target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
 java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
     deps = [":engines", "//:trufflecel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
@@ -33,6 +60,19 @@ java_test(name = "negative_differential", testonly = True, size = "large", srcs 
             "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel", "@maven//:junit_junit"])
 java_library(name = "lifecycle_lib", testonly = True, srcs = ["Lifecycle.java", "ImagePrepared.java", "PreparedLifecycle.java"], deps = [":engines", ":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_truffle_truffle_runtime"])
 java_binary(name = "lifecycle", testonly = True, main_class = "dev.trufflecel.Lifecycle", runtime_deps = [":lifecycle_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+java_library(name = "evaluation_memory_lib", testonly = True, srcs = ["EvaluationMemory.java"],
+    deps = [":engines", "//:trufflecel", "@maven//:com_google_code_gson_gson", "@maven//:org_graalvm_sdk_nativeimage", "@maven//:org_graalvm_truffle_truffle_runtime"])
+java_binary(name = "evaluation_memory", testonly = True, main_class = "dev.trufflecel.EvaluationMemory",
+    runtime_deps = [":evaluation_memory_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+sh_test(name = "input_control_smoke", srcs = ["input_control_smoke.sh"],
+    args = ["$(rootpath :lifecycle)", "$(rootpath :evaluation_memory)"],
+    data = [":lifecycle", ":evaluation_memory"], size = "large")
+sh_test(name = "input_control_native_smoke", srcs = ["input_control_smoke.sh"],
+    args = ["$(rootpath :svm)", "$(rootpath :evaluation_memory_svm)"],
+    data = [":svm", ":evaluation_memory_svm"], tags = ["manual"], size = "large",
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
+java_test(name = "evaluation_memory_smoke", testonly = True, main_class = "dev.trufflecel.EvaluationMemory", use_testrunner = False,
+    args = ["truffle-interpreter", "proto-repeated", "smoke"], runtime_deps = [":evaluation_memory_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 java_library(name = "native_config", testonly = True, srcs = ["UpstreamProtobufFeature.java"], deps = [":policy_java", "@cel_java//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_sdk_nativeimage"])
 native_image(
     name = "svm", testonly = True, executable_name = "representative",
@@ -50,6 +90,21 @@ native_image(
 )
 sh_test(name = "native_smoke", srcs = ["native_smoke.sh"], args = ["$(rootpath :svm)"], data = [":svm"],
     tags = ["manual"], size = "large", target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"])
+
+native_image(
+    name = "evaluation_memory_svm", testonly = True, executable_name = "evaluation-memory",
+    main_class = "dev.trufflecel.EvaluationMemory", deps = [":evaluation_memory_lib", ":native_config"],
+    graalvm_sdk = "@graalvm_linux_amd64//:gvm",
+    extra_args = ["--gc=serial", "-J-Xmx6g", "--parallelism=4", "-march=compatibility",
+        "--features=dev.trufflecel.UpstreamProtobufFeature",
+        "--add-exports=org.graalvm.truffle.runtime/com.oracle.truffle.runtime=ALL-UNNAMED",
+        "--initialize-at-build-time=dev.trufflecel,dev.elide.truffledata,dev.cel,org.antlr.v4,com.google.common,com.google.protobuf,com.google.re2j",
+        "--initialize-at-run-time=dev.trufflecel.EvaluationMemory",
+        "-H:+UnlockExperimentalVMOptions", "-H:+TruffleCheckBlockListMethods", "-H:+TruffleCheckNeverPartOfCompilation", "-H:-UnlockExperimentalVMOptions"],
+    optimization_mode = "3", tags = ["manual"], workspace_tmp = True,
+    exec_properties = {"EstimatedCPU": "8", "EstimatedMemory": "24GB"},
+    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+)
 
 java_binary(name = "prepared_lifecycle", testonly = True, main_class = "dev.trufflecel.PreparedLifecycle", runtime_deps = [":lifecycle_lib"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
 native_image(

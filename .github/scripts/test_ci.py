@@ -42,6 +42,15 @@ class ReleaseTest(unittest.TestCase):
         self.assertEqual(config['release-type'], 'simple')
         self.assertFalse(config['include-component-in-tag'])
 
+    def test_ci_archives_every_published_module(self):
+        spec = importlib.util.spec_from_file_location('maven_repo', ROOT / 'tools/release/maven_repo.py')
+        publication = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(publication)
+        workflow = (ROOT / '.github/workflows/check.bazel.yml').read_text()
+        for module in publication.MODULES:
+            self.assertIn(f'bazel-bin/tools/release/{module}/dev/elide/**', workflow)
+        self.assertIn('bazel-bin/src/main/java/dev/trufflecel/processor/libprocessor.jar', workflow)
+
     def test_workflow_pins_and_credentials(self):
         for path in (ROOT / '.github/workflows').glob('*.yml'):
             text = path.read_text()

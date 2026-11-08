@@ -1,0 +1,294 @@
+diff --git a/benchmarks/representative/Engines.java b/benchmarks/representative/Engines.java
+index 9807893..cd70711 100644
+--- a/benchmarks/representative/Engines.java
++++ b/benchmarks/representative/Engines.java
+@@ -1,6 +1,7 @@
+ package dev.trufflecel;
+ 
+ import com.oracle.truffle.runtime.OptimizedCallTarget;
++import com.oracle.truffle.runtime.OptimizedRuntimeOptions;
+ import dev.cel.common.CelOptions;
+ import dev.cel.common.CelAbstractSyntaxTree;
+ import dev.cel.common.types.*;
+@@ -153,6 +154,13 @@ final class Engines implements AutoCloseable {
+ 
+   void verifyTier(boolean peak) {
+     if (truffle == null || !(truffle.callTarget() instanceof OptimizedCallTarget t)) return;
++    if (t.getOptionValue(OptimizedRuntimeOptions.Compilation) != engine.equals("truffle-jit")
++        || t.getOptionValue(OptimizedRuntimeOptions.BackgroundCompilation)
++        || t.getOptionValue(OptimizedRuntimeOptions.CompilationFailureAction)
++            != OptimizedRuntimeOptions.ExceptionAction.Throw)
++      throw new AssertionError("Target uses incorrect benchmark engine options");
++    if (!"all".equals(t.getCompilerOptions().get("compiler.TreatPerformanceWarningsAsErrors")))
++      throw new AssertionError("Compiler performance warning gate is missing");
+     if (engine.equals("truffle-interpreter") && t.isValid())
+       throw new AssertionError("Unexpected guest JIT");
+     if (peak && engine.equals("truffle-jit") && !t.isValidLastTier())
+diff --git a/src/main/java/dev/trufflecel/Bytes.java b/src/main/java/dev/trufflecel/Bytes.java
+index 94358cc..ff0620a 100644
+--- a/src/main/java/dev/trufflecel/Bytes.java
++++ b/src/main/java/dev/trufflecel/Bytes.java
+@@ -14,6 +14,12 @@ public final class Bytes implements Comparable<Bytes> {
+     return value.clone();
+   }
+ 
++  // Trusted internal codecs may read this owned array during a call. Never mutate it,
++  // expose it to host code, or use it with a decoder that retains borrowed storage.
++  byte[] arrayForRead() {
++    return value;
++  }
++
+   public int size() {
+     return value.length;
+   }
+diff --git a/src/main/java/dev/trufflecel/ProtobufType.java b/src/main/java/dev/trufflecel/ProtobufType.java
+index 383f46d..d8e438e 100644
+--- a/src/main/java/dev/trufflecel/ProtobufType.java
++++ b/src/main/java/dev/trufflecel/ProtobufType.java
+@@ -1034,7 +1034,9 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
+ 
+   public Object decode(Bytes bytes) {
+     try {
+-      return new Value(this, plan.decode(wire(bytes.toByteArray(), true, 0)));
++      // Bytes already owns its immutable input. Both normalization and the native codec
++      // only read it, and the decoded row owns its strings, bytes and unknown fields.
++      return new Value(this, plan.decode(wire(bytes.arrayForRead(), true, 0)));
+     } catch (ContractViolation e) {
+       throw Values.error(CelException.Code.INVALID_ARGUMENT, "Invalid protobuf bytes");
+     }
+diff --git a/src/test/java/dev/trufflecel/ProtobufIntegrationTest.java b/src/test/java/dev/trufflecel/ProtobufIntegrationTest.java
+index c011b17..13537c3 100644
+--- a/src/test/java/dev/trufflecel/ProtobufIntegrationTest.java
++++ b/src/test/java/dev/trufflecel/ProtobufIntegrationTest.java
+@@ -10,6 +10,50 @@ import java.util.*;
+ import org.junit.Test;
+ 
+ public class ProtobufIntegrationTest {
++  @Test
++  public void concurrentWireDecodesPreserveOwnedInputsAndIndependentExports() throws Exception {
++    var descriptor = descriptor();
++    var type = new ProtobufType(descriptor);
++    var payload = ByteString.copyFrom(new byte[] {1, 2, 3, 4});
++    var message =
++        DynamicMessage.newBuilder(descriptor)
++            .setField(descriptor.findFieldByName("bytes"), payload)
++            .setField(descriptor.findFieldByName("string"), "owned")
++            .setUnknownFields(
++                UnknownFieldSet.newBuilder()
++                    .addField(
++                        100, UnknownFieldSet.Field.newBuilder().addLengthDelimited(payload).build())
++                    .build())
++            .build();
++    byte[] wire = message.toByteArray();
++    var input = new Bytes(wire);
++    Arrays.fill(wire, (byte) 0);
++    int hash = input.hashCode();
++    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
++      var jobs = new ArrayList<java.util.concurrent.Callable<Object>>();
++      for (int i = 0; i < 100; i++)
++        jobs.add(
++            () -> {
++              var value = (ProtobufType.Value) type.decode(input);
++              Arrays.fill(value.toBytes().toByteArray(), (byte) 0);
++              Arrays.fill(((Bytes) type.get(value, "bytes")).toByteArray(), (byte) 0);
++              Arrays.fill(value.row().unknownFieldBytes(), (byte) 0);
++              assertEquals(message, value.message());
++              return type.get(value, "bytes");
++            });
++      for (var job : executor.invokeAll(jobs))
++        assertEquals(new Bytes(payload.toByteArray()), job.get());
++    }
++    assertEquals(hash, input.hashCode());
++    assertArrayEquals(message.toByteArray(), input.toByteArray());
++    var invalid = new Bytes(new byte[] {-1});
++    for (int i = 0; i < 2; i++)
++      assertEquals(
++          CelException.Code.INVALID_ARGUMENT,
++          assertThrows(CelException.class, () -> type.decode(invalid)).code());
++    assertArrayEquals(new byte[] {-1}, invalid.toByteArray());
++  }
++
+   @Test
+   public void protobufContextExposesDefaultsAndRetainsNativeSnapshots() throws Exception {
+     var descriptor = descriptor();
+diff --git a/tools/bench/BUILD.bazel b/tools/bench/BUILD.bazel
+index ee4cfb4..290ded6 100644
+--- a/tools/bench/BUILD.bazel
++++ b/tools/bench/BUILD.bazel
+@@ -2,5 +2,5 @@ load("@rules_shell//shell:sh_test.bzl", "sh_test")
+ sh_test(
+     name = "test",
+     srcs = ["test.sh"],
+-    data = ["startup.py", "test_startup.py", "bench.py", "test_bench.py", "compare.py", "codspeed_profile.py", "test_profile.py", "test_compare.py", "representative.py", "test_representative.py", "structured.py", "test_structured.py", "prepared_lifecycle.py", "test_prepared_lifecycle.py", "prepared_report.py", "test_prepared_report.py", "structured_report.py", "activation_report.py", "activation_suite_report.py", "//benchmarks:cases.json"],
++    data = ["startup.py", "test_startup.py", "bench.py", "test_bench.py", "compare.py", "codspeed_profile.py", "test_profile.py", "test_compare.py", "representative.py", "test_representative.py", "structured.py", "test_structured.py", "prepared_lifecycle.py", "test_prepared_lifecycle.py", "focused_payback.py", "test_focused_payback.py", "prepared_report.py", "test_prepared_report.py", "structured_report.py", "activation_report.py", "activation_suite_report.py", "//benchmarks:cases.json"],
+ )
+diff --git a/tools/bench/focused_payback.py b/tools/bench/focused_payback.py
+new file mode 100644
+index 0000000..85eb3a4
+--- /dev/null
++++ b/tools/bench/focused_payback.py
+@@ -0,0 +1,121 @@
++#!/usr/bin/env python3
++"""Bounded natural guest-JIT payback with full map inputs, separate from process startup."""
++import argparse
++import datetime
++import itertools
++import json
++import os
++from pathlib import Path
++import platform
++import random
++import subprocess
++
++from prepared_lifecycle import validate
++from representative import FLAGS, NATIVE_FLAGS, sha
++
++WORKLOADS = ('scalar-wide', 'proto-policy', 'proto-repeated')
++ENGINES = ('truffle-interpreter', 'truffle-jit')
++MODES = (('jvm', 'cold'), ('svm', 'cold'), ('svm', 'image-cold'))
++
++
++def inventory(forks):
++    return {(runtime, engine, workload, 'map', mode, fork)
++            for (runtime, mode), engine, workload, fork in itertools.product(
++                MODES, ENGINES, WORKLOADS, range(forks))}
++
++
++def validate_results(rows, forks, maximum):
++    expected = inventory(forks)
++    seen = set()
++    for row in rows:
++        job = tuple(row[key] for key in ('runtime', 'engine', 'workload', 'entry', 'mode', 'fork'))
++        if job not in expected or job in seen:
++            raise ValueError('Unexpected or duplicate payback cell')
++        validate(row, job, maximum)
++        seen.add(job)
++    if seen != expected:
++        raise ValueError('Incomplete focused payback matrix')
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--java', type=Path, required=True)
++    parser.add_argument('--jar', type=Path, required=True)
++    parser.add_argument('--native', type=Path, required=True)
++    parser.add_argument('--source-manifest', type=Path, required=True)
++    parser.add_argument('--output', type=Path, required=True)
++    parser.add_argument('--cpus', required=True)
++    parser.add_argument('--host-conditions', required=True)
++    parser.add_argument('--forks', type=int, default=3)
++    parser.add_argument('--maximum', type=int, default=1_000_000,
++                        choices=(10_000, 100_000, 1_000_000, 10_000_000))
++    args = parser.parse_args()
++    if platform.system() != 'Linux' or platform.machine() != 'x86_64':
++        parser.error('Use the pinned Linux x86_64 artifacts')
++    if args.forks < 3:
++        parser.error('At least three independent processes per cell are required')
++    os.sched_setaffinity(0, set(map(int, args.cpus.split(','))))
++    args.output.mkdir(parents=True, exist_ok=False)
++    java_version = subprocess.check_output([str(args.java), '-version'], text=True,
++                                           stderr=subprocess.STDOUT)
++    if 'GraalVM' not in java_version:
++        raise ValueError('Use the pinned GraalVM distribution')
++    java_home = args.java.resolve().parent.parent
++    metadata = dict(
++        schema=1, complete=False,
++        captured_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
++        host=platform.node(), kernel=platform.release(), cpus=sorted(os.sched_getaffinity(0)),
++        host_conditions=args.host_conditions, load_start=os.getloadavg(),
++        cpuinfo=Path('/proc/cpuinfo').read_text(), java_version=java_version,
++        java_sha256=sha(args.java), jar_sha256=sha(args.jar), native_sha256=sha(args.native),
++        runtime_sha256={name: sha(java_home / name)
++                       for name in ('release', 'lib/modules', 'lib/server/libjvm.so')},
++        source_manifest=json.loads(args.source_manifest.read_text()),
++        source_manifest_sha256=sha(args.source_manifest),
++        driver_sha256=sha(Path(__file__)),
++        validation_driver_sha256=sha(Path(__file__).with_name('prepared_lifecycle.py')),
++        shared_driver_sha256=sha(Path(__file__).with_name('representative.py')),
++        jvm_flags=FLAGS, native_flags=NATIVE_FLAGS, forks=args.forks, maximum=args.maximum,
++        interval='child configuration/preparation/planning plus cumulative evaluations; '
++                 'excludes process launch, dataset generation and ingestion; natural compilation',
++        activation='full map, four input variants, materialized repeated-list result',
++        commands=[], results=[])
++    path = args.output / 'payback.json'
++
++    def save():
++        path.write_text(json.dumps(metadata, indent=2) + '\n')
++
++    jobs = sorted(inventory(args.forks))
++    random.Random(20261108).shuffle(jobs)
++    save()
++    for index, job in enumerate(jobs):
++        runtime, engine, workload, entry, mode, fork = job
++        command = ([str(args.java), *FLAGS, '-jar', str(args.jar)] if runtime == 'jvm'
++                   else [str(args.native), *NATIVE_FLAGS])
++        command += [engine, workload, entry, mode, str(args.maximum)]
++        metadata['commands'].append(command)
++        save()
++        name = '-'.join(map(str, job))
++        print(f'{index + 1}/{len(jobs)} {name}', flush=True)
++        with (args.output / (name + '.log')).open('w') as output:
++            subprocess.run(command, stdout=output, stderr=subprocess.STDOUT,
++                           check=True, timeout=300)
++        records = [json.loads(line)
++                   for line in (args.output / (name + '.log')).read_text().splitlines()
++                   if line.startswith('{')]
++        if len(records) != 1:
++            raise ValueError('Expected exactly one checked payback result')
++        row = records[0]
++        row['fork'] = fork
++        validate(row, job, args.maximum)
++        metadata['results'].append(row)
++        save()
++    validate_results(metadata['results'], args.forks, args.maximum)
++    if sha(args.jar) != metadata['jar_sha256'] or sha(args.native) != metadata['native_sha256']:
++        raise ValueError('Artifact changed during measurement')
++    metadata.update(complete=True, load_end=os.getloadavg())
++    save()
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tools/bench/test_focused_payback.py b/tools/bench/test_focused_payback.py
+new file mode 100644
+index 0000000..450a751
+--- /dev/null
++++ b/tools/bench/test_focused_payback.py
+@@ -0,0 +1,37 @@
++import copy
++import unittest
++
++import focused_payback as driver
++
++
++class FocusedPaybackTest(unittest.TestCase):
++    def row(self, job):
++        runtime, engine, workload, entry, mode, fork = job
++        points = {str(10 ** i): 10 ** i for i in range(7)}
++        return dict(runtime=runtime, engine=engine, workload=workload, entry=entry,
++                    mode=mode, fork=fork, image_prepared=mode.startswith('image-'),
++                    configure_ns=1, prepare_ns=1, instantiate_ns=1, snapshot_ns=0,
++                    total_ns_through_evaluations=points,
++                    guest_compiled_at_checkpoint={key: False for key in points},
++                    last_tier_at_end=False)
++
++    def test_matrix_requires_both_engines_all_preparation_modes_and_every_fork(self):
++        rows = [self.row(job) for job in driver.inventory(3)]
++        self.assertEqual(54, len(rows))
++        driver.validate_results(rows, 3, 1_000_000)
++        for broken in (rows[:-1], rows + rows[:1],
++                       [row for row in rows if row['mode'] != 'image-cold']):
++            with self.assertRaises(ValueError):
++                driver.validate_results(broken, 3, 1_000_000)
++
++    def test_missing_endpoint_and_accidental_interpreter_compilation_are_rejected(self):
++        rows = [self.row(job) for job in driver.inventory(3)]
++        broken = copy.deepcopy(rows)
++        del broken[0]['total_ns_through_evaluations']['1000000']
++        with self.assertRaises(ValueError):
++            driver.validate_results(broken, 3, 1_000_000)
++        broken = copy.deepcopy(rows)
++        row = next(row for row in broken if row['engine'] == 'truffle-interpreter')
++        row['guest_compiled_at_checkpoint']['1000000'] = True
++        with self.assertRaises(ValueError):
++            driver.validate_results(broken, 3, 1_000_000)

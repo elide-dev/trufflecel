@@ -1,0 +1,41 @@
+{
+  "createdUtc": "2026-11-08T16:24:42.261926+00:00",
+  "baseline": "67921ff",
+  "ast": "4ffe7ea",
+  "harness": "4df7775",
+  "astPlusSharedLayout": "3ea7c78 (cherry-pick of f35e2f0 onto AST+harness)",
+  "host": {
+    "cpu": "Apple M5 Max",
+    "memoryBytes": 51539607552,
+    "os": "macOS 26.6.2 (25G83)",
+    "architecture": "arm64"
+  },
+  "bazel": "9.3.2",
+  "graalvmPin": "25.5.5-elide.27",
+  "runtime": "25.0.4.1.1+1-jvmci-25.5-b24",
+  "sampling": "five explicit GC samples 50ms apart before/live/released; use per-batch minimum; summarize rounds 1 and 2; round 0 retained as priming evidence",
+  "processes": 37,
+  "countPerProcessRound": 10000,
+  "sourceHashes": {
+    "src/main/java/dev/trufflecel/ExprNode.java": "c6109e497c9c3841ba68ef3c3523589a9eaba94c14046f2fc2c5c4fc2fe9f935",
+    "src/main/java/dev/trufflecel/Program.java": "fdaed620f2b94fec0cbf9950d5288fb1f84a0b53d65dd7dbf8424faddf28290a",
+    "benchmarks/retained/RetainedHeap.java": "5224eb249c4112a8dea4e4d1fadf2d8bb169b486a6b57dc7dc3624b310111a49"
+  },
+  "productionPatches": {
+    "baseline-to-ast.patch": {
+      "sha256": "a605550a0ad448037b2f402f5a057301d6d7ced66f2e11ec94a2032b84c91e27",
+      "base": "67921ff",
+      "target": "4ffe7ea",
+      "scope": "src/main/java",
+      "productionTree": "a6582cc71114474e513789ad40f2635bbcb886b5"
+    },
+    "baseline-to-ast-shared.patch": {
+      "sha256": "9b80101b10ff706ebb387230b3efb0bead65bbc7c494ae5cae1f24417e0b81db",
+      "base": "67921ff",
+      "target": "3ea7c78",
+      "scope": "src/main/java",
+      "productionTree": "c2f2a76a0aa76aee1b46cf2a02e53bad6b27db3f"
+    }
+  },
+  "integratedHarness": "001908d"
+}

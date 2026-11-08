@@ -99,6 +99,7 @@ public final class Lifecycle {
       for (int i = 0; i < 4; i++)
         if (!Workloads.expected(workload, i).equals(evaluation.run(i)))
           throw new AssertionError("Wrong result: " + workload);
+      out.put("regex_path", e.qualifyRegex(workload));
       System.out.println(new Gson().toJson(out));
     }
   }

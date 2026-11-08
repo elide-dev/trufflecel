@@ -1,9 +1,106 @@
 # Benchmark methodology and results
 
+## November 8 memory reductions
+
+The [paired evaluation allocation report](benchmarks/evaluation-allocation-20261108/README.md)
+measures the combined 0.10.0 candidate against the completed functionality baseline.
+The ordinary interpreted scalar falls from 128 to 96 bytes per call. A separate
+fixture reading one converted binding falls from 4,192 to 168 bytes with 1,000
+declarations; the final allocation stays at 168 bytes with 1, 69, or 1,000 declarations.
+Controlled calls remain at their baseline allocation in the matched comparison.
+Compile-and-evaluate controls also allocate less; neither diagnostic measures throughput.
+
+The final combined section of the
+[retained Program report](benchmarks/retained-20261108/README.md#combined-production-follow-up)
+measures a 51.9% reduction for 10,000 distinct scalar Programs sharing a 69-declaration
+Environment, and 56.4% for Programs instantiated from one shared PreparedProgram.
+These incremental live-Java-heap results exclude the shared environment and runtime,
+which are already present before caching. They do not measure native process RSS.
+Raw samples, unchanged intermediate results, reproduction patches, and limitations
+are preserved in the reports.
+
+The [paired ingestion report](benchmarks/ingestion-20261108/README.md) removes one
+redundant wire-array copy from protobuf decoding. Ordinary decode allocation falls
+from 5,366 to 5,152 B/op on the JVM and 4,834 to 4,628 B/op in Native Image. Adding a
+64 KiB unknown payload increases the saving to about 65.7 KB per decode on either
+runtime. Unprofiled ordinary decode timing ranges overlap; this establishes an
+allocation saving without a throughput claim. Bound generated-message snapshots
+remain a tradeoff: slower on the measured JVM fixture and more allocation for the
+ordinary native fixture. Remaining unknown-byte staging is tracked in
+[TruffleData #38](https://github.com/elide-dev/truffledata/issues/38), with separate
+qualification requested for its unreleased 0.10.0 slab decoder.
+
+The [CodSpeed check](https://github.com/elide-dev/trufflecel/runs/128794753405)
+classified all 21 benchmarks as unchanged for `07a3fe4` against the actual
+functionality base `547c9fc`. It detected no timing regression in that suite; it
+does not turn the allocation reductions into a measured throughput improvement.
+The [native phase investigation](#native-memory-by-execution-phase-graalvm-27)
+separately evaluates compiler and heap settings, with matched cel-java controls.
+Its production baseline is unchanged; no embedding defaults are changed by the
+library memory optimizations.
+
 ## Representative comparisons
 
-See the [November 5 dedicated-host report](benchmarks/representative-20261105/README.md)
-for measured results, raw data, uncertainty and follow-up priorities.
+The [November 8 six-fixture report](benchmarks/evaluation-refresh-20261108/README.md)
+records production candidate `67ab33c`, GraalVM 25.5.5-elide.27, TruffleData 0.9.0 and
+the existing RE2/J path. It contains all six fixtures, four input variants and full
+69-binding activations except the explicitly single-binding scalar. The repeated
+fixture materializes 77–80 output elements from 128 input elements. Comparators
+include cel-java's default planner and constant-folding/CSE planner on both JVM and
+Native Image.
+
+Using the lower of cel-java's two modes separately for each metric, the ordinary-Map
+protocol records lower TruffleCEL time in all 24 runtime/mode/fixture comparisons,
+lower current-thread allocation in 23 with one tie, lower current RSS in 9, and lower
+lifetime peak RSS in 10. The 24 JMH
+cells each use three forks; 72 native timing processes and 144 separate allocation/RSS
+processes complete the matrix. These are descriptive point estimates from an observed
+low-load shared host with fixed affinity, not universal engine rankings. RSS includes
+setup, calibration, compilation and fixed sampled work at an uncontrolled GC point;
+guest JIT also has 2,000 additional preparation evaluations and forced compilation.
+It is not retained heap or equal total work since process launch.
+
+The full-input maps are JDK unmodifiable maps. cel-java's public `eval(Map)` copies
+their entries on each evaluation, while its Guava `ImmutableMap` path reuses the
+caller-prepared map. The [paired input-representation controls](benchmarks/cel-java-inputs-20261108/README.md)
+isolate this distinction for scalar-wide and protobuf policy on both runtimes, with
+default and optimized planners. Both control forms capture four complete maps in the
+same array and use the same evaluation lambda; caller-side preparation is outside
+the timing/allocation intervals. The original matrix is preserved rather than
+reinterpreted as a comparison of every optimized embedding path.
+
+Across the 96 supplemental control processes, immutable inputs reduce cel-java's
+allocation by 2,864 B/op on the JVM and 3,384 B/op on native in all eight matched
+runtime/workload/planner cells. Scalar-wide allocation falls from 2,936 to 72 B/op
+on the JVM and 3,504 to 120 B/op on native; its paired evaluation speedup is about
+20–22×. Protobuf-policy speedup is 1.78–1.85× on the JVM and 2.01–2.37× on native.
+These compare the two cel-java input forms inside one artifact, not separate-report
+measurements of a revision change or a matched ranking against every TruffleCEL path.
+
+Both reports preserve this RE2/J baseline. The separate
+[paired TruffleRegex RE2 qualification](benchmarks/regex-re2-20261108/README.md)
+compares that production code with the scoped constant-match candidate on the same
+regex workload and an unrelated scalar-wide control. It includes 24 JVM JMH forks,
+24 native timing processes, 48 allocation/RSS processes and 32 first-result launches.
+Every candidate regex cell must prove actual acceleration before being marked complete.
+
+Regex guest-JIT time improves 10.92% on JVM and 11.20% on native, while allocation
+increases by 6 and 4 B/op respectively. Current JIT RSS rises 10.28% on JVM and
+16.54% on native. Interpreter allocation also increases; native interpreter time has
+overlapping fork ranges and a 1.14% higher point estimate. Scalar-wide allocation
+is unchanged, but its timing point estimates rise 1.96–4.24%, with disjoint native-JIT
+ranges. The combined native benchmark executables grow 9.3–9.6 MiB. These results
+describe a speed/footprint tradeoff, not a memory optimization or a new ranking
+against cel-java. The report preserves all controls and costs.
+
+A [separate cached-dispatch experiment](benchmarks/regex-dispatch-20261108/README.md)
+was rejected. All eight timing-pair ranges overlap; native regex JIT RSS rises
+7.11% despite small JIT allocation savings. The prototype and its extra dispatch
+root were removed. Its complete negative evidence is preserved, and the simpler
+initial adapter remains the selected implementation.
+
+The [November 5 report](benchmarks/representative-20261105/README.md) remains historical
+evidence with its original dependencies, raw data and methodology.
 
 `//benchmarks/representative` is the response to the methodology gaps in the historical
 three-expression suite. It compares the same CEL sources and four independently checked
@@ -69,6 +166,16 @@ The [released 0.9.0 evidence matrix](benchmarks/release-0.9.0-20261108/README.md
 separates small-suite wins, memory losses, historical representative results and
 unmeasured categories. `Startup` and `tools/bench/startup.py` address the previously
 missing launch interval; adding the harness is not a startup performance result.
+
+The [2026-11-08 candidate startup/payback report](benchmarks/startup-payback-20261108/README.md)
+now records 285 launch-to-first-result processes and 54 natural-compilation reuse
+processes on pinned GraalVM 25.5.5-elide.27. Native runtime-prepared startup medians
+favor TruffleCEL across the six fixtures, with overlapping scalar ranges; JVM scalar
+startup remains slower. Native repeated-list guest JIT first wins at the 100,000
+sample, native scalar-wide/policy and JVM repeated-list at one million, while JVM
+scalar-wide/policy show no payback through one million. Those are post-compilation sampled
+process-range comparisons, not precise crossover points. The report preserves raw
+outputs, runtime/source hashes, controls and preparation boundaries.
 
 The parent process starts a monotonic clock immediately before `Popen`. The child
 flushes one readiness marker only after its first evaluation matches an independent
@@ -223,6 +330,14 @@ snapshots, including allocation samples and semantic edge cases. It is a direct 
 measurement on a shared host; equality, hashing and ingestion remain separate follow-ups.
 
 ### Prepared-input cold curves and native throughput
+
+`tools/bench/focused_payback.py` supplies the bounded full-map subset used in the
+[2026-11-08 report](benchmarks/startup-payback-20261108/README.md): scalar-wide,
+protobuf policy and materialized repeated-list workloads across JVM runtime, native
+runtime and native image preparation, with three forks per execution mode and
+checkpoints through one million evaluations. Its inventory and tier validation are
+independent of whether a favorable crossing is observed. The report's `run.sh`
+preserves the exact invocation; profiling runs remain separate from these timings.
 
 `PreparedLifecycle` measures ordinary map entry, explicit snapshot reuse and creation
 of a fresh snapshot for every evaluation. Its cold modes include runtime configuration,
@@ -858,6 +973,101 @@ On Linux, reproduce one cell after building `//benchmarks/comparison:svm`:
 Replace the engine with `cel-java` for the paired measurement, repeat in fresh processes,
 and omit the runtime option for the default. An application compiling in its application
 isolate must also assess GC interference under its own concurrency and workload.
+
+### Native memory by execution phase (GraalVM .27)
+
+The [phase attribution report](benchmarks/native-memory-phases-010.json) preserves
+three fresh forks of every scalar/policy/comprehension configuration, with paired
+TruffleCEL and cel-java processes in one RBE action. Profiling pauses the child at
+startup, context creation, preparation, first results, warmup, last-tier compilation,
+fixed evaluation, application GC, idle, and context close. Separate fresh processes
+measure timing. The report retains all phase counters and timing samples, the exact
+commands, binary/source identities, and links/digests for compressed Linux mapping
+snapshots. This is an embedding-configuration experiment on production baseline
+`67921ff`, not a measurement of the subsequent library optimizations.
+
+Both engines use the same combined executable, Serial GC and an explicit
+`-Xmx512m` budget on the same reported `AMD EPYC` host (Linux 5.15, seven available
+logical CPUs). These absolute numbers are not interchangeable with the default
+comparison charts or standalone executable footprints. Each table cell is
+**TruffleCEL / cel-java**; RSS is current `smaps_rollup.Rss` immediately after the
+fixed evaluation workload, and times are medians of per-fork medians.
+
+| Configuration | Scalar RSS (MiB) | Policy RSS (MiB) | Comprehension RSS (MiB) | Comprehension time (ns) |
+| --- | ---: | ---: | ---: | ---: |
+| Default | 66.51 / 70.43 | 83.70 / 70.36 | 130.41 / 65.99 | 86.67 / 559.87 |
+| Compiler in application isolate | 57.65 / 70.59 | 74.79 / 70.64 | 93.91 / 65.77 | 88.00 / 557.32 |
+| Separate compiler heap capped at 16 MiB | 65.64 / 70.51 | 79.02 / 70.63 | 113.16 / 65.77 | 86.55 / 561.50 |
+| Compiler in application isolate, `MaxHeapFree=32m` | 57.66 / 54.14 | 74.88 / 53.77 | 77.22 / 54.11 | 96.25 / 605.37 |
+
+Sharing the compiler keeps the three TruffleCEL median evaluation times within
+1.6% of their defaults while reducing current RSS. The 16 MiB compiler cap also
+preserves steady evaluation time in these fixtures, but comprehension warmup plus
+last-tier compilation increases from 60.7 to 71.0 ms. Limiting retained free chunks
+to 32 MiB reduces current resident memory further, with an approximately 11%
+comprehension slowdown relative to default. Its Linux lifetime high-water counter
+remains about 93.1 MiB, the same as the shared-compiler configuration without the
+cap. Current memory reclamation and startup peak reduction are different outcomes.
+No embedding option or benchmark threshold is changed by this investigation.
+
+Application heap accounting explains another part of the gap. After application
+GC, comprehension reports only 0.81 MiB used but 47.31 MiB committed in the default
+application isolate; RSS is still 127.98 MiB. With the compiler in that isolate,
+the corresponding figures are 1.81 MiB used, 49.31 MiB committed and 91.42 MiB RSS.
+The compiler cap leaves application heap commitment at 47.31 MiB while lowering
+RSS to 110.73 MiB. These observations distinguish application free-chunk retention
+from the additional footprint of separate compilation. They do not assign every
+anonymous mapping to a particular isolate or measure retained bytes per program.
+
+A second action repeats comprehension with three forks and a 12-second idle period,
+exceeding the effective 10-second compiler and graph-cache idle delays recorded from
+each target. It does not reclaim the remaining footprint: default RSS is 127.98 MiB
+after application GC and 128.04 MiB after idle plus another GC. The shared-compiler
+figures are 91.53 and 91.58 MiB; the compiler-cap figures are 110.78 and 110.84 MiB.
+Closing the Polyglot context also leaves these resident pages in place. This context
+does not own the Java API target's standalone engine, so context closure is not a
+test of compiler-engine disposal or proof that all target references were released.
+The excess is still resident at the measured idle
+point, rather than disappearing at the configured idle delay.
+
+`MemoryMXBean` supplies the heap counters: the pinned Native Image Serial GC
+implementation's `Runtime.totalMemory()` returns its maximum heap budget, not
+committed memory. `System.gc()` operates on the application isolate, so it does
+not collect a separate compiler isolate. The report also keeps PSS, file/anonymous
+mapping classes and Linux `VmHWM`; the latter is accounted separately and can lag
+the current `smaps` RSS value.
+
+The probe uncovered a [GraalVM .27 non-heap accounting defect](benchmarks/graalvm-nonheap-counter-issue.md).
+With a shared compiler, the management bean can return implausibly small positive
+values and subsequently throw for negative runtime-code sizes after GC. Such
+getter failures are explicitly `null` with their error text, rather than zero or
+omitted phases; suspect positive readings remain recorded but are unreliable.
+Independent executable anonymous mappings occupy 20 KiB after
+comprehension evaluation in all three compiler configurations; file-backed compiler
+and runtime code is accounted separately. The upstream report remains a draft.
+Correctness, checksums, effective target options and last-tier validity remain
+mandatory throughout the diagnostic.
+
+All 45 engine comparisons completed across the two actions, using 90 profiled
+processes and 90 fresh timing processes. The focused counter tests,
+effective-option smoke, profiler-driver tests,
+native comparison smoke and Linux native JIT/blocklist gate also pass. The raw
+report retains 93 explicitly unavailable non-heap readings; they are a limitation
+of the upstream counter, not missing RSS/heap samples or waived CEL checks.
+
+To reproduce the three-fork matrix, use the recorded command in the report or:
+
+```sh
+bazel test //benchmarks/comparison:memory_diagnostic \
+  --test_env=MEMORY_SOURCE_REVISION="$(git rev-parse HEAD)" \
+  --test_env=MEMORY_FORKS=3 --test_env=MEMORY_IDLE_MS=0 \
+  --test_env=MEMORY_VARIANTS=default,shared-compiler,bounded-compiler,shared-free-32m
+```
+
+The original harness commits `d51d535`, `8d87446` and `aa70c27` correspond to the
+reachable PR commits `9427bb1`, `171cc15` and `092d3b1`, respectively. Applying those
+harness changes to baseline `67921ff` reproduces the recorded production inputs.
+The historical compiler-isolate measurements above remain unchanged.
 
 
 ## Explicit Java host entry

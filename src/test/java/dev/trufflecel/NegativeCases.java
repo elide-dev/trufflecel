@@ -1290,14 +1290,7 @@ public final class NegativeCases {
         .error(CelException.Code.DIVIDE_BY_ZERO);
     c("variable-optional-fallback-evaluated", "m.?missing.orValue(string(x / 0))")
         .error(CelException.Code.DIVIDE_BY_ZERO, "DIVIDE_BY_ZERO");
-    c("binding-initializer-error", "cel.bind(v, 1 / 0, true)")
-        .upstream(
-            Upstream.diverges(
-                Upstream.accepts(),
-                "cel-java evaluates cel.bind initializers lazily; the standard comprehension"
-                    + " expansion evaluates the accumulator initializer eagerly"))
-        .strict(CelException.Code.DIVIDE_BY_ZERO)
-        .error(CelException.Code.DIVIDE_BY_ZERO);
+    c("binding-initializer-error", "cel.bind(v, 1 / 0, true)").value(true);
     c("block-unused-slot-error", "cel.block([1 / 0], true)")
         .upstream(
             Upstream.notApplicable("cel.block is produced by cel-java's optimizer, not parsed"))
