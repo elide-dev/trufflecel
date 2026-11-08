@@ -70,6 +70,13 @@ public class LateFunctionTest {
             .lateFunction("late", "late_int", false, List.of(CelType.INT), CelType.STRING, true)
             .build();
     assertEquals("error", env.compile("recover(1 / 0)").evaluate());
+    var strict =
+        Cel.newBuilder()
+            .validation(Environment.Validation.STRICT)
+            .nonStrictFunction(
+                "recover", "recover", false, List.of(CelType.INT), CelType.INT, a -> 7L)
+            .build();
+    assertEquals(7L, strict.compile("recover(1 / 0)").evaluate());
     assertEquals("unknown", env.compile("recover(x)").evaluate(Map.of("x", Unknown.of("x"))));
     assertEquals("value", env.compile("recover(2)").evaluate());
     assertEquals(

@@ -221,6 +221,7 @@ public final class Environment {
           node.offset);
     if (source.isEmpty()) assignMissingIds(node, nextId);
     FieldPlan.prepare(node, this);
+    node.resolveLazyBindings(Map.of());
     node = Optimizer.optimize(node, this, source);
     // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
     // string used as a list index) become type findings once the folds are known.

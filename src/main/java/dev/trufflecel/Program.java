@@ -54,6 +54,7 @@ public final class Program {
     // plain targets replace folded subtrees with their prebuilt values and failures.
     if (truffleSource == null) body = Optimizer.rewrite(body.lowerUninstrumented());
     body.resolveBlocks(null);
+    body.resolveLazyBindings(Map.of());
     boolean hasBindings = body.hasBindings();
     boolean frameLocals = hasBindings && truffleSource == null && !body.escapesContext();
     FrameDescriptor frameDescriptor = frameLocals ? new FrameDescriptor() : null;
@@ -147,6 +148,8 @@ public final class Program {
               if (node instanceof ExprNode expression) expression.boundaryReads = true;
               return true;
             });
+        body.resolveBlocks(null);
+        body.resolveLazyBindings(Map.of());
         controlledTarget =
             new ExpressionRoot(body, environment, true, null, null, original.getFrameDescriptor())
                 .getCallTarget();

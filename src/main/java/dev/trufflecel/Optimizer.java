@@ -385,14 +385,19 @@ final class Optimizer {
   /** Whether an error in child {@code i} propagates from {@code n} whatever its siblings yield. */
   private boolean strictPosition(ExprNode n, int i, int depth) {
     return switch (n.kind) {
-      case CALL ->
-          switch (n.name) {
-            case "&&", "||", "@not_strictly_false" -> false;
-            case "or", "orValue" -> i == 0;
-            default -> siblingsConstant(n, i, depth);
-          };
+      case CALL -> {
+        boolean nonStrict = false;
+        for (var signature : env.overloads.getOrDefault(n.name, List.of()))
+          nonStrict |= signature.nonStrict();
+        yield !nonStrict
+            && switch (n.name) {
+              case "&&", "||", "@not_strictly_false" -> false;
+              case "or", "orValue" -> i == 0;
+              default -> siblingsConstant(n, i, depth);
+            };
+      }
       case CONDITIONAL -> i == 0;
-      case MACRO -> n.name.equals("has") || n.name.equals("bind") || i == 0;
+      case MACRO -> n.name.equals("bind") ? i == 1 : n.name.equals("has") || i == 0;
       case COMPREHENSION -> i != 2 && i != 3;
       case BLOCK -> i == n.children.length - 1;
       default -> true;

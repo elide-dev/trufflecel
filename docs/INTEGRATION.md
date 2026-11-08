@@ -359,3 +359,10 @@ configuration into an independent builder. Declarations, constants, explicit hos
 object adapters, aliases, extension restrictions and resource limits are preserved. Adding a
 declaration to the new builder does not change the original environment; registered callbacks
 and adapters retain their existing application-owned lifetime and thread-safety contracts.
+
+
+`cel.bind(name, initializer, body)` is lazy: the initializer runs on the first read, in the
+captured outer lexical scope, and its value or CEL error is memoized for that binding only.
+An unused initializer consumes no evaluation budget and produces no host side effects.
+Debugger scopes show `<lazy>` before the first read; the initializer's source events occur
+when that read evaluates it. Each evaluation and each comprehension iteration has fresh slots.

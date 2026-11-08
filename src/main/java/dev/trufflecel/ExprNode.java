@@ -30,6 +30,32 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode lazyInitializer;
+
+  void resolveLazyBindings(Map<String, ExprNode> owners) {
+    if (kind == Kind.IDENT) {
+      lazyInitializer = owners.get(name);
+      return;
+    }
+    if (kind == Kind.MACRO && bindings != null) {
+      children[0].resolveLazyBindings(owners);
+      var nested = new HashMap<>(owners);
+      for (String variable : (String[]) value) nested.remove(variable);
+      if (name.equals("bind")) nested.put(((String[]) value)[0], children[0]);
+      for (int i = 1; i < children.length; i++) children[i].resolveLazyBindings(nested);
+    } else if (kind == Kind.COMPREHENSION) {
+      children[0].resolveLazyBindings(owners);
+      children[1].resolveLazyBindings(owners);
+      var nested = new HashMap<>(owners);
+      String[] names = (String[]) value;
+      for (String variable : names) nested.remove(variable);
+      children[2].resolveLazyBindings(nested);
+      children[3].resolveLazyBindings(nested);
+      var result = new HashMap<>(owners);
+      result.remove(names[0]);
+      children[4].resolveLazyBindings(result);
+    } else for (ExprNode child : children) child.resolveLazyBindings(owners);
+  }
 
   void resolveBlocks(ExprNode owner) {
     if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
@@ -170,6 +196,7 @@ class ExprNode extends CelNode {
     if (kind == Kind.IDENT) return name.startsWith(".");
     if (kind == Kind.COMPREHENSION
         || kind == Kind.BLOCK
+        || kind == Kind.MACRO && name.equals("bind")
         || extensionCall
         || kind == Kind.SELECT && fieldPlan == null
         || kind == Kind.OBJECT
@@ -460,7 +487,8 @@ class ExprNode extends CelNode {
           checkedValue(
               localSlot >= 0
                   ? (frameLocalReads ? frame.getAuxiliarySlot(localSlot) : ctx.getLocal(localSlot))
-                  : boundaryReads ? ctx.getBoundary(name) : ctx.get(name));
+                  : boundaryReads ? ctx.getBoundary(name) : ctx.get(name),
+              frame);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
         Object a = children[0].execute(frame, ctx), b = children[1].execute(frame, ctx);
@@ -496,7 +524,9 @@ class ExprNode extends CelNode {
     };
   }
 
-  private static Object checkedValue(Object value) {
+  private Object checkedValue(Object value, VirtualFrame frame) {
+    if (lazyInitializer != null && value instanceof LazyBinding lazy)
+      value = lazy.read(lazyInitializer, frame);
     if (value instanceof CelException error) throw error;
     return value;
   }
@@ -712,12 +742,19 @@ class ExprNode extends CelNode {
     private final VirtualFrame frame;
     private final EvalContext context;
     private final Object[] results;
+    private final long[] costs;
     private int depth;
 
     BlockScope(ExprNode[] expressions, VirtualFrame frame, EvalContext context) {
+      this(expressions, frame, context, false);
+    }
+
+    BlockScope(
+        ExprNode[] expressions, VirtualFrame frame, EvalContext context, boolean replayCost) {
       this.frame = frame;
       this.context = context;
       results = new Object[expressions.length - 1];
+      costs = replayCost ? new long[results.length] : null;
     }
 
     Object read(ExprNode initializer, int index, VirtualFrame callerFrame) {
@@ -742,6 +779,7 @@ class ExprNode extends CelNode {
           throw Values.error(
               CelException.Code.RESOURCE_EXHAUSTED, "block evaluation nesting limit exceeded");
         depth++;
+        long before = context.charged();
         try {
           EvalContext localContext = context.fork();
           result =
@@ -749,30 +787,66 @@ class ExprNode extends CelNode {
                   ? initializer.execute(callerFrame, localContext)
                   : instrumentedInitializer(initializer, localContext);
         } catch (CelException e) {
+          if (costs != null) throw e;
           result = e;
         } finally {
           depth--;
         }
+        if (costs != null) costs[index] = context.charged() - before;
         results[index] = result;
-      }
+      } else if (costs != null) context.charge(costs[index]);
       if (result instanceof CelException error) throw error;
       return result;
     }
   }
 
+  /** A binding owns one lexical snapshot and evaluates its initializer at most once. */
+  static final class LazyBinding {
+    private final EvalContext context;
+    private final com.oracle.truffle.api.frame.MaterializedFrame frame;
+    private Object result;
+
+    LazyBinding(ExprNode initializer, VirtualFrame frame, EvalContext context) {
+      this.context = context.fork();
+      this.frame = initializer.getSourceSection() == null ? null : frame.materialize();
+    }
+
+    Object read(ExprNode initializer, VirtualFrame caller) {
+      if (result == null) {
+        try {
+          result =
+              frame == null ? initializer.execute(caller, context) : readInstrumented(initializer);
+        } catch (CelException error) {
+          result = error;
+        }
+      }
+      if (result instanceof CelException error) throw error;
+      return result;
+    }
+
+    @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+    private Object readInstrumented(ExprNode initializer) {
+      return initializer.execute(forkFrame(frame, context), context);
+    }
+
+    Object display() {
+      return result == null ? "<lazy>" : result;
+    }
+  }
+
   private Object macro(VirtualFrame frame, EvalContext ctx) {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
-    Object range = children[0].execute(frame, ctx);
-    if (range instanceof Unknown) return range;
-    String[] variables = (String[]) value;
     if (name.equals("bind")) {
-      bindings[0].execute(frame, ctx, range);
+      bindings[0].execute(frame, ctx, new LazyBinding(children[0], frame, ctx));
       try {
         return children[1].execute(frame, ctx);
       } finally {
         bindings[0].clear(frame, ctx);
       }
     }
+    Object range = children[0].execute(frame, ctx);
+    if (range instanceof Unknown) return range;
+    String[] variables = (String[]) value;
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;

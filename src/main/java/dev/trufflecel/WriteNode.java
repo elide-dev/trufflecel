@@ -33,7 +33,7 @@ class WriteNode extends CelNode {
 
   @GenerateWrapper.OutgoingConverter
   final Object instrumentResult(Object result) {
-    return GuestValue.wrap(result);
+    return GuestValue.wrap(result instanceof ExprNode.LazyBinding lazy ? lazy.display() : result);
   }
 
   @Override
