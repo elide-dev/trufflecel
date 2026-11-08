@@ -83,8 +83,9 @@ timing claim is derived from this harness.
 
 ## Separate unprofiled timing
 
-The timing runs use the unchanged `IngestionStages` JMH harness on the dedicated
-Linux Threadripper host, pinned to CPUs 2–9. Source revisions alternate between
+The timing runs use the unchanged `IngestionStages` JMH harness on an observed
+low-load, shared Linux Threadripper host, pinned to CPUs 2–9. CPUs are not isolated
+from other host processes. Source revisions alternate between
 fork groups. Each cell has three independent forks, each with three 500 ms warmup
 and three 500 ms measurement iterations. Heap limits are 512 MiB and the host
 compiler is C2. No allocation profiler, JFR session, other agent measurement, or
@@ -148,7 +149,10 @@ The fixture smoke passes all eligible operations over four inputs. The productio
 candidate also passed [69 test targets](https://app.buildbuddy.io/invocation/37adbeb1-8204-4ce7-8f2e-e2e1ab93c663),
 including complete conformance, protobuf ownership/concurrency regressions, compiled
 allocation gates, native comparisons, native guest-JIT/blocklist checks, and
-image-prepared programs. Native allocation-only qualification is separate from
+image-prepared programs. Full-source coverage is 8,104/8,114 lines (99.88%) and
+7,452/7,465 branches (99.83%), passing both 99.8% floors in the
+[coverage run](https://app.buildbuddy.io/invocation/9ced6f42-d5ee-4221-99a7-d9eb36a546d6).
+Native allocation-only qualification is separate from
 this report; these JVM allocation figures do not claim Native Image object sizes
 or timing.
 
