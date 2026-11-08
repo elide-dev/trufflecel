@@ -130,7 +130,13 @@ public final class Environment {
 
   /** Reject trees deeper than the configured limit before any recursive traversal. */
   long checkDepth(ExprNode node) {
+    return checkDepth(node, null);
+  }
+
+  private long checkDepth(ExprNode node, String source) {
     record Pending(ExprNode node, int depth) {}
+    boolean parsed = source != null && !source.isEmpty();
+    int[] lines = parsed ? lineOffsets(source) : null;
     var pending = new ArrayDeque<Pending>();
     pending.push(new Pending(node, 1));
     int count = 0;
@@ -139,54 +145,60 @@ public final class Environment {
       if (++count > maxAstNodes)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST node limit exceeded");
       Pending item = pending.pop();
-      nextId = Math.max(nextId, item.node().canonicalId + 1);
       if (item.depth() > maxDepth)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "AST depth limit exceeded");
-      for (ExprNode child : item.node().children)
-        pending.push(new Pending(child, item.depth() + 1));
+      ExprNode current = item.node();
+      if (parsed) {
+        // Nonempty source comes directly from Parser; imported canonical trees use empty source.
+        current.canonicalId = count;
+        current.errorOffset = current.offset;
+        int line = lines == null ? 0 : Arrays.binarySearch(lines, current.offset);
+        if (line < 0) line = -line - 2;
+        current.errorLine = line + 1;
+        current.errorColumn = current.offset - (lines == null ? 0 : lines[line]) + 1;
+      } else nextId = Math.max(nextId, current.canonicalId + 1);
+      for (ExprNode child : current.children) pending.push(new Pending(child, item.depth() + 1));
     }
     return nextId;
   }
 
-  private static void locateNodes(String source, ExprNode root, long nextId) {
-    // The tree has already passed checkDepth. Keep the common single-line source path free of
-    // traversal collections and boxed offsets; error metadata belongs to nodes, not a side table.
+  private static int[] lineOffsets(String source) {
     int count = 1;
     for (int i = source.indexOf('\n'); i >= 0; i = source.indexOf('\n', i + 1)) count++;
-    int[] lines = count == 1 ? null : new int[count];
-    if (lines != null) {
-      int line = 1;
-      for (int i = 0; i < source.length(); i++) if (source.charAt(i) == '\n') lines[line++] = i + 1;
-    }
-    locateNodes(root, nextId, !source.isEmpty(), lines);
+    if (count == 1) return null;
+    int[] lines = new int[count];
+    int line = 1;
+    for (int i = source.indexOf('\n'); i >= 0; i = source.indexOf('\n', i + 1))
+      lines[line++] = i + 1;
+    return lines;
   }
 
-  private static long locateNodes(ExprNode node, long nextId, boolean source, int[] lines) {
+  private static long assignMissingIds(ExprNode node, long nextId) {
     if (node.canonicalId == 0) node.canonicalId = nextId++;
-    if (source) {
-      node.errorOffset = node.offset;
-      int line = lines == null ? 0 : Arrays.binarySearch(lines, node.offset);
-      if (line < 0) line = -line - 2;
-      node.errorLine = line + 1;
-      node.errorColumn = node.offset - (lines == null ? 0 : lines[line]) + 1;
-    }
-    for (ExprNode child : node.children) nextId = locateNodes(child, nextId, source, lines);
+    for (ExprNode child : node.children) nextId = assignMissingIds(child, nextId);
     return nextId;
   }
 
   PreparedProgram prepare(String source, ExprNode node, boolean check) {
-    long nextId = checkDepth(node);
+    long nextId = checkDepth(node, source);
     Map<String, CelType> declarations = variables;
     if (inferVariables) {
       var free = new TreeSet<String>();
       node.free(Set.of(), free);
+      boolean mutable = false;
       for (String name : free)
         if (resolve(name, constants.keySet()) == null
             && resolve(name, objectTypes.keySet()) == null
             && builtinType(name) == null
             && resolve(name, declarations.keySet()) == null) {
-          if (declarations == variables) declarations = new LinkedHashMap<>(variables);
-          declarations.put(name, CelType.DYN);
+          if (declarations.isEmpty()) declarations = Map.of(name, CelType.DYN);
+          else {
+            if (!mutable) {
+              declarations = new LinkedHashMap<>(declarations);
+              mutable = true;
+            }
+            declarations.put(name, CelType.DYN);
+          }
         }
     }
     var checker = new Checker(this, declarations, check);
@@ -196,7 +208,7 @@ public final class Environment {
           CelException.Code.TYPE,
           "expected result type " + expectedResultType + ", got " + result,
           node.offset);
-    locateNodes(source, node, nextId);
+    if (source.isEmpty()) assignMissingIds(node, nextId);
     FieldPlan.prepare(node, this);
     node = Optimizer.optimize(node, this, source);
     // Folded values have precise types, so hidden mismatches (for example a dyn-wrapped
