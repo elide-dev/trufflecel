@@ -8,6 +8,36 @@ import org.junit.Test;
 
 public class LateFunctionTest {
   @Test
+  public void returnedErrorsAndLegacyDeclarationsRetainTheirContract() {
+    var binding =
+        new Environment.FunctionBinding(List.of(CelType.INT), CelType.INT, args -> args.getFirst());
+    var overload = new Environment.FunctionOverload("legacy", false, binding);
+    assertFalse(overload.nonStrict());
+    assertFalse(overload.lateBound());
+    var env =
+        Cel.newBuilder()
+            .nonStrictFunction(
+                "pass",
+                "pass_int",
+                false,
+                List.of(CelType.INT),
+                CelType.INT,
+                args -> args.getFirst())
+            .build();
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> env.compile("pass(1/0)").evaluate()).code());
+    var late =
+        Cel.newBuilder()
+            .lateFunction("late", "late", false, List.of(), CelType.INT)
+            .build()
+            .compile("late()");
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        late.evaluateWithDetails(Map.of(), EvaluationOptions.newBuilder().build()).error().code());
+  }
+
+  @Test
   public void implementationsArePerCallAndOverloadIdsAreChecked() throws Exception {
     var env =
         Cel.newBuilder()

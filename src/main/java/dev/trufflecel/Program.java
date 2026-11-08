@@ -68,7 +68,10 @@ public final class Program {
     if (contextInArguments)
       body.accept(
           node -> {
-            if (node instanceof ExprNode expression) expression.boundaryReads = true;
+            if (node instanceof ExprNode expression) {
+              expression.boundaryReads = true;
+              expression.instrumentedSource = truffleSource != null;
+            }
             return true;
           });
     body.rootBody = true;
@@ -168,7 +171,7 @@ public final class Program {
     return controlledTarget;
   }
 
-  private synchronized RootCallTarget traceTarget() {
+  synchronized RootCallTarget traceTarget() {
     if (traceTarget == null) {
       var original = (ExpressionRoot) target.getRootNode();
       ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body).restoreTrace();
@@ -178,7 +181,11 @@ public final class Program {
       body.resolveLocals(new ArrayList<>(), null);
       body.accept(
           node -> {
-            if (node instanceof ExprNode expression) expression.boundaryReads = true;
+            if (node instanceof ExprNode expression) {
+              expression.boundaryReads = true;
+              expression.observe = true;
+              expression.instrumentedSource = false;
+            }
             return true;
           });
       body.rootBody = true;

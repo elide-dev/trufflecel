@@ -83,12 +83,12 @@ public class BorrowedBindingsTest {
     source.put(null, null);
     var bindings = new BorrowedBindings(source, Map.of("x", 0));
     var context = new EvalContext(Cel.newBuilder().build(), bindings);
-    assertEquals(1L, context.get("x"));
+    assertEquals(1L, context.getRoot("x"));
     var visible = context.visibleBindings();
     assertEquals(Arrays.asList("x", "extra", null), new ArrayList<>(visible.keySet()));
     assertEquals(List.of(2L), visible.get("extra"));
     assertEquals(CelNull.INSTANCE, visible.get(null));
-    assertEquals(1L, context.fork().get("x"));
+    assertEquals(1L, context.fork().getRoot("x"));
     assertEquals(Integer.valueOf(1), source.get("x"));
   }
 

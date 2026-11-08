@@ -58,6 +58,8 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean deferAttribute;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean observe;
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean instrumentedSource;
 
   void resolveAttributes(boolean defer) {
     deferAttribute = defer;
@@ -215,7 +217,6 @@ class ExprNode extends CelNode {
     if (kind == Kind.IDENT) return name.startsWith(".");
     if (kind == Kind.COMPREHENSION
         || kind == Kind.BLOCK
-        || kind == Kind.MACRO && name.equals("bind")
         || extensionCall
         || kind == Kind.SELECT && fieldPlan == null
         || kind == Kind.OBJECT
@@ -555,25 +556,29 @@ class ExprNode extends CelNode {
     Object result;
     try {
       result = doExecute(frame, ctx);
-      boolean alias =
-          switch (kind) {
-            case IDENT, SELECT, INDEX, BLOCK, BLOCK_INDEX, CONDITIONAL, COMPREHENSION -> true;
-            case MACRO -> name.equals("bind");
-            case CALL -> name.equals("dyn") && !customOverloads;
-            default -> false;
-          };
-      if (!alias) ctx.attribute(null);
-      if (!deferAttribute) result = ctx.consume(result);
+      if (observe) {
+        boolean alias =
+            switch (kind) {
+              case IDENT, SELECT, INDEX, BLOCK, BLOCK_INDEX, CONDITIONAL, COMPREHENSION -> true;
+              case MACRO -> name.equals("bind");
+              case CALL -> name.equals("dyn") && !customOverloads;
+              default -> false;
+            };
+        if (!alias) ctx.attribute(null);
+        if (!deferAttribute) result = ctx.consume(result);
+      }
     } catch (CelException e) {
       CelException located =
           e.code() == CelException.Code.RESOURCE_EXHAUSTED
               ? e
               : e.at(errorOffset, canonicalId, errorLine, errorColumn);
-      ctx.attribute(null);
-      ctx.trace(this, null, located);
+      if (observe) {
+        ctx.attribute(null);
+        ctx.trace(this, null, located);
+      }
       throw located;
     }
-    ctx.trace(this, result, null);
+    if (observe) ctx.trace(this, result, null);
     return result;
   }
 
@@ -600,7 +605,7 @@ class ExprNode extends CelNode {
                   ? (frameLocalReads
                       ? ctx.readStored(frame.getAuxiliarySlot(localSlot))
                       : ctx.getLocal(localSlot))
-                  : boundaryReads ? ctx.getBoundary(name) : ctx.get(name),
+                  : boundaryReads ? ctx.getRootBoundary(name) : ctx.getRoot(name),
               frame);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
@@ -648,18 +653,24 @@ class ExprNode extends CelNode {
   }
 
   private Object checkedValue(Object value, VirtualFrame frame) {
-    if (lazyInitializer != null && value instanceof LazyBinding lazy)
-      value = lazy.read(lazyInitializer, frame);
+    if (lazyInitializer != null) value = ((LazyBinding) value).read(lazyInitializer, frame);
     if (value instanceof CelException error) throw error;
     return value;
   }
 
   Object executePresence(VirtualFrame frame, EvalContext ctx) {
     try {
-      return select(frame, ctx, true);
+      Object result = select(frame, ctx, true);
+      ctx.trace(this, result, null);
+      return result;
     } catch (CelException e) {
-      if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
-      throw e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      CelException located =
+          e.code() == CelException.Code.RESOURCE_EXHAUSTED
+              ? e
+              : e.at(errorOffset, canonicalId, errorLine, errorColumn);
+      ctx.attribute(null);
+      ctx.trace(this, null, located);
+      throw located;
     }
   }
 
@@ -965,9 +976,11 @@ class ExprNode extends CelNode {
     private Object result;
     private Attribute attribute;
 
-    LazyBinding(ExprNode initializer, VirtualFrame frame, EvalContext context) {
-      this.context = context.fork();
-      this.frame = initializer.getSourceSection() == null ? null : frame.materialize();
+    LazyBinding(VirtualFrame frame, EvalContext context, boolean instrumented) {
+      // Reads have lexical slots (including explicit root reads), and the initializer cannot
+      // outlive this bind scope. Outer slots remain stable while nested body scopes run.
+      this.context = context;
+      this.frame = instrumented ? frame.materialize() : null;
     }
 
     Object read(ExprNode initializer, VirtualFrame caller) {
@@ -999,7 +1012,7 @@ class ExprNode extends CelNode {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
     if (name.equals("bind")) {
       ctx.attribute(null);
-      bindings[0].execute(frame, ctx, new LazyBinding(children[0], frame, ctx));
+      bindings[0].execute(frame, ctx, new LazyBinding(frame, ctx, instrumentedSource));
       try {
         return children[1].execute(frame, ctx);
       } finally {
@@ -1046,11 +1059,15 @@ class ExprNode extends CelNode {
           range instanceof List<?> && variables.length == 1
               ? ctx.qualify(rangeAttribute, index)
               : null);
-      bindings[0].execute(frame, ctx, key);
+      bindings[0].execute(frame, ctx, ctx.iterationValue(key, ctx.attribute()));
       if (variables.length == 2) {
         ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
         bindings[1].execute(
-            frame, ctx, range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item);
+            frame,
+            ctx,
+            ctx.iterationValue(
+                range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item,
+                ctx.attribute()));
       }
       index++;
       try {
@@ -1062,7 +1079,7 @@ class ExprNode extends CelNode {
         if (sorting) {
           HostCollections.add(sortKeys, predicate);
           ctx.attribute(range instanceof List<?> ? ctx.qualify(rangeAttribute, position) : null);
-          Object selected = ctx.consume(item);
+          Object selected = ctx.consume(ctx.iterationValue(item, ctx.attribute()));
           if (selected instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
           else HostCollections.add(result, selected);
           continue;
@@ -1092,7 +1109,7 @@ class ExprNode extends CelNode {
           count++;
           if (filtering && !countResult) {
             ctx.attribute(range instanceof List<?> ? ctx.qualify(rangeAttribute, position) : null);
-            Object selected = ctx.consume(item);
+            Object selected = ctx.consume(ctx.iterationValue(item, ctx.attribute()));
             if (selected instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
             else HostCollections.add(result, selected);
           }

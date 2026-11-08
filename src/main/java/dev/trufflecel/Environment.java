@@ -236,7 +236,6 @@ public final class Environment {
             ? null
             : new Validator.Context(source, validationTree, result, checkedTypes(node));
     FieldPlan.prepare(node, this);
-    node.resolveLazyBindings(Map.of());
     List<CelException.Issue> findings = context == null ? null : new ArrayList<>();
     try {
       node = Optimizer.optimize(node, this, source);

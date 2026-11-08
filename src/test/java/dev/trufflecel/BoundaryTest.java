@@ -113,9 +113,9 @@ public class BoundaryTest {
     var context = new EvalContext(env, Map.of("x", 1L));
     context.push("x", 2L);
     context.push("y", 3L);
-    assertEquals(2L, context.get("x"));
-    assertEquals(1L, context.get(".x"));
-    assertThrows(CelException.class, () -> context.get("missing"));
+    assertEquals(2L, context.getLocal(0));
+    assertEquals(1L, context.getRoot(".x"));
+    assertThrows(CelException.class, () -> context.getRoot("missing"));
     assertThrows(CelException.class, () -> context.charge(-1));
     var scope = new CelNode.DebugScope(context.visibleBindings());
     var interop = InteropLibrary.getUncached();

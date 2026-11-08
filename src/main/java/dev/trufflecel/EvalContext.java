@@ -121,7 +121,7 @@ final class EvalContext {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  Attribute qualify(Attribute parent, Object qualifier) {
+  static Attribute qualify(Attribute parent, Object qualifier) {
     if (parent == null) return null;
     if (qualifier instanceof Integer number) qualifier = number.longValue();
     if (qualifier instanceof Double number) {
@@ -133,6 +133,11 @@ final class EvalContext {
         || qualifier instanceof UInt
         || qualifier instanceof Boolean)) return null;
     return parent.qualify(qualifier);
+  }
+
+  Object iterationValue(Object value, Attribute path) {
+    Object override = attributeRead(path, false);
+    return override == PartialState.NONE ? value : override;
   }
 
   Object store(Object value) {
@@ -177,21 +182,13 @@ final class EvalContext {
     remaining -= cost;
   }
 
-  // Scoped reads remain opaque to avoid expanding dynamic scope walks in each compiled loop.
-  // Observable reads use the same boundary so instruments can safely materialize frames.
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  Object getBoundary(String name) {
-    if (name.startsWith(".")) name = name.substring(1);
-    else {
-      for (int i = scopeSize - 2; i >= 0; i -= 2)
-        if (name.equals(scopes[i])) return readStored(scopes[i + 1]);
-    }
-    return rootBinding(name);
+  Object getRootBoundary(String name) {
+    return getRoot(name);
   }
 
-  Object get(String name) {
-    if (scopeSize != 0 || name.startsWith(".")) return getBoundary(name);
-    return rootBinding(name);
+  Object getRoot(String name) {
+    return rootBinding(name.startsWith(".") ? name.substring(1) : name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
