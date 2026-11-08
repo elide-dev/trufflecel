@@ -26,12 +26,13 @@ final class Parser {
           "var",
           "void",
           "while");
+  private static final Set<String> EXPRESSION_ENDS = Set.of(",", ")", "]", "}", "EOF");
   private final String source;
   private final Environment env;
   private final int baseOffset;
   private int cursor, depth, consumedEnd;
   private Token token;
-  private final List<CelException.Issue> issues = new ArrayList<>();
+  private List<CelException.Issue> issues;
 
   Parser(String source, Environment env) {
     this(source, env, 0);
@@ -52,16 +53,17 @@ final class Parser {
       result = expression(0);
       expect("EOF");
     } catch (CelException failure) {
-      if (issues.isEmpty() || failure.code() != CelException.Code.SYNTAX) throw failure;
+      if (issues == null || failure.code() != CelException.Code.SYNTAX) throw failure;
       record(failure);
       throw new CelException(issues);
     }
-    if (!issues.isEmpty()) throw new CelException(issues);
+    if (issues != null) throw new CelException(issues);
     return result;
   }
 
   private void record(CelException failure) {
     if (failure.code() != CelException.Code.SYNTAX || failure.issues().size() > 1) throw failure;
+    if (issues == null) issues = new ArrayList<>();
     issues.add(failure.issues().get(0));
     if (issues.size() == 100) throw new CelException(issues);
   }
@@ -172,7 +174,7 @@ final class Parser {
   }
 
   private ExprNode primaryValue() {
-    if (Set.of(",", ")", "]", "}", "EOF").contains(token.kind))
+    if (EXPRESSION_ENDS.contains(token.kind))
       throw error("expected expression, found " + token.text);
     Token t = take();
     switch (t.kind) {
@@ -279,7 +281,7 @@ final class Parser {
   }
 
   private ExprNode call(String name, boolean receiver, int offset, ArrayList<ExprNode> args) {
-    if (!issues.isEmpty())
+    if (issues != null)
       return node(ExprNode.Kind.CALL, name, receiver, offset, args.toArray(ExprNode[]::new));
     if (env.macros) {
       String prefix = receiver ? args.get(0).qualifiedName() : null;
@@ -538,7 +540,9 @@ final class Parser {
 
   private Token next() {
     Token next = nextRaw();
-    return new Token(next.kind, next.text, next.value, next.offset + baseOffset);
+    return baseOffset == 0
+        ? next
+        : new Token(next.kind, next.text, next.value, next.offset + baseOffset);
   }
 
   private Token nextRaw() {
