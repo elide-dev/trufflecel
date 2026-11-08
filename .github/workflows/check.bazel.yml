@@ -42,6 +42,8 @@ jobs:
       - name: Build and test
         id: tests
         run: bazel test //...
+      - name: Coverage-guided frontend and decoder fuzzing
+        run: bazel test //tools/fuzz:smoke
       - name: Preserve JUnit results
         if: ${{ !cancelled() && steps.tests.outcome != 'skipped' }}
         run: python3 .github/scripts/reports.py junit
@@ -99,6 +101,7 @@ jobs:
             bazel-out/_coverage/_coverage_report.dat
             bazel-testlogs/**/test.xml
             bazel-testlogs/**/test.log
+            bazel-testlogs/tools/fuzz/smoke/test.outputs/**
       - name: Remove credentials
         if: always()
         run: rm -f user.bazelrc

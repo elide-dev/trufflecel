@@ -48,6 +48,16 @@ maven.install(
 )
 use_repo(maven, "cel_java")
 
+# Fuzzing tools have their own resolution and never enter publication dependencies.
+maven.install(
+    name = "fuzzing",
+    artifacts = ["com.code-intelligence:jazzer:0.30.0", "com.code-intelligence:jazzer-api:0.30.0"],
+    repositories = ["https://repo.maven.apache.org/maven2"],
+    lock_file = "//:fuzzing_install.json",
+    fail_if_repin_required = True,
+)
+use_repo(maven, "fuzzing")
+
 bazel_dep(name = "gazelle", version = "0.54.0", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
 bazel_dep(name = "platforms", version = "1.1.0")
