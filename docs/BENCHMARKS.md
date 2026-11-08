@@ -878,6 +878,101 @@ Replace the engine with `cel-java` for the paired measurement, repeat in fresh p
 and omit the runtime option for the default. An application compiling in its application
 isolate must also assess GC interference under its own concurrency and workload.
 
+### Native memory by execution phase (GraalVM .27)
+
+The [phase attribution report](benchmarks/native-memory-phases-010.json) preserves
+three fresh forks of every scalar/policy/comprehension configuration, with paired
+TruffleCEL and cel-java processes in one RBE action. Profiling pauses the child at
+startup, context creation, preparation, first results, warmup, last-tier compilation,
+fixed evaluation, application GC, idle, and context close. Separate fresh processes
+measure timing. The report retains all phase counters and timing samples, the exact
+commands, binary/source identities, and links/digests for compressed Linux mapping
+snapshots. This is an embedding-configuration experiment on production baseline
+`67921ff`, not a measurement of the subsequent library optimizations.
+
+Both engines use the same combined executable, Serial GC and an explicit
+`-Xmx512m` budget on the same reported `AMD EPYC` host (Linux 5.15, seven available
+logical CPUs). These absolute numbers are not interchangeable with the default
+comparison charts or standalone executable footprints. Each table cell is
+**TruffleCEL / cel-java**; RSS is current `smaps_rollup.Rss` immediately after the
+fixed evaluation workload, and times are medians of per-fork medians.
+
+| Configuration | Scalar RSS (MiB) | Policy RSS (MiB) | Comprehension RSS (MiB) | Comprehension time (ns) |
+| --- | ---: | ---: | ---: | ---: |
+| Default | 66.51 / 70.43 | 83.70 / 70.36 | 130.41 / 65.99 | 86.67 / 559.87 |
+| Compiler in application isolate | 57.65 / 70.59 | 74.79 / 70.64 | 93.91 / 65.77 | 88.00 / 557.32 |
+| Separate compiler heap capped at 16 MiB | 65.64 / 70.51 | 79.02 / 70.63 | 113.16 / 65.77 | 86.55 / 561.50 |
+| Compiler in application isolate, `MaxHeapFree=32m` | 57.66 / 54.14 | 74.88 / 53.77 | 77.22 / 54.11 | 96.25 / 605.37 |
+
+Sharing the compiler keeps the three TruffleCEL median evaluation times within
+1.6% of their defaults while reducing current RSS. The 16 MiB compiler cap also
+preserves steady evaluation time in these fixtures, but comprehension warmup plus
+last-tier compilation increases from 60.7 to 71.0 ms. Limiting retained free chunks
+to 32 MiB reduces current resident memory further, with an approximately 11%
+comprehension slowdown relative to default. Its Linux lifetime high-water counter
+remains about 93.1 MiB, the same as the shared-compiler configuration without the
+cap. Current memory reclamation and startup peak reduction are different outcomes.
+No embedding option or benchmark threshold is changed by this investigation.
+
+Application heap accounting explains another part of the gap. After application
+GC, comprehension reports only 0.81 MiB used but 47.31 MiB committed in the default
+application isolate; RSS is still 127.98 MiB. With the compiler in that isolate,
+the corresponding figures are 1.81 MiB used, 49.31 MiB committed and 91.42 MiB RSS.
+The compiler cap leaves application heap commitment at 47.31 MiB while lowering
+RSS to 110.73 MiB. These observations distinguish application free-chunk retention
+from the additional footprint of separate compilation. They do not assign every
+anonymous mapping to a particular isolate or measure retained bytes per program.
+
+A second action repeats comprehension with three forks and a 12-second idle period,
+exceeding the effective 10-second compiler and graph-cache idle delays recorded from
+each target. It does not reclaim the remaining footprint: default RSS is 127.98 MiB
+after application GC and 128.04 MiB after idle plus another GC. The shared-compiler
+figures are 91.53 and 91.58 MiB; the compiler-cap figures are 110.78 and 110.84 MiB.
+Closing the Polyglot context also leaves these resident pages in place. This context
+does not own the Java API target's standalone engine, so context closure is not a
+test of compiler-engine disposal or proof that all target references were released.
+The excess is still resident at the measured idle
+point, rather than disappearing at the configured idle delay.
+
+`MemoryMXBean` supplies the heap counters: the pinned Native Image Serial GC
+implementation's `Runtime.totalMemory()` returns its maximum heap budget, not
+committed memory. `System.gc()` operates on the application isolate, so it does
+not collect a separate compiler isolate. The report also keeps PSS, file/anonymous
+mapping classes and Linux `VmHWM`; the latter is accounted separately and can lag
+the current `smaps` RSS value.
+
+The probe uncovered a [GraalVM .27 non-heap accounting defect](benchmarks/graalvm-nonheap-counter-issue.md).
+With a shared compiler, the management bean can return implausibly small positive
+values and subsequently throw for negative runtime-code sizes after GC. Such
+getter failures are explicitly `null` with their error text, rather than zero or
+omitted phases; suspect positive readings remain recorded but are unreliable.
+Independent executable anonymous mappings occupy 20 KiB after
+comprehension evaluation in all three compiler configurations; file-backed compiler
+and runtime code is accounted separately. The upstream report remains a draft.
+Correctness, checksums, effective target options and last-tier validity remain
+mandatory throughout the diagnostic.
+
+All 45 engine comparisons completed across the two actions, using 90 profiled
+processes and 90 fresh timing processes. The focused counter tests,
+effective-option smoke, profiler-driver tests,
+native comparison smoke and Linux native JIT/blocklist gate also pass. The raw
+report retains 93 explicitly unavailable non-heap readings; they are a limitation
+of the upstream counter, not missing RSS/heap samples or waived CEL checks.
+
+To reproduce the three-fork matrix, use the recorded command in the report or:
+
+```sh
+bazel test //benchmarks/comparison:memory_diagnostic \
+  --test_env=MEMORY_SOURCE_REVISION="$(git rev-parse HEAD)" \
+  --test_env=MEMORY_FORKS=3 --test_env=MEMORY_IDLE_MS=0 \
+  --test_env=MEMORY_VARIANTS=default,shared-compiler,bounded-compiler,shared-free-32m
+```
+
+The original harness commits `d51d535`, `8d87446` and `aa70c27` correspond to the
+reachable PR commits `9427bb1`, `171cc15` and `092d3b1`, respectively. Applying those
+harness changes to baseline `67921ff` reproduces the recorded production inputs.
+The historical compiler-isolate measurements above remain unchanged.
+
 
 ## Explicit Java host entry
 
