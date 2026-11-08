@@ -97,6 +97,38 @@ public class InstrumentationTest {
   }
 
   @Test
+  public void repeatedScopeInspectionCachesUnusedDeclaredBindings() {
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", "x + x", "scopes.cel").build();
+        var program =
+            Cel.newBuilder()
+                .variable("x", CelType.INT)
+                .variable("unused", CelType.list(CelType.INT))
+                .build()
+                .prepare("x + x")
+                .instantiate(source);
+        int[] traversals = {0};
+        Iterable<Integer> unused =
+            () -> {
+              assertEquals(0, traversals[0]++);
+              return List.of(1, 2).iterator();
+            };
+        assertEquals(4L, program.evaluate(Map.of("x", 2, "unused", unused)));
+        assertEquals(List.of(2L, 2L), events.localValues);
+        assertEquals(1, traversals[0]);
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
   public void sourceTraceRestoresInstrumentedBindingAndReadWrappers() {
     Program program;
     var trace = new ArrayList<TraceEvent>();

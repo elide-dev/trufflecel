@@ -111,6 +111,12 @@ public final class Environment {
     return names.equals(variableNames) ? variableLayout : indexBindings(names);
   }
 
+  Map<String, Integer> bindingLayout(String name) {
+    return variableNames.size() == 1 && variableNames.contains(name)
+        ? variableLayout
+        : Map.of(name, 0);
+  }
+
   private static Map<String, Integer> indexBindings(Set<String> names) {
     if (names.isEmpty()) return Map.of();
     if (names.size() == 1) return Map.of(names.iterator().next(), 0);
@@ -282,6 +288,7 @@ public final class Environment {
     return new PreparedProgram(
         source,
         declarations == variables ? variableNames : declarations.keySet(),
+        checker.bindingLayout(),
         result,
         node,
         this);

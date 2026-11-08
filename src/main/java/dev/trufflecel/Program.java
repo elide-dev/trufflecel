@@ -42,7 +42,10 @@ public final class Program {
       Source truffleSource) {
     this.source = source;
     this.variables = Set.copyOf(variables);
-    this.bindingLayout = bindingLayout;
+    // A debugger can inspect unused declarations repeatedly. Plain evaluation only caches
+    // conversions for referenced roots, independently of the environment's declaration count.
+    this.bindingLayout =
+        truffleSource == null ? bindingLayout : environment.bindingLayout(this.variables);
     String identifier = body.firstIdentifier();
     bindingHint =
         identifier != null
