@@ -72,7 +72,7 @@ java_library(
     name = "jit_support",
     testonly = True,
     srcs = ["JitSmoke.java"],
-    deps = [":benchmarks", "//:trufflecel", "@maven//:org_graalvm_truffle_truffle_api", "@maven//:org_graalvm_truffle_truffle_runtime",
+    deps = [":benchmarks", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:com_google_protobuf_protobuf_java", "@maven//:org_graalvm_truffle_truffle_api", "@maven//:org_graalvm_truffle_truffle_runtime",
             "@maven//:org_graalvm_polyglot_polyglot"],
 )
 native_image(

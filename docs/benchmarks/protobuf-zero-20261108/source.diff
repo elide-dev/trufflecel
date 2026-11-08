@@ -1,0 +1,33 @@
+diff --git a/benchmarks/representative/BUILD.bazel b/benchmarks/representative/BUILD.bazel
+index 55501d8..3c94b17 100644
+--- a/benchmarks/representative/BUILD.bazel
++++ b/benchmarks/representative/BUILD.bazel
+@@ -19,7 +19,7 @@ java_library(
+             "@cel_java//:dev_cel_cel", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime"],
+ )
+ java_plugin(name = "jmh_generator", testonly = True, processor_class = "org.openjdk.jmh.generators.BenchmarkProcessor", deps = ["@cel_java//:org_openjdk_jmh_jmh_generator_annprocess"])
+-java_library(name = "jmh_benchmarks", testonly = True, srcs = ["SteadyState.java", "FrontendStages.java", "ActivationPreparation.java", "ActivationEvaluation.java", "StructuredAccess.java", "IngestionStages.java"], plugins = [":jmh_generator"], deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime", "@maven//:dev_elide_truffledata_protobuf", "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:org_openjdk_jmh_jmh_core", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel"])
++java_library(name = "jmh_benchmarks", testonly = True, srcs = ["SteadyState.java", "FrontendStages.java", "ActivationPreparation.java", "ActivationEvaluation.java", "StructuredAccess.java", "IngestionStages.java", "ProtobufZero.java"], plugins = [":jmh_generator"], deps = [":engines", ":policy_java", "//:trufflecel", "//:trufflecel-protobuf", "@maven//:dev_elide_truffledata_protobuf_runtime", "@maven//:dev_elide_truffledata_protobuf", "@cel_java//:com_google_protobuf_protobuf_java", "@cel_java//:org_openjdk_jmh_jmh_core", "@cel_java//:dev_cel_common", "@cel_java//:dev_cel_compiler", "@cel_java//:dev_cel_runtime", "@cel_java//:dev_cel_cel"])
+ java_binary(name = "jmh", testonly = True, main_class = "org.openjdk.jmh.Main", runtime_deps = [":jmh_benchmarks", "@cel_java//:org_openjdk_jmh_jmh_core"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+ java_test(name = "smoke", testonly = True, srcs = ["Smoke.java"], main_class = "dev.trufflecel.Smoke", use_testrunner = False, deps = [":engines", "//:trufflecel"], jvm_flags = ["--enable-native-access=ALL-UNNAMED"])
+ java_test(name = "semantics", testonly = True, srcs = ["SemanticsTest.java"], test_class = "dev.trufflecel.SemanticsTest",
+diff --git a/src/main/java/dev/trufflecel/ProtobufType.java b/src/main/java/dev/trufflecel/ProtobufType.java
+index 799894f..924149a 100644
+--- a/src/main/java/dev/trufflecel/ProtobufType.java
++++ b/src/main/java/dev/trufflecel/ProtobufType.java
+@@ -525,7 +525,14 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
+ 
+   public boolean isZero(Object value) {
+     Value v = (Value) value;
+-    return v.message().equals(DynamicMessage.getDefaultInstance(descriptor));
++    if (v.type.descriptor != descriptor) return false;
++    // Export synthesizes map-entry defaults and normalizes MessageSet unknowns.
++    if (descriptor.getOptions().getMapEntry() || descriptor.getOptions().getMessageSetWireFormat())
++      return v.message().equals(DynamicMessage.getDefaultInstance(descriptor));
++    ProtoRow row = v.row;
++    for (int i = 0; i < row.plan().size(); i++) if (row.has(i)) return false;
++    // No declared field is present. Any preserved unknown field makes the message non-default.
++    return row.unknownFieldBytes().length == 0;
+   }
+ 
+   public boolean equal(Object a, Object b) {
