@@ -37,6 +37,15 @@ class NativeProfileReportTest(unittest.TestCase):
             (root / f'{phase}.json').write_text(json.dumps(rows))
         startup = dict(complete=True, forks=4, results=test_startup_embeddings.StartupEmbeddingsTest().rows())
         (root / 'startup.json').write_text(json.dumps(startup))
+        rows = []
+        for runtime, engine, workload, entry, mode, fork in report.focused_payback.inventory(3):
+            points = {str(10 ** i): 10 ** i * (1 if engine == 'truffle-jit' else 2) for i in range(7)}
+            rows.append(dict(runtime=runtime, engine=engine, workload=workload, entry=entry, mode=mode,
+                             fork=fork, image_prepared=mode == 'image-cold', configure_ns=1, prepare_ns=1,
+                             instantiate_ns=1, snapshot_ns=0, last_tier_at_end=engine == 'truffle-jit',
+                             total_ns_through_evaluations=points,
+                             guest_compiled_at_checkpoint={k: engine == 'truffle-jit' and int(k) >= 10000 for k in points}))
+        (root / 'payback.json').write_text(json.dumps(dict(complete=True, forks=3, maximum=1000000, results=rows)))
 
     def test_aggregation_preserves_process_ranges_and_all_cells(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -45,11 +54,16 @@ class NativeProfileReportTest(unittest.TestCase):
             summary = report.summarize(root)
             self.assertEqual(48, len(summary['cells']))
             self.assertEqual(72, len(summary['startup']))
+            self.assertEqual(9, len(summary['payback']))
+            self.assertTrue(all(r['first_sustained_post_compilation_checkpoint'] == 10000 for r in summary['payback']))
             first = summary['cells'][0]
             self.assertEqual(dict(median=2., minimum=1., maximum=3., forks=[1., 2., 3.]), first['ns_per_op'])
             self.assertEqual(1., first['rss_mib']['median'])
             self.assertEqual(2., first['peak_mib']['median'])
             self.assertIn('2.00 [1.00–3.00]', report.tables(summary))
+            evaluation = report.summarize(root, include_startup=False)
+            self.assertEqual([], evaluation['startup'])
+            self.assertNotIn('Fresh-process', report.tables(evaluation))
             for key, value in (('complete', False), ('source_manifest_sha256', 'different'), ('common_flags', [])):
                 path = root / 'timing-metadata.json'
                 original = json.loads(path.read_text())
@@ -57,6 +71,17 @@ class NativeProfileReportTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     report.summarize(root)
                 path.write_text(json.dumps(original))
+
+    def test_payback_requires_compilation_and_a_sustained_win(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.data(root)
+            data = json.loads((root / 'payback.json').read_text())
+            for row in data['results']:
+                if row['engine'] == 'truffle-jit':
+                    row['total_ns_through_evaluations']['1000000'] = 3000000
+            self.assertTrue(all(r['first_sustained_post_compilation_checkpoint'] is None
+                                for r in report.payback_summary(data)))
 
 
 if __name__ == '__main__':

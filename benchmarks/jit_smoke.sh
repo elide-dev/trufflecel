@@ -4,4 +4,6 @@ cd "${TEST_SRCDIR}/${TEST_WORKSPACE}"
 "$1"
 # Qualify the opt-in lower-RSS native compiler profile against the same strict
 # guest-JIT/blocklist fixture inventory; do not relax compilation failure gates.
-exec "$1" -XX:-CompileInIsolates
+"$1" -XX:-CompileInIsolates
+"$1" -XX:MaxNewSize=32m
+exec "$1" -XX:-CompileInIsolates -XX:MaxNewSize=32m
