@@ -13,8 +13,21 @@ host access, and crashes or denial of service from untrusted CEL input are usefu
 reports. Include any custom functions, host bindings, and configured limits needed
 to reproduce the issue.
 
-Maintainers will investigate privately and coordinate fixes and disclosure with
-the reporter. There is no guaranteed response time or paid bug bounty.
+Maintainers investigate privately and coordinate fixes and disclosure with the
+reporter. Aim to acknowledge reports within seven calendar days and always triage
+an unanswered report before fourteen days have elapsed. Another repository
+administrator should take over if the assigned maintainer is unavailable.
+There is no paid bug bounty or contractual support SLA.
+
+Prioritize confirmed critical vulnerabilities immediately, coordinate a fix or
+mitigation promptly, and do not ship a release with an unresolved confirmed
+critical issue. Confirmed medium-or-higher vulnerabilities must not remain
+unpatched for more than sixty days after public disclosure. Apply this triage
+policy to static-analysis and fuzzing findings as well as outside reports.
+Release notes must identify publicly known vulnerabilities fixed in that release,
+including assigned CVE/GHSA identifiers and upgrade or mitigation instructions.
+Record acknowledgement and resolution dates privately so response claims can be
+verified without exposing report contents.
 
 ## Supported versions
 

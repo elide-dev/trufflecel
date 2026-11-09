@@ -1,0 +1,2 @@
+# Local agent worktrees are independent workspaces, not TruffleCEL packages.
+.claude

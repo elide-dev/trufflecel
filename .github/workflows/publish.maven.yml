@@ -32,6 +32,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
@@ -56,6 +60,7 @@ jobs:
       - name: Install checksum-pinned rclone
         run: .github/scripts/install-rclone.sh
       - name: Publish immutable Maven artifacts
+        id: maven
         env:
           RELEASE_VERSION: ${{ inputs.version }}
           RCLONE_CONFIG_ELIDE_TYPE: s3
@@ -69,6 +74,31 @@ jobs:
       - name: Remove credentials
         if: always()
         run: rm -f user.bazelrc
+      - name: Describe the checked-out source and verified Maven bytes
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          STAGED_REPOSITORY: ${{ steps.maven.outputs.repository }}
+        run: python3 .github/scripts/release-provenance.py
+      - name: Sign release provenance
+        id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: build/release-provenance/subjects.sha256
+          predicate-type: https://slsa.dev/provenance/v1
+          predicate-path: build/release-provenance/predicate.json
+      - name: Retain signed bundles
+        env:
+          BUNDLE_PATH: ${{ steps.provenance.outputs.bundle-path }}
+        run: |
+          cp "$BUNDLE_PATH" build/release-provenance/trufflecel-provenance.sigstore.json
+          jq -ce '.dsseEnvelope | select(.payloadType == "application/vnd.in-toto+json" and (.signatures | length > 0))' "$BUNDLE_PATH" > build/release-provenance/trufflecel-provenance.intoto.jsonl
+      - name: Preserve signed release provenance
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: maven-provenance-${{ inputs.version }}
+          path: build/release-provenance/
+          if-no-files-found: error
+          retention-days: 90
       - name: Preserve release evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -76,3 +106,29 @@ jobs:
           name: maven-${{ inputs.version }}
           path: build/release-repo.*/
           retention-days: 30
+  attach-provenance:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - name: Download this run's signed provenance
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: maven-provenance-${{ inputs.version }}
+          path: provenance
+      - name: Attach evidence without replacing release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          gh release upload "v$RELEASE_VERSION" \
+            provenance/trufflecel-provenance.sigstore.json \
+            provenance/trufflecel-provenance.intoto.jsonl \
+            provenance/subjects.sha256

@@ -46,10 +46,11 @@ extensions or custom repositories cannot run inside its updater environment.
 - Existing CI enforces conformance, 99.8% line/branch coverage, allocation ceilings,
   native guest compilation and Truffle blocklist checks. Actions are SHA-pinned,
   checkouts discard credentials, and jobs use explicit permissions and runner hardening.
-- PR/main CI runs a 2,000-input coverage-guided Jazzer smoke test. The dedicated
-  `fuzzing.yml` schedule runs 100,000 inputs daily on a fresh hosted runner without
+- PR/main CI runs 2,000 coverage-guided Jazzer inputs per target. The dedicated
+  `fuzzing.yml` schedule runs 100,000 inputs per target daily on a fresh hosted runner without
   publication credentials and retains crash/coverage artifacts. A coverage check
-  fails if instrumentation is inactive. Scorecard may not recognize this custom integration.
+  fails if instrumentation is inactive. Targets cover the frontend/decoders and
+  bounded evaluator oracles with assertions enabled.
 - GitHub secret scanning, push protection, private vulnerability reporting and
   Dependabot security updates are enabled. R2 publishing credentials remain scoped to
   the publication step; repository code must never log them.
@@ -70,17 +71,18 @@ and licensing contracts.
 evidence-based badge requiring passing and silver first. This project does not yet
 claim that badge. CI configuration alone cannot establish it.
 
-Track these remaining items with evidence before applying:
+Project 16472 earned [Passing](BEST_PRACTICES.md) on November 9, 2026.
+Track these stronger-tier and supply-chain follow-ups separately:
 
-- Complete passing/silver/gold self-assessments and register the project with the badge service.
+- Keep the Passing assessment current; complete separate Silver/Gold assessments.
 - Verify organization-enforced 2FA and demonstrate two independent significant
   contributors and a bus factor of at least two; CODEOWNERS alone does not prove either.
 - Establish and retain independent review evidence for releases; document any emergency bypass.
 - Audit per-source copyright/SPDX notices while preserving upstream ownership and licenses.
-- Demonstrate reproducible release artifacts with independent rebuilds, and add
-  verifiable release provenance/signatures and a dependency inventory/SBOM.
+- Demonstrate reproducible release artifacts with independent rebuilds, qualify the new
+  release provenance workflow on the next publication, and add a dependency inventory/SBOM.
 - Perform a documented security review against the threat model; expand the existing
-  coverage-guided fuzzing campaign and dynamic analysis beyond its frontend/decoder scope.
+  coverage-guided fuzzing campaign beyond its frontend/decoder and bounded evaluator scope.
 - Audit download/website hardening headers and identify small newcomer tasks.
 
 The badge criteria and Scorecard results are the source of truth; this list is a
