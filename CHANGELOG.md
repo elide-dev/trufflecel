@@ -1,5 +1,104 @@
 # Changelog
 
+## [0.10.0](https://github.com/elide-dev/trufflecel/compare/v0.9.0...v0.10.0) (2026-11-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* support TruffleRegex-only execution with optional RE2/J ([#64](https://github.com/elide-dev/trufflecel/issues/64))
+* Maven compatibility-mode regex consumers must declare com.google.re2j:re2j:1.8 explicitly. TruffleRegex-only consumers can omit it.
+
+### Features
+
+* add opt-in lazy common-subexpression elimination ([620a3f7](https://github.com/elide-dev/trufflecel/commit/620a3f78ea40bdcfaf0a2cff95cba96fb65965f7))
+* add source-level tracing and asynchronous evaluation ([5c92f3a](https://github.com/elide-dev/trufflecel/commit/5c92f3ac4921abe321d0968ec1fc950c66e6e57e))
+* estimate conservative charged operation bounds ([cce0367](https://github.com/elide-dev/trufflecel/commit/cce03674550a7d2323710cddddaf8cb00d98019d))
+* evaluate cel.bind initializers lazily with lexical memoization ([710b3e6](https://github.com/elide-dev/trufflecel/commit/710b3e63567978750634bb89bf53207b453f1299))
+* expose editable syntax trees and custom macro expansion ([2234f01](https://github.com/elide-dev/trufflecel/commit/2234f01b59116dfce0152660e7c9f7b4b7d9ad72))
+* expose protobuf contexts and typed field-mask projections ([11e6b50](https://github.com/elide-dev/trufflecel/commit/11e6b50e2b83fe38fa8ccddf9075d93f4bd44913))
+* expose regex-only language options and qualify absent-JAR consumers ([ce196bf](https://github.com/elide-dev/trufflecel/commit/ce196bf917c9ecaeb069884ada94fb645c376f63))
+* gate 0.10.0 on TruffleData and fix release staging paths ([1c1e7d0](https://github.com/elide-dev/trufflecel/commit/1c1e7d02f5ce494933ac4308bfb34bce339ee816))
+* gate next release on TruffleData 0.10.0 ([deffb8d](https://github.com/elide-dev/trufflecel/commit/deffb8de39ab5c02c95fb1bcbcd8248673c6112d))
+* gate next release on TruffleData 0.10.0 ([5beb225](https://github.com/elide-dev/trufflecel/commit/5beb225a5d3e23eb5c698998ff59828dc6e655e3))
+* generate reflection-free POJO snapshot adapters ([265a064](https://github.com/elide-dev/trufflecel/commit/265a064ed32f5b6abca866329de135ff54995601))
+* import environment YAML and compile policy rules ([1f3d028](https://github.com/elide-dev/trufflecel/commit/1f3d0284bc18a6b81a5e831b0d28d0dd1add522c))
+* integrate 0.10.0 functionality and qualified performance improvements ([ecb07bf](https://github.com/elide-dev/trufflecel/commit/ecb07bfeadfa18dbd6dc5f11c30eb98cc4e628fe))
+* preserve offsets for embedded CEL expressions ([175c2cc](https://github.com/elide-dev/trufflecel/commit/175c2ccca76e86b8faad034ef4ebaaf006667302))
+* recover checker diagnostics and copy compiler environments ([23d2b86](https://github.com/elide-dev/trufflecel/commit/23d2b860007a0dd827c0d4b0b2d1e1bbca179b5c))
+* resolve qualified unknown attributes across partial evaluations ([7f84d1d](https://github.com/elide-dev/trufflecel/commit/7f84d1dd2a3d5efcd645355891a7f99c6e1f7ec9))
+* round-trip macro source and legacy AST schemas with parser recovery ([aa684cc](https://github.com/elide-dev/trufflecel/commit/aa684ccd92f9c3842eff566e8ad916a6d9d38200))
+* support application validators over immutable syntax trees ([aa53b07](https://github.com/elide-dev/trufflecel/commit/aa53b07e77dd9a1fd7bc56ce048b95f5c7016069))
+* support per-call and non-strict function bindings ([987c8f2](https://github.com/elide-dev/trufflecel/commit/987c8f2b67e5820e3b8bdf8d4788700f102887e5))
+* support TruffleRegex-only execution with optional RE2/J ([#64](https://github.com/elide-dev/trufflecel/issues/64)) ([86a169c](https://github.com/elide-dev/trufflecel/commit/86a169c18852ac04690750efaad29554758b67ea))
+* support TruffleRegex-only operation with optional RE2/J ([c0370cb](https://github.com/elide-dev/trufflecel/commit/c0370cb0a171389b833da26cd88525f84b0556f7))
+
+
+### Bug Fixes
+
+* accept bounded long unary runs without consuming AST depth ([727f423](https://github.com/elide-dev/trufflecel/commit/727f4237af9271d970393eb1f3207e78e8902ed2))
+* **bench:** construct startup driver provenance with paths ([1f7d9e5](https://github.com/elide-dev/trufflecel/commit/1f7d9e5eef01715bdee7fb1a0552b410dafc78bf))
+* bound CSE guest compilation and preserve cache costs ([0ce9855](https://github.com/elide-dev/trufflecel/commit/0ce9855e89993d96a6d0943cf7ef174010f8e50f))
+* bound policy condition analysis and preserve embedded source limits ([48e6b33](https://github.com/elide-dev/trufflecel/commit/48e6b33f53a633fb394112315c95a81bd27e9166))
+* bound sorting costs and isolate lexical size guarantees ([30c5580](https://github.com/elide-dev/trufflecel/commit/30c558010be72ce8da5c543e8d5068316e96a9f9))
+* bound unary runs by source length rather than AST depth ([d791633](https://github.com/elide-dev/trufflecel/commit/d79163302fedc95d63dadfa0f22c3a47f4b673df))
+* bound unary runs by source length rather than AST depth ([fb6cd79](https://github.com/elide-dev/trufflecel/commit/fb6cd798ade0cc2784cf96cef927a13dc8b201b3))
+* encode lazy bindings explicitly in canonical expressions ([d803c75](https://github.com/elide-dev/trufflecel/commit/d803c75bfd88a4360f991ef4b5dc417a04a20f42))
+* enforce string extension introduction versions ([793c756](https://github.com/elide-dev/trufflecel/commit/793c7561e03c8f525716f8968570db5c90bfe1c4))
+* expose source offset encoding on trace events ([8883446](https://github.com/elide-dev/trufflecel/commit/88834468c43e47e2a94442f8dbfb2ab3e63b592b))
+* include release gate in CI test runfiles ([2c02d93](https://github.com/elide-dev/trufflecel/commit/2c02d934e5c2101f58272ce044bb0286fb64417b))
+* include release gate in CI test runfiles ([e1c11a2](https://github.com/elide-dev/trufflecel/commit/e1c11a2ca7dfe380bec5fb7fa70b63393260f65e))
+* initialize canonical protobuf descriptors for native qualification ([e4c7891](https://github.com/elide-dev/trufflecel/commit/e4c7891a2fcc2cca964a08fc392b2d869a34ccdd))
+* isolate lazy initializer locals from active body scopes ([337724f](https://github.com/elide-dev/trufflecel/commit/337724f7e70c188a6f2c552d2d57b5d95b5c435e))
+* isolate partial attribute allocation from guest compilation ([fb0466e](https://github.com/elide-dev/trufflecel/commit/fb0466e6b09a9abf7d4fe33c054e72eb8f1dce03))
+* keep absolute-name slicing outside native guest compilation ([4b882d7](https://github.com/elide-dev/trufflecel/commit/4b882d7e2c84d07fd0715145093d526280456105))
+* plan builtin overload fallbacks before guest compilation ([a3c9e09](https://github.com/elide-dev/trufflecel/commit/a3c9e09986a3f8f896acff783a2cd179a8d63231))
+* preserve diagnostic offset encoding across canonical ASTs ([5421c33](https://github.com/elide-dev/trufflecel/commit/5421c33f13b9180417a29a26b43f8b766d06e0ee))
+* preserve environment declarations and exact configuration limits ([f3a070a](https://github.com/elide-dev/trufflecel/commit/f3a070ab6726e5b5fb7bd5479cbe681e4f8edaa0))
+* preserve policy results and source locations across configured environments ([93cf82a](https://github.com/elide-dev/trufflecel/commit/93cf82a988e049ec65099574e1e8b86fb6b88dcd))
+* preserve registered extensions in protobuf wildcard views ([8dc76e9](https://github.com/elide-dev/trufflecel/commit/8dc76e966c5145cedbb0d51ad6e92d4b44acf0c5))
+* preserve source budget failures when replaying CSE costs ([818579a](https://github.com/elide-dev/trufflecel/commit/818579ad320a779ca1e859cb2c08bb44b2c0673b))
+* preserve unavailable native diagnostic counters explicitly ([092d3b1](https://github.com/elide-dev/trufflecel/commit/092d3b1132260564ba3e6060f94d5b6c7ac6cb2b))
+* recover regex acceleration and bound cache eviction and failures ([6be8d41](https://github.com/elide-dev/trufflecel/commit/6be8d419c1446ab495399213ab6a40b1e0adce43))
+* recover regex acceleration and harden bounded caches ([#65](https://github.com/elide-dev/trufflecel/issues/65)) ([92a0944](https://github.com/elide-dev/trufflecel/commit/92a0944c18f64e65e46b06e9077fdb19ad6a3f9d))
+* reject lossy AST source and type constant exports ([8ca6e61](https://github.com/elide-dev/trufflecel/commit/8ca6e6104bf38382d579106370d617d3c316ed0f))
+* reject map receivers in dynamic list sorting ([18c1000](https://github.com/elide-dev/trufflecel/commit/18c1000a074c8cc203742926839201e0307af0e9))
+* resolve closed policy condition bindings before analysis ([474c5ab](https://github.com/elide-dev/trufflecel/commit/474c5abdbed8f408646e1a9f2f184ba671eecf09))
+* resolve partial attributes in cached expressions ([99e3a2f](https://github.com/elide-dev/trufflecel/commit/99e3a2fbec143d9bc4b5808ac33f0641aef7ff0d))
+* retain implicit policy condition findings after lowering ([42d69c5](https://github.com/elide-dev/trufflecel/commit/42d69c516d9a45e67da8295cb9c111cfbade4e37))
+* retain source positions for exported CSE initializers ([9daf6aa](https://github.com/elide-dev/trufflecel/commit/9daf6aa4ced58933cbda8d36fe696ce52d22ba93))
+* retain source provenance in editable ASTs ([0d750b5](https://github.com/elide-dev/trufflecel/commit/0d750b5e682ddb849834853d69a36374ca339b80))
+* validate edited macro shapes and preserve expansion source identity ([f1859a3](https://github.com/elide-dev/trufflecel/commit/f1859a368321f340de1c1de6a7b6adb9419cac36))
+* validate inherited POJO properties and owned snapshot bounds ([5e48904](https://github.com/elide-dev/trufflecel/commit/5e48904fa976b2f947068cc7cc9392337d45dabc))
+
+
+### Performance Improvements
+
+* accelerate scoped constant matches with TruffleRegex ([bf991bf](https://github.com/elide-dev/trufflecel/commit/bf991bf100aca77fed882c7465688697f3372b2f))
+* avoid unused parser allocations and planning walks ([547c9fc](https://github.com/elide-dev/trufflecel/commit/547c9fccaba28882dc4a2a01ef69fee386d70360))
+* cache scoped regex dispatch without retaining program contexts ([17dc72f](https://github.com/elide-dev/trufflecel/commit/17dc72fecdd3a4ca2181cbfe3132d012bff8b6c7))
+* compact ordinary evaluation contexts ([8a73718](https://github.com/elide-dev/trufflecel/commit/8a7371846311224dea703bfbe658edd30f0cec68))
+* decode owned protobuf bytes without cloning the wire buffer ([67ab33c](https://github.com/elide-dev/trufflecel/commit/67ab33cf89e0f06ad71b0b3c49d32fab53adf2d1))
+* preserve scalar allocation budgets with lazy lexical scopes ([3f02a19](https://github.com/elide-dev/trufflecel/commit/3f02a19616f8540ad0f05df1af3de4a0a5f4d64f))
+* **protobuf:** check ordinary message defaults in native storage ([b1c0cc1](https://github.com/elide-dev/trufflecel/commit/b1c0cc195348002ca0e0bac8da30a4cc33ece0f0))
+* **protobuf:** check ordinary message defaults in native storage ([28211ae](https://github.com/elide-dev/trufflecel/commit/28211ae408d31042fc721c059ce59fe083ecad4c))
+* **protobuf:** check ordinary message defaults in native storage ([71f3d52](https://github.com/elide-dev/trufflecel/commit/71f3d52f215a70753497275d88840745cd21717c))
+* reduce host map snapshot allocations ([5fbc06b](https://github.com/elide-dev/trufflecel/commit/5fbc06bafd204c62d8930d9e8e875dd767f4b0ed))
+* reduce host map snapshot allocations ([d2344d5](https://github.com/elide-dev/trufflecel/commit/d2344d5fd2bee793d4e41b97e291e51a43aaef54))
+* reduce host map snapshot allocations ([ddfc673](https://github.com/elide-dev/trufflecel/commit/ddfc673cda28f373e9786bc6263cda47488380d1))
+* **runtime:** release planning metadata from cached programs ([1ff2d77](https://github.com/elide-dev/trufflecel/commit/1ff2d77b2e3355be5cc33366b3e763880cf02246))
+* share immutable binding layouts across program instances ([f35e2f0](https://github.com/elide-dev/trufflecel/commit/f35e2f06bfa616496ef55f42e574e5d31f043cbf))
+* size binding conversion caches by referenced variables ([b81fa2f](https://github.com/elide-dev/trufflecel/commit/b81fa2fb04de5c23a43c441456559c6e64e1833f))
+
+
+### Reverts
+
+* remove cached regex adapter after performance qualification ([8ceb58b](https://github.com/elide-dev/trufflecel/commit/8ceb58b4933a337972b0d0f5220691b4c6d42949))
+
+
+### Documentation
+
+* document explicit dependency for compatibility regex ([66e9150](https://github.com/elide-dev/trufflecel/commit/66e9150f9150ff6a4374d94842492023ee6c7150))
+
 ## [0.9.0](https://github.com/elide-dev/trufflecel/compare/v0.8.0...v0.9.0) (2026-11-08)
 
 
