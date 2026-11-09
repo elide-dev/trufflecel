@@ -7,16 +7,19 @@ on:
       version:
         value: ${{ jobs.release.outputs.version }}
 permissions:
-  contents: write
-  pull-requests: write
-  actions: write
+  contents: read
 jobs:
   release:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       version: ${{ steps.release.outputs.version }}
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      prs: ${{ steps.release.outputs.prs }}
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
@@ -36,12 +39,26 @@ jobs:
           token: ${{ github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-      # Explicit dispatch makes release-branch checks independent of bot PR event behavior.
+  check-release-prs:
+    needs: release
+    if: needs.release.outputs.prs_created == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      # This job needs dispatch rights, but cannot write repository contents and
+      # never checks out or executes release-branch code. The publishing job has
+      # no Actions write permission. Bot PRs still receive explicit CI dispatch.
       - name: Check release PRs
-        if: steps.release.outputs.prs_created == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0; shared with Studio
         env:
-          RELEASE_PRS: ${{ steps.release.outputs.prs }}
+          RELEASE_PRS: ${{ needs.release.outputs.prs }}
         with:
           script: |
             for (const pr of JSON.parse(process.env.RELEASE_PRS)) {

@@ -103,8 +103,9 @@ reusable publisher checks out and verifies the exact release tag before calling 
 with its version. All modules release together. The explicit local `--publish` command
 remains available; coordinate manual publishes with CI to avoid concurrent metadata writes.
 
-The 0.10.0 release wave is gated on adopting published TruffleData 0.10.0; see
-[the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). Staging is still
-available before adoption, but a staged development build is not release-qualified.
+The published 0.10.0 release satisfied its TruffleData 0.10.0 adoption requirement;
+see [the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). The recorded
+dependency contract remains enforced. Staging a development build does not by
+itself qualify a new release.
 The staging script resolves Bazel's physical configuration output directory rather
 than following the mutable `bazel-bin` symlink while copying publication files.

@@ -11,7 +11,9 @@ actual native guest compilation.
 
 Jobs use Ubuntu 24.04, commit-pinned actions, StepSecurity harden-runner in audit mode,
 explicit permissions, timeouts and non-persistent checkout credentials. Codecov reporting and CodSpeed
-measurement get OIDC permission; only Release Please gets repository/PR write permission and permission to dispatch checks.
+measurement get OIDC permission. The Release Please creation job gets repository/PR
+write permission; a separate job gets Actions write permission to dispatch checks
+without checking out release-branch code. Reusable-workflow defaults are read-only.
 The publisher has read-only GitHub access and scoped R2 credentials in its upload step.
 
 ## Repository provisioning
@@ -25,8 +27,9 @@ Provide these existing organization conventions to `elide-dev/trufflecel`:
 | `CODECOV_TOKEN` (optional) / Codecov GitHub integration | JVM LCOV and JVM/native JIT test reporting; uses OIDC when no token is provided |
 | CodSpeed GitHub integration | Enable `elide-dev/trufflecel`; uploads use GitHub OIDC, without a stored CodSpeed token |
 
-Release Please uses the built-in `GITHUB_TOKEN`, with Contents, Pull requests and Actions
-write permissions. No bot app or PAT is required. Following Studio's convention, it explicitly
+Release Please uses the built-in `GITHUB_TOKEN`; Contents/Pull requests writes and
+Actions writes are isolated in separate jobs. The caller grants their union as
+the reusable workflow's permission ceiling. No bot app or PAT is required. It explicitly
 dispatches `ci.yml` on each created/updated release branch. Those runs execute the same Bazel
 and simulation checks; they cannot run Release Please or publish because those jobs require
 a main push. Publishing still runs directly after release creation in the main CI chain.
@@ -42,7 +45,7 @@ branch protection. Those administrative settings must be provisioned on GitHub/C
 
 `VERSION` and `.release-please-manifest.json` record the latest release. Conventional
 commits produce stable release PRs, updating VERSION, the manifest and CHANGELOG together.
-Before 1.0, feature commits advance the minor version. All three Maven
+Before 1.0, feature commits advance the minor version. All four Maven
 artifacts share the resulting version. Bazel's default publication version is a development
 snapshot; the release workflow always supplies the exact version explicitly.
 The Bazel root module is unversioned because it is not published to a Bazel registry;
@@ -82,10 +85,18 @@ See [Maintenance](MAINTENANCE.md) for Dependabot, CodeQL, dependency review,
 Scorecard publication and dependency automation limits. Security workflows have
 job-scoped SARIF write permission; only the Scorecard job receives OIDC for publication.
 
+`fuzzing.yml` supplements the 2,000-input Jazzer PR/main smoke run with a daily
+100,000-input campaign on Linux x86-64. It uses the pinned toolchain, local hosted
+execution, no publishing credentials, a 30-minute timeout, and a required nonzero
+coverage check. Crash reproducers and coverage reports are retained for 30 days.
+Maintainers can dispatch it manually on main. Neither a finite run nor Scorecard
+recognition proves the absence of defects.
+
 ## TruffleData gate for the 0.10.0 wave
 
-`tools/release/dependency_gate.json` holds the next release at TruffleCEL 0.10.0
-until stable TruffleData 0.10.0 is published and adopted. The gate verifies the
+This dependency requirement was satisfied for the published TruffleCEL 0.10.0
+release. `tools/release/dependency_gate.json` records its contract: stable
+TruffleData 0.10.0 must be published and adopted. The gate verifies the
 four TruffleData coordinates in MODULE.bazel and the Maven lock, and the three
 published adapter dependencies (JDBC remains test/integration-only). It also
 checks the upstream GitHub release is published, non-draft and non-prerelease.
@@ -96,7 +107,7 @@ The local/CI `publish.sh --publish` path independently enforces the gate before
 any R2 access, including for manually created tags. Existing 0.9.x publication
 recovery is unaffected. Network failures do not open the gate.
 
-Once TruffleData ships, update all pins and repin normally, then run the full
+For a future dependency wave, update all pins and repin normally, then run the full
 conformance, coverage, packaged-consumer, allocation and native/JIT gates. Do not
 change the gate just to unblock publication. Future dependency waves must update
 the policy explicitly.

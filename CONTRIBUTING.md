@@ -43,6 +43,48 @@ scope. Use a descriptive conventional commit-style PR title such as
 `fix: preserve uint comparisons` or `docs: clarify embedding`. Maintainers can
 help with release categorization. See [governance](GOVERNANCE.md) for decisions.
 
+## Choose the right validation
+
+| Change | Evidence expected |
+| --- | --- |
+| Parser, checker or evaluator | Relevant regression tests plus complete conformance; preserve rejection phase, CEL error categories, limits and concurrent reuse |
+| Protobuf/JSON or ownership | Shipped adapter tests, mutable-input/aliasing cases and applicable wire/interchange tests |
+| Compilation, allocation or native paths | JVM checks plus Linux native guest-JIT/blocklist gates; a JVM pass alone does not qualify Native Image |
+| Performance claims | Matched engine/configuration/input contracts, verified outputs, raw forks, source/runtime hashes and the [comparison guide](docs/BENCHMARK_COMPARISON.md); publish losses and unresolved scope |
+| GitHub Actions | `actionlint` and `python3 -m unittest discover -s .github/scripts -p 'test_*.py'`; inspect token permissions, trigger trust and fork behavior |
+| Documentation/charts | Check local links, versioned examples, source data, font licensing and rendered output; do not rewrite archived measurements |
+
+Run builds sequentially in one checkout. Avoid simultaneous benchmark jobs on a
+shared host. Use the checks above to choose focused validation while preparing
+the change; CI still runs the repository's full required gates. Report exactly
+what ran, failed, was skipped, or still requires Linux or release infrastructure.
+
+## Coding and review advice
+
+Java follows the repository's google-java-format tool; Gazelle owns generated Java
+targets. Follow existing Python and shell conventions, quote paths and shell
+arguments, and keep dependency versions with verified checksums. Resolve warnings
+or explain a narrow suppression; do not disable checks globally. Keep new
+first-party source copyright and `SPDX-License-Identifier: Apache-2.0 OR MIT`
+notices, preserving shebangs and existing attribution. Upstream/generated files
+retain their own notices; the historical source-header audit remains open.
+
+Explain the concrete trigger and before/after behavior in a PR. Include a small
+reproducer and evidence a reviewer can rerun. Reviewers should distinguish defects
+from preferences, identify blocking concerns, and re-review affected code after a
+new push. Approval requires someone other than the author; bots and agent output
+do not substitute for an accountable review. Do not claim an approval that did not
+occur, even when an administrator authorizes a documented bypass.
+
+## Starter contributions
+
+| Task | Completion check |
+| --- | --- |
+| Improve an integration example | Run it against the documented release and state input ownership and error behavior |
+| Add a negative CEL edge case | Assert the rejection phase and defined error category; keep the complete upstream corpus intact |
+| Add a decoder fuzz seed | Use a minimized, non-sensitive reproducer and run `//tools/fuzz:regression`; use the private security process for exploitable findings |
+| Improve chart accessibility | Keep complete data and text alternatives, validate every displayed value, and inspect the exported SVG/PNG |
+
 ## Contribution licensing
 
 By intentionally submitting a contribution for inclusion, you agree to license
@@ -53,6 +95,9 @@ the right to contribute, and retain third-party attribution and license notices.
 No separate contributor license agreement (CLA), copyright assignment, or
 Developer Certificate of Origin sign-off is required. Contributions must follow
 the [code of conduct](CODE_OF_CONDUCT.md).
+The [contributor agreement](CONTRIBUTOR_AGREEMENT.md) spells out the inbound
+license grant, provenance and responsibilities for assisted contributions.
+The [third-party guide](THIRD_PARTY.md) describes exceptions to first-party licensing.
 
 ## Review standards
 
@@ -67,4 +112,5 @@ Keep review discussion and resolution in the PR. Document any emergency administ
 bypass and arrange follow-up review before release.
 
 Dependency update procedures and the OpenSSF readiness roadmap are in
-[maintenance](docs/MAINTENANCE.md). Coding agents should also read [AGENTS.md](AGENTS.md).
+[maintenance](docs/MAINTENANCE.md) and [OpenSSF evidence](docs/OPENSSF.md).
+Coding agents should also read [AGENTS.md](AGENTS.md).
