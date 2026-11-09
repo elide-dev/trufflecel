@@ -125,12 +125,16 @@ final class Checker {
         yield check(n.children[4], resultScope);
       }
       case BLOCK_INDEX -> {
+        env.libraryPolicy.name(n.name, n.offset);
+        env.libraryPolicy.library(n.name, CelType.DYN, n.offset);
         int index = Math.toIntExact((Long) n.value);
         if (blockTypes == null || index >= blockTypes.size())
           throw failure(n, "block index must reference an earlier slot in the current block");
         yield blockTypes.get(index);
       }
       case BLOCK -> {
+        env.libraryPolicy.name(n.name, n.offset);
+        env.libraryPolicy.library(n.name, CelType.DYN, n.offset);
         var outer = blockTypes;
         blockTypes = new ArrayList<>();
         try {
