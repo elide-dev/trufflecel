@@ -241,6 +241,7 @@ final class Checker {
         if (n.value instanceof String[] names && names.length == 2)
           env.libraryPolicy.library("transformList", CelType.DYN, n.offset);
         if (n.name.equals("has")) {
+          require(n, n.children[0].kind == ExprNode.Kind.SELECT, "has requires a field selection");
           check(n.children[0], locals);
           yield CelType.BOOL;
         }
