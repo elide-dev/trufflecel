@@ -223,6 +223,11 @@ public class EvaluationControlsTest {
                 CelException.class,
                 () -> Values.listRange(List.copyOf(Collections.nCopies(1_000_000, 1L))))
             .code());
+    var oversizedMap = new LinkedHashMap<Long, Long>();
+    for (long k = 0; k < 1_000_000; k++) oversizedMap.put(k, 1L);
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> Values.mapRange(oversizedMap)).code());
     var smallMap = new LinkedHashMap<String, Long>();
     smallMap.put("a", 1L);
     smallMap.put("b", 2L);
