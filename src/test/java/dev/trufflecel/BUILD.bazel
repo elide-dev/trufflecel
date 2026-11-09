@@ -583,6 +583,17 @@ java_test(
     ],
 )
 
+java_test(
+    name = "optionalValue",
+    srcs = ["OptionalValueTest.java"],
+    test_class = "dev.trufflecel.OptionalValueTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
+
 # Packaged classpath regression belongs to the standard coverage suite.
 # keep
 java_test(
