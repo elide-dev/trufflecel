@@ -66,6 +66,20 @@ class ReleaseTest(unittest.TestCase):
         self.assertIn('needs: [bazel, benchmarks]', ci)
         self.assertIn("needs.release.outputs.release_created == 'true'", ci)
 
+    def test_release_write_permissions_are_isolated(self):
+        workflow = (ROOT / '.github/workflows/release-please.yml').read_text()
+        top = re.search(r'^permissions:\n(.*?)(?=^[^\s])', workflow, re.M | re.S).group(1)
+        self.assertEqual(top.strip(), 'contents: read')
+        release, dispatch = workflow.split('  check-release-prs:\n')
+        self.assertIn('      contents: write', release)
+        self.assertNotIn('actions: write', release)
+        self.assertIn('      actions: write', dispatch)
+        self.assertNotIn('contents: write', dispatch)
+        self.assertNotIn('actions/checkout@', dispatch)
+        self.assertIn("needs.release.outputs.prs_created == 'true'", dispatch)
+        self.assertIn("pr.baseBranchName !== 'main'", dispatch)
+        self.assertIn("!pr.headBranchName.startsWith('release-please--')", dispatch)
+
 
 if __name__ == '__main__':
     unittest.main()

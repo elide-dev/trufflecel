@@ -7,14 +7,31 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/elide-dev/trufflecel/badge)](https://scorecard.dev/viewer/?uri=github.com/elide-dev/trufflecel)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
 
-**CEL expressions, executed by Truffle.** TruffleCEL brings the
-[Common Expression Language](https://cel.dev/) to [GraalVM Truffle](https://www.graalvm.org/latest/graalvm-as-a-platform/language-implementation-framework/)
-with an independent parser, gradual type checker, and AST evaluator. Embed reusable policies,
-validation rules, and filters in Java or Elide, with no CEL Java dependency.
+**CEL expressions, executed by Truffle.** TruffleCEL is an independent
+[Common Expression Language](https://cel.dev/) parser, type checker, and evaluator
+for Java and Elide. Compile reusable policies, validation rules, and filters for
+GraalVM JVM or Native Image, with optional guest compilation for hot expressions.
+Production code has no cel-java dependency.
 
-[Get started](#choose-an-artifact) · [Architecture](#architecture) ·
-[Integration guide](docs/INTEGRATION.md) · [CEL compatibility](#compatibility-and-scope) ·
-[Benchmarks](https://codspeed.io/elide-dev/trufflecel)
+[Get started](#get-started) · [Documentation](docs/README.md) ·
+[Benchmarks](#performance-and-memory) · [Contribute](CONTRIBUTING.md) ·
+[Releases](https://github.com/elide-dev/trufflecel/releases)
+
+## Get started
+
+Use Java 25 and Elide GraalVM `25.5.5-elide.27`. TruffleCEL **0.10.0** uses
+TruffleData **0.10.0**. Add the thin core JAR and the matching runtime repository:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven("https://maven.elide.dev")
+    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.27")
+}
+dependencies {
+    implementation("dev.elide:trufflecel-core:0.10.0")
+}
+```
 
 ```java
 import dev.trufflecel.Cel;
@@ -26,378 +43,130 @@ boolean allowed = policy.test(Map.of(
     "user", Map.of("age", 30, "roles", List.of("admin"))));
 ```
 
-Compile once and reuse across threads. Evaluation has its own activation, comprehension
-scopes and operation budget. Map inputs are borrowed: keep their contents stable until
-evaluation returns. Bindings are normalized when read; failures carry stable CEL error codes. Native TruffleData rows, protobuf messages and Oracle JSON objects have
-explicit adapters; expressions cannot discover arbitrary Java methods.
+Compile once and reuse across threads. Each evaluation has its own activation,
+scopes, and operation budget. Map inputs are borrowed: keep their contents stable
+until evaluation returns. Use `Activation.snapshot(bindings)` for reusable owned
+inputs. Declare an environment with `Cel.newBuilder()` for typed variables,
+custom functions, and explicit resource limits.
 
-For repeated evaluations over the same input, `Activation.snapshot(bindings)` prepares reusable
-bindings for `program.evaluate(activation)` or `program.test(activation)`. See
-[snapshot ownership and reuse](docs/INTEGRATION.md#reusing-input-snapshots).
+RE2/J is optional. For compatibility-mode regex support, add
+`com.google.re2j:re2j:1.8`. Applications can omit it by selecting
+[TruffleRegex-only mode](docs/INTEGRATION.md#omitting-re2j), subject to its explicit
+context and supported-pattern contract.
 
-## Architecture
-
-Compile expressions once, then evaluate them against fresh inputs. The frontend implements
-CEL parsing, name resolution, and gradual typing; each `Program` owns a reusable Truffle call
-target. Evaluation state belongs to the individual call.
-
-```mermaid
-flowchart LR
-    Source["CEL source"] --> Parser["Parser"]
-    Parser --> Checker["Type checker"]
-    Env["Declarations and bindings"] --> Checker
-    Checker --> Program["Program / Truffle AST"]
-    Input["Input variables"] --> Activation["Activation, scopes and budget"]
-    Program --> Eval["Evaluate call target"]
-    Activation --> Eval
-    Eval --> Result["CEL value or error"]
-    Program -. "Graal partial evaluation" .-> Code["Compiled guest code"]
-    Code -.-> Eval
-```
-
-Truffle specializes expression execution and can compile hot guest code on a compatible
-GraalVM runtime. Generic collections, libraries, input conversion, and object adapters use
-explicit Truffle boundaries. The JVM and Native Image compilation gates exercise this split
-and enforce allocation, AST-size, and compiler-graph budgets.
-
-```mermaid
-flowchart TB
-    Host["Java / Elide embedder"] --> API["Cel / Environment / Program"]
-    Host --> Polyglot["Polyglot Context: cel"]
-    Polyglot --> Core["trufflecel-core"]
-    API --> Core
-    Rows["TruffleData batch / JDBC rows"] --> Data["DataType schema adapter"]
-    Data --> Core
-    Proto["Protobuf messages and wire data"] --> PB["trufflecel-protobuf / ProtobufType"]
-    PB --> Core
-    JSON["Oracle JSONObject / JSONArray"] --> JS["trufflecel-json / JsonValues"]
-    JS --> Core
-    Core --> Runtime["Embedder-supplied Truffle runtime"]
-    Runtime --> JVM["GraalVM JVM"]
-    Runtime --> Native["Native Image"]
-```
-
-The direct Java API does not require a Polyglot context. Optional adapters keep protobuf and
-Oracle JSON dependencies out of the core JAR. Native TruffleData rows retain their schema;
-host collections and JSON trees are converted to bounded CEL snapshots. See the
-[integration guide](docs/INTEGRATION.md) for object bindings, presence, and numeric semantics.
-
-## Choose an artifact
+### Choose an artifact
 
 | Maven coordinate | Purpose |
 | --- | --- |
 | `dev.elide:trufflecel-core` | Compiler, evaluator, Polyglot language and native TruffleData rows |
-| `dev.elide:trufflecel-protobuf` | Optional protobuf construction, ingestion, wire decoding and canonical CEL AST interchange |
-| `dev.elide:trufflecel-json` | Optional Oracle Truffle JSON input conversion |
-| `dev.elide:trufflecel-processor` | Build-time generation of reflection-free POJO, JavaBean and record snapshot adapters |
+| `dev.elide:trufflecel-protobuf` | Protobuf inputs, wire decoding and canonical CEL AST interchange |
+| `dev.elide:trufflecel-json` | Oracle Truffle JSON input conversion |
+| `dev.elide:trufflecel-processor` | Build-time generation of reflection-free POJO, JavaBean and record adapters |
 
-All artifacts are thin JARs. The processor belongs on the annotation processor path; generated adapters use only core. The optional bridges depend on the matching core version; core
-does not pull in protobuf, JSON, JDBC drivers or test libraries. The current source tree targets
-**Java 25**, **Elide GraalVM `25.5.5-elide.27`**, and **TruffleData `0.10.0`**.
+Use matching versions. Put the processor on the annotation processor path; generated
+adapters depend on core. The direct Java API does not require a Polyglot context;
+the registered language ID is `cel`. See [integration](docs/INTEGRATION.md) for
+ownership, numeric and presence semantics, and [publishing](docs/PUBLISHING.md)
+for Maven/Bazel consumption and runtime dependencies.
 
-Artifacts are published to `maven.elide.dev`. See [Releases](https://github.com/elide-dev/trufflecel/releases)
-for available versions. The example below uses released TruffleCEL `0.8.0`, whose POM pins
-TruffleData `0.8.0`:
+## Performance and memory
 
-```kotlin
-repositories {
-    mavenCentral()
-    maven("https://maven.elide.dev")
-    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.24")
-}
-dependencies {
-    implementation("dev.elide:trufflecel-core:0.8.0")
-    // Add trufflecel-protobuf or trufflecel-json as needed.
-}
-```
+Start with **interpreter-to-interpreter** results under the same host runtime.
+Guest JIT is a separate choice for hot, reused expressions; warmed evaluation
+excludes compilation and warmup. The [comparison guide](docs/BENCHMARK_COMPARISON.md)
+explains the evidence, comparator settings, and remaining limits in response to
+upstream methodology feedback.
 
-See [publishing](docs/PUBLISHING.md) for Maven and Bazel consumption, local staging, and
-release operations.
+The [0.10.0 report](docs/benchmarks/release-0.10.0-20261109/README.md) covers six
+fixtures, including protobuf policy, materialized repeated fields, maps/regex,
+wide activations, and optimizer opportunities. cel-java 0.15.0 runs with both
+default and constant-folding/CSE planners. Every non-scalar fixture retains all
+69 bindings. Figures use ordinary Map inputs and three forks per cell on the
+recorded Linux host; they do not establish universal rankings.
 
-In the `0.10.0` development line, RE2/J is an optional dependency. Compatibility-mode
-regex users must add `com.google.re2j:re2j:1.8` explicitly. Applications can omit it by
-selecting [TruffleRegex-only mode](docs/INTEGRATION.md#omitting-re2j), through the Java
-builder or Polyglot language options. This mode has an explicit context and parser-bound
-contract and reports unsupported regex operations as errors.
+| Metric | TruffleCEL interpreter: lower / tied / higher | Guest JIT: lower / tied / higher |
+| --- | ---: | ---: |
+| Hot evaluation time | 12 / 0 / 0 | 12 / 0 / 0 |
+| Current-thread allocation per evaluation | 11 / 1 / 0 | 12 / 0 / 0 |
+| Current whole-process RSS | 5 / 0 / 7 | 4 / 0 / 8 |
+| Lifetime peak whole-process RSS | 6 / 0 / 6 | 4 / 0 / 8 |
 
+Each mode is compared with the lower cel-java planner aggregate for that metric,
+fixture and runtime. Counts are descriptive, not significance tests. Three of
+the interpreter peak-RSS comparisons have overlapping fork ranges.
 
-## Embed
+**Open a chart for readable values and observed ranges. Shorter bars are better.**
 
-`Cel.compile(source)` infers free variables as `dyn`. Declare a fixed environment when
-you want compile-time validation:
-
-```java
-var env = Cel.newBuilder()
-    .variable("balance", CelType.INT)
-    .variable("enabled", CelType.BOOL)
-    .evaluationBudget(10_000)
-    .build();
-var program = env.compile("enabled && balance > 0");
-boolean allowed = program.test(Map.of("balance", 42L, "enabled", true));
-```
-
-`Program.evaluate` returns a value; `Program.test` requires a boolean. `source`, `variables`
-and `resultType` describe the compiled program. Explicit `ObjectType` and function bindings
-extend the environment. The registered Polyglot language ID is `cel`.
-
-Every compilation validates literals, precompiles constant regular expressions and folds
-constant subexpressions. `validation(Environment.Validation.STRICT)` additionally rejects, at
-compile time and with line/column diagnostics, every failure that no evaluation could avoid;
-the default keeps CEL's evaluation-time semantics. See
-[compile-time validation](docs/VALIDATION.md).
-
-For TruffleData, bind a `DataType` to a schema and pass immutable batch/JDBC rows directly.
-For protobuf, register a `ProtobufType` and ingest messages or native `ProtoRow` values through
-`input`. Binary decoding and message construction use TruffleData’s embedded codec and native
-representation, with no retained Java-message sidecar. `JsonValues.from` creates
-bounded, immutable CEL snapshots of Oracle `JSONObject` and `JSONArray` trees.
-
-[Integration notes](docs/INTEGRATION.md) cover Elide's Kotlin facade, numeric and presence
-semantics, native rows, well-known protobuf mappings, and adapter limitations.
-[Instrumentation](docs/INSTRUMENTATION.md) covers source tags for coverage and profiling,
-debugger breakpoints, local scopes, and source-aware Java embedding.
-
-## Build and verify
-
-Bazelisk selects the pinned Bazel version. Builds default to BuildBuddy Linux amd64 remote
-execution and caching. Dependencies and toolchains are pinned. Configure
-credentials outside Git, or append `--config=local` for host JVM execution.
-
-```sh
-bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json
-bazel test //...
-bazel coverage //src/test/...
-bazel run //tools:coverage --config=local
-```
-
-JARs are under `bazel-bin/src/main/java/dev/trufflecel/`. Gazelle owns the Java library and
-test target source lists and dependency mappings. Run workspace tools locally on macOS:
-
-```sh
-bazel run //:gazelle --config=local
-bazel run //tools:format --config=local
-```
-
-The reusable CI workflows check generated targets, formatting, tests, coverage, Maven
-publications, and an independent JVM consumer of the publication JARs. External actions
-are pinned by commit; runner hardening, limited permissions, fork-safe credentials and
-serialized publishing are included. See [CI setup](docs/CI.md) and [Bazel setup](docs/BAZEL.md).
-
-## Performance and releases
-
-Every pull request and main update runs 21 **CodSpeed simulation** cases covering compilation,
-evaluation, native data adapters, and CEL extensions. Bazel builds a Native Image executable;
-the Linux CI runner measures named regions and verifies their results. Startup, fixture
-creation, and warmup are excluded.
-
-These measurements count native-AOT instructions using Truffle’s fallback interpreter.
-Separate JVM and Native Image gates require guest compilation, enforce allocation and
-AST-size budgets, and reject compilation blocklist violations. CodSpeed does not measure
-JVM/JIT throughput. See [benchmark details](docs/BENCHMARKS.md) for the cases and methodology.
-
-For cross-engine comparisons, start with **interpreter-to-interpreter** results under
-the same host runtime. Guest-JIT throughput answers a separate question about hot,
-reused expressions: include preparation and warmup when evaluating that tradeoff.
-The [representative suite](docs/BENCHMARKS.md#representative-comparisons) adds protobuf
-policies, wide activations, optimizer-enabled cel-java, JMH, and fresh-process evaluation
-curves. Compilation includes this library's own parser and checker; it is not Truffle
-guest compilation. Corpus coverage and microbenchmark speedups do not establish a
-general replacement for another CEL engine.
-
-The [0.10.0 release report](docs/benchmarks/release-0.10.0-20261109/README.md)
-refreshes JVM/native measurements with TruffleData 0.10.0 and the selected
-TruffleRegex adapter. Across six ordinary-map fixtures, TruffleCEL has lower
-evaluation time in 24/24 comparisons against the faster cel-java planner mode,
-lower allocation in 23/24 with one tie, and lower current RSS in 9/24.
-These are measured aggregates from three forks per cell, not universal rankings.
-
-![Evaluation time: TruffleCEL is faster in all 24 ordinary-map comparisons. Shorter bars are better; each fixture labels interpreter and guest-JIT speedups against the faster cel-java planner.](docs/images/benchmark-0.10.0-elide/evaluation-time.svg)
-
-[Allocation](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg),
-[process RSS](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg), and the report's
-prepared-input controls and ingestion tables retain the remaining tradeoffs.
-The [chart gallery](docs/images/benchmark-0.10.0-elide/README.md) includes downloadable
-SVG/PNG charts, reading guidance, and links to the complete values and ranges.
-cel-java copies ordinary maps; caller-prepared immutable inputs are a separate
-scenario with lower adaptation cost. Compilation and image-prepared AST results
-are retained in the [separate CI comparison](docs/benchmarks/release-0.10.0-20261109/ci/tables.md).
-
-<details>
-<summary>Earlier 0.10.0 development measurements (TruffleData 0.9.0)</summary>
-
-The [November 8 six-fixture report](docs/benchmarks/evaluation-refresh-20261108/README.md)
-measures the RE2/J candidate `67ab33c` on pinned GraalVM 25.5.5-elide.27 with TruffleData
-0.9.0. Under the ordinary Map API, TruffleCEL has lower evaluation time in 24/24
-comparisons against the faster cel-java planner mode, lower allocation in 23/24 with
-one tie, and lower current process RSS in 9/24. These are separate timing and memory
-measurements; native guest-JIT memory remains higher on the complex fixtures.
-
-cel-java copies ordinary input maps on evaluation. The
-[paired prepared-map control](docs/benchmarks/cel-java-inputs-20261108/README.md)
-isolates how caller-prepared Guava immutable maps change that cost while retaining
-all 69 bindings: cel-java's scalar-wide allocation falls from 2,936 to 72 B/op on the
-JVM and 3,504 to 120 B/op on native, with substantially lower evaluation time.
-Caller-side preparation is excluded. The ordinary-map counts do not establish an
-advantage over every embedding path.
-
-The [selected TruffleRegex RE2 adapter](docs/benchmarks/regex-re2-20261108/README.md)
-reduces the regex workload's guest-JIT time by 10.9% on JVM and 11.2% on native,
-but increases allocation and current process RSS. JIT RSS rises from 486.83 to
-536.88 MiB on JVM and 192.54 to 224.39 MiB on native; the combined native benchmark
-binaries grow 9.3–9.6 MiB. This is a speed/footprint tradeoff and
-does not close the memory gap. The report retains the unrelated scalar control,
-startup observations and exact backend proofs.
-A [cached-dispatch follow-up](docs/benchmarks/regex-dispatch-20261108/README.md)
-showed no demonstrated throughput gain and increased native regex JIT RSS another
-7.11%; that prototype was removed. The simpler adapter remains selected.
-
-[Startup and natural-JIT payback](docs/benchmarks/startup-payback-20261108/README.md)
-remain separate tradeoffs, including slower JVM scalar startup and no sampled
-JVM scalar-wide/policy payback through one million evaluations. Historical
-[November 5 measurements](docs/benchmarks/representative-20261105/README.md) remain
-available with their original dependencies and methodology.
-
-</details>
-
-<details>
-<summary>Historical three-expression comparison (TruffleCEL 0.2.0)</summary>
-
-The earlier suite compares **TruffleCEL and upstream cel-java 0.15.0** on scalar
-arithmetic, a policy expression, and a list comprehension. It measures compilation,
-guest-JIT evaluation, and interpretation on the JVM and Native Image (SVM), including
-checked ASTs embedded at image build time.
-
-![TruffleCEL versus cel-java: compilation, evaluation, and interpretation](docs/images/cel-comparison.svg)
-
-![TruffleCEL versus cel-java: allocated heap bytes per operation](docs/images/cel-allocations.svg)
-
-<details>
-<summary>Whole-process peak RSS for a fixed workload</summary>
-
-![TruffleCEL versus cel-java: fixed-work peak resident memory](docs/images/cel-peak-rss.svg)
-
-</details>
-
-Measured **TruffleCEL 0.2.0**, captured **2026-11-04 (UTC)** on a shared
-AMD EPYC 7763 64-Core Processor CI runner. Lower is better; bars show medians across
-three fresh processes, with minimum/maximum whiskers. TruffleCEL has lower median time
-in **24 of 24 comparisons**, lower allocation in **24 of 24**, and lower
-peak RSS for fixed workloads in **16 of 24**. Native guest JIT still requires
-substantial process memory. These results cover the tested workloads and runtime settings.
-
-Allocation and RSS use separate, equal-work processes: 8,192 compilations or 524,288
-evaluations, plus setup. Bytes/op measures current-thread heap allocation; it excludes
-compiler/background threads and native memory. RSS includes the process's entire lifetime,
-including calibration, warmup, and guest compilation. Timing excludes setup and guest
-compilation. Both native engines share one benchmark binary, so RSS does not represent
-standalone deployment footprints. Image-build preparation embeds checked ASTs, not guest
-machine code. See the [raw measurements](docs/benchmarks/comparison.json),
-[measurement run](https://github.com/elide-dev/trufflecel/actions/runs/41754803857), and
-[methodology and reproduction commands](docs/BENCHMARKS.md#comparison-with-upstream-cel-java).
-
-The [first allocation snapshot](docs/benchmarks/comparison-allocation-baseline-v3.json) is
-retained alongside the [earlier time-bounded RSS snapshot](docs/benchmarks/comparison-throughput-rss-v2.json), which
-used different operation counts for each engine; its RSS is not directly comparable with
-this fixed-work measurement. The [original timing baseline](docs/benchmarks/comparison-baseline.json),
-[earlier optimized timing snapshot](docs/benchmarks/comparison-optimized-v1.json), and
-[CodSpeed optimization history](docs/BENCHMARKS.md#finding-instruction-hotspots) are retained.
-
-CI preserves fresh JSON and SVG results in its `cel-comparison` artifact.
-
-These microbenchmarks use small activations, cel-java without its optional AST optimizers,
-and a 500 ms warmup on shared hardware. Guest compilation is forced before timing.
-They do not measure cold-start costs or representative protobuf evaluation.
-</details>
-
-After successful main checks, Release Please opens version/changelog PRs from conventional
-commits. Merging a release PR creates a version tag. The Maven publisher uses that exact tag to
-publish JARs, sources, POMs, and checksums to `maven.elide.dev`; it requires the R2 credentials
-described in [CI setup](docs/CI.md). Existing versions are immutable.
-
-## Compatibility and scope
-
-The conformance suite runs **all 2,771 cases across the 32 files in the upstream CEL corpus**, with no
-suite exclusions or per-case skips, pinned to cel-spec revision
-[`21ec6f4`](https://github.com/cel-expr/cel-spec/tree/21ec6f4e52e8d694687ff9ed7408d3eccbb955d7).
-It checks values, errors, namespaces, declarations, macros and inferred types.
-[Corpus provenance](third_party/cel-spec/README.md).
-
-CI requires **99.8% production line coverage and 99.8% branch coverage**, including optional
-adapters. Additional tests cover resource limits, concurrency, interop, published TruffleData
-artifacts and Maven consumption. Every corpus case runs with both an independent test-only
-protobuf fixture and the shipped `ProtobufType` adapter backed by TruffleData, through both
-the direct frontend and canonical AST interchange (11,084 executions of 2,771 cases).
-The production-adapter path uses unmodified upstream proto2/proto3 schemas and protobuf-java
-fixture construction. This is evidence of compatibility with the pinned corpus, not exhaustive
-specification compliance. Corpus error cases assert an evaluation failure, not its category
-or diagnostic text. A separate table of 431 independently specified negative and edge cases
-(malformed input, invalid declarations and types, unknown propagation, resource limits,
-collection, arithmetic, conversion, short-circuit, comprehension, optional and protobuf edge
-cases) records the rejection phase and, where the contract defines one, the `CelException.Code`
-category, never the diagnostic wording. Each case runs through the direct checked and unchecked
-frontends, strict compile-time validation, canonical `ParsedExpr`/`CheckedExpr` interchange
-with a wire round trip, borrowed and snapshot activations, both protobuf adapters for protobuf
-cases, and forced last-tier guest compilation; the 368 cases expressible in cel-java also run
-against both of its parsers with and without AST optimizers, with 22 recorded, explained
-divergences. Strict validation rejects at compile time every case that cel-java's
-constant-folding optimizer rejects. Custom functions, limits, concurrency, and unknown
-propagation have separate regression tests.
-See the [coverage audit](docs/COVERAGE.md) for measured totals and remaining defensive paths.
-
-The table describes the current `main` branch against the pinned corpus, not every CEL
-extension or future specification revision. ✅ means implemented; the scope column identifies
-validation evidence and execution limits.
-
-| Capability | Status | Scope and limitations |
-| --- | --- | --- |
-| Independent parser, type checker, and evaluator | ✅ Implemented | No CEL Java frontend or interpreter dependency; core syntax, types, operators, namespaces, and standard functions pass the pinned suites. |
-| Compile-time validation and constant folding | ✅ Implemented | Bounded constant folding and constant regular-expression precompilation on every compilation, at the original budget cost and invisible to AST export and tooling; opt-in strict validation with every-path analysis, homogeneous-literal and nesting validators, and multi-issue line/column diagnostics; see [validation](docs/VALIDATION.md). |
-| Complete pinned conformance corpus | ✅ Passing | All 2,771 cases across 32 files; no suite exclusions or per-case skips. |
-| Macros and optional values | ✅ Implemented | Standard macros, two-variable comprehensions, optional selection/indexing, and optional aggregate entries. |
-| String, list, math, and network extensions | ✅ Implemented | All cases in their pinned suites; see [supported APIs and limits](docs/EXTENSIONS.md). |
-| Local bindings and set operations | ✅ Implemented | `cel.bind`, `sets.contains`, `sets.equivalent`, and `sets.intersects`. |
-| Lazy blocks | ✅ Implemented | `cel.block`, `cel.index`, and `cel.iterVar`; cached values/errors and isolated lexical scopes. |
-| Block optimization | ✅ Implemented | Slot reads resolve to their initializer nodes; JVM guest-compilation and allocation gates cover the compiled path. Source-backed tooling retains observable boundary evaluation. |
-| Base64 encoding/decoding | ✅ Implemented | Standard alphabet, padded or unpadded decoding, and CR/LF handling. |
-| URL-safe Base64 and structured encoders | ✅ Implemented | `base64.encodeUrl`/`decodeUrl`, `json.encode`/`parse`, and `yaml.encode`/`parse`, including typed optional parsing and bounded data traversal. |
-| Protobuf messages and well-known types | ✅ Implemented | Proto2/proto3 fields, construction, presence, native wire decoding, and registered `Any` payloads through [TruffleData](docs/INTEGRATION.md). |
-| Proto2 extensions | ✅ Implemented | `proto.hasExt` and `proto.getExt`; descriptors must be registered explicitly. |
-| Protobuf Editions and MessageSet | ✅ Implemented | Resolved edition presence, packing and enum features feed native plans; explicitly registered MessageSet payloads and unknown payloads round-trip through native storage. |
-| Unknown values | ✅ Implemented | Propagation, error precedence and short-circuiting have regression coverage, including AST and RPC paths. Upstream's empty `unknowns` file provides no additional conformance evidence. |
-| Canonical protobuf AST interchange | ✅ Implemented | `CanonicalAst` exports/imports `ParsedExpr` and `CheckedExpr`; all pinned cases also run through interchange, with cross-engine wire tests. |
-| CEL conformance RPC service | ✅ Implemented | Standalone gRPC Parse/Check/Eval service, with explicit descriptor registration, bounded requests and loopback transport tests; see [interchange and RPC](docs/INTERCHANGE.md). |
-| JVM embedding and Truffle tooling | ✅ Implemented | Thin JARs, Polyglot integration, node instrumentation, profiling/coverage tags, and debugger scopes. |
-| Native Image guest compilation | ✅ Tested | Native JIT/blocklist checks and representative compiled-operation tests run in CI. |
-
-Resource limits intentionally bound expression size/depth, evaluation work, and collection or
-string expansion. See [extension support](docs/EXTENSIONS.md), [integration](docs/INTEGRATION.md),
-and [benchmark methodology](docs/BENCHMARKS.md) for the detailed contracts.
-
-## Reference shelf
-
-| Reference | What it covers |
+| Interpreter evaluation | Allocation per evaluation |
 | --- | --- |
-| [CEL specification](https://github.com/cel-expr/cel-spec) | Upstream language specification, schemas, and conformance tests |
-| [CEL language definition](https://github.com/cel-expr/cel-spec/blob/master/doc/langdef.md) | Syntax, types, evaluation, and standard functions |
-| [Pinned conformance corpus](third_party/cel-spec/README.md) | Exact upstream revision, complete corpus, and reproducible import |
-| [TruffleCEL extensions](docs/EXTENSIONS.md) | Supported optional, string, list, math, and network APIs |
-| [Compile-time validation](docs/VALIDATION.md) | Validation policies, constant folding bounds, strict every-path rules, and diagnostics |
-| [Configuration and policy tooling](docs/TOOLING.md) | Environment YAML, CEL Policy compilation, static cost bounds and coverage-guided fuzzing |
-| [TruffleData](https://github.com/elide-dev/truffledata) | Native Truffle data types, rows, and protobuf integration |
-| [Bazel](docs/BAZEL.md) / [CI](docs/CI.md) | Toolchains, BuildBuddy, generated targets, and quality gates |
-| [Benchmark methodology](docs/BENCHMARKS.md) | Paired cel-java timings, SVG results, CodSpeed simulation, and guest-JIT qualification |
-| [Publishing](docs/PUBLISHING.md) | Maven consumption, release automation, and artifact verification |
+| [![Interpreter evaluation: 12 lower ordinary-map times, guest JIT excluded.](docs/images/benchmark-0.10.0-elide/interpreter-time.svg)](docs/images/benchmark-0.10.0-elide/interpreter-time.svg) | [![Allocation: interpreter has 11 lower and one tied result; guest JIT has 12 lower results.](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg)](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg) |
+| **Current whole-process RSS** | **Peak whole-process RSS** |
+| [![Current RSS: interpreter is higher in 7 cases, guest JIT in 8.](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg)](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg) | [![Peak RSS: interpreter is higher in 6 cases, guest JIT in 8.](docs/images/benchmark-0.10.0-elide/evaluation-peak-rss.svg)](docs/images/benchmark-0.10.0-elide/evaluation-peak-rss.svg) |
 
-## Community and licensing
+[Full gallery and PNG downloads](docs/images/benchmark-0.10.0-elide/README.md) ·
+[Guest-JIT timing alongside interpreters](docs/images/benchmark-0.10.0-elide/evaluation-time.svg) ·
+[All values and ranges](docs/benchmarks/release-0.10.0-20261109/tables.md)
 
-Contributions are open to everyone; see [Contributing](CONTRIBUTING.md),
-[Governance](GOVERNANCE.md), and our [Code of Conduct](CODE_OF_CONDUCT.md).
-For help, see [Support](SUPPORT.md). Report vulnerabilities privately through
-our [Security Policy](SECURITY.md).
+**Input preparation changes the comparison.** cel-java copies ordinary maps but
+reuses Guava ImmutableMaps. In the [separate prepared-input controls](docs/images/benchmark-0.10.0-elide/README.md#prepared-input-controls),
+JVM scalar-wide cel-java allocation falls from 2,936 to 72 B/op, below TruffleCEL
+interpreter's 120 B/op. Caller preparation is excluded. Only two fixtures have
+these controls; ordinary-map counts do not apply to every input API.
 
-TruffleCEL is dual-licensed under [MIT](LICENSE-MIT) or
-[Apache-2.0](LICENSE-APACHE), at your option (`MIT OR Apache-2.0`).
-See [LICENSE](LICENSE) and [NOTICE](NOTICE) for scope and third-party attribution.
+**Memory and startup remain tradeoffs.** Allocation is current-thread bytes/op,
+not retained heap. RSS covers the whole process, including setup and compilation;
+the shared comparison binary is not a standalone deployment footprint.
+[Startup/payback](docs/benchmarks/startup-payback-20261108/README.md) and
+[retained-heap](docs/benchmarks/retained-20261108/README.md) measurements use earlier
+TruffleData 0.9.0 artifacts, and are explicitly historical. Current-release
+startup/payback and separate deployment-size measurements remain open evidence gaps.
 
-Security automation, dependency update coverage and the OpenSSF readiness roadmap are
-documented in [Maintenance](docs/MAINTENANCE.md) and the [threat model](docs/THREAT_MODEL.md).
+CI also runs [CodSpeed simulation](https://codspeed.io/elide-dev/trufflecel),
+allocation limits and native guest-compilation gates. CodSpeed instruction counts
+are distinct from JVM/JIT throughput. See [methodology and historical reports](docs/BENCHMARKS.md).
+
+## Compatibility and safety
+
+All **2,771 cases in the pinned 32-file cel-spec corpus** run without skips, through
+both a test fixture and the shipped protobuf adapter, and through frontend and
+canonical AST paths. An additional 431-case negative/edge table checks rejection
+phase and defined error categories; 368 cases also run against cel-java with both
+parsers and optimizer settings, with 22 documented divergences.
+
+This is evidence for the tested contracts, not exhaustive CEL specification
+compliance. CI enforces **99.8% line and branch coverage**, resource-limit and
+concurrency tests, and coverage-guided frontend/decoder fuzzing. Read
+[compatibility and limitations](docs/COMPATIBILITY.md), [validation](docs/VALIDATION.md),
+and the [threat model](docs/THREAT_MODEL.md) before exposing expressions to untrusted input.
+
+## Build and contribute
+
+Bazelisk selects the pinned Bazel and GraalVM toolchains. Local development needs
+no BuildBuddy credentials:
+
+```sh
+bazel run --config=local //bazel/gazelle:update
+bazel run --config=local //tools:format
+bazel test --config=local //...
+bazel coverage --config=local //src/test/...
+bazel run --config=local //tools:coverage
+```
+
+The default configuration uses BuildBuddy RBE; `--config=local` uses the host.
+Native guest-JIT qualification runs on Linux. See [Bazel setup](docs/BAZEL.md),
+[contributor guidance](CONTRIBUTING.md), [agent guidance](AGENTS.md), and
+[CI](docs/CI.md). Contributions of code, tests, documentation, and reproducible
+performance investigations are welcome.
+
+## Community, security and licensing
+
+[Support](SUPPORT.md) · [Governance](GOVERNANCE.md) ·
+[Code of conduct](CODE_OF_CONDUCT.md) · [Security policy](SECURITY.md) ·
+[OpenSSF evidence and remaining work](docs/OPENSSF.md)
+
+First-party TruffleCEL is dual-licensed under [Apache-2.0](LICENSE-APACHE) or
+[MIT](LICENSE-MIT), at your option (`Apache-2.0 OR MIT`). Contributors offer their
+work under both alternatives and retain copyright; see the
+[contributor agreement](CONTRIBUTOR_AGREEMENT.md). [Third-party components](THIRD_PARTY.md)
+retain their own terms and notices. Report vulnerabilities privately using the
+[security process](SECURITY.md).
