@@ -185,7 +185,7 @@ serialized publishing are included. See [CI setup](docs/CI.md) and [Bazel setup]
 
 ## Performance and releases
 
-Every pull request and main update runs 14 **CodSpeed simulation** cases covering compilation,
+Every pull request and main update runs 21 **CodSpeed simulation** cases covering compilation,
 evaluation, native data adapters, and CEL extensions. Bazel builds a Native Image executable;
 the Linux CI runner measures named regions and verifies their results. Startup, fixture
 creation, and warmup are excluded.
@@ -203,6 +203,25 @@ policies, wide activations, optimizer-enabled cel-java, JMH, and fresh-process e
 curves. Compilation includes this library's own parser and checker; it is not Truffle
 guest compilation. Corpus coverage and microbenchmark speedups do not establish a
 general replacement for another CEL engine.
+
+The [0.10.0 release report](docs/benchmarks/release-0.10.0-20261109/README.md)
+refreshes JVM/native measurements with TruffleData 0.10.0 and the selected
+TruffleRegex adapter. Across six ordinary-map fixtures, TruffleCEL has lower
+evaluation time in 24/24 comparisons against the faster cel-java planner mode,
+lower allocation in 23/24 with one tie, and lower current RSS in 9/24.
+These are measured aggregates from three forks per cell, not universal rankings.
+
+![TruffleCEL 0.10.0 evaluation comparison](docs/images/release-0.10.0/evaluation-time.svg)
+
+[Allocation](docs/images/release-0.10.0/evaluation-allocation.svg),
+[process RSS](docs/images/release-0.10.0/evaluation-rss.svg), and the report's
+prepared-input controls and ingestion tables retain the remaining tradeoffs.
+cel-java copies ordinary maps; caller-prepared immutable inputs are a separate
+scenario with lower adaptation cost. Compilation and image-prepared AST results
+are retained in the [separate CI comparison](docs/benchmarks/release-0.10.0-20261109/ci/tables.md).
+
+<details>
+<summary>Earlier 0.10.0 development measurements (TruffleData 0.9.0)</summary>
 
 The [November 8 six-fixture report](docs/benchmarks/evaluation-refresh-20261108/README.md)
 measures the RE2/J candidate `67ab33c` on pinned GraalVM 25.5.5-elide.27 with TruffleData
@@ -235,6 +254,8 @@ remain separate tradeoffs, including slower JVM scalar startup and no sampled
 JVM scalar-wide/policy payback through one million evaluations. Historical
 [November 5 measurements](docs/benchmarks/representative-20261105/README.md) remain
 available with their original dependencies and methodology.
+
+</details>
 
 <details>
 <summary>Historical three-expression comparison (TruffleCEL 0.2.0)</summary>

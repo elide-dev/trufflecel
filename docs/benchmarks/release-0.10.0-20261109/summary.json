@@ -1,0 +1,1749 @@
+{
+  "schema": 1,
+  "cells": [
+    {
+      "time_ns": 135.63753111340753,
+      "time_forks_ns": [
+        130.7689593292315,
+        141.5832977970381,
+        134.56033621395295
+      ],
+      "measurement_drift_percent": [
+        0.11898269292476282,
+        0.022532853039525236,
+        0.5437054691726395
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "allocation_bytes": 526.0,
+      "allocation_forks_bytes": [
+        526.0,
+        526.0,
+        526.0
+      ],
+      "rss_mib": 422.4609375,
+      "rss_forks_mib": [
+        422.4609375,
+        422.37890625,
+        423.40625
+      ],
+      "peak_rss_mib": 422.4609375,
+      "peak_rss_forks_mib": [
+        422.4609375,
+        422.37890625,
+        423.40625
+      ]
+    },
+    {
+      "time_ns": 1216.5776928917182,
+      "time_forks_ns": [
+        1225.9108423500923,
+        1213.0237320297451,
+        1210.7985042953173
+      ],
+      "measurement_drift_percent": [
+        0.4715114424276745,
+        -0.4997279561875456,
+        -0.8945210460575947
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "allocation_bytes": 4062.0,
+      "allocation_forks_bytes": [
+        4062.0,
+        4062.0,
+        4062.0
+      ],
+      "rss_mib": 399.19921875,
+      "rss_forks_mib": [
+        399.109375,
+        399.19921875,
+        399.296875
+      ],
+      "peak_rss_mib": 399.19921875,
+      "peak_rss_forks_mib": [
+        399.109375,
+        399.19921875,
+        399.296875
+      ]
+    },
+    {
+      "time_ns": 527.0591812175079,
+      "time_forks_ns": [
+        518.0770814500315,
+        525.7860897677094,
+        537.3143724347827
+      ],
+      "measurement_drift_percent": [
+        -0.6657565181264369,
+        0.7064828172156812,
+        0.47276562959646107
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "allocation_bytes": 2936.0,
+      "allocation_forks_bytes": [
+        2936.0,
+        2936.0,
+        2936.0
+      ],
+      "rss_mib": 388.109375,
+      "rss_forks_mib": [
+        388.1953125,
+        388.109375,
+        388.05078125
+      ],
+      "peak_rss_mib": 388.109375,
+      "peak_rss_forks_mib": [
+        388.1953125,
+        388.109375,
+        388.05078125
+      ]
+    },
+    {
+      "time_ns": 7659.025604265625,
+      "time_forks_ns": [
+        7455.951938555856,
+        7889.97441628032,
+        7631.150457960698
+      ],
+      "measurement_drift_percent": [
+        -0.10921353314714555,
+        0.011809855053512841,
+        -0.08243241898384657
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "allocation_bytes": 18344.0,
+      "allocation_forks_bytes": [
+        18344.0,
+        18344.0,
+        18344.0
+      ],
+      "rss_mib": 390.984375,
+      "rss_forks_mib": [
+        390.93359375,
+        390.984375,
+        391.20703125
+      ],
+      "peak_rss_mib": 390.984375,
+      "peak_rss_forks_mib": [
+        390.93359375,
+        390.984375,
+        391.20703125
+      ]
+    },
+    {
+      "time_ns": 717.1800617594205,
+      "time_forks_ns": [
+        696.1334294798353,
+        746.1360000712234,
+        709.2707557272028
+      ],
+      "measurement_drift_percent": [
+        0.1689116579260963,
+        -4.5223909743841055,
+        1.2535413874734669
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 3272.0,
+      "allocation_forks_bytes": [
+        3272.0,
+        3272.0,
+        3272.0
+      ],
+      "rss_mib": 399.63671875,
+      "rss_forks_mib": [
+        399.63671875,
+        399.69921875,
+        399.55859375
+      ],
+      "peak_rss_mib": 399.63671875,
+      "peak_rss_forks_mib": [
+        399.63671875,
+        399.69921875,
+        399.55859375
+      ]
+    },
+    {
+      "time_ns": 2837.9677456834966,
+      "time_forks_ns": [
+        2807.580416508616,
+        2815.490524028053,
+        2890.8322965138204
+      ],
+      "measurement_drift_percent": [
+        -0.08322194734616817,
+        0.04305780939592996,
+        -0.016140509727524677
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "allocation_bytes": 5444.0,
+      "allocation_forks_bytes": [
+        5444.0,
+        5444.0,
+        5444.0
+      ],
+      "rss_mib": 420.953125,
+      "rss_forks_mib": [
+        420.953125,
+        420.953125,
+        420.99609375
+      ],
+      "peak_rss_mib": 420.953125,
+      "peak_rss_forks_mib": [
+        420.953125,
+        420.953125,
+        420.99609375
+      ]
+    },
+    {
+      "time_ns": 7533.598194798867,
+      "time_forks_ns": [
+        7684.244884134548,
+        7432.978083201376,
+        7483.5716170606765
+      ],
+      "measurement_drift_percent": [
+        -0.2964329954081357,
+        -0.1607642579115498,
+        -0.25534752414155815
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "allocation_bytes": 18344.0,
+      "allocation_forks_bytes": [
+        18344.0,
+        18344.0,
+        18344.0
+      ],
+      "rss_mib": 393.9296875,
+      "rss_forks_mib": [
+        393.9296875,
+        393.9921875,
+        393.74609375
+      ],
+      "peak_rss_mib": 393.9296875,
+      "peak_rss_forks_mib": [
+        393.9296875,
+        393.9921875,
+        393.74609375
+      ]
+    },
+    {
+      "time_ns": 2755.5305591974484,
+      "time_forks_ns": [
+        2705.214887245028,
+        2749.12568755682,
+        2812.251102790497
+      ],
+      "measurement_drift_percent": [
+        -4.0280541151809235,
+        0.4284105102046132,
+        -0.7799339873905131
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "allocation_bytes": 3054.0,
+      "allocation_forks_bytes": [
+        3054.0,
+        3054.0,
+        3054.0
+      ],
+      "rss_mib": 391.19140625,
+      "rss_forks_mib": [
+        391.1796875,
+        391.2578125,
+        391.19140625
+      ],
+      "peak_rss_mib": 391.19140625,
+      "peak_rss_forks_mib": [
+        391.1796875,
+        391.2578125,
+        391.19140625
+      ]
+    },
+    {
+      "time_ns": 1084.445277362655,
+      "time_forks_ns": [
+        1067.1536173119662,
+        1092.1318595657776,
+        1094.0503552102211
+      ],
+      "measurement_drift_percent": [
+        0.08986999945106433,
+        -0.5589131477635623,
+        2.249124900506816
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "allocation_bytes": 1904.0,
+      "allocation_forks_bytes": [
+        1904.0,
+        1904.0,
+        1904.0
+      ],
+      "rss_mib": 434.83984375,
+      "rss_forks_mib": [
+        434.83203125,
+        434.85546875,
+        434.83984375
+      ],
+      "peak_rss_mib": 434.83984375,
+      "peak_rss_forks_mib": [
+        434.83203125,
+        434.85546875,
+        434.83984375
+      ]
+    },
+    {
+      "time_ns": 96.96737524506666,
+      "time_forks_ns": [
+        98.5030096422956,
+        96.18846129676695,
+        96.21065479613745
+      ],
+      "measurement_drift_percent": [
+        -0.09757358397365357,
+        -4.508140714243303,
+        -0.9964002326191435
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 280.0,
+      "allocation_forks_bytes": [
+        280.0,
+        280.0,
+        280.0
+      ],
+      "rss_mib": 312.65234375,
+      "rss_forks_mib": [
+        312.65234375,
+        312.65234375,
+        312.64453125
+      ],
+      "peak_rss_mib": 312.65234375,
+      "peak_rss_forks_mib": [
+        312.65234375,
+        312.65234375,
+        312.64453125
+      ]
+    },
+    {
+      "time_ns": 27.37154765303885,
+      "time_forks_ns": [
+        27.20858777780457,
+        26.894143213720607,
+        28.011911967591374
+      ],
+      "measurement_drift_percent": [
+        -0.17715782593715756,
+        -0.2902943815264236,
+        -4.535669259773978
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "allocation_bytes": 96.0,
+      "allocation_forks_bytes": [
+        96.0,
+        96.0,
+        96.0
+      ],
+      "rss_mib": 153.953125,
+      "rss_forks_mib": [
+        153.98046875,
+        153.94140625,
+        153.953125
+      ],
+      "peak_rss_mib": 153.953125,
+      "peak_rss_forks_mib": [
+        153.98046875,
+        153.94140625,
+        153.953125
+      ]
+    },
+    {
+      "time_ns": 23.070310071934184,
+      "time_forks_ns": [
+        22.138271847218444,
+        24.30188072304368,
+        22.77077764554043
+      ],
+      "measurement_drift_percent": [
+        0.2816788167116391,
+        1.7499850966585129,
+        -0.08156894839608242
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "allocation_bytes": 120.0,
+      "allocation_forks_bytes": [
+        120.0,
+        120.0,
+        120.0
+      ],
+      "rss_mib": 190.28515625,
+      "rss_forks_mib": [
+        190.2890625,
+        190.1953125,
+        190.28515625
+      ],
+      "peak_rss_mib": 190.28515625,
+      "peak_rss_forks_mib": [
+        190.2890625,
+        190.1953125,
+        190.28515625
+      ]
+    },
+    {
+      "time_ns": 55.52160607987887,
+      "time_forks_ns": [
+        55.810820048915105,
+        55.143572970743634,
+        55.61042521997788
+      ],
+      "measurement_drift_percent": [
+        0.16382299364685604,
+        -0.1975282636136444,
+        -0.9064955892854498
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 264.0,
+      "allocation_forks_bytes": [
+        264.0,
+        264.0,
+        264.0
+      ],
+      "rss_mib": 386.03515625,
+      "rss_forks_mib": [
+        386.0390625,
+        386.03515625,
+        385.99609375
+      ],
+      "peak_rss_mib": 386.03515625,
+      "peak_rss_forks_mib": [
+        386.0390625,
+        386.03515625,
+        385.99609375
+      ]
+    },
+    {
+      "time_ns": 9.069774210174392,
+      "time_forks_ns": [
+        8.956622912678602,
+        9.373101235367189,
+        8.879598482477387
+      ],
+      "measurement_drift_percent": [
+        0.17361580194819037,
+        -0.11719172137767409,
+        0.14539675110578631
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "allocation_bytes": 24.0,
+      "allocation_forks_bytes": [
+        24.0,
+        24.0,
+        24.0
+      ],
+      "rss_mib": 202.90234375,
+      "rss_forks_mib": [
+        202.875,
+        202.90234375,
+        202.93359375
+      ],
+      "peak_rss_mib": 202.90234375,
+      "peak_rss_forks_mib": [
+        202.875,
+        202.90234375,
+        202.93359375
+      ]
+    },
+    {
+      "time_ns": 2659.3681584022165,
+      "time_forks_ns": [
+        2686.3594088305217,
+        2602.4982515421334,
+        2689.246814833995
+      ],
+      "measurement_drift_percent": [
+        0.07172502081249643,
+        -0.3038767563273259,
+        -0.010669325147094622
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "allocation_bytes": 3054.0,
+      "allocation_forks_bytes": [
+        3054.0,
+        3054.0,
+        3054.0
+      ],
+      "rss_mib": 388.40234375,
+      "rss_forks_mib": [
+        388.45703125,
+        388.34765625,
+        388.40234375
+      ],
+      "peak_rss_mib": 388.40234375,
+      "peak_rss_forks_mib": [
+        388.45703125,
+        388.34765625,
+        388.40234375
+      ]
+    },
+    {
+      "time_ns": 186.6482438830576,
+      "time_forks_ns": [
+        188.9837397561208,
+        182.11454380072783,
+        188.84644809232418
+      ],
+      "measurement_drift_percent": [
+        0.36562136301070414,
+        -0.6165475142353105,
+        -0.529556847775825
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "allocation_bytes": 548.0,
+      "allocation_forks_bytes": [
+        548.0,
+        548.0,
+        548.0
+      ],
+      "rss_mib": 336.23828125,
+      "rss_forks_mib": [
+        336.23828125,
+        336.20703125,
+        336.23828125
+      ],
+      "peak_rss_mib": 336.23828125,
+      "peak_rss_forks_mib": [
+        336.23828125,
+        336.20703125,
+        336.23828125
+      ]
+    },
+    {
+      "time_ns": 527.655557669474,
+      "time_forks_ns": [
+        521.5579384284132,
+        505.30810846907167,
+        556.1006261109371
+      ],
+      "measurement_drift_percent": [
+        0.506911836796875,
+        1.1614769543886405,
+        -0.5551839860612362
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "allocation_bytes": 2936.0,
+      "allocation_forks_bytes": [
+        2936.0,
+        2936.0,
+        2936.0
+      ],
+      "rss_mib": 386.25390625,
+      "rss_forks_mib": [
+        386.25390625,
+        386.19921875,
+        386.25390625
+      ],
+      "peak_rss_mib": 386.25390625,
+      "peak_rss_forks_mib": [
+        386.25390625,
+        386.19921875,
+        386.25390625
+      ]
+    },
+    {
+      "time_ns": 21.2435439454867,
+      "time_forks_ns": [
+        21.011649292091587,
+        21.704951389708068,
+        21.014031154660444
+      ],
+      "measurement_drift_percent": [
+        -0.08704547524460704,
+        -4.807877115184378,
+        0.14353172091905453
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "allocation_bytes": 96.0,
+      "allocation_forks_bytes": [
+        96.0,
+        96.0,
+        96.0
+      ],
+      "rss_mib": 173.66796875,
+      "rss_forks_mib": [
+        173.65625,
+        173.6875,
+        173.66796875
+      ],
+      "peak_rss_mib": 173.66796875,
+      "peak_rss_forks_mib": [
+        173.65625,
+        173.6875,
+        173.66796875
+      ]
+    },
+    {
+      "time_ns": 735.0612708664986,
+      "time_forks_ns": [
+        747.899419727276,
+        702.85425535899,
+        754.4301375132299
+      ],
+      "measurement_drift_percent": [
+        -0.023268548596477867,
+        0.539795832929646,
+        0.04420853199023078
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 3336.0,
+      "allocation_forks_bytes": [
+        3336.0,
+        3336.0,
+        3336.0
+      ],
+      "rss_mib": 391.88671875,
+      "rss_forks_mib": [
+        391.88671875,
+        391.6640625,
+        391.98046875
+      ],
+      "peak_rss_mib": 391.88671875,
+      "peak_rss_forks_mib": [
+        391.88671875,
+        391.6640625,
+        391.98046875
+      ]
+    },
+    {
+      "time_ns": 27.369353863024354,
+      "time_forks_ns": [
+        27.60184377124891,
+        27.130037147978324,
+        27.376180669845834
+      ],
+      "measurement_drift_percent": [
+        4.520404936873268,
+        -0.8744606265792432,
+        -1.9610659248051387
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "allocation_bytes": 96.0,
+      "allocation_forks_bytes": [
+        96.0,
+        96.0,
+        96.0
+      ],
+      "rss_mib": 150.296875,
+      "rss_forks_mib": [
+        150.35546875,
+        150.296875,
+        150.25390625
+      ],
+      "peak_rss_mib": 150.296875,
+      "peak_rss_forks_mib": [
+        150.35546875,
+        150.296875,
+        150.25390625
+      ]
+    },
+    {
+      "time_ns": 1712.9369962026897,
+      "time_forks_ns": [
+        1692.2863029125594,
+        1721.7738932115162,
+        1724.7507924839936
+      ],
+      "measurement_drift_percent": [
+        -0.09193520046926196,
+        -0.11084885787131515,
+        -0.8359436149347865
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "allocation_bytes": 5436.0,
+      "allocation_forks_bytes": [
+        5436.0,
+        5436.0,
+        5436.0
+      ],
+      "rss_mib": 494.96484375,
+      "rss_forks_mib": [
+        494.85546875,
+        495.078125,
+        494.96484375
+      ],
+      "peak_rss_mib": 494.96484375,
+      "peak_rss_forks_mib": [
+        494.85546875,
+        495.078125,
+        494.96484375
+      ]
+    },
+    {
+      "time_ns": 12.56731639963454,
+      "time_forks_ns": [
+        12.478260819182735,
+        13.013927271202121,
+        12.209761108518768
+      ],
+      "measurement_drift_percent": [
+        0.1388119981661884,
+        6.678796686489963,
+        0.35599809453206177
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "allocation_bytes": 48.0,
+      "allocation_forks_bytes": [
+        48.0,
+        48.0,
+        48.0
+      ],
+      "rss_mib": 202.984375,
+      "rss_forks_mib": [
+        202.984375,
+        202.93359375,
+        203.0234375
+      ],
+      "peak_rss_mib": 202.984375,
+      "peak_rss_forks_mib": [
+        202.984375,
+        202.93359375,
+        203.0234375
+      ]
+    },
+    {
+      "time_ns": 1241.1448204770113,
+      "time_forks_ns": [
+        1235.9285039506185,
+        1205.6207248499604,
+        1281.8852326304552
+      ],
+      "measurement_drift_percent": [
+        -0.7096353737171102,
+        -0.01797543429541415,
+        1.0392623517488264
+      ],
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "allocation_bytes": 4158.0,
+      "allocation_forks_bytes": [
+        4158.0,
+        4158.0,
+        4158.0
+      ],
+      "rss_mib": 397.46484375,
+      "rss_forks_mib": [
+        397.35546875,
+        397.46484375,
+        397.56640625
+      ],
+      "peak_rss_mib": 397.46484375,
+      "peak_rss_forks_mib": [
+        397.35546875,
+        397.46484375,
+        397.56640625
+      ]
+    },
+    {
+      "time_ns": 804.4194458555918,
+      "time_forks_ns": [
+        810.9235966695014,
+        781.8498736589843,
+        820.4848672382896
+      ],
+      "measurement_drift_percent": [
+        -1.1951936378036043,
+        0.04256773072295328,
+        0.12392316501470546
+      ],
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "allocation_bytes": 1732.0,
+      "allocation_forks_bytes": [
+        1732.0,
+        1732.0,
+        1732.0
+      ],
+      "rss_mib": 537.30078125,
+      "rss_forks_mib": [
+        537.34375,
+        537.30078125,
+        537.265625
+      ],
+      "peak_rss_mib": 537.30078125,
+      "peak_rss_forks_mib": [
+        537.34375,
+        537.30078125,
+        537.265625
+      ]
+    },
+    {
+      "time_ns": 31.228352566613637,
+      "time_forks_ns": [
+        31.372000713775158,
+        31.228352566613637,
+        31.059209032206127
+      ],
+      "measurement_drift_percent": [
+        0.4929511708766876,
+        -0.27255205274315797,
+        0.06801790542452224
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar",
+      "allocation_bytes": 104.0,
+      "allocation_forks_bytes": [
+        104.0,
+        104.0,
+        104.0
+      ],
+      "rss_mib": 117.75,
+      "rss_forks_mib": [
+        118.515625,
+        117.75,
+        117.57421875
+      ],
+      "peak_rss_mib": 117.75,
+      "peak_rss_forks_mib": [
+        118.515625,
+        117.75,
+        117.57421875
+      ]
+    },
+    {
+      "time_ns": 34.01114316460242,
+      "time_forks_ns": [
+        35.0737605642102,
+        33.59685924981831,
+        34.01114316460242
+      ],
+      "measurement_drift_percent": [
+        -5.074893577253603,
+        0.34248866910719933,
+        -0.08649848723020215
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "scalar-wide",
+      "allocation_bytes": 104.0,
+      "allocation_forks_bytes": [
+        104.0,
+        104.0,
+        104.0
+      ],
+      "rss_mib": 118.52734375,
+      "rss_forks_mib": [
+        118.52734375,
+        118.53125,
+        117.5703125
+      ],
+      "peak_rss_mib": 118.52734375,
+      "peak_rss_forks_mib": [
+        118.52734375,
+        118.53125,
+        117.5703125
+      ]
+    },
+    {
+      "time_ns": 329.6360161491076,
+      "time_forks_ns": [
+        329.6360161491076,
+        326.62550038672185,
+        348.7629674735503
+      ],
+      "measurement_drift_percent": [
+        -0.5768959665958584,
+        0.2692133070808067,
+        0.0373805984074993
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-policy",
+      "allocation_bytes": 360.0,
+      "allocation_forks_bytes": [
+        360.0,
+        360.0,
+        360.0
+      ],
+      "rss_mib": 168.32421875,
+      "rss_forks_mib": [
+        167.26953125,
+        168.34375,
+        168.32421875
+      ],
+      "peak_rss_mib": 168.32421875,
+      "peak_rss_forks_mib": [
+        167.26953125,
+        168.34375,
+        168.32421875
+      ]
+    },
+    {
+      "time_ns": 5191.584509966778,
+      "time_forks_ns": [
+        5263.784564393939,
+        5191.584509966778,
+        5034.191023679124
+      ],
+      "measurement_drift_percent": [
+        0.15355454068175511,
+        0.25559421346492694,
+        0.17185216186850205
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "proto-repeated",
+      "allocation_bytes": 4752.0,
+      "allocation_forks_bytes": [
+        4752.0,
+        4752.0,
+        4752.0
+      ],
+      "rss_mib": 116.81640625,
+      "rss_forks_mib": [
+        116.765625,
+        116.81640625,
+        118.04296875
+      ],
+      "peak_rss_mib": 165.109375,
+      "peak_rss_forks_mib": [
+        165.0625,
+        165.109375,
+        166.3984375
+      ]
+    },
+    {
+      "time_ns": 1560.086202700679,
+      "time_forks_ns": [
+        1635.6265242306888,
+        1560.086202700679,
+        1553.772901546033
+      ],
+      "measurement_drift_percent": [
+        -2.940105431548834,
+        0.01614959500240154,
+        -0.35395152499522187
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "map-regex",
+      "allocation_bytes": 1804.0,
+      "allocation_forks_bytes": [
+        1804.0,
+        1804.0,
+        1804.0
+      ],
+      "rss_mib": 159.28125,
+      "rss_forks_mib": [
+        159.28125,
+        159.3828125,
+        158.83984375
+      ],
+      "peak_rss_mib": 170.22265625,
+      "peak_rss_forks_mib": [
+        170.10546875,
+        170.58203125,
+        170.22265625
+      ]
+    },
+    {
+      "time_ns": 158.97629558126283,
+      "time_forks_ns": [
+        154.9786101991629,
+        160.5471402223501,
+        158.97629558126283
+      ],
+      "measurement_drift_percent": [
+        3.167472483693845,
+        0.6778406448895602,
+        3.990717205658334
+      ],
+      "runtime": "svm",
+      "engine": "truffle-interpreter",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 184.0,
+      "allocation_forks_bytes": [
+        184.0,
+        184.0,
+        184.0
+      ],
+      "rss_mib": 167.30078125,
+      "rss_forks_mib": [
+        167.30078125,
+        167.28125,
+        167.63671875
+      ],
+      "peak_rss_mib": 167.30078125,
+      "peak_rss_forks_mib": [
+        167.30078125,
+        167.28125,
+        167.63671875
+      ]
+    },
+    {
+      "time_ns": 18.266431351678055,
+      "time_forks_ns": [
+        18.266431351678055,
+        18.09056368037031,
+        18.93172083854333
+      ],
+      "measurement_drift_percent": [
+        0.7886430111418541,
+        -0.06314075083698745,
+        -0.11827488766460448
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar",
+      "allocation_bytes": 40.0,
+      "allocation_forks_bytes": [
+        40.0,
+        40.0,
+        40.0
+      ],
+      "rss_mib": 114.09375,
+      "rss_forks_mib": [
+        113.953125,
+        114.09375,
+        114.83203125
+      ],
+      "peak_rss_mib": 114.09375,
+      "peak_rss_forks_mib": [
+        113.953125,
+        114.09375,
+        114.83203125
+      ]
+    },
+    {
+      "time_ns": 23.72951966622321,
+      "time_forks_ns": [
+        25.1675095575847,
+        23.72951966622321,
+        23.440128614643996
+      ],
+      "measurement_drift_percent": [
+        -2.257156769634072,
+        0.006702880946085621,
+        0.044031478542372327
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "allocation_bytes": 40.0,
+      "allocation_forks_bytes": [
+        40.0,
+        40.0,
+        40.0
+      ],
+      "rss_mib": 113.9296875,
+      "rss_forks_mib": [
+        113.7734375,
+        114.78515625,
+        113.9296875
+      ],
+      "peak_rss_mib": 113.9296875,
+      "peak_rss_forks_mib": [
+        113.7734375,
+        114.78515625,
+        113.9296875
+      ]
+    },
+    {
+      "time_ns": 192.8871063563193,
+      "time_forks_ns": [
+        192.8871063563193,
+        191.40053254691557,
+        192.97554379708535
+      ],
+      "measurement_drift_percent": [
+        0.42782436049686456,
+        -0.027939225289097536,
+        1.1193362445284238
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "allocation_bytes": 340.0,
+      "allocation_forks_bytes": [
+        340.0,
+        340.0,
+        340.0
+      ],
+      "rss_mib": 257.4765625,
+      "rss_forks_mib": [
+        256.89453125,
+        257.4765625,
+        258.31640625
+      ],
+      "peak_rss_mib": 257.4765625,
+      "peak_rss_forks_mib": [
+        256.89453125,
+        257.4765625,
+        258.31640625
+      ]
+    },
+    {
+      "time_ns": 1826.5025859046284,
+      "time_forks_ns": [
+        1826.5025859046284,
+        1778.7258315786478,
+        1863.1331254470672
+      ],
+      "measurement_drift_percent": [
+        0.9417637987777283,
+        -0.032081972429343075,
+        1.8214439034158314
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "allocation_bytes": 4720.0,
+      "allocation_forks_bytes": [
+        4720.0,
+        4720.0,
+        4720.0
+      ],
+      "rss_mib": 190.15625,
+      "rss_forks_mib": [
+        190.12890625,
+        190.90625,
+        190.15625
+      ],
+      "peak_rss_mib": 239.71484375,
+      "peak_rss_forks_mib": [
+        239.0859375,
+        240.6796875,
+        239.71484375
+      ]
+    },
+    {
+      "time_ns": 995.8444529855977,
+      "time_forks_ns": [
+        992.0341286027171,
+        1007.3536294481692,
+        995.8444529855977
+      ],
+      "measurement_drift_percent": [
+        -0.3174266084126742,
+        -5.42950918217826,
+        0.2428810337142151
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "allocation_bytes": 1664.0,
+      "allocation_forks_bytes": [
+        1664.0,
+        1664.0,
+        1664.0
+      ],
+      "rss_mib": 245.43359375,
+      "rss_forks_mib": [
+        244.50390625,
+        245.43359375,
+        245.74609375
+      ],
+      "peak_rss_mib": 257.41015625,
+      "peak_rss_forks_mib": [
+        257.02734375,
+        257.41015625,
+        258.37109375
+      ]
+    },
+    {
+      "time_ns": 83.16307884785293,
+      "time_forks_ns": [
+        83.16307884785293,
+        82.34202790527935,
+        87.8467959736996
+      ],
+      "measurement_drift_percent": [
+        -0.2663843989826109,
+        -0.03035268791971024,
+        -0.04570537294895649
+      ],
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 168.0,
+      "allocation_forks_bytes": [
+        168.0,
+        168.0,
+        168.0
+      ],
+      "rss_mib": 258.59375,
+      "rss_forks_mib": [
+        258.1640625,
+        258.59375,
+        258.83984375
+      ],
+      "peak_rss_mib": 258.59375,
+      "peak_rss_forks_mib": [
+        258.1640625,
+        258.59375,
+        258.83984375
+      ]
+    },
+    {
+      "time_ns": 79.9932702029898,
+      "time_forks_ns": [
+        80.53577818482171,
+        79.73321935851772,
+        79.9932702029898
+      ],
+      "measurement_drift_percent": [
+        0.3652037589372714,
+        -0.07096346113548702,
+        -3.619406714680884
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar",
+      "allocation_bytes": 240.0,
+      "allocation_forks_bytes": [
+        240.0,
+        240.0,
+        240.0
+      ],
+      "rss_mib": 164.78515625,
+      "rss_forks_mib": [
+        164.78515625,
+        164.76171875,
+        165.46875
+      ],
+      "peak_rss_mib": 164.78515625,
+      "peak_rss_forks_mib": [
+        164.78515625,
+        164.76171875,
+        165.46875
+      ]
+    },
+    {
+      "time_ns": 1323.0563479043183,
+      "time_forks_ns": [
+        1342.0865333004122,
+        1255.7240612945998,
+        1323.0563479043183
+      ],
+      "measurement_drift_percent": [
+        1.4266149783638937,
+        -0.6608814895980641,
+        7.431337348500633
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "allocation_bytes": 3504.0,
+      "allocation_forks_bytes": [
+        3504.0,
+        3504.0,
+        3504.0
+      ],
+      "rss_mib": 133.21875,
+      "rss_forks_mib": [
+        134.015625,
+        133.1875,
+        133.21875
+      ],
+      "peak_rss_mib": 160.96484375,
+      "peak_rss_forks_mib": [
+        162.4296875,
+        160.71484375,
+        160.96484375
+      ]
+    },
+    {
+      "time_ns": 2528.0910607408605,
+      "time_forks_ns": [
+        2578.5656146864685,
+        2415.5290426970632,
+        2528.0910607408605
+      ],
+      "measurement_drift_percent": [
+        0.45603197719281674,
+        0.3511557425019518,
+        0.4295776407733154
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "allocation_bytes": 4794.0,
+      "allocation_forks_bytes": [
+        4794.0,
+        4794.0,
+        4794.0
+      ],
+      "rss_mib": 119.265625,
+      "rss_forks_mib": [
+        119.265625,
+        119.33203125,
+        119.21484375
+      ],
+      "peak_rss_mib": 167.50390625,
+      "peak_rss_forks_mib": [
+        167.93359375,
+        167.24609375,
+        167.50390625
+      ]
+    },
+    {
+      "time_ns": 11924.841368140244,
+      "time_forks_ns": [
+        11984.959691334356,
+        11856.93496301214,
+        11924.841368140244
+      ],
+      "measurement_drift_percent": [
+        0.013190431505161193,
+        0.0011016500356841874,
+        -0.3200079962656144
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "proto-repeated",
+      "allocation_bytes": 15704.0,
+      "allocation_forks_bytes": [
+        15704.0,
+        15704.0,
+        15704.0
+      ],
+      "rss_mib": 66.90625,
+      "rss_forks_mib": [
+        67.76171875,
+        66.32421875,
+        66.90625
+      ],
+      "peak_rss_mib": 166.98828125,
+      "peak_rss_forks_mib": [
+        167.3359375,
+        166.0390625,
+        166.98828125
+      ]
+    },
+    {
+      "time_ns": 6345.314021915585,
+      "time_forks_ns": [
+        6169.39376973165,
+        6505.784918817652,
+        6345.314021915585
+      ],
+      "measurement_drift_percent": [
+        -0.08426236517030672,
+        1.2706114018774306,
+        0.22036044400310928
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "map-regex",
+      "allocation_bytes": 6176.0,
+      "allocation_forks_bytes": [
+        6176.0,
+        6176.0,
+        6176.0
+      ],
+      "rss_mib": 92.5625,
+      "rss_forks_mib": [
+        92.5625,
+        92.95703125,
+        91.8125
+      ],
+      "peak_rss_mib": 163.1171875,
+      "peak_rss_forks_mib": [
+        163.1171875,
+        163.8671875,
+        162.8046875
+      ]
+    },
+    {
+      "time_ns": 1697.0271265475674,
+      "time_forks_ns": [
+        1808.1240453598705,
+        1681.0958275064545,
+        1697.0271265475674
+      ],
+      "measurement_drift_percent": [
+        -0.6638364788521312,
+        -1.1048062419439675,
+        4.340470649272166
+      ],
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 3912.0,
+      "allocation_forks_bytes": [
+        3912.0,
+        3912.0,
+        3912.0
+      ],
+      "rss_mib": 134.6796875,
+      "rss_forks_mib": [
+        134.16015625,
+        135.30078125,
+        134.6796875
+      ],
+      "peak_rss_mib": 166.3671875,
+      "peak_rss_forks_mib": [
+        166.2890625,
+        167.36328125,
+        166.3671875
+      ]
+    },
+    {
+      "time_ns": 79.48197337933526,
+      "time_forks_ns": [
+        80.53004914239182,
+        79.48197337933526,
+        79.11550465068001
+      ],
+      "measurement_drift_percent": [
+        0.24120573189092553,
+        -0.0751090149175182,
+        -1.0321201765659427
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar",
+      "allocation_bytes": 240.0,
+      "allocation_forks_bytes": [
+        240.0,
+        240.0,
+        240.0
+      ],
+      "rss_mib": 165.703125,
+      "rss_forks_mib": [
+        165.73828125,
+        165.703125,
+        164.9765625
+      ],
+      "peak_rss_mib": 165.703125,
+      "peak_rss_forks_mib": [
+        165.73828125,
+        165.703125,
+        164.9765625
+      ]
+    },
+    {
+      "time_ns": 1347.83406557271,
+      "time_forks_ns": [
+        1347.83406557271,
+        1350.6589293431289,
+        1254.5931077392422
+      ],
+      "measurement_drift_percent": [
+        3.296413340184179,
+        0.6715313672975842,
+        0.06322596119630042
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "allocation_bytes": 3504.0,
+      "allocation_forks_bytes": [
+        3504.0,
+        3504.0,
+        3504.0
+      ],
+      "rss_mib": 134.328125,
+      "rss_forks_mib": [
+        134.328125,
+        134.01953125,
+        134.74609375
+      ],
+      "peak_rss_mib": 162.015625,
+      "peak_rss_forks_mib": [
+        162.015625,
+        161.21484375,
+        162.09765625
+      ]
+    },
+    {
+      "time_ns": 2368.41181039709,
+      "time_forks_ns": [
+        2285.9529741442366,
+        2398.140927140884,
+        2368.41181039709
+      ],
+      "measurement_drift_percent": [
+        0.17172578682933537,
+        -0.37668918622379977,
+        -3.035248823306713
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "allocation_bytes": 4598.0,
+      "allocation_forks_bytes": [
+        4598.0,
+        4598.0,
+        4598.0
+      ],
+      "rss_mib": 124.22265625,
+      "rss_forks_mib": [
+        124.71875,
+        123.46875,
+        124.22265625
+      ],
+      "peak_rss_mib": 168.77734375,
+      "peak_rss_forks_mib": [
+        169.14453125,
+        168.77734375,
+        168.33984375
+      ]
+    },
+    {
+      "time_ns": 11982.675086273006,
+      "time_forks_ns": [
+        11982.675086273006,
+        12431.914720786963,
+        11929.539599236641
+      ],
+      "measurement_drift_percent": [
+        0.3481588388759782,
+        0.0722024563419188,
+        0.20850338549058822
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-repeated",
+      "allocation_bytes": 15704.0,
+      "allocation_forks_bytes": [
+        15704.0,
+        15704.0,
+        15704.0
+      ],
+      "rss_mib": 67.44140625,
+      "rss_forks_mib": [
+        67.44140625,
+        66.86328125,
+        67.75390625
+      ],
+      "peak_rss_mib": 167.8359375,
+      "peak_rss_forks_mib": [
+        167.20703125,
+        167.953125,
+        167.8359375
+      ]
+    },
+    {
+      "time_ns": 6148.052247246263,
+      "time_forks_ns": [
+        6148.052247246263,
+        6140.80199332286,
+        6250.2739625
+      ],
+      "measurement_drift_percent": [
+        1.9424302363995727,
+        0.5204261080142158,
+        1.509116001002364
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "allocation_bytes": 6176.0,
+      "allocation_forks_bytes": [
+        6176.0,
+        6176.0,
+        6176.0
+      ],
+      "rss_mib": 93.046875,
+      "rss_forks_mib": [
+        92.65234375,
+        93.046875,
+        93.28515625
+      ],
+      "peak_rss_mib": 162.83984375,
+      "peak_rss_forks_mib": [
+        162.3828125,
+        163.33984375,
+        162.83984375
+      ]
+    },
+    {
+      "time_ns": 1633.3146719533863,
+      "time_forks_ns": [
+        1715.4793358946213,
+        1633.3146719533863,
+        1540.6239061575627
+      ],
+      "measurement_drift_percent": [
+        0.24334679517030722,
+        3.2280334345120565,
+        2.9445796861287343
+      ],
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "allocation_bytes": 3804.0,
+      "allocation_forks_bytes": [
+        3804.0,
+        3804.0,
+        3804.0
+      ],
+      "rss_mib": 136.2265625,
+      "rss_forks_mib": [
+        136.79296875,
+        136.2265625,
+        135.79296875
+      ],
+      "peak_rss_mib": 167.33203125,
+      "peak_rss_forks_mib": [
+        168.19921875,
+        167.33203125,
+        167.15625
+      ]
+    }
+  ],
+  "counts": {
+    "jvm/truffle-interpreter": {
+      "time_ns": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "allocation_bytes": {
+        "lower": 5,
+        "tied": 1,
+        "higher": 0,
+        "overlapping_fork_ranges": 1
+      },
+      "rss_mib": {
+        "lower": 3,
+        "tied": 0,
+        "higher": 3,
+        "overlapping_fork_ranges": 0
+      },
+      "peak_rss_mib": {
+        "lower": 3,
+        "tied": 0,
+        "higher": 3,
+        "overlapping_fork_ranges": 0
+      }
+    },
+    "jvm/truffle-jit": {
+      "time_ns": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "allocation_bytes": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "rss_mib": {
+        "lower": 2,
+        "tied": 0,
+        "higher": 4,
+        "overlapping_fork_ranges": 0
+      },
+      "peak_rss_mib": {
+        "lower": 2,
+        "tied": 0,
+        "higher": 4,
+        "overlapping_fork_ranges": 0
+      }
+    },
+    "svm/truffle-interpreter": {
+      "time_ns": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "allocation_bytes": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "rss_mib": {
+        "lower": 2,
+        "tied": 0,
+        "higher": 4,
+        "overlapping_fork_ranges": 0
+      },
+      "peak_rss_mib": {
+        "lower": 3,
+        "tied": 0,
+        "higher": 3,
+        "overlapping_fork_ranges": 3
+      }
+    },
+    "svm/truffle-jit": {
+      "time_ns": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "allocation_bytes": {
+        "lower": 6,
+        "tied": 0,
+        "higher": 0,
+        "overlapping_fork_ranges": 0
+      },
+      "rss_mib": {
+        "lower": 2,
+        "tied": 0,
+        "higher": 4,
+        "overlapping_fork_ranges": 0
+      },
+      "peak_rss_mib": {
+        "lower": 2,
+        "tied": 0,
+        "higher": 4,
+        "overlapping_fork_ranges": 0
+      }
+    }
+  },
+  "timing_aggregation": {
+    "jvm": "mean of three fork means",
+    "svm": "median of three fork medians"
+  },
+  "memory_aggregation": "median of three fork medians (allocation) or process checkpoints (RSS)",
+  "caveat": "Point estimates and observed ranges, not significance tests. RSS is whole-process footprint at uncontrolled GC position; extra guest-JIT preparation is included."
+}
