@@ -101,8 +101,8 @@ final class WellKnownTypes {
         throw Values.error(CelException.Code.OVERFLOW, "invalid protobuf Duration");
       return Functions.checkedDuration(Duration.ofSeconds(seconds, nanos));
     }
-    if (nanos < 0 || nanos >= 1000000000L)
-      throw Values.error(CelException.Code.OVERFLOW, "invalid protobuf Timestamp nanos");
+    if (nanos < 0 || nanos >= 1000000000L || seconds < -62135596800L || seconds > 253402300799L)
+      throw Values.error(CelException.Code.OVERFLOW, "invalid protobuf Timestamp");
     return Functions.checkedTimestamp(Instant.ofEpochSecond(seconds, nanos));
   }
 
