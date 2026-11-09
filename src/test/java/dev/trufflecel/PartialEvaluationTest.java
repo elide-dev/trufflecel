@@ -518,5 +518,24 @@ public class PartialEvaluationTest {
     // Normal (no error, no unknown) constructs successfully.
     assertTrue(env.compile("Msg{a: 1, b: 2}").partialEvaluate(activation).isComplete());
     assertEquals(List.of(1L, 2L), env.compile("[1, 2]").partialEvaluate(activation).value());
+
+    // A non-budget error in a map key is captured and rethrown after the literal.
+    assertThrows(
+        CelException.class, () -> env.compile("{(1/0): 1}").partialEvaluate(activation).value());
+
+    // Multiple unknowns in an object literal merge into a single unknown result.
+    assertEquals(
+        Unknown.of("data.secret"),
+        env.compile("Msg{a: data.secret, b: data.secret}").partialEvaluate(activation).value());
+
+    // RESOURCE_EXHAUSTED from a child propagates immediately rather than being deferred.
+    for (String expr : List.of("[data.secret, 1]", "Msg{a: data.secret}", "{'a': data.secret}")) {
+      assertEquals(
+          CelException.Code.RESOURCE_EXHAUSTED,
+          env.compile(expr)
+              .partialEvaluate(activation, EvaluationOptions.newBuilder().budget(1).build())
+              .error()
+              .code());
+    }
   }
 }
