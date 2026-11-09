@@ -65,3 +65,14 @@ time/allocation controls. Font source
 checksums are in [`fonts/SHA256SUMS`](fonts/SHA256SUMS). Dependency versions are
 pinned; byte-identical rendering additionally depends on the platform's rendering
 libraries. The output is visually reviewed at full size before committing.
+
+## Native launch profiles
+
+`render_native_profiles.py` uses these same tokens and exact font files for the
+separate [native configuration gallery](../../../docs/images/native-profiles-20261109/README.md).
+Run it with the same Python environment. It regenerates and validates the complete
+72-cell summary against the retained raw records before drawing evaluation time,
+current RSS and peak RSS. Each workload shares a zero-based scale across its
+interpreter and guest-JIT columns. The charts compare application launch settings;
+all matched cel-java controls and unchanged allocation medians remain in the tables.
+This renderer does not alter the release charts or their historical measurements.

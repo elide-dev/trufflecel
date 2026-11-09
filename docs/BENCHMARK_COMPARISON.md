@@ -56,6 +56,15 @@ lower per-evaluation allocation. Both outcomes belong in a performance discussio
 
 ## Startup and cumulative cost
 
+The [current native-profile investigation](benchmarks/native-profiles-20261109/README.md)
+includes TruffleData **0.10.0** first-result and bounded natural-JIT reuse measurements.
+It separates the context/direct Java embedding controls from native memory profiles;
+neither is a new evaluator implementation. The native scalar first-result ranges
+overlap after omitting an unnecessary context, while JVM scalar-wide and protobuf-policy
+guest JIT still do not recover their compilation cost through one million evaluations.
+The report retains all checkpoints and cases without observed payback. Its hot-profile
+memory savings also include measured throughput tradeoffs and a known GraalVM counter bug.
+
 The [November 8 launch-to-first-result and natural-JIT report](benchmarks/startup-payback-20261108/README.md)
 uses **TruffleData 0.9.0**, before the final release dependency and regex changes.
 It includes fresh-process first results and cumulative reuse through one million
@@ -63,10 +72,10 @@ evaluations, including engine preparation and natural compilation. It records a
 slower JVM scalar startup and no sampled JVM scalar-wide/policy JIT payback in
 that interval. It is historical evidence, not a current-release guarantee.
 
-Before publishing a current-release end-to-end speedup, rerun first-result and
-cumulative-cost curves using the exact released artifacts, retained full inputs,
-recommended cel-java configurations, and matched preparation contracts. Report
-all checkpoints, timeouts and cases without observed payback. Do not extrapolate
+Before publishing an application end-to-end speedup, measure its complete request
+path and expected reuse using the exact deployed artifacts, retained full inputs,
+recommended cel-java configurations, and matched preparation contracts. The current
+cumulative-cost curve excludes process launch and ingestion. Do not extrapolate
 an unobserved crossover from a warmed nanoseconds-per-operation ratio.
 
 ## Reproduction and reporting rules

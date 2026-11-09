@@ -19,13 +19,30 @@ public final class Startup {
       System.out.println("{\"control\":true,\"verified\":true}");
       return;
     }
-    if (args.length != 4)
-      throw new IllegalArgumentException("engine workload runtime|image input-index");
+    if (args.length != 4 && args.length != 5)
+      throw new IllegalArgumentException(
+          "engine workload runtime|image input-index [context|direct]");
     long start = System.nanoTime();
     String engine = args[0], workload = args[1], mode = args[2];
     if (!Set.of("truffle-interpreter", "truffle-jit", "cel-java-optimized").contains(engine)
         || !Set.of("runtime", "image").contains(mode)) throw new IllegalArgumentException();
     boolean ours = engine.startsWith("truffle-"), image = mode.equals("image");
+    String embedding = args.length == 5 ? args[4] : "context";
+    if (!Set.of("context", "direct").contains(embedding))
+      throw new IllegalArgumentException("embedding");
+    // Plain Java programs need a context only for TruffleRegex acceleration. Keep that
+    // backend in both controls; do not make a startup win by substituting RE2/J.
+    boolean enterContext = embedding.equals("context") || workload.equals("map-regex");
+    if (ours && !enterContext) {
+      // These fresh-process controls must configure the standalone engine before its
+      // first call target. Never change process-global options in the library itself.
+      System.setProperty(
+          "polyglot.engine.Compilation", Boolean.toString(engine.equals("truffle-jit")));
+      System.setProperty("polyglot.engine.BackgroundCompilation", "false");
+      System.setProperty("polyglot.engine.CompilationFailureAction", "Throw");
+      System.setProperty("polyglot.compiler.TreatPerformanceWarningsAsErrors", "all");
+      System.setProperty("polyglot.compiler.MaximumGraalGraphSize", "10000");
+    }
     int inputIndex = Integer.parseInt(args[3]);
     if (inputIndex < 0 || inputIndex > 3) throw new IllegalArgumentException("input-index");
     if (ImageInfo.inImageRuntimeCode() && image != StartupImageMode.PREPARED)
@@ -43,7 +60,7 @@ public final class Startup {
     input.put("request", ours ? adapter.decode(new Bytes(wire)) : Request.parseFrom(wire));
     Map<String, Object> bindings = workload.equals("scalar") ? Map.of("x", input.get("x")) : input;
     long decoded = System.nanoTime();
-    try (var e = new Engines(engine, true, image, adapter)) {
+    try (var e = new Engines(engine, enterContext, image, adapter)) {
       long configured = System.nanoTime();
       Object ast =
           image
@@ -77,6 +94,8 @@ public final class Startup {
       out.put("workload", workload);
       out.put("mode", mode);
       out.put("input_index", inputIndex);
+      out.put("embedding", embedding);
+      out.put("context_created", e.context != null);
       out.put("image_prepared", image);
       out.put("guest_compiled_at_first_result", compiled);
       out.put("fixture_and_wire_ns", fixture - start);

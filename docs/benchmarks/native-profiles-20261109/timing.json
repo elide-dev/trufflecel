@@ -1,0 +1,5042 @@
+[
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 369145,
+    "prepare_ns": 29254,
+    "plan_ns": 21242,
+    "forced_guest_preparation_ns": 10364057,
+    "warmup_ns_per_op": [
+      19.397695645703525,
+      18.987856268873916,
+      18.450694601890294,
+      18.269721396512796,
+      18.277197162416027
+    ],
+    "ns_per_op": [
+      18.273664751197582,
+      18.113607783684902,
+      18.11696745152194,
+      18.077070674583158,
+      18.140251347890395,
+      18.145040589675283,
+      18.295768546902664
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 341002,
+    "prepare_ns": 27491,
+    "plan_ns": 21513,
+    "forced_guest_preparation_ns": 9829034,
+    "warmup_ns_per_op": [
+      19.484096358255076,
+      18.88092254104254,
+      18.845841528755415,
+      18.846971134593254,
+      18.47576690634892
+    ],
+    "ns_per_op": [
+      17.996618224643523,
+      18.01390049384011,
+      18.015567854655682,
+      18.020177146908487,
+      18.066722986645082,
+      18.038434294938398,
+      18.0229605946133
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 265779,
+    "prepare_ns": 783637,
+    "plan_ns": 35133,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      6472.169662267081,
+      6437.975120984349,
+      6424.87550755551,
+      6430.8133616255145,
+      6576.88858638468
+    ],
+    "ns_per_op": [
+      6591.945286150927,
+      6585.272193555181,
+      6590.556057651771,
+      6571.10682558873,
+      6582.539687763268,
+      6576.65714436027,
+      6234.800301535088
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 254172,
+    "prepare_ns": 730638,
+    "plan_ns": 33730,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      6491.847586466556,
+      6470.637202380953,
+      6507.4003369587845,
+      6503.005546452351,
+      6497.964286642412
+    ],
+    "ns_per_op": [
+      6503.255329658902,
+      6510.059273522065,
+      6492.72421355897,
+      6490.707848837209,
+      6496.634780236907,
+      6502.533953826955,
+      6510.441458333334
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 245960,
+    "prepare_ns": 565148,
+    "plan_ns": 9054,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      1214.9345744887644,
+      1198.9812876477133,
+      1230.1276250787278,
+      1264.3377460251638,
+      1221.7051663897576
+    ],
+    "ns_per_op": [
+      1231.9486188308106,
+      1232.1923789623088,
+      1235.0823535804616,
+      1245.3916834356073,
+      1247.5957383642024,
+      1248.4633119606904,
+      1248.8710413003516
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 256305,
+    "prepare_ns": 590857,
+    "plan_ns": 9675,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      1262.138842891761,
+      1302.2737506771398,
+      1323.751781705354,
+      1327.402889271152,
+      1327.42417939215
+    ],
+    "ns_per_op": [
+      1325.4356737701441,
+      1322.918649995767,
+      1348.606014842941,
+      1290.2945473782,
+      1185.084924351585,
+      1173.6972524222622,
+      1175.4115931059125
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 257447,
+    "prepare_ns": 843717,
+    "plan_ns": 17697,
+    "forced_guest_preparation_ns": 241,
+    "warmup_ns_per_op": [
+      1651.9598167089543,
+      1606.425908553511,
+      1609.6100590363617,
+      1626.333911193797,
+      1650.0749835005279
+    ],
+    "ns_per_op": [
+      1673.0244579764453,
+      1672.4301858144263,
+      1688.5365281229738,
+      1697.6606027270752,
+      1697.8875794491526,
+      1696.8980132764987,
+      1695.688673231337
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259660,
+    "prepare_ns": 854293,
+    "plan_ns": 16845,
+    "forced_guest_preparation_ns": 291,
+    "warmup_ns_per_op": [
+      1756.0167365559676,
+      1738.373600720325,
+      1735.0397703614258,
+      1760.9643375309895,
+      1802.0837093472494
+    ],
+    "ns_per_op": [
+      1803.0119693124134,
+      1799.356175869415,
+      1792.3126613041982,
+      1804.8668644606144,
+      1808.1316210078685,
+      1830.886411228913,
+      1835.542580602537
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 278348,
+    "prepare_ns": 609716,
+    "plan_ns": 7751,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      1220.048611111111,
+      1215.854536258948,
+      1254.0746037319423,
+      1268.7612912065606,
+      1267.8557628915125
+    ],
+    "ns_per_op": [
+      1267.4777716377353,
+      1265.6751883201036,
+      1266.2953580834685,
+      1267.4865828804348,
+      1269.4192069455728,
+      1278.0272216996564,
+      1281.8065755742412
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 249755,
+    "prepare_ns": 639100,
+    "plan_ns": 8272,
+    "forced_guest_preparation_ns": 180,
+    "warmup_ns_per_op": [
+      1296.8296720682215,
+      1364.5483063706226,
+      1364.1567792910773,
+      1368.1057919621749,
+      1371.5300623189678
+    ],
+    "ns_per_op": [
+      1371.1841517857142,
+      1329.1709632315412,
+      1234.2267328199052,
+      1221.7430365519938,
+      1212.6391529566972,
+      1216.7320145810622,
+      1219.1213015876112
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 368103,
+    "prepare_ns": 64287,
+    "plan_ns": 46710,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      163.62647656348176,
+      159.09622519396814,
+      158.74936230645358,
+      158.9838025025183,
+      159.07676124852378
+    ],
+    "ns_per_op": [
+      158.8312621980971,
+      159.308439621949,
+      160.10939613433754,
+      160.11857060327512,
+      159.87280882939757,
+      159.90392310368824,
+      160.03273923830886
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 329625,
+    "prepare_ns": 62404,
+    "plan_ns": 41041,
+    "forced_guest_preparation_ns": 341,
+    "warmup_ns_per_op": [
+      155.052453131047,
+      151.66623078099065,
+      151.2544966324792,
+      151.44942343341089,
+      152.09248079384625
+    ],
+    "ns_per_op": [
+      151.71888897250165,
+      153.8601793750123,
+      153.1160967142913,
+      151.583098685487,
+      151.5676599330682,
+      151.58856511215026,
+      151.5755773204377
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 254642,
+    "prepare_ns": 1250318,
+    "plan_ns": 2925,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      12643.17080046521,
+      12294.234215184893,
+      11908.335253236863,
+      11741.295431066867,
+      11789.093243306937
+    ],
+    "ns_per_op": [
+      11813.88890200151,
+      11858.311646433991,
+      11858.18719176783,
+      11898.342370624048,
+      11893.51514935312,
+      11923.538347942073,
+      11904.30403348554
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 256275,
+    "prepare_ns": 1483869,
+    "plan_ns": 2394,
+    "forced_guest_preparation_ns": 160,
+    "warmup_ns_per_op": [
+      12697.54988322502,
+      12490.462480015987,
+      11821.558623298033,
+      11797.227853773586,
+      11816.673351284959
+    ],
+    "ns_per_op": [
+      11850.836103219697,
+      11860.270414453718,
+      11856.427636570561,
+      11912.108755716463,
+      11884.958111702128,
+      11900.032248858448,
+      11920.765505907013
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 363406,
+    "prepare_ns": 88143,
+    "plan_ns": 47241,
+    "forced_guest_preparation_ns": 70763938,
+    "warmup_ns_per_op": [
+      211.2951552759334,
+      203.49973260334454,
+      203.12453017751287,
+      203.55557448606714,
+      204.1977958497236
+    ],
+    "ns_per_op": [
+      204.10112532002717,
+      195.210858049524,
+      194.57623452754532,
+      194.99884874578808,
+      194.83873104643624,
+      195.22861235881354,
+      191.82996384462396
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 356936,
+    "prepare_ns": 94863,
+    "plan_ns": 44997,
+    "forced_guest_preparation_ns": 71367174,
+    "warmup_ns_per_op": [
+      202.61965550638658,
+      190.38521371739105,
+      190.37837290889928,
+      190.136665226703,
+      190.34187077445486
+    ],
+    "ns_per_op": [
+      190.5275397055237,
+      190.56669962131375,
+      190.74926790597456,
+      190.5757104524942,
+      191.22279125159096,
+      190.62877786216237,
+      191.0801397483246
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 356005,
+    "prepare_ns": 27211,
+    "plan_ns": 21182,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      36.131026435759644,
+      35.463999352853456,
+      35.330102917866945,
+      34.58696687677085,
+      33.68597277931326
+    ],
+    "ns_per_op": [
+      33.63063714464667,
+      33.663954439101325,
+      33.577829918790215,
+      33.655847343083614,
+      33.468145096945136,
+      33.51711215356729,
+      33.52235265217503
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 362164,
+    "prepare_ns": 28572,
+    "plan_ns": 23135,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      36.518730915328035,
+      35.68624188209728,
+      35.44437956948452,
+      35.46402839784561,
+      35.47411626373838
+    ],
+    "ns_per_op": [
+      35.46078941590185,
+      35.43413071763879,
+      35.49033487446112,
+      35.42346359999728,
+      35.45302296665048,
+      35.47046506533366,
+      35.50681657304264
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 340342,
+    "prepare_ns": 25588,
+    "plan_ns": 21392,
+    "forced_guest_preparation_ns": 321,
+    "warmup_ns_per_op": [
+      34.1362557690207,
+      33.24777260206785,
+      33.23087546204136,
+      33.28527437056509,
+      33.471269478909385
+    ],
+    "ns_per_op": [
+      33.37719487499359,
+      33.313166929263126,
+      33.334166328881686,
+      33.310853716838494,
+      33.31195395180065,
+      33.322794572403495,
+      33.24818186219018
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 345409,
+    "prepare_ns": 27541,
+    "plan_ns": 21092,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      36.53876746841304,
+      35.38103582455318,
+      35.26692670127525,
+      35.29636856873234,
+      35.29714752886455
+    ],
+    "ns_per_op": [
+      35.32530364183687,
+      35.2877172305156,
+      35.28286983459411,
+      35.29447751770935,
+      35.29255323504167,
+      35.296420735632964,
+      35.38673883195561
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 335644,
+    "prepare_ns": 46259,
+    "plan_ns": 39009,
+    "forced_guest_preparation_ns": 280,
+    "warmup_ns_per_op": [
+      5126.2504714660545,
+      5006.274418441704,
+      5011.062540076948,
+      5012.484690707184,
+      5001.978788212228
+    ],
+    "ns_per_op": [
+      5001.925546174776,
+      5006.131015775144,
+      4998.035975463555,
+      4991.358008061941,
+      4999.474618122201,
+      5006.519168401665,
+      5002.195632602433
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 329194,
+    "prepare_ns": 46430,
+    "plan_ns": 38718,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      5378.678049698795,
+      5069.430982403503,
+      5017.959442236673,
+      5018.045931679512,
+      5019.984736387729
+    ],
+    "ns_per_op": [
+      5021.366032696015,
+      5020.473908156711,
+      5015.258093308729,
+      5003.65077824904,
+      5012.291462876844,
+      5018.295379736673,
+      5019.949271435453
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 278578,
+    "prepare_ns": 754914,
+    "plan_ns": 34782,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      6469.31118067053,
+      6395.488389934533,
+      6369.819111801875,
+      6376.76199127907,
+      6026.562596413421
+    ],
+    "ns_per_op": [
+      6011.809459134615,
+      5998.915075786646,
+      6006.303396425827,
+      6064.173269006982,
+      6078.805635206066,
+      6082.009606031128,
+      6089.030020930685
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 272159,
+    "prepare_ns": 740842,
+    "plan_ns": 31868,
+    "forced_guest_preparation_ns": 310,
+    "warmup_ns_per_op": [
+      6535.280916718946,
+      6436.181347817133,
+      6401.983049979516,
+      6464.734375,
+      6446.068875051567
+    ],
+    "ns_per_op": [
+      6442.733486191261,
+      6449.219562190594,
+      6445.9056188169825,
+      6467.0047559966915,
+      6532.786776233278,
+      6496.579125103907,
+      6498.8549849334995
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 248844,
+    "prepare_ns": 1155766,
+    "plan_ns": 20691,
+    "forced_guest_preparation_ns": 320,
+    "warmup_ns_per_op": [
+      6127.760784313726,
+      6086.606393594237,
+      6080.156499270428,
+      6080.208493433852,
+      6073.554648027594
+    ],
+    "ns_per_op": [
+      6076.804043545879,
+      6075.756597492224,
+      6072.534066627816,
+      6081.156420233463,
+      6091.699568881528,
+      6090.647591095089,
+      6095.34856425507
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 256195,
+    "prepare_ns": 1220333,
+    "plan_ns": 21432,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      6238.814520958083,
+      6190.4578032178215,
+      6305.282504286002,
+      6388.738380263696,
+      6380.074221938776
+    ],
+    "ns_per_op": [
+      6400.85873515561,
+      6350.469460804225,
+      6356.804477725794,
+      6363.997875101792,
+      6386.554304534314,
+      6389.909009607522,
+      6387.361787683823
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 367081,
+    "prepare_ns": 29004,
+    "plan_ns": 21883,
+    "forced_guest_preparation_ns": 371,
+    "warmup_ns_per_op": [
+      32.32640711375974,
+      31.614264682673767,
+      31.666477174849266,
+      31.74111042931232,
+      31.521268210432563
+    ],
+    "ns_per_op": [
+      30.16933878473094,
+      30.09944726736324,
+      30.253808893262647,
+      30.315012625576713,
+      30.309243761153787,
+      30.246374496217516,
+      29.939564327745906
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 374362,
+    "prepare_ns": 28132,
+    "plan_ns": 21062,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      31.796395287876877,
+      30.909868301968533,
+      30.898982788803615,
+      30.99320818324364,
+      30.9344777643041
+    ],
+    "ns_per_op": [
+      30.953929242507687,
+      30.982436374722397,
+      31.01460164431635,
+      30.9975279547249,
+      30.948096681277455,
+      30.93089837873149,
+      30.978485823796948
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 332350,
+    "prepare_ns": 60981,
+    "plan_ns": 28473,
+    "forced_guest_preparation_ns": 280,
+    "warmup_ns_per_op": [
+      1634.9289673145338,
+      1601.3794018369542,
+      1602.1256151953246,
+      1598.1364127377788,
+      1592.0858825776872
+    ],
+    "ns_per_op": [
+      1582.857535833671,
+      1551.2522706968434,
+      1548.4033516646848,
+      1553.7216084211573,
+      1551.008345945812,
+      1551.9340988083416,
+      1546.7066601098575
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 338228,
+    "prepare_ns": 64196,
+    "plan_ns": 28603,
+    "forced_guest_preparation_ns": 290,
+    "warmup_ns_per_op": [
+      1726.611742058011,
+      1697.3299512546166,
+      1624.8470173260891,
+      1619.0269191664077,
+      1614.3260166985226
+    ],
+    "ns_per_op": [
+      1602.7815128205127,
+      1585.0119255934267,
+      1571.4705538515689,
+      1575.4913257461183,
+      1569.4095645841703,
+      1573.480967453685,
+      1572.7625710799114
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 364207,
+    "prepare_ns": 88563,
+    "plan_ns": 48754,
+    "forced_guest_preparation_ns": 70160422,
+    "warmup_ns_per_op": [
+      209.9138490196276,
+      203.93927610583953,
+      204.45993309267087,
+      204.8785331164361,
+      204.99970849186565
+    ],
+    "ns_per_op": [
+      204.46889762555944,
+      204.24886519607844,
+      204.422503385185,
+      204.33167091669935,
+      204.81078409686722,
+      206.3481278558411,
+      204.32143767816513
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 337387,
+    "prepare_ns": 84256,
+    "plan_ns": 44217,
+    "forced_guest_preparation_ns": 75860602,
+    "warmup_ns_per_op": [
+      195.9906550646606,
+      193.23028165693827,
+      191.79200811811856,
+      192.4125613024284,
+      192.36165369392327
+    ],
+    "ns_per_op": [
+      192.45848177994284,
+      192.81499728522422,
+      192.7065505445105,
+      192.413532405241,
+      192.50842255377867,
+      192.87784725651153,
+      192.76970435563067
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 361814,
+    "prepare_ns": 26600,
+    "plan_ns": 20731,
+    "forced_guest_preparation_ns": 10056374,
+    "warmup_ns_per_op": [
+      26.122864459337006,
+      25.51348886062225,
+      25.045376936707765,
+      24.058667243111532,
+      24.068706830420957
+    ],
+    "ns_per_op": [
+      23.969335761325773,
+      24.164152148866414,
+      23.99381387148539,
+      23.977121981189693,
+      24.003573261069274,
+      23.985495121546858,
+      23.990450618530268
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 357437,
+    "prepare_ns": 27291,
+    "plan_ns": 22314,
+    "forced_guest_preparation_ns": 11745062,
+    "warmup_ns_per_op": [
+      25.578354642116395,
+      25.21474509745384,
+      25.18928191358592,
+      25.06867782229082,
+      25.002382974952834
+    ],
+    "ns_per_op": [
+      25.00197820192591,
+      25.01515466554172,
+      24.99812464402734,
+      24.997612179230792,
+      25.005500246853714,
+      25.009791322532315,
+      25.024989899916076
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 331859,
+    "prepare_ns": 83195,
+    "plan_ns": 42744,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      334.57087959295103,
+      326.25660503058964,
+      326.9897447551533,
+      328.0759774523905,
+      327.1970098026385
+    ],
+    "ns_per_op": [
+      327.7567319188656,
+      328.94939671052634,
+      329.10652960318464,
+      330.07355942899994,
+      330.076217837678,
+      329.31718012350365,
+      330.3070653035556
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 348644,
+    "prepare_ns": 88933,
+    "plan_ns": 44097,
+    "forced_guest_preparation_ns": 280,
+    "warmup_ns_per_op": [
+      358.41956359674276,
+      349.01566374053476,
+      351.921402027027,
+      354.61997192875947,
+      358.50756047230635
+    ],
+    "ns_per_op": [
+      352.85659805338514,
+      349.0213396247487,
+      350.23635307863003,
+      351.6255541428507,
+      361.10223412368276,
+      362.21245189855813,
+      361.4071766433825
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 337988,
+    "prepare_ns": 62053,
+    "plan_ns": 43095,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      158.06923052604958,
+      152.97025827255374,
+      149.6381514918262,
+      149.7376254791567,
+      149.65414003835912
+    ],
+    "ns_per_op": [
+      149.6208232390455,
+      150.00873549135002,
+      150.19493731496078,
+      150.0110062043971,
+      150.48553733434778,
+      150.21360916169968,
+      150.67293543036777
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 362264,
+    "prepare_ns": 63665,
+    "plan_ns": 40862,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      163.33665601283687,
+      158.60881606361596,
+      158.70200313595043,
+      152.31797229899007,
+      151.14843160525655
+    ],
+    "ns_per_op": [
+      150.85155133713073,
+      151.2556442518054,
+      151.3560518458066,
+      151.4545419849178,
+      151.34021535943282,
+      152.1572143709222,
+      151.73434859872984
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 258328,
+    "prepare_ns": 793492,
+    "plan_ns": 17416,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      12554.411634036145,
+      11795.802735849056,
+      11846.87587661107,
+      11847.668747630782,
+      11834.103650170326
+    ],
+    "ns_per_op": [
+      11871.672467754173,
+      11892.912314497717,
+      11905.400637366818,
+      11905.26890696347,
+      11908.239987633182,
+      11907.15672564688,
+      11898.179937214612
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 277928,
+    "prepare_ns": 760652,
+    "plan_ns": 17907,
+    "forced_guest_preparation_ns": 240,
+    "warmup_ns_per_op": [
+      12694.260268582453,
+      12363.70136965981,
+      12412.774808876093,
+      12448.082516421178,
+      12440.652356190287
+    ],
+    "ns_per_op": [
+      12449.681876990446,
+      12593.275941022544,
+      12462.519961124402,
+      12462.748056220096,
+      12455.103304140128,
+      12447.708125995223,
+      12452.085464769109
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 335103,
+    "prepare_ns": 27231,
+    "plan_ns": 21002,
+    "forced_guest_preparation_ns": 10146510,
+    "warmup_ns_per_op": [
+      23.92153526680323,
+      23.625155264359545,
+      23.516817536261005,
+      23.550316826657866,
+      23.60033930667138
+    ],
+    "ns_per_op": [
+      23.608133404472312,
+      23.600073764190213,
+      23.599476073566816,
+      23.599582335860685,
+      23.593926435036423,
+      23.597930504458297,
+      23.59241504854369
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 344257,
+    "prepare_ns": 27181,
+    "plan_ns": 19619,
+    "forced_guest_preparation_ns": 9588712,
+    "warmup_ns_per_op": [
+      25.734507017896377,
+      25.170067213037512,
+      25.24817208377703,
+      25.193715635808093,
+      24.94249305502345
+    ],
+    "ns_per_op": [
+      23.83209989818953,
+      23.85067446818741,
+      23.875780163653868,
+      23.844383877721686,
+      23.851243371281505,
+      23.799677362297075,
+      23.844825780582347
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 262895,
+    "prepare_ns": 851619,
+    "plan_ns": 17587,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      1784.3517453894028,
+      1787.0815559240623,
+      1798.1602776179516,
+      1732.8387074414993,
+      1614.8927113476643
+    ],
+    "ns_per_op": [
+      1636.9538648386758,
+      1617.2975639101635,
+      1636.586984839757,
+      1634.6190834205022,
+      1635.4694695938874,
+      1637.8063364598618,
+      1637.5891715573255
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 257006,
+    "prepare_ns": 852511,
+    "plan_ns": 16574,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      1790.3544966630384,
+      1759.6590072494369,
+      1680.0129001585851,
+      1735.5858255581472,
+      1718.1437225123693
+    ],
+    "ns_per_op": [
+      1706.9210283755735,
+      1754.9334252863882,
+      1755.7340800561797,
+      1756.4350796706385,
+      1756.1990967071251,
+      1756.0192178017533,
+      1757.144500505959
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 245940,
+    "prepare_ns": 1205931,
+    "plan_ns": 2724,
+    "forced_guest_preparation_ns": 290,
+    "warmup_ns_per_op": [
+      12541.474242576243,
+      12534.373834703289,
+      12542.501956260032,
+      12419.392002581413,
+      11920.424508962624
+    ],
+    "ns_per_op": [
+      11984.859638611963,
+      11958.812571674312,
+      11936.412166030534,
+      11948.998040902141,
+      11954.441537652905,
+      11965.181350497704,
+      12044.20281201849
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 260331,
+    "prepare_ns": 1244149,
+    "plan_ns": 2434,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      12620.34663791364,
+      12297.99831579465,
+      12331.65170297713,
+      11695.88039156063,
+      11686.662502337322
+    ],
+    "ns_per_op": [
+      11723.77679910045,
+      11732.966732357358,
+      11735.662936373874,
+      11762.233505639098,
+      11774.136789344879,
+      11793.983314479638,
+      11788.990172511312
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 258789,
+    "prepare_ns": 2588167,
+    "plan_ns": 7211,
+    "forced_guest_preparation_ns": 140,
+    "warmup_ns_per_op": [
+      1643.1149086487908,
+      1616.687643882566,
+      1622.9419174543,
+      1623.1864271709774,
+      1624.0867032403078
+    ],
+    "ns_per_op": [
+      1616.9319607564155,
+      1589.8175387843337,
+      1574.6727724455864,
+      1570.007823488045,
+      1598.1687717324605,
+      1598.4180326820785,
+      1597.6162626507871
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 241403,
+    "prepare_ns": 2432814,
+    "plan_ns": 7000,
+    "forced_guest_preparation_ns": 181,
+    "warmup_ns_per_op": [
+      1553.0930293956862,
+      1539.1449483476163,
+      1537.913261257382,
+      1537.530716508413,
+      1551.420688232228
+    ],
+    "ns_per_op": [
+      1563.2616171468587,
+      1565.3867837106793,
+      1561.966769542183,
+      1589.1331604636973,
+      1610.1318321141562,
+      1625.0072047888934,
+      1632.992868338558
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 250236,
+    "prepare_ns": 2572734,
+    "plan_ns": 7291,
+    "forced_guest_preparation_ns": 230,
+    "warmup_ns_per_op": [
+      1651.0455195345519,
+      1658.0000298408488,
+      1623.3582046670476,
+      1554.8865791994228,
+      1574.9482395297853
+    ],
+    "ns_per_op": [
+      1574.7308324516323,
+      1576.8400479313825,
+      1575.8328427541348,
+      1573.36602962646,
+      1574.547542573559,
+      1573.9408648519338,
+      1574.2019034606085
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 278528,
+    "prepare_ns": 2602198,
+    "plan_ns": 7752,
+    "forced_guest_preparation_ns": 180,
+    "warmup_ns_per_op": [
+      1644.1350056555134,
+      1648.7515333175056,
+      1654.329658549497,
+      1590.1721230663545,
+      1599.1865309333743
+    ],
+    "ns_per_op": [
+      1623.7400768911057,
+      1622.8904399927296,
+      1623.0201106148734,
+      1622.3873391114803,
+      1624.3079684251559,
+      1625.7924859550562,
+      1619.5750712435233
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 253560,
+    "prepare_ns": 618730,
+    "plan_ns": 7802,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      1204.2965197495182,
+      1192.9520573274547,
+      1196.7905405081954,
+      1229.9820861047701,
+      1252.041522686298
+    ],
+    "ns_per_op": [
+      1258.4406833829923,
+      1259.0905494560839,
+      1266.0451583009237,
+      1264.5437722527918,
+      1255.007370803887,
+      1251.0899169335469,
+      1251.8658167761578
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 255534,
+    "prepare_ns": 642004,
+    "plan_ns": 8733,
+    "forced_guest_preparation_ns": 160,
+    "warmup_ns_per_op": [
+      1292.907705713222,
+      1310.5608985783779,
+      1317.870816026398,
+      1327.1441497154747,
+      1348.5409294899457
+    ],
+    "ns_per_op": [
+      1347.9700601708075,
+      1348.270933994823,
+      1335.3896155571697,
+      1337.2173327058017,
+      1339.5449275672895,
+      1343.229075339522,
+      1344.667534423408
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 331788,
+    "prepare_ns": 25789,
+    "plan_ns": 21101,
+    "forced_guest_preparation_ns": 10833802,
+    "warmup_ns_per_op": [
+      18.69922041890409,
+      18.23274851220864,
+      18.16160483685368,
+      18.19387411126611,
+      18.21261128256848
+    ],
+    "ns_per_op": [
+      18.195786099536985,
+      18.210796621360174,
+      18.202163745491696,
+      18.20845336316599,
+      18.218217847107244,
+      18.199330448139303,
+      18.19008382412519
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 348824,
+    "prepare_ns": 28193,
+    "plan_ns": 23024,
+    "forced_guest_preparation_ns": 12542268,
+    "warmup_ns_per_op": [
+      19.51239107803825,
+      19.31296430242274,
+      19.243912907231515,
+      18.295118213397515,
+      18.256850985693653
+    ],
+    "ns_per_op": [
+      18.253994809153973,
+      18.26946165262016,
+      18.271417615902017,
+      18.43621883252037,
+      18.28170389795011,
+      18.3020071726256,
+      18.29254837860904
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 362896,
+    "prepare_ns": 87942,
+    "plan_ns": 44987,
+    "forced_guest_preparation_ns": 240,
+    "warmup_ns_per_op": [
+      354.7860512789219,
+      345.2407846367573,
+      344.9782375311858,
+      344.93155271087664,
+      346.10801687617675
+    ],
+    "ns_per_op": [
+      360.0233035714286,
+      353.53973351660784,
+      353.389628471594,
+      356.3834390110391,
+      347.8280123046614,
+      347.6275439118537,
+      347.8065666317945
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 324648,
+    "prepare_ns": 82514,
+    "plan_ns": 42974,
+    "forced_guest_preparation_ns": 301,
+    "warmup_ns_per_op": [
+      332.77568238329,
+      326.29814396431107,
+      330.13297756444115,
+      326.2297758424503,
+      327.60647866652687
+    ],
+    "ns_per_op": [
+      326.62485693904426,
+      326.23825384687655,
+      326.8721497008493,
+      327.0934523498011,
+      327.9059057070008,
+      327.33104012171106,
+      327.2714667026223
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 260852,
+    "prepare_ns": 1215636,
+    "plan_ns": 21592,
+    "forced_guest_preparation_ns": 140,
+    "warmup_ns_per_op": [
+      6538.739239016736,
+      6516.881281276063,
+      6060.158939996122,
+      6112.391028304653,
+      6174.735152854603
+    ],
+    "ns_per_op": [
+      6184.640303599684,
+      6013.713521634615,
+      6043.366855181748,
+      6151.904675196851,
+      6321.478749494337,
+      6404.144928278689,
+      6406.899321209016
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 287311,
+    "prepare_ns": 1346202,
+    "plan_ns": 22194,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      6329.597331915756,
+      6070.150224514563,
+      6143.403793238994,
+      6149.416500639512,
+      6241.086155900559
+    ],
+    "ns_per_op": [
+      6318.731116107519,
+      6281.141629823152,
+      6218.526315135243,
+      6328.900151821862,
+      6378.588839285714,
+      6379.780931122449,
+      6372.155562347189
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 380862,
+    "prepare_ns": 64507,
+    "plan_ns": 29515,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      1726.3960025135343,
+      1682.1593585154483,
+      1670.8223274433276,
+      1661.566587356444,
+      1648.0355563099884
+    ],
+    "ns_per_op": [
+      1638.907066157961,
+      1639.1474558160269,
+      1640.4070602823851,
+      1643.8222537081842,
+      1651.4753850930035,
+      1656.8378690892705,
+      1656.6676109255725
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 324337,
+    "prepare_ns": 62554,
+    "plan_ns": 29605,
+    "forced_guest_preparation_ns": 320,
+    "warmup_ns_per_op": [
+      1638.5163393231624,
+      1602.8360216432454,
+      1605.8407923132258,
+      1603.4491951000514,
+      1590.3570753816794
+    ],
+    "ns_per_op": [
+      1578.0737287921631,
+      1561.3148012839729,
+      1559.6831555638723,
+      1557.278652581224,
+      1556.8585749153217,
+      1556.4053598107569,
+      1556.5734748505977
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 258398,
+    "prepare_ns": 638089,
+    "plan_ns": 8302,
+    "forced_guest_preparation_ns": 130,
+    "warmup_ns_per_op": [
+      84.82778933695988,
+      78.91237271470418,
+      79.13342063830703,
+      79.18543492679478,
+      79.223267931024
+    ],
+    "ns_per_op": [
+      79.22568285992435,
+      79.3892002873242,
+      79.40698911684589,
+      79.45554297693387,
+      79.45695068091209,
+      79.59303700869025,
+      79.41082437157581
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 261012,
+    "prepare_ns": 654693,
+    "plan_ns": 8433,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      85.72347351225909,
+      80.30644732818347,
+      80.26683959283689,
+      80.30451813788726,
+      80.25327014540542
+    ],
+    "ns_per_op": [
+      80.27294952478807,
+      80.32493227056815,
+      80.33625466590573,
+      80.2757246316314,
+      80.27787289737873,
+      80.34541346143958,
+      80.37167664343399
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 287011,
+    "prepare_ns": 856987,
+    "plan_ns": 17356,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      1751.7386701233183,
+      1718.890128286217,
+      1746.8927386109558,
+      1751.0125486749216,
+      1692.4130225820427
+    ],
+    "ns_per_op": [
+      1633.6047917102237,
+      1652.1289219443856,
+      1654.7784075868276,
+      1659.615066774639,
+      1659.9590735872105,
+      1651.0445636094676,
+      1645.8016707920792
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 254572,
+    "prepare_ns": 824739,
+    "plan_ns": 17456,
+    "forced_guest_preparation_ns": 160,
+    "warmup_ns_per_op": [
+      1835.6022682221308,
+      1844.9731373243594,
+      1849.4647498964375,
+      1849.436246153391,
+      1847.956757775544
+    ],
+    "ns_per_op": [
+      1843.2925992274122,
+      1850.1421308903623,
+      1853.4578577146585,
+      1856.4012978142077,
+      1856.4835731468281,
+      1862.1557659080077,
+      1790.4292972330431
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 253030,
+    "prepare_ns": 1288976,
+    "plan_ns": 2954,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      12699.057257818846,
+      12374.452209520981,
+      11959.922867253252,
+      11772.430793486446,
+      11801.550427209215
+    ],
+    "ns_per_op": [
+      11885.366807560791,
+      11886.669334156535,
+      11881.402141907294,
+      11892.547968987823,
+      11916.571527248476,
+      11899.20039003044,
+      11916.500714557927
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 268904,
+    "prepare_ns": 1312281,
+    "plan_ns": 2554,
+    "forced_guest_preparation_ns": 161,
+    "warmup_ns_per_op": [
+      12750.285111643556,
+      12640.19885559822,
+      12669.925331746354,
+      12666.677066450568,
+      12669.544646474878
+    ],
+    "ns_per_op": [
+      12669.626949959482,
+      12695.965173498376,
+      11971.387203292496,
+      11982.755344133435,
+      12020.8659375,
+      12007.508688556067,
+      12012.89314516129
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 348273,
+    "prepare_ns": 28413,
+    "plan_ns": 28963,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      32.0486053352436,
+      29.790833934710033,
+      29.82958578413124,
+      29.830267975952516,
+      29.896428730306635
+    ],
+    "ns_per_op": [
+      29.855449254427196,
+      29.83972003477633,
+      29.82093536840458,
+      29.857615374399504,
+      29.85117174962555,
+      29.886690014058644,
+      29.84949315611508
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 362124,
+    "prepare_ns": 28132,
+    "plan_ns": 22694,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      31.712535080362,
+      30.57050668368505,
+      29.233644657363683,
+      29.22428544993164,
+      29.270747755521626
+    ],
+    "ns_per_op": [
+      29.337267179872324,
+      29.430076624067656,
+      29.40995970375543,
+      29.425129234854335,
+      29.822083300727943,
+      29.44282979470124,
+      29.415185832752876
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 380080,
+    "prepare_ns": 47362,
+    "plan_ns": 44016,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      5377.099820414659,
+      5265.021889740566,
+      5269.596657956844,
+      5273.188976045884,
+      5270.353040682968
+    ],
+    "ns_per_op": [
+      5274.044313006073,
+      5284.98180780933,
+      5269.4525033715445,
+      5270.77096679029,
+      5196.954392453457,
+      5100.7479091873365,
+      5072.101324221285
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 350186,
+    "prepare_ns": 46520,
+    "plan_ns": 42213,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      5396.398647919545,
+      5240.284006120054,
+      5054.96103856727,
+      5001.7533610755445,
+      4984.201445374801
+    ],
+    "ns_per_op": [
+      5024.160751607717,
+      4971.512335003181,
+      4969.512247695487,
+      4974.159213876512,
+      4983.501245615434,
+      4990.758910041507,
+      4993.206269968051
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 258429,
+    "prepare_ns": 614693,
+    "plan_ns": 9284,
+    "forced_guest_preparation_ns": 310,
+    "warmup_ns_per_op": [
+      1331.0378918562058,
+      1350.6240464819778,
+      1373.8875914996042,
+      1369.382305177022,
+      1388.1703369314143
+    ],
+    "ns_per_op": [
+      1357.6563748913989,
+      1280.5942058678904,
+      1181.3371517803146,
+      1192.3364108042117,
+      1199.7223059351966,
+      1203.8839199730355,
+      1205.2384794848065
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 254913,
+    "prepare_ns": 595866,
+    "plan_ns": 10135,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      1361.5917213096898,
+      1377.238995295699,
+      1380.745472795352,
+      1343.5133356620809,
+      1342.4502214884021
+    ],
+    "ns_per_op": [
+      1386.7129453984735,
+      1250.0186875,
+      1214.1323475135976,
+      1226.5135939952904,
+      1256.6259976077517,
+      1316.3950400168492,
+      1325.2901611535199
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 371779,
+    "prepare_ns": 64517,
+    "plan_ns": 29314,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      1706.8008909066084,
+      1667.1182202203136,
+      1598.6020172634271,
+      1562.8803541958391,
+      1563.2230329631852
+    ],
+    "ns_per_op": [
+      1568.662944187914,
+      1566.9422727386682,
+      1576.2434751361711,
+      1580.2824762338187,
+      1577.1923508780783,
+      1575.5213268649193,
+      1580.1478039686551
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 371207,
+    "prepare_ns": 66620,
+    "plan_ns": 39009,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      1714.7343612833315,
+      1668.8964074014739,
+      1580.5601308036617,
+      1566.955382884577,
+      1564.1158893268268
+    ],
+    "ns_per_op": [
+      1562.05312562475,
+      1556.7323825712294,
+      1552.4755488774092,
+      1557.7794277063397,
+      1550.2508711557539,
+      1551.581854398332,
+      1557.8463515702892
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259620,
+    "prepare_ns": 1528877,
+    "plan_ns": 15443,
+    "forced_guest_preparation_ns": 140,
+    "warmup_ns_per_op": [
+      2400.3747359831027,
+      2369.3871232941624,
+      2410.4716204881997,
+      2233.1009048520796,
+      2290.335531016415
+    ],
+    "ns_per_op": [
+      2304.3210612651137,
+      2293.0030534771126,
+      2313.086006882771,
+      2318.6039456602375,
+      2332.706212686567,
+      2315.2836805555557,
+      2248.62934352518
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259320,
+    "prepare_ns": 1558731,
+    "plan_ns": 16385,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      2388.135435771053,
+      2343.312474223905,
+      2332.843271778889,
+      2235.478873837625,
+      2248.851229670409
+    ],
+    "ns_per_op": [
+      2250.055958465304,
+      2244.6138277434643,
+      2249.603890728477,
+      2264.798786231884,
+      2286.6142266608135,
+      2283.3610279076565,
+      2292.733545151115
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 378408,
+    "prepare_ns": 79900,
+    "plan_ns": 46650,
+    "forced_guest_preparation_ns": 70048191,
+    "warmup_ns_per_op": [
+      210.63939086533924,
+      205.85247915953045,
+      195.9879960410787,
+      190.87273510890412,
+      204.75881478508714
+    ],
+    "ns_per_op": [
+      191.2015334762977,
+      192.7163117615136,
+      191.65677589294475,
+      191.196497892296,
+      191.32819119952,
+      190.76465098889025,
+      190.76719230722273
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 330336,
+    "prepare_ns": 87932,
+    "plan_ns": 45519,
+    "forced_guest_preparation_ns": 69554338,
+    "warmup_ns_per_op": [
+      219.54134921387623,
+      214.87894363860772,
+      217.0528964028727,
+      216.03374409798553,
+      216.25003546467372
+    ],
+    "ns_per_op": [
+      217.7047582100262,
+      203.84520340304232,
+      202.2574288224558,
+      202.5691238526758,
+      203.6172031783471,
+      202.06940178594522,
+      201.94292494894927
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 260161,
+    "prepare_ns": 606511,
+    "plan_ns": 10055,
+    "forced_guest_preparation_ns": 190,
+    "warmup_ns_per_op": [
+      85.15898623358822,
+      82.1380800410295,
+      80.00053368136622,
+      80.17732993147101,
+      79.84712177482407
+    ],
+    "ns_per_op": [
+      79.7872870007251,
+      79.78396073109955,
+      79.96681912571522,
+      79.79916154254721,
+      79.95080420372095,
+      79.9660166085795,
+      80.20794304520348
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259570,
+    "prepare_ns": 643336,
+    "plan_ns": 9835,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      84.5897356448548,
+      82.93589610679993,
+      83.10145787572331,
+      83.29934940051285,
+      83.25979732610062
+    ],
+    "ns_per_op": [
+      83.25365166107204,
+      83.17035764472928,
+      83.06933161789725,
+      84.06939262078984,
+      83.10193529150534,
+      83.03980370846708,
+      83.17594859892684
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 335914,
+    "prepare_ns": 63876,
+    "plan_ns": 43125,
+    "forced_guest_preparation_ns": 66506758,
+    "warmup_ns_per_op": [
+      84.46024792701583,
+      83.28913637726546,
+      82.92596041067391,
+      83.0431994428825,
+      83.11808916288979
+    ],
+    "ns_per_op": [
+      83.10941505856196,
+      83.08421800557257,
+      83.13336300624627,
+      83.03258648634286,
+      83.12402446614958,
+      83.10267232690855,
+      83.60079764395245
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 428814,
+    "prepare_ns": 70496,
+    "plan_ns": 49515,
+    "forced_guest_preparation_ns": 62278686,
+    "warmup_ns_per_op": [
+      91.63966874138589,
+      82.54587314239073,
+      82.55757792108294,
+      82.83045849148374,
+      82.82395549524526
+    ],
+    "ns_per_op": [
+      82.5738166597085,
+      82.4256835350221,
+      82.53445743492362,
+      82.43774104665027,
+      82.39026841833291,
+      83.11623507234427,
+      82.23298855981264
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 256546,
+    "prepare_ns": 638279,
+    "plan_ns": 13630,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      84.58138864529539,
+      81.77567593956728,
+      81.9309960968224,
+      81.93786216399047,
+      82.95723202624356
+    ],
+    "ns_per_op": [
+      83.02353065223167,
+      82.14074689576499,
+      82.18895539208467,
+      82.14222889943224,
+      82.18720807296597,
+      82.18738740426897,
+      82.28428445511133
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 260121,
+    "prepare_ns": 642064,
+    "plan_ns": 8603,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      86.24182170612164,
+      83.59596830175859,
+      83.28350372508835,
+      85.84595288179965,
+      83.14381604923162
+    ],
+    "ns_per_op": [
+      83.01227148481081,
+      83.31168705011997,
+      79.44679901766375,
+      79.94487648249151,
+      80.23059920437274,
+      79.82308674251325,
+      79.8823892074212
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 273571,
+    "prepare_ns": 808484,
+    "plan_ns": 15614,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      2565.24647847587,
+      2506.509000541386,
+      2385.9703246678882,
+      2410.2696330788217,
+      2426.581371312112
+    ],
+    "ns_per_op": [
+      2440.147398110556,
+      2452.4033662900188,
+      2460.442985477015,
+      2457.198295007862,
+      2459.0395738278794,
+      2443.3737785334583,
+      2435.5777207372194
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 249835,
+    "prepare_ns": 802055,
+    "plan_ns": 16114,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      2576.7811392026715,
+      2534.3570639393447,
+      2504.248998397436,
+      2515.27282260985,
+      2516.2545868558777
+    ],
+    "ns_per_op": [
+      2521.471235680865,
+      2533.372248905642,
+      2561.5193852459015,
+      2568.081811740059,
+      2564.0977806038727,
+      2561.9347079918034,
+      2560.545538786042
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 360482,
+    "prepare_ns": 25028,
+    "plan_ns": 20190,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      29.883821510674963,
+      29.327903604041143,
+      29.360358893402807,
+      29.37086925388635,
+      29.379580561473244
+    ],
+    "ns_per_op": [
+      29.36429027832591,
+      29.407893247879816,
+      29.363353483560346,
+      29.41254793067488,
+      29.385265371993306,
+      29.38897857716528,
+      29.394797874832097
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 396185,
+    "prepare_ns": 31187,
+    "plan_ns": 22965,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      31.377121906220193,
+      30.73726270234941,
+      30.952691693591362,
+      30.769765930851275,
+      30.774519438141834
+    ],
+    "ns_per_op": [
+      30.762778648704522,
+      30.77553358462508,
+      30.790088391924645,
+      30.79240223320563,
+      30.76175438734649,
+      30.771080075386386,
+      30.76049453153607
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 248263,
+    "prepare_ns": 698089,
+    "plan_ns": 32189,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      6084.276213993772,
+      6033.99107746139,
+      6029.482464072145,
+      6054.414628535452,
+      6100.590535958236
+    ],
+    "ns_per_op": [
+      6096.593128412636,
+      6095.493589118565,
+      6098.100489957098,
+      6115.18072672144,
+      6127.140759698276,
+      6127.969546568627,
+      6062.501212179985
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259009,
+    "prepare_ns": 746031,
+    "plan_ns": 33941,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      6680.141372863248,
+      6578.580406933923,
+      6555.883415478188,
+      6604.360075021133,
+      6577.271477798821
+    ],
+    "ns_per_op": [
+      6623.182150423729,
+      6643.224856627018,
+      6637.6078894312395,
+      6647.91087372449,
+      6688.359775983747,
+      6555.4848468959735,
+      6555.719431627517
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 344718,
+    "prepare_ns": 45278,
+    "plan_ns": 40641,
+    "forced_guest_preparation_ns": 53987196,
+    "warmup_ns_per_op": [
+      1821.838519805876,
+      1781.4224325267899,
+      1772.1536431751163,
+      1772.1602426420552,
+      1773.721835981839
+    ],
+    "ns_per_op": [
+      1769.4058997112772,
+      1769.1436212361332,
+      1780.7809580104831,
+      1768.7459036110483,
+      1769.9711217149977,
+      1767.4772145724949,
+      1766.7711619459521
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 367412,
+    "prepare_ns": 47371,
+    "plan_ns": 44327,
+    "forced_guest_preparation_ns": 52428734,
+    "warmup_ns_per_op": [
+      1923.664888664902,
+      1856.3299904223093,
+      1782.3790564046994,
+      1780.1834153234993,
+      1769.5437747734995
+    ],
+    "ns_per_op": [
+      1769.1278476624407,
+      1770.9256856300997,
+      1770.2040347473946,
+      1767.5288466975796,
+      1769.6598173839184,
+      1769.6960751698755,
+      1771.0579810743427
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 254782,
+    "prepare_ns": 1228215,
+    "plan_ns": 22064,
+    "forced_guest_preparation_ns": 280,
+    "warmup_ns_per_op": [
+      6489.9159053156145,
+      6479.413673818408,
+      6485.2212072095435,
+      6505.847757077436,
+      6439.972438967861
+    ],
+    "ns_per_op": [
+      6436.679095448929,
+      6399.946752149877,
+      6441.3500231863145,
+      6488.954812084718,
+      6516.12195058382,
+      6518.262223728107,
+      6501.571612416806
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 248443,
+    "prepare_ns": 1164450,
+    "plan_ns": 20470,
+    "forced_guest_preparation_ns": 151,
+    "warmup_ns_per_op": [
+      6254.548731992797,
+      6201.709207589286,
+      6206.268870383241,
+      6201.828298611111,
+      6217.53260491249
+    ],
+    "ns_per_op": [
+      6243.812999201278,
+      6283.551007335209,
+      6278.564696285141,
+      6283.604350884244,
+      6294.05953099839,
+      6275.93875502008,
+      6256.700035028022
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 277757,
+    "prepare_ns": 811790,
+    "plan_ns": 15653,
+    "forced_guest_preparation_ns": 241,
+    "warmup_ns_per_op": [
+      2530.0387563754857,
+      2491.1621134226048,
+      2329.965073803489,
+      2357.8545038290326,
+      2367.783416193182
+    ],
+    "ns_per_op": [
+      2363.0379545282735,
+      2362.552218778349,
+      2368.844773037284,
+      2378.6466799847794,
+      2381.831077605913,
+      2387.8418112011004,
+      2386.6393221212584
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 262194,
+    "prepare_ns": 828434,
+    "plan_ns": 16555,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      2521.703841072293,
+      2465.782302844406,
+      2469.3458907830277,
+      2480.598011589141,
+      2503.2917234059596
+    ],
+    "ns_per_op": [
+      2508.382338483146,
+      2521.6284033155857,
+      2513.214005709231,
+      2508.55158005618,
+      2505.137078190125,
+      2498.52675787496,
+      2485.1421855120866
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 250546,
+    "prepare_ns": 600362,
+    "plan_ns": 10055,
+    "forced_guest_preparation_ns": 150,
+    "warmup_ns_per_op": [
+      85.76248404824634,
+      80.03789511310259,
+      79.86522933353098,
+      79.88559901811415,
+      79.90843428929051
+    ],
+    "ns_per_op": [
+      79.9081681054322,
+      80.17310356505142,
+      79.97584495859182,
+      79.99761113173254,
+      80.0374407085267,
+      80.11771731717822,
+      80.01708786333934
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 281273,
+    "prepare_ns": 607302,
+    "plan_ns": 9714,
+    "forced_guest_preparation_ns": 251,
+    "warmup_ns_per_op": [
+      86.01013266176754,
+      82.93237329955893,
+      82.80387970723216,
+      82.78446856257682,
+      79.00097881895815
+    ],
+    "ns_per_op": [
+      79.0062722796683,
+      79.03798276341747,
+      79.67315917017653,
+      79.10177654759735,
+      79.08329495186712,
+      79.02749401925975,
+      79.19490116573746
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 262855,
+    "prepare_ns": 817088,
+    "plan_ns": 16335,
+    "forced_guest_preparation_ns": 430,
+    "warmup_ns_per_op": [
+      2544.5351581582804,
+      2487.753905628085,
+      2499.973214285714,
+      2478.0860564343484,
+      2480.9238420781076
+    ],
+    "ns_per_op": [
+      2479.2127468670687,
+      2476.0219373811788,
+      2359.3138445425725,
+      2373.641431880316,
+      2399.7837357954545,
+      2401.447362861094,
+      2389.4137184633028
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 251899,
+    "prepare_ns": 799340,
+    "plan_ns": 16074,
+    "forced_guest_preparation_ns": 411,
+    "warmup_ns_per_op": [
+      2590.66880284317,
+      2468.50535150079,
+      2424.279029630779,
+      2439.370509580862,
+      2490.4135707171313
+    ],
+    "ns_per_op": [
+      2496.2459514776356,
+      2506.611099414501,
+      2515.021363051175,
+      2515.4319160495816,
+      2506.0971626443234,
+      2494.005560764443,
+      2496.1445037939297
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 377347,
+    "prepare_ns": 65909,
+    "plan_ns": 48844,
+    "forced_guest_preparation_ns": 311,
+    "warmup_ns_per_op": [
+      154.67124827387374,
+      150.77776720664866,
+      151.09009123346485,
+      151.18323922734925,
+      151.0969453805688
+    ],
+    "ns_per_op": [
+      150.969208040252,
+      152.21361858512256,
+      152.60973179926944,
+      159.64463493879887,
+      155.7617107283131,
+      155.9256620472009,
+      156.0494123264756
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 355114,
+    "prepare_ns": 64507,
+    "plan_ns": 44807,
+    "forced_guest_preparation_ns": 240,
+    "warmup_ns_per_op": [
+      167.24873493427813,
+      159.10432523903592,
+      158.3244154676259,
+      150.62800425732408,
+      150.46313311289686
+    ],
+    "ns_per_op": [
+      150.49074852159342,
+      151.00169513945264,
+      153.49907226850306,
+      150.41991262418654,
+      150.91584780897466,
+      150.922056405266,
+      151.07676472792141
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 385119,
+    "prepare_ns": 64116,
+    "plan_ns": 28363,
+    "forced_guest_preparation_ns": 48305267,
+    "warmup_ns_per_op": [
+      1109.226222536736,
+      1081.5972855523637,
+      1087.378200026096,
+      1037.557885126162,
+      986.7615024076413
+    ],
+    "ns_per_op": [
+      992.8167149777637,
+      994.8708932891889,
+      994.3440085274277,
+      994.5995743157225,
+      994.5175880696283,
+      995.2089654705808,
+      994.1014740265937
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 350657,
+    "prepare_ns": 64347,
+    "plan_ns": 28953,
+    "forced_guest_preparation_ns": 48867461,
+    "warmup_ns_per_op": [
+      1104.89815796917,
+      1066.147753053357,
+      1060.0519462347354,
+      1039.134772768837,
+      1027.9464087477797
+    ],
+    "ns_per_op": [
+      1029.9052180826523,
+      1030.7943127473616,
+      1029.6150974400368,
+      1000.2120267091282,
+      975.8642209748938,
+      970.9502939760159,
+      972.0017825485195
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 364177,
+    "prepare_ns": 63325,
+    "plan_ns": 47692,
+    "forced_guest_preparation_ns": 61144564,
+    "warmup_ns_per_op": [
+      89.74073392710481,
+      87.29495617098067,
+      87.61289755077323,
+      88.35093282448035,
+      88.37629134568614
+    ],
+    "ns_per_op": [
+      89.90624029022867,
+      91.2241707024089,
+      90.61046413431762,
+      89.11382016448232,
+      88.0219046103406,
+      87.81970452642169,
+      82.15346402883371
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 351789,
+    "prepare_ns": 63836,
+    "plan_ns": 44156,
+    "forced_guest_preparation_ns": 62282464,
+    "warmup_ns_per_op": [
+      93.18940925627722,
+      88.49343591950931,
+      87.82744319682867,
+      90.61187416274741,
+      88.92133782893613
+    ],
+    "ns_per_op": [
+      91.3745389254386,
+      91.29561056074274,
+      91.28552467458871,
+      91.3635495360246,
+      88.16009462665599,
+      87.94857826941045,
+      87.94456875809084
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 342004,
+    "prepare_ns": 45558,
+    "plan_ns": 42714,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      5134.781470793625,
+      5019.596515619981,
+      5019.429072638934,
+      5022.711341811315,
+      5033.875689634343
+    ],
+    "ns_per_op": [
+      4996.572570332481,
+      4997.787034446931,
+      5002.418123799616,
+      4994.022913338658,
+      5013.739967527261,
+      5009.922365785256,
+      5004.678937259923
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 340912,
+    "prepare_ns": 48093,
+    "plan_ns": 38377,
+    "forced_guest_preparation_ns": 391,
+    "warmup_ns_per_op": [
+      5405.506836950882,
+      5107.408016748366,
+      4999.632082733525,
+      5002.23838128201,
+      4987.3388824609
+    ],
+    "ns_per_op": [
+      4980.824699251115,
+      4978.468909235668,
+      4972.677103212468,
+      4974.708843889242,
+      4985.948727664327,
+      5012.301675753688,
+      4997.852641464195
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 354242,
+    "prepare_ns": 65929,
+    "plan_ns": 48052,
+    "forced_guest_preparation_ns": 63080032,
+    "warmup_ns_per_op": [
+      89.69210270553017,
+      87.54120059891981,
+      85.2663971691678,
+      82.48250925449362,
+      82.62908045190615
+    ],
+    "ns_per_op": [
+      82.75547375668661,
+      82.80113013099742,
+      82.8250187514577,
+      82.7778122682242,
+      82.78313644382987,
+      82.80521629366812,
+      82.83273114205286
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 368925,
+    "prepare_ns": 64056,
+    "plan_ns": 45428,
+    "forced_guest_preparation_ns": 58433441,
+    "warmup_ns_per_op": [
+      91.50089103236046,
+      89.07189463134402,
+      89.24633163504267,
+      88.91067346320395,
+      88.8679903759747
+    ],
+    "ns_per_op": [
+      88.84870541248252,
+      88.93823178263246,
+      88.98135535307517,
+      88.9603221681033,
+      88.96368104267967,
+      89.06830170354789,
+      85.70028027336251
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 55,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 371728,
+    "prepare_ns": 45839,
+    "plan_ns": 43085,
+    "forced_guest_preparation_ns": 53080870,
+    "warmup_ns_per_op": [
+      1869.9938405038297,
+      1787.9726119979402,
+      1783.5549077588175,
+      1785.2725208499942,
+      1788.3926977223302
+    ],
+    "ns_per_op": [
+      1788.9770203754579,
+      1789.0066979619876,
+      1789.5662398362344,
+      1791.6190237330889,
+      1791.7461627207063,
+      1792.7907045949978,
+      1790.4164327451879
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 349996,
+    "prepare_ns": 46830,
+    "plan_ns": 42063,
+    "forced_guest_preparation_ns": 53597436,
+    "warmup_ns_per_op": [
+      1930.365783276714,
+      1872.7206918893817,
+      1870.069433640498,
+      1869.1649689742824,
+      1868.5306427866794
+    ],
+    "ns_per_op": [
+      1866.8196572580646,
+      1863.1216879768717,
+      1870.472595463251,
+      1875.3623004680749,
+      1866.6019469660773,
+      1862.4311844613917,
+      1860.773390985949
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 269245,
+    "prepare_ns": 724388,
+    "plan_ns": 18217,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      12050.61237471087,
+      11783.469350508667,
+      11784.342041383861,
+      11789.580399227,
+      11816.340750188965
+    ],
+    "ns_per_op": [
+      11859.458175265554,
+      11863.706562974203,
+      11856.518920713203,
+      11861.116582890743,
+      11859.461968892261,
+      11867.6749573217,
+      11866.718228376329
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 313160,
+    "prepare_ns": 858530,
+    "plan_ns": 18218,
+    "forced_guest_preparation_ns": 401,
+    "warmup_ns_per_op": [
+      12652.609501518218,
+      12091.572590390564,
+      11711.826661985018,
+      11735.851844031531,
+      11793.588490566037
+    ],
+    "ns_per_op": [
+      11759.51877349624,
+      11810.93724037009,
+      11836.720688350983,
+      11872.862196509863,
+      11896.757087138509,
+      11881.114789133739,
+      11871.366440629741
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 360331,
+    "prepare_ns": 89284,
+    "plan_ns": 48553,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      347.9553313449205,
+      322.67129322495043,
+      323.31929226933187,
+      323.42746314245204,
+      323.5068178818402
+    ],
+    "ns_per_op": [
+      323.3480394058853,
+      322.8151947669614,
+      324.19106796443833,
+      324.08863802526236,
+      323.93009241023304,
+      324.36260755729467,
+      323.5590023968773
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 389766,
+    "prepare_ns": 87792,
+    "plan_ns": 54171,
+    "forced_guest_preparation_ns": 270,
+    "warmup_ns_per_op": [
+      355.03670011077025,
+      346.65176962007763,
+      347.3574395466065,
+      346.9763924820128,
+      347.4544609600845
+    ],
+    "ns_per_op": [
+      347.132016184573,
+      346.8595803365299,
+      347.7792154947917,
+      337.25400236337737,
+      327.5024647610564,
+      329.64678797468355,
+      324.8536168139293
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 68,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 265950,
+    "prepare_ns": 2818764,
+    "plan_ns": 10686,
+    "forced_guest_preparation_ns": 140,
+    "warmup_ns_per_op": [
+      1646.422146638921,
+      1622.3165652252908,
+      1628.7331975062539,
+      1645.7555621379674,
+      1646.9392933837478
+    ],
+    "ns_per_op": [
+      1644.997414473684,
+      1656.158147652607,
+      1653.476755952381,
+      1653.9667985287892,
+      1675.0721182193397,
+      1678.8989612430169,
+      1668.6259377669799
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "optimizer-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 245719,
+    "prepare_ns": 2433676,
+    "plan_ns": 6630,
+    "forced_guest_preparation_ns": 290,
+    "warmup_ns_per_op": [
+      1542.1471282199961,
+      1519.9196378635347,
+      1522.2814844130542,
+      1528.9431002323875,
+      1539.3094384173974
+    ],
+    "ns_per_op": [
+      1534.399689463865,
+      1530.3749051175319,
+      1547.9983034475927,
+      1551.0751036082986,
+      1548.447300460761,
+      1564.3313031781781,
+      1571.6766998591834
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 358428,
+    "prepare_ns": 61512,
+    "plan_ns": 30286,
+    "forced_guest_preparation_ns": 48874049,
+    "warmup_ns_per_op": [
+      1094.2462535014006,
+      1055.3561826708767,
+      1052.1099578339617,
+      1036.6369864575731,
+      1025.5266425887642
+    ],
+    "ns_per_op": [
+      1026.6398940538766,
+      1026.2148817146046,
+      1030.370561618093,
+      1027.2047807651854,
+      992.5955882352941,
+      974.818438084841,
+      976.59894140625
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 376676,
+    "prepare_ns": 62935,
+    "plan_ns": 28963,
+    "forced_guest_preparation_ns": 48545796,
+    "warmup_ns_per_op": [
+      1109.9775531452015,
+      1075.5236461488162,
+      1071.553765987176,
+      1040.8154328748417,
+      1027.6965138697053
+    ],
+    "ns_per_op": [
+      1029.8247104422037,
+      1028.5078988941548,
+      1028.535320810295,
+      1028.779266526205,
+      1028.830824499605,
+      1026.5601001018263,
+      1026.9834097331757
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 337557,
+    "prepare_ns": 25408,
+    "plan_ns": 20070,
+    "forced_guest_preparation_ns": 10469437,
+    "warmup_ns_per_op": [
+      23.878023814581397,
+      23.58494901973437,
+      23.4833959071651,
+      23.475251912762264,
+      23.582380157183156
+    ],
+    "ns_per_op": [
+      23.479126063508474,
+      23.482499408241782,
+      23.478900760640247,
+      23.474505148238624,
+      23.467548697909628,
+      23.489615388807376,
+      23.471781845337347
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 367743,
+    "prepare_ns": 28032,
+    "plan_ns": 21402,
+    "forced_guest_preparation_ns": 9394372,
+    "warmup_ns_per_op": [
+      25.4904953146463,
+      24.920556753624044,
+      24.92170294067921,
+      24.855229549735064,
+      24.890568000614895
+    ],
+    "ns_per_op": [
+      24.908650240158522,
+      24.911464112786224,
+      24.99053850293808,
+      24.946683319735733,
+      24.988587572326903,
+      24.952369842652597,
+      24.991980991743468
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 357347,
+    "prepare_ns": 26720,
+    "plan_ns": 19920,
+    "forced_guest_preparation_ns": 12207789,
+    "warmup_ns_per_op": [
+      18.445756369093083,
+      18.051723310042295,
+      18.08945377802849,
+      18.0083882816786,
+      18.005306738303755
+    ],
+    "ns_per_op": [
+      17.999947692267817,
+      18.00518152962759,
+      18.01143183735905,
+      18.013086130690112,
+      18.006183607641763,
+      18.038211296117144,
+      18.005407376848936
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 389305,
+    "prepare_ns": 28914,
+    "plan_ns": 20801,
+    "forced_guest_preparation_ns": 12335430,
+    "warmup_ns_per_op": [
+      19.354402448408912,
+      18.93420861396319,
+      18.907247545991485,
+      18.542611888301725,
+      18.068743394075078
+    ],
+    "ns_per_op": [
+      18.127064125922885,
+      18.116659690562432,
+      18.177497476965495,
+      18.128245132066233,
+      18.127659141719185,
+      18.13258974161841,
+      18.133543933598247
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 252680,
+    "prepare_ns": 591949,
+    "plan_ns": 9725,
+    "forced_guest_preparation_ns": 280,
+    "warmup_ns_per_op": [
+      84.8163679555102,
+      82.4057032391317,
+      82.10993819103598,
+      82.13412680760416,
+      82.18516257824005
+    ],
+    "ns_per_op": [
+      82.1566247975666,
+      82.2361052449448,
+      82.23723618421053,
+      82.23259351481501,
+      82.20484355599865,
+      82.26300311940612,
+      79.40762104868628
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 259791,
+    "prepare_ns": 629085,
+    "plan_ns": 9834,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      86.60567790204306,
+      83.15839614545358,
+      91.15020539709253,
+      85.66975956345573,
+      82.7318607073079
+    ],
+    "ns_per_op": [
+      84.1529478413779,
+      85.34137736222623,
+      83.23447021957767,
+      83.37982184118124,
+      83.28257034981026,
+      82.73000240247157,
+      82.83744164979007
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 250316,
+    "prepare_ns": 573701,
+    "plan_ns": 9325,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      1219.97477528693,
+      1219.2713502652934,
+      1234.0628430540198,
+      1242.4475091444021,
+      1270.632214079525
+    ],
+    "ns_per_op": [
+      1266.8289965745096,
+      1262.6315626010019,
+      1261.12329751816,
+      1287.7710591107632,
+      1290.7913766933752,
+      1292.3668282748924,
+      1293.7549314870012
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 279590,
+    "prepare_ns": 606311,
+    "plan_ns": 9264,
+    "forced_guest_preparation_ns": 250,
+    "warmup_ns_per_op": [
+      1319.3182267920465,
+      1360.7962123356265,
+      1366.7641162096563,
+      1363.7009676645139,
+      1363.7518136891256
+    ],
+    "ns_per_op": [
+      1359.0617118194468,
+      1363.8182301666957,
+      1386.1469254479332,
+      1387.2670260342684,
+      1383.7275283386468,
+      1387.5348406144558,
+      1390.5520471836626
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 2
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 253411,
+    "prepare_ns": 1400894,
+    "plan_ns": 14912,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      2310.773414392931,
+      2290.5195621701846,
+      2290.262863201671,
+      2298.4902223080317,
+      2326.3170570008933
+    ],
+    "ns_per_op": [
+      2323.276473758549,
+      2328.7107768256333,
+      2329.4387252161596,
+      2330.6689019161945,
+      2332.144333022388,
+      2333.7709033378137,
+      2344.5008860261028
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 253280,
+    "prepare_ns": 1443038,
+    "plan_ns": 14933,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      2257.102549924166,
+      2222.1179118671785,
+      2217.1862784655223,
+      2243.318933031869,
+      2221.239914267946
+    ],
+    "ns_per_op": [
+      2225.3794013457705,
+      2232.1828973214288,
+      2254.4493923110213,
+      2254.1695623557416,
+      2262.188771171106,
+      2248.3015692446043,
+      2242.5431212327785
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 356335,
+    "prepare_ns": 47862,
+    "plan_ns": 41212,
+    "forced_guest_preparation_ns": 52960445,
+    "warmup_ns_per_op": [
+      1950.8384968008738,
+      1911.0661420753333,
+      1838.2432830882353,
+      1792.8601315110143,
+      1795.9558779163315
+    ],
+    "ns_per_op": [
+      1800.8431342187139,
+      1796.277047413793,
+      1798.8773493265023,
+      1798.1257875431531,
+      1798.8614072571363,
+      1798.4394742520137,
+      1800.057673203179
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 396726,
+    "prepare_ns": 51847,
+    "plan_ns": 42955,
+    "forced_guest_preparation_ns": 53730973,
+    "warmup_ns_per_op": [
+      1927.9756072640346,
+      1875.6480427019565,
+      1872.485045311564,
+      1872.6727907029003,
+      1872.8922037935995
+    ],
+    "ns_per_op": [
+      1871.7295010781024,
+      1871.7358386739338,
+      1867.9605172722927,
+      1878.504230283722,
+      1880.7880619583534,
+      1883.3069414316703,
+      1876.0354404261705
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 17,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 357307,
+    "prepare_ns": 63165,
+    "plan_ns": 28483,
+    "forced_guest_preparation_ns": 54194299,
+    "warmup_ns_per_op": [
+      1025.990299778398,
+      995.2838544984077,
+      994.4642102771767,
+      983.1336835047816,
+      990.2834453625071
+    ],
+    "ns_per_op": [
+      992.5849935681616,
+      989.3956268994555,
+      978.2365817109052,
+      983.4523402095922,
+      995.1196901668577,
+      997.8175307311622,
+      991.5408530298223
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-jit",
+    "workload": "map-regex",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 392830,
+    "prepare_ns": 64838,
+    "plan_ns": 28392,
+    "forced_guest_preparation_ns": 49693959,
+    "warmup_ns_per_op": [
+      1092.939784133035,
+      1058.973098102338,
+      1050.847018124958,
+      1030.788692979418,
+      1028.7587131312134
+    ],
+    "ns_per_op": [
+      1033.6315588206112,
+      1029.7430967444313,
+      1025.1102195945946,
+      1026.1874835828737,
+      1031.9385215790517,
+      1035.3243771534587,
+      1029.9267379877406
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 1,
+      "accelerated_nodes": 1,
+      "ast_nodes": 18,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 1,
+      "regex_execution": "truffle-regex-re2"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 392990,
+    "prepare_ns": 29334,
+    "plan_ns": 23285,
+    "forced_guest_preparation_ns": 271,
+    "warmup_ns_per_op": [
+      34.14395037689403,
+      33.4793072795137,
+      33.415429205900786,
+      33.33321947826356,
+      33.341388464045735
+    ],
+    "ns_per_op": [
+      34.238770896515,
+      35.51356386968321,
+      35.33240776858196,
+      35.351417700999114,
+      35.297471948503166,
+      35.28005732570007,
+      35.29018313898337
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "truffle-interpreter",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 371017,
+    "prepare_ns": 27312,
+    "plan_ns": 21752,
+    "forced_guest_preparation_ns": 260,
+    "warmup_ns_per_op": [
+      34.16292412510276,
+      33.40922715775114,
+      33.27528301279048,
+      33.27416021414699,
+      33.29397659837419
+    ],
+    "ns_per_op": [
+      33.26642252721985,
+      33.28005132299756,
+      33.275710795379524,
+      33.283232946751134,
+      33.26447212393714,
+      33.28238219910622,
+      33.280278150812144
+    ],
+    "regex_path": {
+      "backend": "truffle-regex-re2",
+      "match_nodes": 0,
+      "accelerated_nodes": 0,
+      "ast_nodes": 3,
+      "regex_policy": "compatibility",
+      "scoped_regexes": 0,
+      "regex_execution": "none"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 262615,
+    "prepare_ns": 660602,
+    "plan_ns": 8563,
+    "forced_guest_preparation_ns": 150,
+    "warmup_ns_per_op": [
+      1191.2650020012197,
+      1142.1222075780279,
+      1142.2572162828947,
+      1143.2891922605547,
+      1139.4818705334353
+    ],
+    "ns_per_op": [
+      1139.861777793989,
+      1142.4436184018132,
+      1142.0763366101446,
+      1140.7319567637612,
+      1140.3070545096323,
+      1141.0823490214693,
+      1142.706811284189
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar-wide",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 277967,
+    "prepare_ns": 637888,
+    "plan_ns": 8603,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      1258.599202074104,
+      1246.296552231217,
+      1249.2503085525263,
+      1249.1694667339516,
+      1260.4501832600629
+    ],
+    "ns_per_op": [
+      1263.4188076083442,
+      1261.6563206442759,
+      1260.091083669355,
+      1259.1787444601127,
+      1262.866969048004,
+      1264.6540572393978,
+      1264.196249089953
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 250126,
+    "prepare_ns": 1368525,
+    "plan_ns": 15073,
+    "forced_guest_preparation_ns": 140,
+    "warmup_ns_per_op": [
+      2280.008551119784,
+      2251.3473247730876,
+      2250.2049228650635,
+      2253.9752677412375,
+      2257.10125442366
+    ],
+    "ns_per_op": [
+      2260.6122594762733,
+      2256.520768661565,
+      2260.010255459936,
+      2263.0732153200115,
+      2274.6206058951966,
+      2272.148657858389,
+      2274.227076360594
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "proto-policy",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 274743,
+    "prepare_ns": 1509918,
+    "plan_ns": 15734,
+    "forced_guest_preparation_ns": 310,
+    "warmup_ns_per_op": [
+      2425.349567844948,
+      2382.921908356206,
+      2363.7401679019817,
+      2362.8366947678815,
+      2366.0921458585703
+    ],
+    "ns_per_op": [
+      2366.9885688049076,
+      2370.46560698574,
+      2367.4314204545453,
+      2372.0561295157863,
+      2373.1999924058323,
+      2395.823223321067,
+      2372.5478856665654
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 1
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 250226,
+    "prepare_ns": 601924,
+    "plan_ns": 7391,
+    "forced_guest_preparation_ns": 281,
+    "warmup_ns_per_op": [
+      79.68974222929725,
+      77.8460030945311,
+      77.98849363117728,
+      77.99453329735194,
+      77.98218480026651
+    ],
+    "ns_per_op": [
+      78.01935102635416,
+      77.99107956190353,
+      77.99193145346457,
+      77.98028869427864,
+      78.04133863552363,
+      78.00320028804776,
+      78.0337946789756
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java-optimized",
+    "workload": "scalar",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 246410,
+    "prepare_ns": 637667,
+    "plan_ns": 8393,
+    "forced_guest_preparation_ns": 130,
+    "warmup_ns_per_op": [
+      83.31283549923486,
+      81.32224947238169,
+      80.71004941049614,
+      77.88837917106994,
+      77.9252955232329
+    ],
+    "ns_per_op": [
+      77.91869093776492,
+      78.52688284006273,
+      77.96771973738049,
+      77.9752449647181,
+      77.95994273390413,
+      78.00292525110576,
+      77.97446984100844
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 255053,
+    "prepare_ns": 732240,
+    "plan_ns": 17656,
+    "forced_guest_preparation_ns": 261,
+    "warmup_ns_per_op": [
+      12663.119124797407,
+      12383.134087757528,
+      12443.195063694267,
+      12466.245003488835,
+      12021.71251201923
+    ],
+    "ns_per_op": [
+      11813.03490842145,
+      11824.525765885022,
+      11867.69726858877,
+      11859.111722306525,
+      11890.175484422492,
+      11891.382800608828,
+      11886.751377279636
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "shared-compiler",
+    "fork": 0
+  },
+  {
+    "engine": "cel-java",
+    "workload": "proto-repeated",
+    "mode": "steady",
+    "runtime": "svm",
+    "image_prepared": false,
+    "configure_ns": 288864,
+    "prepare_ns": 714103,
+    "plan_ns": 17967,
+    "forced_guest_preparation_ns": 231,
+    "warmup_ns_per_op": [
+      12115.160271317829,
+      11770.65368505271,
+      11798.075412735849,
+      11810.838766061981,
+      11734.664449605856
+    ],
+    "ns_per_op": [
+      11852.284114583334,
+      11928.423640267176,
+      11908.714017313547,
+      11914.683665205792,
+      11915.568907202744,
+      11914.215415396342,
+      11933.323377862596
+    ],
+    "regex_path": {
+      "backend": "cel-java"
+    },
+    "profile": "default",
+    "fork": 0
+  }
+]
