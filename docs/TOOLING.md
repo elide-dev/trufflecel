@@ -102,7 +102,7 @@ budgets and cancellation remain necessary independently of static estimation.
 
 `//tools/fuzz:regression` exercises the seed corpus and deterministic mutations.
 On Linux x86-64, `//tools/fuzz:smoke` runs Jazzer against parsing, checking,
-canonical AST imports, JSON and YAML decoding. It requires nonzero instrumented
+canonical AST imports, JSON and YAML decoding, and bounded evaluator oracles. It requires nonzero instrumented
 coverage and preserves its coverage report, log and findings as test outputs.
 For a longer campaign use `--test_env=TRUFFLECEL_FUZZ_RUNS=100000`.
 Jazzer is an isolated test-only Maven resolution and is absent from publications.
