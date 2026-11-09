@@ -297,6 +297,27 @@ public class ReproLeakTest {
     }
   }
 
+  /**
+   * Exercises the defensive no-op branches of {@link EvalContext#clearReentrant}: clearing a node
+   * before any re-entrant push has initialized the per-context depth map (writeDepths still null),
+   * and clearing a node that never pushed when the map already holds an entry for a different node
+   * (holder == null). Both paths must leave the scope stack untouched.
+   */
+  @Test
+  public void clearReentrantNoOpsWhenNoPushRecorded() {
+    var ctx = new EvalContext.Scoped(Cel.newBuilder().build(), Map.of());
+    var nodeA = new WriteNode();
+    var nodeB = new WriteNode();
+    // No pushes yet: writeDepths is null; clearReentrant returns without touching the stack.
+    ctx.clearReentrant(nodeA);
+    // A push for nodeA initializes the depth map; clearing an unrelated nodeB finds no entry and
+    // must skip the unwind (holder == null branch).
+    ctx.pushReentrant(nodeA, "a", 1L);
+    ctx.clearReentrant(nodeB);
+    // Restore the stack by clearing nodeA's recorded push.
+    ctx.clearReentrant(nodeA);
+  }
+
   private static List<Long> evalList(Context context, String expression) throws Exception {
     var value = context.eval(Source.newBuilder("cel", expression, "repro.cel").build());
     var result = new ArrayList<Long>();
