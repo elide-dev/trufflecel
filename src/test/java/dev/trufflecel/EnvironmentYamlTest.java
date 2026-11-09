@@ -263,6 +263,78 @@ public class EnvironmentYamlTest {
   }
 
   @Test
+  public void canonicalOperatorNamesSelectDeclaredOverloads() {
+    var env =
+        EnvironmentYaml.read(
+            """
+        functions:
+              - name: '_+_'
+                overloads:
+                  - id: custom_plus
+                    args: [int, int]
+                    return: bool
+              - name: '!_'
+                overloads:
+                  - id: custom_not
+                    args: [bool]
+                    return: int
+              - name: '@in'
+                overloads:
+                  - id: custom_in
+                    args: [int, list<int>]
+                    return: string
+            """);
+    assertEquals(CelType.BOOL, env.compile("1 + 2").resultType());
+    assertEquals(CelType.INT, env.compile("!true").resultType());
+    assertEquals(CelType.STRING, env.compile("1 in [1]").resultType());
+    assertThrows(CelException.class, () -> env.compile("1 + 2").evaluate(Map.of()));
+    assertThrows(CelException.class, () -> env.compile("!true").evaluate(Map.of()));
+    assertThrows(CelException.class, () -> env.compile("1 in [1]").evaluate(Map.of()));
+    var options =
+        EvaluationOptions.newBuilder()
+            .function("custom_plus", values -> true)
+            .function("custom_not", values -> 7L)
+            .function("custom_in", values -> "yes")
+            .build();
+    assertEquals(true, env.compile("1 + 2").evaluate(Map.of(), options));
+    assertEquals(7L, env.compile("!true").evaluate(Map.of(), options));
+    assertEquals("yes", env.compile("1 in [1]").evaluate(Map.of(), options));
+    var restored = EnvironmentYaml.read(EnvironmentYaml.write(env));
+    assertEquals(true, restored.compile("1 + 2").evaluate(Map.of(), options));
+    assertEquals(7L, restored.compile("!true").evaluate(Map.of(), options));
+    assertEquals("yes", restored.compile("1 in [1]").evaluate(Map.of(), options));
+    var plain =
+        EnvironmentYaml.read(
+            """
+        functions:
+              - name: '+'
+                overloads:
+                  - id: custom_plus
+                    args: [int, int]
+                    return: bool
+              - name: '!'
+                overloads:
+                  - id: custom_not
+                    args: [bool]
+                    return: int
+              - name: in
+                overloads:
+                  - id: custom_in
+                    args: [int, list<int>]
+                    return: string
+            """);
+    assertEquals(CelType.BOOL, plain.compile("1 + 2").resultType());
+    assertEquals(CelType.INT, plain.compile("!true").resultType());
+    assertEquals(CelType.STRING, plain.compile("1 in [1]").resultType());
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            EnvironmentYaml.read(
+                "functions: [{name: '_?_:_', overloads: [{id: ternary, args: [bool, int, int],"
+                    + " return: int}]}]"));
+  }
+
+  @Test
   public void contextFieldsHaveDistinctValidatedDeclarations() {
     ObjectType record =
         new ObjectType() {
