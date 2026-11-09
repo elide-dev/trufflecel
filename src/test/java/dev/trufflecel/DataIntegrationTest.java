@@ -303,4 +303,37 @@ public class DataIntegrationTest {
         type.equal(
             row, type.construct(Map.of("arr", List.of(UInt.parse("4294967296"), new UInt(-1))))));
   }
+
+  @Test
+  public void unsignedArrayElementEdges() {
+    // CelNull list elements thread through to native DataNull on construct and read
+    // back as CEL null identity. The element is nullable so DataNull is permitted.
+    Schema nullableSchema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, true, false))));
+    var nullableType = new DataType("Native", nullableSchema);
+    Object nullRow = nullableType.construct(Map.of("vals", List.of(CelNull.INSTANCE)));
+    assertEquals(CelNull.INSTANCE, ((List<?>) nullableType.get(nullRow, "vals")).get(0));
+
+    // Non-UInt, non-CelNull list items (e.g. Long) pass through unchanged on the
+    // construct path for an INT64 unsigned element and read back as UInt.
+    Schema int64Schema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 32, false, false, false))));
+    var int64Type = new DataType("Native", int64Schema);
+    Object longRow = int64Type.construct(Map.of("vals", List.of(UInt.parse("0"), 9L)));
+    var longRead = (List<?>) int64Type.get(longRow, "vals");
+    assertEquals(new UInt(0), longRead.get(0));
+    assertEquals(new UInt(9L), longRead.get(1));
+  }
 }
