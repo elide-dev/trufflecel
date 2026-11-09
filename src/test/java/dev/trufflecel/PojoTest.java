@@ -225,4 +225,49 @@ public final class PojoTest {
         CelException.class,
         () -> userType.construct(Map.of("groups", Collections.singletonMap(null, List.of(1)))));
   }
+
+  @Test
+  public void pojoSnapshotEqualityPreservesIeeeNanSemantics() {
+    var type = PojoFixtures_ScalarsCel.INSTANCE;
+    var environment =
+        type.register(Cel.newBuilder())
+            .variable("a", CelType.of(type.name()))
+            .variable("b", CelType.of(type.name()))
+            .build();
+    var nanA = type.construct(Map.of("f", Double.NaN));
+    var nanB = type.construct(Map.of("f", Double.NaN));
+    var nanBoxedA = type.construct(Map.of("n", Double.NaN));
+    var nanBoxedB = type.construct(Map.of("n", Double.NaN));
+    var finiteA = type.construct(Map.of("f", 1.5));
+    var finiteB = type.construct(Map.of("f", 1.5));
+    var different = type.construct(Map.of("f", 2.5));
+    var nanBindings = Map.<String, Object>of("a", nanA, "b", nanB);
+
+    // Whole-snapshot == must be false for NaN-containing POJOs (IEEE/CEL semantics).
+    assertFalse(environment.compile("a == b").test(nanBindings));
+    assertTrue(environment.compile("a != b").test(nanBindings));
+    // List membership must also be false: Values.equal routes PojoType.Value pairs field-wise.
+    assertFalse(environment.compile("a in [b]").test(nanBindings));
+    // Field-level comparison bypasses adapter dispatch and is already IEEE-correct.
+    assertFalse(environment.compile("a.f == b.f").test(nanBindings));
+    // Boxed Double fields with NaN are also IEEE-unequal at the snapshot level.
+    assertFalse(type.equal(nanBoxedA, nanBoxedB));
+    assertFalse(Values.equal(nanBoxedA, nanBoxedB));
+    // Non-NaN snapshots compare equal.
+    assertTrue(environment.compile("a == b").test(Map.of("a", finiteA, "b", finiteB)));
+    assertTrue(environment.compile("a in [b]").test(Map.of("a", finiteA, "b", finiteB)));
+    assertTrue(type.equal(finiteA, finiteB));
+    assertTrue(Values.equal(finiteA, finiteB));
+    // Distinct non-NaN snapshots compare unequal.
+    assertFalse(environment.compile("a == b").test(Map.of("a", finiteA, "b", different)));
+    assertFalse(type.equal(finiteA, different));
+    assertFalse(Values.equal(finiteA, different));
+    // Direct adapter equal() is IEEE-safe.
+    assertFalse(type.equal(nanA, nanB));
+    // Direct Values.equal() is IEEE-safe for POJO snapshot pairs.
+    assertFalse(Values.equal(nanA, nanB));
+    // Host-side Value.equals retains Java equality (NaN-reflexive), unchanged by the fix.
+    assertEquals(nanA, nanB);
+    assertEquals(nanA.hashCode(), nanB.hashCode());
+  }
 }
