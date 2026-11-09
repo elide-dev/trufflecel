@@ -19,6 +19,7 @@ from evaluation_refresh import (ENGINES, WORKLOADS, NATIVE_FLAGS, fixed_memory,
 PROFILES = {
     'default': [],
     'shared-compiler': ['-XX:-CompileInIsolates'],
+    'young-32m': ['-XX:MaxNewSize=32m'],
     'shared-free-32m': ['-XX:-CompileInIsolates', '-XX:MaxHeapFree=32m'],
     'shared-young-32m': ['-XX:-CompileInIsolates', '-XX:MaxNewSize=32m'],
 }
