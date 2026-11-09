@@ -2,8 +2,9 @@
 
 TruffleCEL's registered project is
 [16472](https://www.bestpractices.dev/en/projects/16472). The saved assessment on
-that service determines the badge. Repository evidence is a proposed assessment,
-not a certificate and not a substitute for saving reviewed answers.
+that service determines the badge. The owner reviewed and saved all three sections
+on November 9, 2026; the public service then reported **Passing, 100%**. The
+[retained response](security/best-practices-20261109-passing.json) records that result.
 
 The November 9, 2026 review covers all **67 Passing criteria** in the
 [official criteria](https://www.bestpractices.dev/en/criteria/0).
@@ -11,10 +12,10 @@ The November 9, 2026 review covers all **67 Passing criteria** in the
 justification for each: 54 Met, 12 Not Applicable, and one Unmet suggested item.
 The suggested `warnings_strict` item remains Unmet because we do not globally
 enable every javac warning or fail on all warnings from pinned upstream sources.
-It is not a required Passing criterion. These are proposed answers until the
-project owner reviews and saves them.
+It is not a required Passing criterion. All saved statuses match the repository
+assessment as of the recorded review.
 
-## Save the assessment
+## Maintain the assessment
 
 ```sh
 python3 tools/best-practices.py
@@ -28,7 +29,7 @@ the service's documented proposal interface and never handles credentials or
 submits answers. Existing answers are not forcibly replaced. The service can
 also read `.bestpractices.json` from main after this change lands.
 
-After saving all sections, check the public project page for the attained tier
+After future updates, check the public project page for the attained tier
 and any remaining criterion. Never replace the live badge with a static Passing
 image before the service awards it. Revisit the assessment after material changes,
 new reports, new vulnerabilities and releases.

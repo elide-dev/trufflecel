@@ -71,10 +71,10 @@ and licensing contracts.
 evidence-based badge requiring passing and silver first. This project does not yet
 claim that badge. CI configuration alone cannot establish it.
 
-The [Passing assessment](BEST_PRACTICES.md) is prepared for registered project 16472.
+Project 16472 earned [Passing](BEST_PRACTICES.md) on November 9, 2026.
 Track these stronger-tier and supply-chain follow-ups separately:
 
-- Save the reviewed Passing assessment; complete separate Silver/Gold assessments.
+- Keep the Passing assessment current; complete separate Silver/Gold assessments.
 - Verify organization-enforced 2FA and demonstrate two independent significant
   contributors and a bus factor of at least two; CODEOWNERS alone does not prove either.
 - Establish and retain independent review evidence for releases; document any emergency bypass.
