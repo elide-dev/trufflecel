@@ -642,7 +642,8 @@ public final class Environment {
 
     /**
      * Register a fixed-arity or variadic compile-time macro. Exact signatures win over variadic
-     * ones.
+     * ones. A custom macro whose name, receiver style and arity match an enabled standard macro is
+     * rejected so that built-in expansions cannot be silently shadowed.
      */
     public Builder macro(Macro macro) {
       Objects.requireNonNull(macro);
@@ -653,6 +654,10 @@ public final class Environment {
                 || existing.variadic() == macro.variadic()
                     && existing.argumentCount() == macro.argumentCount()))
           throw new IllegalArgumentException("duplicate macro signature");
+      for (String standard : standardMacros)
+        if (Macro.shadows(standard, macro))
+          throw new IllegalArgumentException(
+              "macro conflicts with standard macro: " + macro.name());
       customMacros.add(macro);
       return this;
     }
