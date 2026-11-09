@@ -142,6 +142,41 @@ public final class TimestampOverflowTest {
     assertEquals(CelException.Code.OVERFLOW, e.code());
   }
 
+  @Test
+  public void constructArithmeticOverflowBecomesCelException() {
+    var type =
+        new ObjectType() {
+          public String name() {
+            return "test.Overflowing";
+          }
+
+          public Map<String, CelType> fields() {
+            return Map.of("value", CelType.INT);
+          }
+
+          public Object construct(Map<String, Object> values) {
+            throw new ArithmeticException();
+          }
+
+          public Object get(Object value, String field) {
+            throw Values.overload("test field selection");
+          }
+
+          public boolean has(Object value, String field) {
+            return false;
+          }
+
+          public boolean accepts(Object value) {
+            return false;
+          }
+        };
+    var env = Cel.newBuilder().objectType(type).build();
+    CelException e =
+        assertThrows(
+            CelException.class, () -> env.compile("test.Overflowing{value: 1}").evaluate(Map.of()));
+    assertEquals(CelException.Code.OVERFLOW, e.code());
+  }
+
   private static Descriptor mappedDescriptor() throws Exception {
     var root = DescriptorProto.newBuilder().setName("Record");
     root.addField(
