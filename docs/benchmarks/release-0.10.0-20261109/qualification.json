@@ -1,0 +1,30 @@
+{
+  "source": "cf0d51d85cd6041a93e2aed6178f88a0c3cdaa73",
+  "equivalent_adoption_main": "41d54e4ca797b79304f21302105dae6597faf001",
+  "truffledata_release": "https://github.com/elide-dev/truffledata/releases/tag/v0.10.0",
+  "pr": "https://github.com/elide-dev/trufflecel/pull/66",
+  "ci": "https://github.com/elide-dev/trufflecel/actions/runs/42542038742",
+  "qualification": {
+    "targets_passed": 75,
+    "url": "https://app.buildbuddy.io/invocation/827f1d4b-08c0-435c-a4e9-7fd822e2c106"
+  },
+  "artifact_build": "https://app.buildbuddy.io/invocation/bfbb824f-a2f5-4938-8847-cce4aa9fc6ce",
+  "staging": {
+    "version": "0.10.0",
+    "targets_passed": 72,
+    "url": "https://app.buildbuddy.io/invocation/d320a4e5-3951-4e6f-9815-52dee22369a2"
+  },
+  "coverage": {
+    "covered_lines": 8267,
+    "total_lines": 8283,
+    "covered_branches": 7557,
+    "total_branches": 7572,
+    "required_percent": 99.8
+  },
+  "codspeed": {
+    "unchanged_benchmarks": 21,
+    "baseline": "92a0944"
+  },
+  "driver_tests_passed": 33,
+  "main_ci": "https://github.com/elide-dev/trufflecel/actions/runs/42543160686"
+}

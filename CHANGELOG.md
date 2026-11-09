@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.10.0](https://github.com/elide-dev/trufflecel/compare/v0.9.0...v0.10.0) (2026-11-09)
+
+TruffleCEL 0.10.0 adopts published TruffleData 0.10.0 and completes this wave of
+CEL tooling, embedding APIs, allocation reductions and regex hardening. Java 25
+and Elide GraalVM 25.5.5-elide.27 remain the runtime baseline. All four Maven modules
+release together: core, protobuf, JSON and the generated-adapter annotation processor.
+
+### Compatibility
+
+RE2/J is now an **optional Maven dependency**. Compatibility-mode consumers must
+explicitly declare `com.google.re2j:re2j:1.8`. Applications that accept the supported
+TruffleRegex subset can opt into `Cel.newBuilder().truffleRegexOnly(limit)` or the
+matching Polyglot options and omit RE2/J entirely. JVM and Native Image packaged
+consumers verify matching and guest compilation with the JAR physically absent.
+See [integration and regex policy](https://github.com/elide-dev/trufflecel/blob/v0.10.0/docs/INTEGRATION.md).
+
+### Functionality and fixes
+
+- Editable syntax trees, custom macros, parser/checker recovery, canonical AST
+  interchange, copied compiler environments and application validators.
+- Lazy lexical bindings, opt-in common-subexpression elimination, conservative
+  charged-operation bounds, field-level partial evaluation and qualified unknowns.
+- Environment YAML, CEL Policy compilation, embedded source offsets, source-level
+  tracing, asynchronous evaluation and per-call/non-strict function bindings.
+- Reflection-free generated POJO/JavaBean/record snapshots, protobuf contexts and
+  typed field-mask projections, with bounded owned snapshots and preserved extensions.
+- Correctness fixes for diagnostic/source provenance, sorting budgets, policy
+  conditions, AST round trips, long unary runs and native guest-compilation boundaries.
+- Constant regex acceleration recovers after weak-handle collection in its owner
+  context. Bounded caches evict one entry at a time and cache syntax-failure data
+  without retaining exception stacks or weakening per-caller limits.
+
+### Performance and qualification
+
+Evaluation contexts, binding conversion caches, shared layouts, cached-program
+metadata, map snapshots and protobuf wire ingestion use less allocation or retained
+storage in their documented comparisons. Scoped TruffleRegex accelerates constant
+matches while retaining the tested compatibility fallback.
+
+[Fresh release measurements and charts](https://github.com/elide-dev/trufflecel/blob/v0.10.0/docs/benchmarks/release-0.10.0-20261109/README.md)
+cover JVM/native evaluation, optimized cel-java, prepared-input controls, ingestion
+allocation, and the separate compilation/image-AST comparison. Raw observations,
+source/runtime/artifact identities, observed ranges and remaining memory gaps are
+preserved. Timing wins do not establish universal optimality or smaller process RSS.
+
+All 75 qualification targets pass, including conformance, packaged consumers,
+allocation and native guest-JIT gates. Exact-version staging passes for all four
+modules. Full-source coverage meets the unchanged 99.8% line/branch floors, and
+CodSpeed classifies all 21 cases as unchanged against pre-adoption main.
+
 ## [0.9.0](https://github.com/elide-dev/trufflecel/compare/v0.8.0...v0.9.0) (2026-11-08)
 
 
