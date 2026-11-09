@@ -597,3 +597,16 @@ java_test(
     visibility = ["//tools/release:__pkg__"],
     runtime_deps = ["//tools/release:no_re2j_consumer_lib"],
 )
+
+java_test(
+    name = "foreignOrdinalBug",
+    srcs = ["ForeignOrdinalBugTest.java"],
+    test_class = "dev.trufflecel.ForeignOrdinalBugTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
