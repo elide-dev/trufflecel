@@ -12,9 +12,13 @@ observed fork ranges, summaries and reproduction scripts are preserved.
 The ordinary-map matrix records 24/24 lower TruffleCEL evaluation times, 23/24 lower
 allocations with one tie, and 9/24 lower current RSS values. Prepared immutable
 cel-java inputs reduce adaptation costs; process footprint remains a gap.
-[Time](images/release-0.10.0/evaluation-time.svg),
-[allocation](images/release-0.10.0/evaluation-allocation.svg) and
-[RSS](images/release-0.10.0/evaluation-rss.svg) charts describe the measured cases.
+[Time](images/benchmark-0.10.0-elide/evaluation-time.svg),
+[allocation](images/benchmark-0.10.0-elide/evaluation-allocation.svg) and
+[RSS](images/benchmark-0.10.0-elide/evaluation-rss.svg) charts describe the measured cases.
+The [chart gallery](images/benchmark-0.10.0-elide/README.md) uses Elide's fonts and
+colors, zero-based linear bars, direct values, and explicit comparisons against
+the best cel-java planner for each metric. Each card has its own scale; compare
+lengths within a card. These are new presentations of the preserved measurements.
 The separate three-expression CI comparison records 24/24 time and allocation wins
 and 12/24 peak-RSS wins using its own protocol and host. Neither suite establishes
 universal optimality, and they must not be pooled as one experiment.
