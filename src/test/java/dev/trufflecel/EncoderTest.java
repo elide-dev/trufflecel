@@ -268,5 +268,18 @@ public final class EncoderTest {
     assertEquals(items, env.compile("yaml.parse(s).value()").evaluate(Map.of("s", yamlResult)));
   }
 
+  @Test
+  public void yamlEncodeConvertsEngineExceptionToResourceExhausted() {
+    // A C1 control character (U+0080) is emitted raw by the JSON writer but rejected by
+    // snakeyaml-engine's reader, so the encode path must translate the engine exception
+    // into a catchable CEL error instead of letting a RuntimeException escape.
+    var env = Cel.newBuilder().inferVariables(true).build();
+    var error =
+        assertThrows(
+            CelException.class,
+            () -> env.compile("yaml.encode(s)").evaluate(Map.of("s", "\u0080")));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, error.code());
+  }
+
   private record Record(Map<String, Object> fields) {}
 }
