@@ -163,6 +163,7 @@ public class FunctionOverloadTest {
     var env =
         Cel.newBuilder()
             .variable("x", CelType.DYN)
+            .variable("w", CelType.wrapper(CelType.INT))
             .function("same2", "same2_T", false, List.of(t, t), t, a -> a.get(0))
             .function("same", "same_T", false, List.of(t), t, a -> a.get(0))
             .build();
@@ -188,6 +189,9 @@ public class FunctionOverloadTest {
     assertEquals(CelType.DYN, env.compile("same2(1, 1u)").resultType());
     assertEquals(CelType.DYN, env.compile("same2(1, 1.0)").resultType());
     assertEquals(CelType.DYN, env.compile("same2(1u, 1.0)").resultType());
+    // A null then a wrapper-typed value binds through the asymmetric accept path
+    // (null_type accepts the wrapper, but not the other way around).
+    assertEquals(CelType.wrapper(CelType.INT), env.compile("same2(null, w)").resultType());
   }
 
   @Test
