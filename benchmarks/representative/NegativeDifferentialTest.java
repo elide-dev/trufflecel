@@ -200,6 +200,8 @@ public final class NegativeDifferentialTest {
         config.name() + "|" + engine.name(), k -> build(config, engine));
   }
 
+  // Preserve the pinned cel-java options contract in this comparison-only harness.
+  @SuppressWarnings("deprecation")
   private static Toolchain build(Config config, Engine engine) {
     var options =
         CelOptions.current()

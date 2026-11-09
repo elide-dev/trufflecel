@@ -5,6 +5,7 @@
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json%3Frepository%3Delide-dev/trufflecel)](https://codspeed.io/elide-dev/trufflecel)
 [![Release](https://img.shields.io/github/v/release/elide-dev/trufflecel?include_prereleases)](https://github.com/elide-dev/trufflecel/releases)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/elide-dev/trufflecel/badge)](https://scorecard.dev/viewer/?uri=github.com/elide-dev/trufflecel)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16472/badge)](https://www.bestpractices.dev/en/projects/16472)
 [![Java 25](https://img.shields.io/badge/Java-25-blue)](https://www.graalvm.org/)
 
 **CEL expressions, executed by Truffle.** TruffleCEL is an independent

@@ -15,6 +15,20 @@ java_test(
     runtime_deps = [":target"],
 )
 
+java_library(
+    name = "evaluation_target",
+    testonly = True,
+    srcs = ["EvaluationFuzzTarget.java"],
+    deps = ["//:trufflecel", "@fuzzing//:com_code_intelligence_jazzer_api"],
+)
+
+java_test(
+    name = "evaluation_regression",
+    main_class = "dev.trufflecel.EvaluationFuzzTarget",
+    use_testrunner = False,
+    runtime_deps = [":evaluation_target"],
+)
+
 java_binary(
     name = "seed",
     testonly = True,
@@ -26,8 +40,8 @@ java_binary(
     name = "jazzer",
     testonly = True,
     main_class = "com.code_intelligence.jazzer.Jazzer",
-    runtime_deps = [":target", "@fuzzing//:com_code_intelligence_jazzer"],
-    jvm_flags = ["-Xmx1g", "-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading", "--enable-native-access=ALL-UNNAMED"],
+    runtime_deps = [":target", ":evaluation_target", "@fuzzing//:com_code_intelligence_jazzer"],
+    jvm_flags = ["-ea", "-Xmx1g", "-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading", "--enable-native-access=ALL-UNNAMED"],
 )
 
 sh_test(

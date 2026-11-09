@@ -16,7 +16,7 @@ configuration, runtime dependencies and artifact verification.
 | Build and validate | [Bazel](BAZEL.md), [CI](CI.md), [coverage](COVERAGE.md) |
 | Contribute code, evidence or documentation | [Contributing](../CONTRIBUTING.md), [agent guidance](../AGENTS.md), [contributor agreement](../CONTRIBUTOR_AGREEMENT.md) |
 | Understand project responsibilities | [Governance](../GOVERNANCE.md), [conduct](../CODE_OF_CONDUCT.md), [support](../SUPPORT.md) |
-| Review security and supply-chain practices | [Security policy](../SECURITY.md), [threat model](THREAT_MODEL.md), [maintenance](MAINTENANCE.md), [OpenSSF evidence](OPENSSF.md) |
+| Review security and supply-chain practices | [Security policy](../SECURITY.md), [threat model](THREAT_MODEL.md), [secure development](SECURE_DEVELOPMENT.md), [maintenance](MAINTENANCE.md), [OpenSSF evidence](OPENSSF.md), [Passing assessment](BEST_PRACTICES.md), [release provenance](PROVENANCE.md) |
 | Redistribute code or dependencies | [Dual licensing](../LICENSE), [third-party scope](../THIRD_PARTY.md), [notices](../NOTICE) |
 
 Versioned benchmark reports keep their original measurements and dependencies.

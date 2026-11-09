@@ -106,7 +106,8 @@ the author. Reviewers should check correctness and CEL compatibility, error and
 unknown semantics, resource limits, thread safety, dependency/license changes,
 instrumentation and Native Image behavior, and whether tests demonstrate the change.
 Security-sensitive changes also require reviewing the
-[threat model](docs/THREAT_MODEL.md). All relevant CI checks must pass before merge;
+[threat model](docs/THREAT_MODEL.md) and [secure development guide](docs/SECURE_DEVELOPMENT.md).
+All relevant CI checks must pass before merge;
 coverage exclusions or relaxed allocation limits need a documented technical reason.
 Keep review discussion and resolution in the PR. Document any emergency administrative
 bypass and arrange follow-up review before release.

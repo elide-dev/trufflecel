@@ -67,3 +67,6 @@ for module in "${modules[@]}"; do
 done
 rm -f "$repo/public-check"
 echo "Published dev.elide:trufflecel-{core,protobuf,json,processor}:$version at $public"
+if [[ -n ${GITHUB_OUTPUT:-} ]]; then
+  printf 'repository=%s\n' "$repo" >> "$GITHUB_OUTPUT"
+fi
