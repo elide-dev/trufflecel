@@ -1,0 +1,38 @@
+name: Scheduled fuzzing
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: scheduled-fuzzing
+  cancel-in-progress: false
+jobs:
+  jazzer:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Bazelisk
+        run: .github/scripts/install-bazelisk.sh
+      - name: Fuzz CEL frontend, AST import and JSON/YAML decoders
+        # Keep the same pinned GraalVM and Jazzer as PR CI. This longer run uses
+        # fresh hosted runners and no BuildBuddy or publication credentials.
+        run: bazel test --config=local --nocache_test_results --test_env=TRUFFLECEL_FUZZ_RUNS=100000 //tools/fuzz:smoke
+      - name: Preserve crash reproducers and coverage
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: jazzer-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            bazel-testlogs/tools/fuzz/smoke/test.log
+            bazel-testlogs/tools/fuzz/smoke/test.outputs/**
+          retention-days: 30

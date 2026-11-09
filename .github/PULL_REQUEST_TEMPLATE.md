@@ -6,4 +6,8 @@ Describe the problem and resulting behavior. Link related issues and CEL specifi
 
 Describe the tests or benchmarks run and any remaining limitations.
 
-<!-- See CONTRIBUTING.md for checks and contribution licensing. Keep third-party notices intact. -->
+<!-- For benchmarks: identify interpreter/JIT mode, comparator settings, input preparation,
+     source/runtime identity, raw samples, and any losses or unresolved limits.
+     For CI/security changes: explain token permissions, trust boundaries and relevant checks.
+     See CONTRIBUTING.md and CONTRIBUTOR_AGREEMENT.md. Preserve third-party notices;
+     identify externally sourced material. Do not invent approvals or human certifications. -->

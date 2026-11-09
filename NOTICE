@@ -17,3 +17,9 @@ are retained in third_party/cel-policy/LICENSE and third_party/cel-policy/UPSTRE
 The CEL Policy fixtures are not included in runtime JARs.
 
 Dependencies are distributed separately and retain their own licenses.
+
+Documentation chart tooling includes Inter, Instrument Sans and JetBrains Mono
+fonts from Fontsource variable packages version 5.3.0 under the SIL Open Font
+License 1.1. Original copyright and license notices accompany the unmodified
+font files in tools/bench/charts/fonts/. These fonts are not in runtime JARs.
+See THIRD_PARTY.md for the source and dependency inventory scopes.

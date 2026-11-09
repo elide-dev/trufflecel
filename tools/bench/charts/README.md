@@ -2,12 +2,15 @@
 
 This presentation layer reads the immutable
 [`summary.json`](../../../docs/benchmarks/release-0.10.0-20261109/summary.json) and
+separate [`prepared-inputs.json`](../../../docs/benchmarks/release-0.10.0-20261109/prepared-inputs.json), then
 writes new charts to [`docs/images/benchmark-0.10.0-elide`](../../../docs/images/benchmark-0.10.0-elide/README.md).
 It does not modify historical reports or published release artifacts.
 
 The renderer validates the complete 48-cell matrix, finite positive values,
 three-fork ranges, and all computed lower/tied/higher counts against the recorded
-summary before drawing. It shows all four engine modes. Each card uses one
+summary before drawing. It also validates all 16 prepared-input cells and their
+fork ranges. It leads with interpreter-only evaluation and shows all four engine
+modes in the full matrix, keeping interpreter/JIT counts separate. Each card uses one
 zero-based linear scale; direct values and comparison labels remove the need to
 infer winners from a legend or a logarithmic axis. The separate prepared-input
 controls and the limits of RSS measurements remain prominent.
@@ -56,7 +59,9 @@ git diff --check
 ```
 
 The renderer has no network access requirement after installing Python packages.
-It writes SVG, 1.5× PNG, and `SHA256SUMS` for the three charts. Font source
+It writes SVG, 1.5× PNG, and `SHA256SUMS` for seven charts: interpreter time,
+all-mode time, allocation, current RSS, peak RSS, and the separate prepared-input
+time/allocation controls. Font source
 checksums are in [`fonts/SHA256SUMS`](fonts/SHA256SUMS). Dependency versions are
 pinned; byte-identical rendering additionally depends on the platform's rendering
 libraries. The output is visually reviewed at full size before committing.

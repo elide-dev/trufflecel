@@ -1,5 +1,11 @@
 # Benchmark methodology and results
 
+Start with the [comparison guide](BENCHMARK_COMPARISON.md) for interpreter-first
+results, prepared-input controls, allocation/current/peak RSS definitions, and an
+explicit accounting of upstream methodology feedback and remaining evidence gaps.
+The [chart gallery](images/benchmark-0.10.0-elide/README.md) collects the current
+release's readable figures and downloadable SVG/PNG files.
+
 ## Final 0.10.0 dependency qualification
 
 The [November 9 release report](benchmarks/release-0.10.0-20261109/README.md)
