@@ -7,8 +7,14 @@ import java.util.*;
 
 /** The same entry point is exercised by Jazzer and deterministic corpus regressions. */
 public final class FuzzTarget {
-  private static final Environment ENVIRONMENT = Cel.newBuilder().inferVariables(true)
-      .maxSourceLength(4096).maxAstNodes(2048).maxDepth(64).evaluationBudget(10000).build();
+  private static final Environment ENVIRONMENT =
+      Cel.newBuilder()
+          .inferVariables(true)
+          .maxSourceLength(4096)
+          .maxAstNodes(2048)
+          .maxDepth(64)
+          .evaluationBudget(10000)
+          .build();
 
   public static void fuzzerTestOneInput(byte[] input) {
     if (input.length == 0 || input.length > 4097) return;
@@ -19,11 +25,19 @@ public final class FuzzTarget {
         case 0 -> ENVIRONMENT.parse(text);
         case 1 -> ENVIRONMENT.prepare(text);
         case 2 -> {
-          var ast = CanonicalAst.prototype("cel.expr.ParsedExpr").newBuilderForType().mergeFrom(payload).build();
+          var ast =
+              CanonicalAst.prototype("cel.expr.ParsedExpr")
+                  .newBuilderForType()
+                  .mergeFrom(payload)
+                  .build();
           CanonicalAst.program(ENVIRONMENT, ast);
         }
-        case 3 -> EncoderFunctions.apply("json.parse", new Object[] {text}, new EvalContext(ENVIRONMENT, Map.of()));
-        case 4 -> EncoderFunctions.apply("yaml.parse", new Object[] {text}, new EvalContext(ENVIRONMENT, Map.of()));
+        case 3 ->
+            EncoderFunctions.apply(
+                "json.parse", new Object[] {text}, new EvalContext(ENVIRONMENT, Map.of()));
+        case 4 ->
+            EncoderFunctions.apply(
+                "yaml.parse", new Object[] {text}, new EvalContext(ENVIRONMENT, Map.of()));
         default -> throw new AssertionError("selector");
       }
     } catch (CelException | InvalidProtocolBufferException expected) {
@@ -36,14 +50,26 @@ public final class FuzzTarget {
 
   static List<byte[]> seeds() {
     var inputs = new ArrayList<byte[]>();
-    for (String expression : List.of("1 + 2", "[1,2,3].map(x, x * 2)", "cel.bind(x, 1 / 0, true)",
-        "has({'a':1}.a)", "[?optional.of(1)]", "x ? 1 : 2", "1 +", "!".repeat(1024) + "true")) {
-      for (int kind : new int[] {0, 1}) inputs.add(input(kind, expression.getBytes(StandardCharsets.UTF_8)));
+    for (String expression :
+        List.of(
+            "1 + 2",
+            "[1,2,3].map(x, x * 2)",
+            "cel.bind(x, 1 / 0, true)",
+            "has({'a':1}.a)",
+            "[?optional.of(1)]",
+            "x ? 1 : 2",
+            "1 +",
+            "!".repeat(1024) + "true")) {
+      for (int kind : new int[] {0, 1})
+        inputs.add(input(kind, expression.getBytes(StandardCharsets.UTF_8)));
     }
     for (String expression : List.of("1", "x + 1", "[1].all(x, x == 1)", "{'a': 2}"))
       inputs.add(input(2, CanonicalAst.parse(ENVIRONMENT, expression).toByteArray()));
-    for (String text : List.of("{\"a\":[1,true,null]}", "a: [1, 2, 3]", "a: &a [*a]", "a: !!java/object {}", "{bad"))
-      for (int kind : new int[] {3, 4}) inputs.add(input(kind, text.getBytes(StandardCharsets.UTF_8)));
+    for (String text :
+        List.of(
+            "{\"a\":[1,true,null]}", "a: [1, 2, 3]", "a: &a [*a]", "a: !!java/object {}", "{bad"))
+      for (int kind : new int[] {3, 4})
+        inputs.add(input(kind, text.getBytes(StandardCharsets.UTF_8)));
     return inputs;
   }
 
@@ -59,7 +85,8 @@ public final class FuzzTarget {
     if (args.length == 1) {
       Path directory = Path.of(args[0]);
       Files.createDirectories(directory);
-      for (int i = 0; i < seeds.size(); i++) Files.write(directory.resolve("seed-" + i), seeds.get(i));
+      for (int i = 0; i < seeds.size(); i++)
+        Files.write(directory.resolve("seed-" + i), seeds.get(i));
       return;
     }
     if (args.length != 0) throw new IllegalArgumentException("optional corpus directory");

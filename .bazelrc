@@ -8,6 +8,8 @@ common --repo_env=ANDROID_SDK_ROOT=
 build --incompatible_strict_action_env
 build --nojava_header_compilation
 build --experimental_java_classpath=off
+build --javacopt=-Xlint:unchecked
+build --javacopt=-Xlint:deprecation
 build --@rules_go//go/config:pure
 test --test_output=errors
 test --nozip_undeclared_test_outputs

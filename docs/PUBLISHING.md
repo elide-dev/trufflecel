@@ -57,7 +57,10 @@ then updates discovery metadata. It does not tag or push Git history.
 Serialize publishers across machines: R2/rclone has no multi-artifact transaction or
 cross-machine release lock. A failed upload can leave a partial immutable version; inspect
 and repair it before retrying. Automatic overwrite/resume is deliberately unsupported.
-No signing keys or Maven Central upload are configured.
+The CI publisher signs provenance with short-lived GitHub OIDC credentials;
+no long-lived signing keys or Maven Central upload are configured.
+See [provenance and verification](PROVENANCE.md), including failure recovery
+and the distinction between the release source and workflow revisions.
 
 ## CI validation
 

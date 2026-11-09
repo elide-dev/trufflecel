@@ -50,6 +50,7 @@ public final class NegativeCompiledTest {
         }
 
         @Override
+        @SuppressWarnings("deprecation") // Observe the callback exposed by the pinned GraalVM.
         public void onCompilationDeoptimized(OptimizedCallTarget target, Frame frame) {
           deoptimizations.computeIfAbsent(target, t -> new AtomicInteger()).incrementAndGet();
         }

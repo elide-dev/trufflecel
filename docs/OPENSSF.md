@@ -2,36 +2,32 @@
 
 OpenSSF Scorecard and the OpenSSF Best Practices badge assess different things.
 The [live Scorecard](https://scorecard.dev/viewer/?uri=github.com/elide-dev/trufflecel)
-is the source of truth for the numeric score. TruffleCEL does not currently claim
-a Passing, Silver or Gold Best Practices badge.
+is the source of truth for the numeric score. TruffleCEL earned the
+[Passing Best Practices badge](https://www.bestpractices.dev/en/projects/16472)
+on November 9, 2026; Silver and Gold remain unclaimed.
 
-The November 9, 2026 assessment of main `2de7031` was **5.9/10**.
-Its [workflow](https://github.com/elide-dev/trufflecel/actions/runs/42549366295)
-retains SARIF; the [public JSON snapshot](security/scorecard-20261109-before.json)
-records the findings before this documentation/security follow-up. Do not describe
-proposed changes as an attained score increase before the subsequent run finishes.
+The November 9 assessment of main `666276f` scored **6.8/10**, up from
+**5.9/10** at `2de7031`. Retained snapshots record
+[5.9](security/scorecard-20261109-before.json) and
+[6.8](security/scorecard-20261109-6.8.json). The current live assessment can be
+newer; proposed changes are not an attained increase until it finishes.
 
 ## Evidence and action
 
-| Area | Recorded finding | Action / evidence |
+| Area | 6.8 baseline finding | Action / evidence |
 | --- | --- | --- |
-| Token permissions | 0/10; release workflow had top-level contents/actions writes | Read-only reusable-workflow default; release creation gets contents/PR writes, while a separate dispatch job gets Actions write and never checks out release-branch code. Caller permissions still describe the maximum grant needed by the reusable workflow. |
-| Vulnerabilities | 9/10; `PYSEC-2026-4322` in chart-tooling Brotli 1.2.0 | Upgrade the maintained renderer to 1.2.1, the [fixed version](https://osv.dev/vulnerability/PYSEC-2026-4322), and cover its requirements with weekly Dependabot updates. Font decoding is a tooling operation, not a runtime dependency. |
-| License | 9/10; root pointer was not recognized as an OSI/FSF license | Root LICENSE now contains the complete Apache-2.0 text and explicit MIT alternative, following Toolchain/Myna; both full alternative texts and third-party notices remain present. This clarifies the existing grant, not a relicensing of dependencies. |
-| Fuzzing | 0/10; recognized integration not found | Existing PR/main CI runs real Jazzer coverage-guided fuzzing. Add a daily 100,000-run job using the same target, pinned toolchain and coverage checks. This improves sustained execution; it does not guarantee Scorecard recognizes the custom Bazel integration. |
+| Token permissions, vulnerabilities, license | Each 10/10 after the previous fixes | Preserve scoped writes, patched tooling and recognized complete license texts. |
+| Fuzzing | 0/10; raw-byte Jazzer entry point not recognized | Add a real `FuzzedDataProvider` evaluator target with independent Java oracles alongside frontend/decoder fuzzing. PR/main smoke runs 2,000 inputs per target; daily runs 100,000 per target with assertions and coverage enforcement. |
 | Code review | 0/10; no approved changesets in the sampled window | Independent human review must occur. Document administrative exceptions; never invent approvals or count an agent's self-review. |
-| Branch protection | 8/10; administrator bypass and one approval | Keep the existing policy. One separate reviewer plus the author is distinct from requiring two approvals. Changing protections needs a deliberate governance decision, not score chasing. |
-| Signed releases | 0/10; no signatures/provenance detected for v0.10.0 | Add verifiable provenance to a future publication build and independent rebuild evidence. Do not manufacture provenance for existing artifacts or rewrite released bytes/tags. |
-| Best Practices | 0/10; no registered badge effort detected | `.bestpractices.json` provides a limited evidence-backed draft. Registration, saved self-assessment and maintainer attestations remain outstanding; the draft is not a badge. |
-| Maintained | 0/10; repository younger than 90 days | Time and sustained maintenance are required. This cannot be fixed by editing metadata. |
-| SAST / CI tests | 9/10 each; historical unchecked commits/PRs in the sample | Keep CodeQL and required CI active. Wait for real coverage of the moving history window; do not falsify or suppress results. |
+| Branch protection | 8/10; administrator bypass and one approval | Keep the existing policy; do not change protections merely to chase points. |
+| Signed releases | 0/10; v0.10.0 has no signatures/provenance | The future Maven publisher signs all twelve JAR/source/POM digests and attaches evidence to its release. See [verification and limitations](PROVENANCE.md). Existing release bytes/evidence remain unchanged; this score cannot improve from future-only configuration alone. |
+| Best Practices | 0/10; registration not detected in this snapshot | Project [16472](https://www.bestpractices.dev/en/projects/16472) earned Passing (100%) after the owner reviewed and saved every section. The [assessment](BEST_PRACTICES.md) and [public snapshot](security/best-practices-20261109-passing.json) retain the evidence. The baseline predates that award. |
+| Maintained | 0/10; repository younger than 90 days | Time and sustained maintenance are required. This differs from the Best Practices maintained criterion; metadata edits cannot create history. |
+| Packaging | Not detected | Custom immutable R2 Maven publishing is not recognized by the scanner. Retain actual publication/consumer evidence; do not add an unused packaging action for recognition. |
 
-Dependency updates, dangerous-workflow checks, binary-artifact checks, pinned
-dependencies, security policy and contributor diversity each scored 10 in that
-snapshot. Packaging was not detected by Scorecard; actual Maven publication uses
-the [immutable release workflow](../.github/workflows/publish.maven.yml) and
-[consumer validation](PUBLISHING.md). Scanner recognition is not a substitute for
-the artifact's own build, dependency and publication evidence.
+All other scored checks were 10/10, including SAST, CI tests, dependency updates,
+pinned dependencies, security policy and contributor diversity. Scanner recognition
+is not a substitute for artifact build, dependency and publication evidence.
 
 ## Project practices
 
@@ -54,16 +50,17 @@ automatically TruffleCEL evidence. TruffleCEL retains its existing no-mandatory-
 policy and existing CodeQL analysis; adopting useful documentation patterns does
 not silently import another repository's operational policy.
 
-## Before claiming a Best Practices tier
+## Best Practices scope
 
-Complete and save the official self-assessment. Verify security response evidence,
-account controls, continuity/recovery and two-person review with the people
-responsible. Audit maintained-source notices and shipped distributions, complete a
-documented security review, inventory release dependencies, and demonstrate
-reproducible release builds/provenance. Keep incomplete items marked as such.
+The [Passing assessment](BEST_PRACTICES.md) records repository evidence and the
+primary developer's explicit knowledge/report-history confirmations. The badge
+service's saved state is authoritative. Silver/Gold recovery exercises, independent
+security review, reproducible rebuilds and other stronger requirements remain
+follow-ups; they are not silently claimed by a Passing application.
 
-The deterministic fuzz regression and PR smoke run do not prove complete dynamic
-coverage. The daily campaign targets CEL parsing/preparation, canonical AST import,
-and JSON/YAML decoders; it is not a full arbitrary-host-function or compiled-guest
-fuzz campaign. Retain crash reproducers and coverage, minimize failures, add
-regressions, and report exploitable defects through the private security process.
+Fuzzing remains bounded. Targets cover CEL parsing/preparation, canonical AST
+import, JSON/YAML decoders, and selected evaluator arithmetic/logic/collection
+oracles through borrowed and snapshotted activations. They do not constitute a
+full arbitrary-host-function or compiled-guest campaign. Retain crash reproducers
+and coverage, minimize failures, add regressions, and report exploitable defects
+through the private security process.

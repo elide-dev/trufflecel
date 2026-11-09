@@ -11,6 +11,7 @@ filegroup(
     name = "ci_sources",
     srcs = glob([".github/scripts/*.py", ".github/workflows/*.yml"]) + [
         "VERSION", "release-please-config.json", ".release-please-manifest.json",
+        ".bestpractices.json", "//tools:best-practices.py", "//tools:best-practices-criteria.json",
         "//tools/release:maven_repo.py", "//tools/release:dependency_gate.py",
     ],
     visibility = ["//visibility:public"],

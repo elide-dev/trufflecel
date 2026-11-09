@@ -18,6 +18,7 @@ public final class Format {
             "tools/java",
             "tools/release",
             "tools/conformance",
+            "tools/fuzz",
             "benchmarks")) {
       try (var paths = Files.walk(root.resolve(directory))) {
         for (Path path : paths.filter(p -> p.toString().endsWith(".java")).sorted().toList()) {
