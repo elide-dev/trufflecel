@@ -77,6 +77,8 @@ final class ConfigurationData {
         int newline = yaml.indexOf('\n', start);
         start = newline < 0 ? end : newline + 1;
         text = yaml.substring(start, end);
+      } else if (style == org.snakeyaml.engine.v2.common.ScalarStyle.PLAIN) {
+        text = yaml.substring(start, end);
       } else if (style == org.snakeyaml.engine.v2.common.ScalarStyle.SINGLE_QUOTED
           || style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED) start++;
       return new Expression(text, start);
