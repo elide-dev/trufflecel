@@ -211,11 +211,13 @@ evaluation time in 24/24 comparisons against the faster cel-java planner mode,
 lower allocation in 23/24 with one tie, and lower current RSS in 9/24.
 These are measured aggregates from three forks per cell, not universal rankings.
 
-![TruffleCEL 0.10.0 evaluation comparison](docs/images/release-0.10.0/evaluation-time.svg)
+![Evaluation time: TruffleCEL is faster in all 24 ordinary-map comparisons. Shorter bars are better; each fixture labels interpreter and guest-JIT speedups against the faster cel-java planner.](docs/images/benchmark-0.10.0-elide/evaluation-time.svg)
 
-[Allocation](docs/images/release-0.10.0/evaluation-allocation.svg),
-[process RSS](docs/images/release-0.10.0/evaluation-rss.svg), and the report's
+[Allocation](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg),
+[process RSS](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg), and the report's
 prepared-input controls and ingestion tables retain the remaining tradeoffs.
+The [chart gallery](docs/images/benchmark-0.10.0-elide/README.md) includes downloadable
+SVG/PNG charts, reading guidance, and links to the complete values and ranges.
 cel-java copies ordinary maps; caller-prepared immutable inputs are a separate
 scenario with lower adaptation cost. Compilation and image-prepared AST results
 are retained in the [separate CI comparison](docs/benchmarks/release-0.10.0-20261109/ci/tables.md).
