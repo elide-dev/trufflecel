@@ -1,5 +1,27 @@
 # Benchmark methodology and results
 
+## Final 0.10.0 dependency qualification
+
+The [November 9 release report](benchmarks/release-0.10.0-20261109/README.md)
+measures the completed production code with published TruffleData 0.10.0 on JVM
+and Native Image. All six ordinary-map fixtures, both TruffleCEL modes and both
+cel-java planners are refreshed, alongside caller-prepared input controls and
+separate ingestion allocation samples. Source/runtime/artifact hashes, raw samples,
+observed fork ranges, summaries and reproduction scripts are preserved.
+
+The ordinary-map matrix records 24/24 lower TruffleCEL evaluation times, 23/24 lower
+allocations with one tie, and 9/24 lower current RSS values. Prepared immutable
+cel-java inputs reduce adaptation costs; process footprint remains a gap.
+[Time](images/release-0.10.0/evaluation-time.svg),
+[allocation](images/release-0.10.0/evaluation-allocation.svg) and
+[RSS](images/release-0.10.0/evaluation-rss.svg) charts describe the measured cases.
+The separate three-expression CI comparison records 24/24 time and allocation wins
+and 12/24 peak-RSS wins using its own protocol and host. Neither suite establishes
+universal optimality, and they must not be pooled as one experiment.
+
+Reports below retain their original source revisions, dependencies and observations.
+They are historical evidence, not isolated before/after measurements of this upgrade.
+
 ## November 8 memory reductions
 
 The [paired evaluation allocation report](benchmarks/evaluation-allocation-20261108/README.md)
@@ -731,7 +753,7 @@ fixtures, not zero-allocation claims or limits for arbitrary inputs.
 `bazel test //benchmarks:jit_smoke` builds a separate Linux amd64 Native Image containing
 the optimizing guest compiler. `TruffleCheckBlockListMethods` and
 `TruffleCheckNeverPartOfCompilation` are explicitly enabled. The smoke executable runs all
-14 workload correctness cases, then requires actual last-tier guest compilation and changed
+21 workload correctness cases, then requires actual last-tier guest compilation and changed
 input correctness for scalar, lazy, comprehension, map, and optional expressions. It never
 sets `truffle.UseFallbackRuntime`. This manual Bazel target is explicitly required by CI,
 and release creation depends on its success.
