@@ -32,6 +32,8 @@ def validate(rows, forks):
     keys = []
     controls = set()
     for row in rows:
+        if row['runtime'] != 'svm':
+            raise ValueError('Native embedding control requires Native Image')
         startup.validate(row)
         if row['engine'] == 'control':
             key = (row['mode'], row['fork'])
