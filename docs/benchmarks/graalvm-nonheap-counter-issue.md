@@ -121,3 +121,10 @@ at the evaluated and subsequent GC/idle checkpoints, and `-103944` after context
 closure. The report preserves the binary/driver hashes, phases, heap counters,
 Linux RSS and last-tier checks. This is a fresh reproduction of the accounting
 failure, not a three-fork performance result or evidence of corrupted guest code.
+
+The later [exact-profile controls](native-profiles-20261109/young-generation/counter-controls/counters.json)
+also reproduce those negative values with both `-XX:-CompileInIsolates` and
+`-XX:MaxNewSize=32m`. With the cap alone and default compiler isolation, this
+single-process diagnostic completes without counter errors. Baseline, interpreter
+and cel-java controls also complete. This does not prove those configurations
+cannot fail under other workloads or longer lifetimes.
