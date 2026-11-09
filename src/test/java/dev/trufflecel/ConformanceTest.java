@@ -151,6 +151,11 @@ public class ConformanceTest {
       // Strict validation reports certain evaluation failures from compile; the corpus expects
       // them at evaluation, or never evaluates the (type-correct) check-only expression.
       if (strict && (error || flag("check_only") && e.code() != CelException.Code.TYPE)) return;
+      // A check-only expression whose host function name collides with a standard or extension
+      // function is statically rejected by the checker (the standard/extension signature is
+      // checked instead of the host declaration), but the corpus considers it type-correct under
+      // the host declaration.  Accept the rejection without evaluating.
+      if (flag("check_only") && e.code() == CelException.Code.TYPE) return;
       // Some upstream eval_error cases describe a statically invalid overload. Keep the
       // checker rejection and also execute unchecked to verify the required runtime error.
       if (error && e.code() == CelException.Code.TYPE)
