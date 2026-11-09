@@ -647,9 +647,24 @@ class ExprNode extends CelNode {
               frame);
       case SELECT -> select(frame, ctx, false);
       case INDEX -> {
-        Object a = children[0].execute(frame, ctx);
+        CelException error = null;
+        Object a;
+        try {
+          a = children[0].execute(frame, ctx);
+        } catch (CelException e) {
+          if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+          a = null;
+          error = e;
+        }
         Attribute parent = ctx.attribute();
-        Object b = children[1].execute(frame, ctx);
+        Object b;
+        try {
+          b = children[1].execute(frame, ctx);
+        } catch (CelException e) {
+          if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+          b = null;
+          error = e;
+        }
         Attribute path = ctx.qualify(parent, b);
         Object override = ctx.attributeRead(path, false);
         if (override != PartialState.NONE)
@@ -658,8 +673,9 @@ class ExprNode extends CelNode {
               ? OptionalValue.of(override)
               : override;
         if (a == PartialState.MISSING) throw missingAttribute(parent);
-        if (a instanceof Unknown u) yield u;
+        if (a instanceof Unknown u) yield b instanceof Unknown v ? u.merge(v) : u;
         if (b instanceof Unknown u) yield u;
+        if (error != null) throw error;
         boolean optional = Boolean.TRUE.equals(value) || a instanceof OptionalValue;
         if (a instanceof OptionalValue o) {
           if (!o.present()) yield o;

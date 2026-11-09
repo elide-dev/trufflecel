@@ -791,6 +791,18 @@ public class RuntimeTest {
     assertEquals(
         new Unknown(Set.of("x", "y")),
         Cel.compile("x + y").evaluate(Map.of("x", Unknown.of("x"), "y", Unknown.of("y"))));
+    // INDEX follows the same unknown/error discipline as scalarBinary, call, and logical:
+    // evaluate all operands, merge unknowns, and let unknowns beat deferred errors.
+    assertEquals(
+        new Unknown(Set.of("x", "y")),
+        Cel.compile("x[y]").evaluate(Map.of("x", Unknown.of("x"), "y", Unknown.of("y"))));
+    assertEquals(Unknown.of("x"), Cel.compile("x[1/0]").evaluate(Map.of("x", Unknown.of("x"))));
+    assertEquals(
+        Unknown.of("y"), Cel.compile("dyn(1/0)[y]").evaluate(Map.of("y", Unknown.of("y"))));
+    // Errors still propagate when no operand is unknown.
+    assertEquals(
+        CelException.Code.DIVIDE_BY_ZERO,
+        assertThrows(CelException.class, () -> Cel.compile("[1, 2][1/0]").evaluate()).code());
     for (String expr :
         List.of(
             "x",
