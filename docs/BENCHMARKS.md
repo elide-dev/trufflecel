@@ -987,6 +987,11 @@ requires successful image-build AST initialization and the Truffle blocklist gat
 
 ### Native compiler memory diagnostic
 
+The [current six-fixture native profile report](benchmarks/native-profiles-20261109/README.md)
+extends this historical investigation with TruffleData 0.10.0, matched runtime flags,
+materialized list results, and explicit context/direct Java startup controls. Its
+measurements are separate from the archived reports below.
+
 A separate [three-fork diagnostic](benchmarks/compiler-isolate-diagnostic.json) at
 `d415645` compares Native Image's default compiler isolate with compilation in the
 application isolate (`-XX:-CompileInIsolates`) and a 16 MiB compiler-isolate heap
