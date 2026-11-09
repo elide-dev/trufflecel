@@ -158,6 +158,39 @@ public class FunctionOverloadTest {
   }
 
   @Test
+  public void repeatedTypeParametersRejectInconsistentBindings() {
+    var t = CelType.parameter("T");
+    var env =
+        Cel.newBuilder()
+            .variable("x", CelType.DYN)
+            .function("same2", "same2_T", false, List.of(t, t), t, a -> a.get(0))
+            .function("same", "same_T", false, List.of(t), t, a -> a.get(0))
+            .build();
+    // Consistent bindings deduce the concrete type.
+    assertEquals(CelType.INT, env.compile("same2(1, 2)").resultType());
+    assertEquals(CelType.STRING, env.compile("same2('a', 'b')").resultType());
+    assertEquals(1L, env.compile("same2(1, 2)").evaluate());
+    // A leading dyn argument keeps the binding general.
+    assertEquals(CelType.DYN, env.compile("same2(dyn(1), 2)").resultType());
+    assertEquals(CelType.DYN, env.compile("same2(2, dyn(1))").resultType());
+    assertEquals(CelType.DYN, env.compile("same2(x, x)").resultType());
+    // Single-position control still works.
+    assertEquals(CelType.INT, env.compile("same(1)").resultType());
+    assertEquals(CelType.DYN, env.compile("same(x)").resultType());
+    // Inconsistent non-numeric bindings are rejected at check time.
+    assertThrows(CelException.class, () -> env.compile("same2(1, 'x')"));
+    assertThrows(CelException.class, () -> env.compile("same2(true, 'x')"));
+    assertThrows(CelException.class, () -> env.compile("same2(1, true)"));
+    // Inconsistent bindings inside parameterized types are also rejected.
+    assertThrows(CelException.class, () -> env.compile("same2([1], ['x'])"));
+    assertThrows(CelException.class, () -> env.compile("same2([1], [true])"));
+    // Numeric type mixing generalizes to dyn (CEL heterogeneous numerics).
+    assertEquals(CelType.DYN, env.compile("same2(1, 1u)").resultType());
+    assertEquals(CelType.DYN, env.compile("same2(1, 1.0)").resultType());
+    assertEquals(CelType.DYN, env.compile("same2(1u, 1.0)").resultType());
+  }
+
+  @Test
   public void customObjectsOperatorsAndCallbackFailures() {
     record Box(long value) {}
     ObjectType type =
