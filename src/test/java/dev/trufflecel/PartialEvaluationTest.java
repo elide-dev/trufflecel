@@ -260,6 +260,56 @@ public class PartialEvaluationTest {
   }
 
   @Test
+  public void sameCallParentAndChildRefinementIsOrderIndependent() {
+    var activation = PartialActivation.of(Map.of(), AttributePattern.of("data").wildcard());
+    var program = Cel.compile("data.child.y");
+    var partial = program.partialEvaluate(activation);
+    assertFalse(partial.isComplete());
+    var child = Attribute.of("data").qualify("child");
+    var parent = Attribute.of("data");
+    var parentValue = Map.of("x", 1L, "child", Map.of("y", 2L));
+    var childValue = Map.of("y", 9L);
+    var childFirst = new LinkedHashMap<Attribute, Object>();
+    childFirst.put(child, childValue);
+    childFirst.put(parent, parentValue);
+    var parentFirst = new LinkedHashMap<Attribute, Object>();
+    parentFirst.put(parent, parentValue);
+    parentFirst.put(child, childValue);
+    var childResult = partial.advanceEvaluation(childFirst);
+    var parentResult = partial.advanceEvaluation(parentFirst);
+    assertTrue(childResult.isComplete());
+    assertTrue(parentResult.isComplete());
+    assertEquals(9L, childResult.value());
+    assertEquals(9L, parentResult.value());
+    assertEquals(Set.of(), childResult.unknownAttributes());
+    // A plain HashMap has arbitrary iteration order; the outcome must not depend on it.
+    var hashed = new HashMap<Attribute, Object>();
+    hashed.put(child, childValue);
+    hashed.put(parent, parentValue);
+    assertEquals(9L, partial.advanceEvaluation(hashed).value());
+    // The public resolve API is order-independent too, and the child refines the parent.
+    assertEquals(9L, program.partialEvaluate(activation.resolve(childFirst)).value());
+    assertEquals(9L, program.partialEvaluate(activation.resolve(parentFirst)).value());
+    assertEquals(1L, Cel.compile("data.x").partialEvaluate(activation.resolve(childFirst)).value());
+    // A deeper same-call chain keeps the most specific refinement regardless of order.
+    var grandchild = Attribute.of("data").qualify("child").qualify("deep");
+    var grandchildFirst = new LinkedHashMap<Attribute, Object>();
+    grandchildFirst.put(grandchild, 5L);
+    grandchildFirst.put(child, Map.of("y", 9L, "deep", 1L));
+    grandchildFirst.put(parent, parentValue);
+    var parentFirstDeep = new LinkedHashMap<Attribute, Object>();
+    parentFirstDeep.put(parent, parentValue);
+    parentFirstDeep.put(child, Map.of("y", 9L, "deep", 1L));
+    parentFirstDeep.put(grandchild, 5L);
+    var deep = Cel.compile("data.child.deep");
+    assertEquals(5L, deep.partialEvaluate(activation.resolve(grandchildFirst)).value());
+    assertEquals(5L, deep.partialEvaluate(activation.resolve(parentFirstDeep)).value());
+    assertEquals(
+        9L,
+        Cel.compile("data.child.y").partialEvaluate(activation.resolve(grandchildFirst)).value());
+  }
+
+  @Test
   public void resolvedParentsPreserveOptionalReadsAndIteratorOverrides() {
     var missing = data().resolve(Map.of(Attribute.of("data"), Map.of()));
     assertEquals(
