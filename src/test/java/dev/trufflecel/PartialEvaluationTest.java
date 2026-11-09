@@ -407,4 +407,116 @@ public class PartialEvaluationTest {
             AttributePattern.of("v").qualify(left).matches(Attribute.of("v").qualify(right)));
       }
   }
+
+  @Test
+  public void objectListAndMapLiteralsPreferUnknownOverErrorRegardlessOfOrder() {
+    ObjectType adapter =
+        new ObjectType() {
+          public String name() {
+            return "app.Msg";
+          }
+
+          public Map<String, CelType> fields() {
+            return Map.of("a", CelType.DYN, "b", CelType.DYN, "c", CelType.DYN);
+          }
+
+          public Object construct(Map<String, Object> fields) {
+            return Map.of(
+                "a", fields.getOrDefault("a", 0L),
+                "b", fields.getOrDefault("b", 0L),
+                "c", fields.getOrDefault("c", 0L));
+          }
+
+          public Object get(Object value, String field) {
+            return ((Map<?, ?>) value).get(field);
+          }
+
+          public boolean has(Object value, String field) {
+            return ((Map<?, ?>) value).containsKey(field);
+          }
+
+          public boolean accepts(Object value) {
+            return value instanceof Map<?, ?>;
+          }
+        };
+    var env =
+        Cel.newBuilder().objectType(adapter).container("app").variable("data", CelType.DYN).build();
+    var activation = data();
+
+    // Control: scalar error-vs-unknown precedence (existing behavior).
+    assertEquals(
+        Unknown.of("data.secret"),
+        env.compile("1/0 == data.secret").partialEvaluate(activation).value());
+
+    // Object literal: both field orders yield Unknown, not DIVIDE_BY_ZERO.
+    for (String expr :
+        List.of(
+            "Msg{a: 1/0, b: data.secret}",
+            "Msg{b: data.secret, a: 1/0}",
+            "Msg{a: data.secret, b: 1/0}",
+            "Msg{a: 1/0, b: data.secret, c: 2}")) {
+      var partial = env.compile(expr).partialEvaluate(activation);
+      assertEquals(expr, Unknown.of("data.secret"), partial.value());
+      assertEquals(expr, Set.of("data.secret"), partial.unknownAttributes());
+      assertFalse(expr, partial.isComplete());
+    }
+
+    // List literal: both element orders yield Unknown, not DIVIDE_BY_ZERO.
+    for (String expr : List.of("[data.secret, 1/0]", "[1/0, data.secret]")) {
+      var partial = env.compile(expr).partialEvaluate(activation);
+      assertEquals(expr, Unknown.of("data.secret"), partial.value());
+      assertEquals(expr, Set.of("data.secret"), partial.unknownAttributes());
+    }
+
+    // Map literal: both value orders yield Unknown, not DIVIDE_BY_ZERO.
+    for (String expr : List.of("{'a': data.secret, 'b': 1/0}", "{'a': 1/0, 'b': data.secret}")) {
+      var partial = env.compile(expr).partialEvaluate(activation);
+      assertEquals(expr, Unknown.of("data.secret"), partial.value());
+      assertEquals(expr, Set.of("data.secret"), partial.unknownAttributes());
+    }
+
+    // Advancing the unknown resolves it; the error surfaces when no unknown remains.
+    var resolved = activation.resolve(Map.of(Attribute.of("data").qualify("secret"), 42L));
+    for (String expr :
+        List.of(
+            "Msg{a: 1/0, b: data.secret}", "[1/0, data.secret]", "{'a': 1/0, 'b': data.secret}")) {
+      assertThrows(
+          expr, CelException.class, () -> env.compile(expr).partialEvaluate(resolved).value());
+    }
+
+    // Without the error, advancing produces a complete value.
+    var msgPartial = env.compile("Msg{a: data.known, b: data.secret}").partialEvaluate(activation);
+    assertEquals(Unknown.of("data.secret"), msgPartial.value());
+    var msgAdvanced =
+        msgPartial.advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 42L));
+    assertTrue(msgAdvanced.isComplete());
+    assertEquals(Set.of(), msgAdvanced.unknownAttributes());
+
+    var listPartial = env.compile("[data.secret, data.known]").partialEvaluate(activation);
+    assertEquals(Unknown.of("data.secret"), listPartial.value());
+    var listAdvanced =
+        listPartial.advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 42L));
+    assertTrue(listAdvanced.isComplete());
+    assertEquals(List.of(42L, 3L), listAdvanced.value());
+
+    var mapPartial = env.compile("{'a': data.known, 'b': data.secret}").partialEvaluate(activation);
+    assertEquals(Unknown.of("data.secret"), mapPartial.value());
+    var mapAdvanced =
+        mapPartial.advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), 42L));
+    assertTrue(mapAdvanced.isComplete());
+
+    // Error-only (no unknown) still throws.
+    assertThrows(
+        CelException.class,
+        () -> env.compile("Msg{a: 1/0, b: 2}").partialEvaluate(activation).value());
+    assertThrows(
+        CelException.class, () -> env.compile("[1/0, 2]").partialEvaluate(activation).value());
+    assertThrows(
+        CelException.class,
+        () -> env.compile("{'a': 1/0, 'b': 2}").partialEvaluate(activation).value());
+
+    // Normal (no error, no unknown) constructs successfully.
+    assertTrue(env.compile("Msg{a: 1, b: 2}").partialEvaluate(activation).isComplete());
+    assertEquals(List.of(1L, 2L), env.compile("[1, 2]").partialEvaluate(activation).value());
+  }
 }
