@@ -370,12 +370,6 @@ final class Optimizer {
         return false;
       }
       error = e;
-    } catch (OutOfMemoryError e) {
-      // A plan-time allocation failure (e.g. from exponential string growth that the
-      // length-proportional charge did not fully prevent) must not escape the compile API;
-      // folding is optional, so skip the subtree and leave it to evaluation.
-      allowance -= context.charged();
-      return false;
     }
     long cost = context.charged();
     allowance -= cost;
