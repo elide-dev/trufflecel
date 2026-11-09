@@ -23,7 +23,7 @@ public final class DataType implements ObjectType {
             case FLOAT64 -> CelType.DOUBLE;
             case BOOLEAN -> CelType.BOOL;
             case STRING -> CelType.STRING;
-            case ARRAY -> CelType.list(CelType.DYN);
+            case ARRAY -> CelType.list(elementType(f));
             case RECORD ->
                 f.constraints().recordType() == null
                     ? CelType.DYN
@@ -38,6 +38,16 @@ public final class DataType implements ObjectType {
 
   private static boolean unsigned(Field field) {
     return field.constraints().integer() != null && !field.constraints().integer().signed();
+  }
+
+  private static boolean unsignedElement(Field field) {
+    Field element = field.constraints().element();
+    return element != null && unsigned(element);
+  }
+
+  private static CelType elementType(Field field) {
+    Field element = field.constraints().element();
+    return element != null && unsigned(element) ? CelType.UINT : CelType.DYN;
   }
 
   public String name() {
@@ -71,11 +81,26 @@ public final class DataType implements ObjectType {
   public Object get(Object value, String field) {
     Object result = DataLibrary.factory().getUncached().read(value, index(field));
     if (result == Missing.INSTANCE) throw Values.error(CelException.Code.NO_SUCH_KEY, field);
-    if (result != DataNull.INSTANCE && unsigned(schema.field(index(field))))
+    Field f = schema.field(index(field));
+    if (result != DataNull.INSTANCE && unsigned(f))
       return result instanceof ExactNumber number
           ? UInt.parse(number.decimal().toBigIntegerExact().toString())
           : new UInt((Long) result);
+    if (result != DataNull.INSTANCE && f.kind() == Field.Kind.ARRAY && unsignedElement(f))
+      return unsignedArray((DataArray) result);
     return DataValues.from(result);
+  }
+
+  private static Object unsignedArray(DataArray array) {
+    var list = new ArrayList<Object>(array.size());
+    for (int i = 0; i < array.size(); i++) {
+      Object element = array.get(i);
+      if (element == DataNull.INSTANCE) list.add(CelNull.INSTANCE);
+      else if (element instanceof ExactNumber number)
+        list.add(UInt.parse(number.decimal().toBigIntegerExact().toString()));
+      else list.add(new UInt((Long) element));
+    }
+    return List.copyOf(list);
   }
 
   public boolean has(Object value, String field) {
@@ -86,13 +111,16 @@ public final class DataType implements ObjectType {
     for (String field : values.keySet()) index(field);
     Object[] row = new Object[schema.size()];
     for (int i = 0; i < row.length; i++) {
-      String field = schema.field(i).name();
+      Field f = schema.field(i);
+      String field = f.name();
       Object value = values.getOrDefault(field, Missing.INSTANCE);
-      if (value instanceof UInt u && unsigned(schema.field(i)))
+      if (value instanceof UInt u && unsigned(f))
         value =
-            schema.field(i).kind() == Field.Kind.EXACT
+            f.kind() == Field.Kind.EXACT
                 ? new ExactNumber(new java.math.BigDecimal(u.toBigInteger()))
                 : u.bits();
+      else if (f.kind() == Field.Kind.ARRAY && unsignedElement(f) && value instanceof List<?> list)
+        value = toUnsignedArray(list, f.constraints().element());
       row[i] = value == CelNull.INSTANCE ? DataNull.INSTANCE : value;
     }
     try {
@@ -100,5 +128,18 @@ public final class DataType implements ObjectType {
     } catch (ContractViolation e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, e.getMessage());
     }
+  }
+
+  private static DataArray toUnsignedArray(List<?> list, Field element) {
+    boolean exact = element.kind() == Field.Kind.EXACT;
+    var nativeValues = new ArrayList<Object>(list.size());
+    for (Object item : list) {
+      if (item == CelNull.INSTANCE) nativeValues.add(DataNull.INSTANCE);
+      else if (item instanceof UInt u)
+        nativeValues.add(
+            exact ? new ExactNumber(new java.math.BigDecimal(u.toBigInteger())) : u.bits());
+      else nativeValues.add(item);
+    }
+    return new DataArray(nativeValues.toArray());
   }
 }
