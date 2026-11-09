@@ -425,7 +425,10 @@ final class ExtensionFunctions {
       throw e;
     } catch (ArithmeticException e) {
       throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
-    } catch (IllegalArgumentException | IndexOutOfBoundsException | ClassCastException e) {
+    } catch (IllegalArgumentException
+        | IndexOutOfBoundsException
+        | ClassCastException
+        | org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid extension argument: " + name);
     }
   }
