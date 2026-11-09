@@ -273,6 +273,12 @@ public final class CanonicalAst {
         resolving.remove(id);
         return expanded;
       }
+      if (expression && has(source, "const_expr")) {
+        reader.bytes += child(source, "const_expr").getSerializedSize();
+        if (reader.bytes > 8 * 1024 * 1024)
+          throw Values.error(
+              CelException.Code.RESOURCE_EXHAUSTED, "macro source byte limit exceeded");
+      }
       var builder = source.toBuilder();
       FieldDescriptor id = source.getDescriptorForType().findFieldByName("id");
       if (id != null) builder.setField(id, next++);
@@ -477,7 +483,7 @@ public final class CanonicalAst {
     final Set<Long> ids = new HashSet<>();
     final Map<Long, Message> references = new HashMap<>();
     final Map<Long, Message> macroCalls = new HashMap<>(), expressions = new HashMap<>();
-    int count;
+    int count, bytes;
     final Map<Long, Integer> positions = new HashMap<>();
     final List<Integer> lineOffsets = new ArrayList<>();
 

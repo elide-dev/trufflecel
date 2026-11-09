@@ -3,6 +3,7 @@ package dev.trufflecel;
 import static dev.trufflecel.CanonicalAst.*;
 import static org.junit.Assert.*;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import java.util.*;
 import org.junit.Test;
@@ -406,6 +407,68 @@ public final class AstInterchangeTest {
     Environment small = Cel.newBuilder().inferVariables(true).maxAstNodes(25).build();
     assertThrows(CelException.class, () -> CanonicalAst.unparse(small, excessiveNodes));
     assertEquals(true, program(small, excessiveNodes).evaluate());
+  }
+
+  @Test
+  public void macroAmplifiedConstantsAreByteBounded() {
+    Message parsed = CanonicalAst.parse(ENV, "true");
+    long rootId = (Long) field(child(parsed, "expr"), "id");
+    byte[] payload = new byte[1024 * 1024];
+    Message constant =
+        message(
+            "cel.expr.Expr",
+            "id",
+            2L,
+            "const_expr",
+            message("cel.expr.Constant", "bytes_value", ByteString.copyFrom(payload)));
+    var args = new ArrayList<Message>();
+    for (int i = 0; i < 20; i++) args.add(message("cel.expr.Expr", "id", 2L));
+    Message call =
+        message(
+            "cel.expr.Expr",
+            "id",
+            rootId,
+            "call_expr",
+            message("cel.expr.Expr.Call", "function", "f", "args", args));
+    Map<Long, Message> macros = new LinkedHashMap<>();
+    macros.put(rootId, call);
+    macros.put(2L, constant);
+    Message attack = source(parsed, macros);
+    CelException astFailure = assertThrows(CelException.class, () -> CanonicalAst.ast(ENV, attack));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, astFailure.code());
+    CelException unparseFailure =
+        assertThrows(CelException.class, () -> CanonicalAst.unparse(ENV, attack));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, unparseFailure.code());
+    assertEquals(true, program(ENV, attack).evaluate());
+    CelException legacyFailure =
+        assertThrows(CelException.class, () -> CanonicalAst.ast(ENV, toV1Alpha1(attack)));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, legacyFailure.code());
+    var single = new ArrayList<Message>();
+    single.add(message("cel.expr.Expr", "id", 2L));
+    Message benignCall =
+        message(
+            "cel.expr.Expr",
+            "id",
+            rootId,
+            "call_expr",
+            message("cel.expr.Expr.Call", "function", "f", "args", single));
+    Map<Long, Message> benignMacros = new LinkedHashMap<>();
+    benignMacros.put(rootId, benignCall);
+    benignMacros.put(2L, constant);
+    Message benign = source(parsed, benignMacros);
+    CanonicalAst.ast(ENV, benign);
+    Message tiny =
+        message(
+            "cel.expr.Expr",
+            "id",
+            2L,
+            "const_expr",
+            message("cel.expr.Constant", "bytes_value", ByteString.copyFrom(new byte[1])));
+    Map<Long, Message> tinyMacros = new LinkedHashMap<>();
+    tinyMacros.put(rootId, benignCall);
+    tinyMacros.put(2L, tiny);
+    Message withTiny = source(parsed, tinyMacros);
+    CanonicalAst.ast(ENV, withTiny);
   }
 
   private static Message source(Message parsed, Map<Long, Message> macros) {
