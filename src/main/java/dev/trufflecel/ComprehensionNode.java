@@ -44,27 +44,27 @@ final class ComprehensionNode extends ExprNode {
       Object item = items.get(position);
       ctx.tick();
       ctx.attribute(accumulatorAttribute);
-      bindings[0].execute(frame, ctx, accumulator);
-      ctx.attribute(
-          range instanceof List<?> && names[2].isEmpty()
-              ? ctx.qualify(rangeAttribute, index)
-              : null);
-      bindings[1].execute(
-          frame,
-          ctx,
-          ctx.iterationValue(
-              range instanceof List<?> && !names[2].isEmpty() ? index : item, ctx.attribute()));
-      if (bindings.length == 3) {
-        ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
-        bindings[2].execute(
+      try {
+        bindings[0].execute(frame, ctx, accumulator);
+        ctx.attribute(
+            range instanceof List<?> && names[2].isEmpty()
+                ? ctx.qualify(rangeAttribute, index)
+                : null);
+        bindings[1].execute(
             frame,
             ctx,
             ctx.iterationValue(
-                range instanceof Map<?, ?> map ? HostCollections.get(map, item) : item,
-                ctx.attribute()));
-      }
-      index++;
-      try {
+                range instanceof List<?> && !names[2].isEmpty() ? index : item, ctx.attribute()));
+        if (bindings.length == 3) {
+          ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
+          bindings[2].execute(
+              frame,
+              ctx,
+              ctx.iterationValue(
+                  range instanceof Map<?, ?> map ? HostCollections.get(map, item) : item,
+                  ctx.attribute()));
+        }
+        index++;
         Object condition = children[2].execute(frame, ctx);
         if (Boolean.FALSE.equals(condition)) break;
         if (condition instanceof Unknown) return condition;
@@ -82,8 +82,8 @@ final class ComprehensionNode extends ExprNode {
       }
     }
     ctx.attribute(accumulatorAttribute);
-    bindings[0].execute(frame, ctx, accumulator);
     try {
+      bindings[0].execute(frame, ctx, accumulator);
       return children[4].execute(frame, ctx);
     } finally {
       bindings[0].clear(frame, ctx);

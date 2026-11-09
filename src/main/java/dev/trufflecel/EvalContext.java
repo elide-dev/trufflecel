@@ -15,6 +15,10 @@ sealed class EvalContext {
     private Object[] scopes;
     private int scopeSize;
     private final EvalContext budgetParent;
+
+    /** Per-WriteNode scope depths for re-entrant safe pushes under instrumentation. */
+    private java.util.IdentityHashMap<WriteNode, int[]> writeDepths;
+
     ExprNode.BlockScope block;
 
     Scoped(Environment environment, Object activation) {
@@ -282,6 +286,38 @@ sealed class EvalContext {
       scoped.scopes = Arrays.copyOf(scoped.scopes, scoped.scopeSize * 2);
     scoped.scopes[scoped.scopeSize++] = name;
     scoped.scopes[scoped.scopeSize++] = value;
+  }
+
+  /**
+   * Re-entrant safe push for {@link WriteNode}. Records the scope stack depth before the first push
+   * for {@code node}; on a re-enter ({@code ProbeNode.UNWIND_ACTION_REENTER} re-runs {@code
+   * execute} without {@code clear}) truncates back to that depth before pushing again so the stack
+   * stays balanced. The depth map is per-{@code EvalContext} (not per-{@code WriteNode}) so
+   * concurrent evaluations of the same program on different threads do not race.
+   */
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  void pushReentrant(WriteNode node, String name, Object value) {
+    Scoped scoped = (Scoped) this;
+    if (scoped.writeDepths == null) scoped.writeDepths = new IdentityHashMap<>();
+    int[] holder = scoped.writeDepths.get(node);
+    if (holder != null) {
+      // Re-enter: remove any pair this logical execution already pushed.
+      while (scoped.scopeSize > holder[0]) scoped.scopes[--scoped.scopeSize] = null;
+    } else {
+      scoped.writeDepths.put(node, new int[] {scoped.scopeSize});
+    }
+    push(name, value);
+  }
+
+  /** Counterpart to {@link #pushReentrant}: restores the scope stack to the recorded depth. */
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  void clearReentrant(WriteNode node) {
+    Scoped scoped = (Scoped) this;
+    if (scoped.writeDepths == null) return;
+    int[] holder = scoped.writeDepths.remove(node);
+    if (holder != null) {
+      while (scoped.scopeSize > holder[0]) scoped.scopes[--scoped.scopeSize] = null;
+    }
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary

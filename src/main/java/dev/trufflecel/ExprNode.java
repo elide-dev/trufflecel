@@ -1059,15 +1059,15 @@ class ExprNode extends CelNode {
     if (name.equals("has")) return children[0].executePresence(frame, ctx);
     if (name.equals("bind")) {
       ctx.attribute(null);
-      bindings[0].execute(
-          frame,
-          ctx,
-          new LazyBinding(
-              frame,
-              ctx,
-              instrumentedSource || isolatedInitializer,
-              instrumentedSource || isolatedInitializer && bindings[0].frameSlot >= 0));
       try {
+        bindings[0].execute(
+            frame,
+            ctx,
+            new LazyBinding(
+                frame,
+                ctx,
+                instrumentedSource || isolatedInitializer,
+                instrumentedSource || isolatedInitializer && bindings[0].frameSlot >= 0));
         return children[1].execute(frame, ctx);
       } finally {
         bindings[0].clear(frame, ctx);
@@ -1081,8 +1081,8 @@ class ExprNode extends CelNode {
     if (name.equals("optMap") || name.equals("optFlatMap")) {
       OptionalValue o = optional(range);
       if (!o.present()) return o;
-      bindings[0].execute(frame, ctx, o.value());
       try {
+        bindings[0].execute(frame, ctx, o.value());
         Object mapped = children[1].execute(frame, ctx);
         if (mapped instanceof Unknown) return mapped;
         return name.equals("optMap") ? OptionalValue.of(mapped) : optional(mapped);
@@ -1113,18 +1113,18 @@ class ExprNode extends CelNode {
           range instanceof List<?> && variables.length == 1
               ? ctx.qualify(rangeAttribute, index)
               : null);
-      bindings[0].execute(frame, ctx, ctx.iterationValue(key, ctx.attribute()));
-      if (variables.length == 2) {
-        ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
-        bindings[1].execute(
-            frame,
-            ctx,
-            ctx.iterationValue(
-                range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item,
-                ctx.attribute()));
-      }
-      index++;
       try {
+        bindings[0].execute(frame, ctx, ctx.iterationValue(key, ctx.attribute()));
+        if (variables.length == 2) {
+          ctx.attribute(ctx.qualify(rangeAttribute, range instanceof Map<?, ?> ? item : index));
+          bindings[1].execute(
+              frame,
+              ctx,
+              ctx.iterationValue(
+                  range instanceof Map<?, ?> m ? HostCollections.get(m, item) : item,
+                  ctx.attribute()));
+        }
+        index++;
         Object predicate = children[1].execute(frame, ctx);
         if (predicate instanceof Unknown u) {
           unknown = unknown == null ? u : unknown.merge(u);
