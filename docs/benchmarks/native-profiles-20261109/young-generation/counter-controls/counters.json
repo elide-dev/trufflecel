@@ -1,0 +1,1529 @@
+{
+  "complete": true,
+  "captured_at": "2026-11-09T05:11:15.184458+00:00",
+  "host": "unclemax",
+  "kernel": "7.0.0-43-generic",
+  "source_manifest": {
+    "commit": "29269155d6c4b6470c74f55c5cbbe37b31fc3955",
+    "dirty": false,
+    "production_tree": "06e399d1096d1d03731a2544fe932334b71b315d",
+    "purpose": "Issue 42 baseline: current release production tree, diagnostic and startup harnesses",
+    "build_command": "bazel build //benchmarks/comparison:memory_phases //benchmarks/representative:startup_deploy.jar //benchmarks/representative:startup_svm //benchmarks/representative:startup_prepared_svm --remote_download_toplevel",
+    "files": {
+      "MODULE.bazel": "071c9b497fee2a6f2587f5821168b9e140d477f33c524e55f390e73f18674107",
+      "MODULE.bazel.lock": "9f6534ffc790b1d5413c4fe25e909be85876b97c3efcda77d0a4610273d666c8",
+      "benchmarks/comparison/AstInterchangeTest.java": "9b0a98db56e4a36b091f40ff07a831cbfe33b2cbe66b53d66185b683ed59a270",
+      "benchmarks/comparison/BUILD.bazel": "d1c84d329f679043a25ffd31e3967d69868a52da76bd00aaf5a9ef819b45f7cd",
+      "benchmarks/comparison/Comparison.java": "5fa9dba2743978266b90fcd8ec1b35774522764018041766f294378588e709c1",
+      "benchmarks/comparison/Fixtures.java": "7162a5b8aa152ee1149d41fef3e7509542b38be8244ee295ed7ab1ebe0923b0d",
+      "benchmarks/comparison/ImageExpressions.java": "a7e2ddeaaab30b7d022c4c4268b27b51720579a58ec3c6d9158428462cfef8cf",
+      "benchmarks/comparison/MemoryPhases.java": "4741c361a493940b28ed02fb42f977ff63fd9ff531d159b32246dd7d16ea3a55",
+      "benchmarks/comparison/MemoryPhasesTest.java": "9ff6963bf424d40f17012b62adb9574b70e76908f86cfbe0b9b6cb6af82d25d8",
+      "benchmarks/comparison/memory_diagnostic.py": "62ad656f66c68739ae1afec051493e18fca1ae50fc31099e262cffc59fa7a4dc",
+      "benchmarks/comparison/memory_diagnostic.sh": "d70c32a0936381c5c4c3ee6db8af267834530ec39fa9a543511c12c3e3336b3a",
+      "benchmarks/comparison/memory_diagnostic_test.sh": "767ab0f073682a05d50ee9a83c5df2cf9b3c78450125eb8358f53f014ba67f88",
+      "benchmarks/comparison/native_smoke.sh": "5e3857eb1c8d871d80fe8b5ca27d07667c4d9c7c2a4ab6848e3b7d4d24da48aa",
+      "benchmarks/comparison/test_memory_diagnostic.py": "83d91fb156b1ded5b38d4a9347b0465fbca1eb45a2ebad896281342acff54a6d",
+      "benchmarks/representative/ActivationEvaluation.java": "d517c074a8612684004489ccf4256b2ae9f352c5979ca1aa3407b9a7fe8c3cf8",
+      "benchmarks/representative/ActivationPreparation.java": "6a49bba9f7615931904c9251539808ffc359fd7dd7002786baea0892bc12fb40",
+      "benchmarks/representative/BUILD.bazel": "41a096a627e758716e51a91e86f55a18971f6e063b9d63ce8ad1eeebc08b43e1",
+      "benchmarks/representative/Engines.java": "ddb8fa0c891a412d3818428b6b5e5de90a1f85d56be85e8ea4a07ec44dbcc850",
+      "benchmarks/representative/EvaluationMemory.java": "5e7b45bb46ec490d51a3e04cff04af0e9c51a66157404fe0bbf9296c35293b2a",
+      "benchmarks/representative/FrontendStages.java": "acfc40e69e14b117840b43dfd7307bc146527ddf45fb87bfa959ee04caef47dd",
+      "benchmarks/representative/ImagePrepared.java": "66546cdcd1a4737895e785f200ace41eebe93e6bb2756bc9381bb70713c14f96",
+      "benchmarks/representative/IngestionNativeAllocation.java": "f9704f327b5b2e599ca4f153b05aa3e43980831c57973b7ff7d3812c7a65a1ed",
+      "benchmarks/representative/IngestionProfile.java": "6554d20e840cd6f3d5e0bc8c3956722ef4a6daae2bd95d3a0723e5c7ba38d471",
+      "benchmarks/representative/IngestionStages.java": "3f5a89cade692a9e7d65bb050a1bf5f7bf74af2f604e80614b44594378fd4d5b",
+      "benchmarks/representative/Lifecycle.java": "31d0b2d3be9a9b72ce2152ebe9fc7805a186a93b742021b65f9535ad521ab00d",
+      "benchmarks/representative/NegativeDifferentialTest.java": "c772f653101ccb1eb850f64e1d4945ed8f02f5434fc4e842e93c0a73cbbde72c",
+      "benchmarks/representative/PreparedLifecycle.java": "4b3c665a8ddf49246b4b45a194c7fc4ede46c0f87d3ecf02e134d23370555a68",
+      "benchmarks/representative/ProtobufZero.java": "4adb215d913b139353db879882fb894d811bdf9e82eb7c9b632105999996d064",
+      "benchmarks/representative/RegexQualification.java": "d175d2494157e5c5681e585d156035cffa24b60c33dc3941532ca7e874bad2cb",
+      "benchmarks/representative/SemanticsTest.java": "ac6c27240a17e4f06cb4e979960ecd48642a5a5370e8ee1420e5e6b5630395b6",
+      "benchmarks/representative/Smoke.java": "938a14f2205bcb5609f8dc12b9e5b9436393faf38971a7ff4ffb2c3e21fa99d0",
+      "benchmarks/representative/Startup.java": "c3cd5a2d425e79d217e724b9c9a15892a908c959f586968b9637b18195fd8bdf",
+      "benchmarks/representative/StartupImageMode.java": "66e54295f8b61bb240580a5726b49e54c48aaa04a066a451d528098cac09e9c2",
+      "benchmarks/representative/StartupPrepared.java": "14f026cd9d9391ee7f013dd28fd8f721e2f67c1e8a734d44f93e92991d65a2c4",
+      "benchmarks/representative/SteadyState.java": "718296ab8e48566ada4aabd643be6cd8026791ca2930d65c94437fbb09ddea28",
+      "benchmarks/representative/StructuredAccess.java": "502f5a75b46337b1476442586ab7e585af4e829eb534ef224b97f8d4afc26810",
+      "benchmarks/representative/UpstreamProtobufFeature.java": "8f375dbd1e6c1cd69c307c7f6115c51d68b6a3a3b00e65c172753791e2c3d371",
+      "benchmarks/representative/Workloads.java": "af0e610af712cdd068e4d131a2910645594b42bba0a3073d23920c6f381d8abc",
+      "benchmarks/representative/ingestion_native_allocation.sh": "92605289d318f94ed352f5f2b5af9063b0ce37da743e692e8360b6e5fd794129",
+      "benchmarks/representative/input_control_smoke.sh": "6cb57e506b9761c18441540e8183d8647bf6673cf4fdbc4d221650fb2a2c0d1d",
+      "benchmarks/representative/native_smoke.sh": "fb624ca9c8ee95963ac0f70815e2a5933d05f5361b5e9cd5e475eac2842c533c",
+      "benchmarks/representative/policy.proto": "b4285040affd5c149530b3345c6a685f8ba322d5ad715710a6aaaf86636c14aa",
+      "benchmarks/representative/prepared_native_smoke.sh": "b0824367d02f9923d43d83fd6be05ce88010fec398c32597d35a74e72fa0091e",
+      "benchmarks/representative/startup_smoke.sh": "25de725c84a0f10e19b7f8b8748e538aac7bc9e14a591d86075651a612dc1de5",
+      "cel_java_install.json": "8029578430b1acc274134f0fa37ef066a27b1f02eb07769f43c1674ee1dc5316",
+      "maven_install.json": "d87ab53d45dc3e40241bd691e63808a35c67190d277fa297761958f41e4b91dd",
+      "src/main/java/dev/trufflecel/Activation.java": "afa27d50ec0af4cc114b214063dbef72873361550e78e58a32f1d727cf2bef32",
+      "src/main/java/dev/trufflecel/Ast.java": "ecfa32e8ea895586b31a0c9f0a4ec0845a3f7d52b72ef22ced008a1accae8a36",
+      "src/main/java/dev/trufflecel/Attribute.java": "8e44dea2d79289bade09cbe583394b1f995ad89c1d22035058a44f190feee149",
+      "src/main/java/dev/trufflecel/AttributePattern.java": "60b4511c9b0946d696a933b0760c4f95df13857e3107b4160a69abd9630de9f5",
+      "src/main/java/dev/trufflecel/BUILD.bazel": "07e7d94af11f224aa13ad77d57192c0c7142ea44eab0031c9bb8775760388baa",
+      "src/main/java/dev/trufflecel/BorrowedBindings.java": "ecc29e7593c517e4dec097c47788778ba904dfac7cecff4b182b3a13d8f0278f",
+      "src/main/java/dev/trufflecel/Bytes.java": "b610ea18fb1809edb9a458357a5690c3597f443553b79b91244362df089584b9",
+      "src/main/java/dev/trufflecel/CanonicalAst.java": "c7b244c168f995d21ee803b08a69b5df8125a7fbabd0cfba8e5054e28f61a14f",
+      "src/main/java/dev/trufflecel/Cel.java": "2192bfc84c6daa7d6422e8ddfe83034d2402e44273d3d5d72aec769c5c4f9720",
+      "src/main/java/dev/trufflecel/CelException.java": "ca2184c4ae31a2a1ac787290c268b0a6b1c7050e07eb3805157ec3cee000f7c0",
+      "src/main/java/dev/trufflecel/CelField.java": "92ec3527b8fb111054878499df87a424a58fc6de0432aadc23db00ca60e92df3",
+      "src/main/java/dev/trufflecel/CelLanguage.java": "eff568c15d18a543b601e7ef7ec8cee91b97599453f8c007637b2c2dee073bd5",
+      "src/main/java/dev/trufflecel/CelNode.java": "5e7a39ecacb17adadb7a40cbf9c245fe9bfcf8231c15bc8f5dca6f712ea8b901",
+      "src/main/java/dev/trufflecel/CelNull.java": "b2c140503bc24f3188cb5c8f835160ac2216d3278ab95bde17b57e9d0084b160",
+      "src/main/java/dev/trufflecel/CelPojo.java": "77fead122b1834ea9a12173687001145d2ebe3f7163289f722476638b9556b60",
+      "src/main/java/dev/trufflecel/CelType.java": "e7c0df8d6162129a3d57c296e2cd3322ade281a4aa654c24e671e1973b1a748a",
+      "src/main/java/dev/trufflecel/Checker.java": "f0d76354a441e5c6e233ae3f64c0568976afbf52d03a4eadc4c2aec3ad3537ee",
+      "src/main/java/dev/trufflecel/ComprehensionNode.java": "7d0218c82c18a72c1da7cc8de55088b9118ebc36623df14229abdef3dbf8a253",
+      "src/main/java/dev/trufflecel/ConfigurationData.java": "fb41129d94b8a36d62aa620bdb26ff36fd81b32f3cb1ec334f69d8bf1b7cbc1f",
+      "src/main/java/dev/trufflecel/CostEstimator.java": "9a3dfe02f556c767f15a0a95ea37e931cd4af90846d020a1818d6e4d58ce2b6f",
+      "src/main/java/dev/trufflecel/CseOptimizer.java": "b5c790761f05988a336f5b29f4da3cc1f6ed51edb207507bcd61522ab652c044",
+      "src/main/java/dev/trufflecel/DataType.java": "652dd395786e2873fbfb64eb2df9effd9a5a769e974e4257738b73fcfe97e7b8",
+      "src/main/java/dev/trufflecel/DataValues.java": "ce3df626817e9aa2bee32a925a4dca967b68e1f40585a105aa754a9791139361",
+      "src/main/java/dev/trufflecel/EncoderFunctions.java": "389bdbf98fea6793f84f53432fc0744443c1dd9c8189103542909c1907beb221",
+      "src/main/java/dev/trufflecel/Environment.java": "2c21f9bbe5ecf108232e107d9ac448ce6b445e8812ecdce9863f110d2656e7d8",
+      "src/main/java/dev/trufflecel/EnvironmentYaml.java": "3faa0785c489ce4aa5330851be9a9d7ac2eb5b7e71f47e1d01bfaf88250d49d4",
+      "src/main/java/dev/trufflecel/EvalContext.java": "526d5c47d0a784ef780ad04586a7fd2320f4661c2a90ddfd5fe81970cc985b9b",
+      "src/main/java/dev/trufflecel/EvaluationOptions.java": "4d577d36aab26947f797484e4ac6504989291ad327959e37c9d3067491f890ed",
+      "src/main/java/dev/trufflecel/EvaluationResult.java": "7778b3ea8e9e46ca9e7677b2d8dfc5262e5da45a0cf4211b8c6c9d1b57ecf6e8",
+      "src/main/java/dev/trufflecel/EvaluationState.java": "ec8087f539b3364a73a36712fdaf0925551185326090fdabbb88466dea57004d",
+      "src/main/java/dev/trufflecel/ExprNode.java": "278d10a5c559d82dc2330a4f57f4a6595233d841fab7ec0cb1b88dfa6d5b1272",
+      "src/main/java/dev/trufflecel/ExtensionFunctions.java": "375726c6804d34d7c02e55eccdcd37de11a4f29a009a9a4d1ee34dc0d27fce2a",
+      "src/main/java/dev/trufflecel/FieldPlan.java": "62cfde053da7d9f61266268d518e040cd1e3ddca39f5f02c500af9e389a9598d",
+      "src/main/java/dev/trufflecel/FunctionOverloads.java": "c77811ab928eed7cf4103fe2f21a3b2c4a018e5d3d6e44b27e501a7ed9d15664",
+      "src/main/java/dev/trufflecel/Functions.java": "f9baa0a4ffc9c20b2750141a895aba036f6beb0046d2fc0ba95eb18831fb04f5",
+      "src/main/java/dev/trufflecel/GuestException.java": "ab3f00bda58ba27df0e9468f98ae57d754154cfb422c5765416c950f40c702b5",
+      "src/main/java/dev/trufflecel/GuestValue.java": "2a89fb09ff66ea15f74d39d2c21d0f31c0c464b86d02446313a947da40f2f255",
+      "src/main/java/dev/trufflecel/HostCollections.java": "844ccbed29f299622515fcdbb3c368d43ddbb915aa51037bd2ac799e404cab24",
+      "src/main/java/dev/trufflecel/JsonValues.java": "40662779deb49949666f4be4857ef90d316feff49be1934989bb3d63e7162de9",
+      "src/main/java/dev/trufflecel/LibraryPolicy.java": "b100e5210f11caf0b9565404dee79a51b8f24950f3fbeb1e3c21a422a0b071fa",
+      "src/main/java/dev/trufflecel/Macro.java": "3515aa60367212ee3154c1ad6fd9fb387111800915ba6633d8aa263665c17a8e",
+      "src/main/java/dev/trufflecel/NetworkValue.java": "d594b2d8e263eae838b96a085adb41fb420718c258276c77e72aeb129b9a589e",
+      "src/main/java/dev/trufflecel/ObjectType.java": "f1abcda2dad78b76b0a1854f521f43765594f6cad91773d9eaefa4e48b00350e",
+      "src/main/java/dev/trufflecel/Optimizer.java": "1b8adcdaeb27bc048e9ed649c87853c8b2de7bae6d4da789e729d868660164d5",
+      "src/main/java/dev/trufflecel/OptionalValue.java": "5208cc8ef454b3aba64fc224faef1e8b2cd58daa9adc2c451fc72d699a7bb6bc",
+      "src/main/java/dev/trufflecel/Parser.java": "fde8c8dda9be04133f6a16a2ca13ef81188582d8e535daa1f7343e3ce0bd6af2",
+      "src/main/java/dev/trufflecel/PartialActivation.java": "b658d4f07feb5d6c37987587506a852df707d98281f4198cf395c0822ecb3266",
+      "src/main/java/dev/trufflecel/PartialResult.java": "75c9e1d03f7a4cfb54b9c9d2305726895a7a1fafc4ab3472ffe7acf7a1105b91",
+      "src/main/java/dev/trufflecel/PartialState.java": "c3a1dc1c10731e393ffc2f2610671d88d53b481226e7c8e10423a970b8cf9ae2",
+      "src/main/java/dev/trufflecel/PojoType.java": "7b6a3bda26f9ca7bacc7fa62069dd24c59c7bb777ceca4bacec09a2e54ff4411",
+      "src/main/java/dev/trufflecel/PolicyCompiler.java": "024339f345e2f76220be86e9a3357d94fe36df60dcb40a7f7eb37107924d14e0",
+      "src/main/java/dev/trufflecel/PreparedProgram.java": "08731e430c8fe467eec14197e7fdc50c056a9ab79b7ab6c85c7be99460ceff43",
+      "src/main/java/dev/trufflecel/Program.java": "08724eb51e48b0640a2c43d8650be9390cb40d0a2cfefbf1a17a557390025814",
+      "src/main/java/dev/trufflecel/ProtobufType.java": "cab782a58071d29d58018fd192fcc24f8dbe82028d923b1ddce707d8877a5902",
+      "src/main/java/dev/trufflecel/Re2Regex.java": "eedd5564df3996ed47935987ea325523721569f27836fe3eef5579ccc77b5c3a",
+      "src/main/java/dev/trufflecel/Regex.java": "f4ae6ca3576ac5283a2ec5ba4af51a63a17d1594c0da1e8cf4a47d9a20ff03c8",
+      "src/main/java/dev/trufflecel/TraceEvent.java": "1ed99f655472e91a4ad234aabf48f86880792c077e6899effcab8ffd3f50d578",
+      "src/main/java/dev/trufflecel/TraceListener.java": "ca22249e3eb4222f848819a2762d7ee26de3d7536bbc443bc95bf9e91625561d",
+      "src/main/java/dev/trufflecel/TracedProgram.java": "bccc4bb369ed44d6e216320fdb6870ea61720da98c84f58f67fd54fa2a25fe86",
+      "src/main/java/dev/trufflecel/TypeSyntax.java": "7434111a4904f76bb8107c53fcc0ab2d62b8778438257e94019b41651f8e8f0f",
+      "src/main/java/dev/trufflecel/UInt.java": "87b980a1ef8098f0b1995e5e674b0f55eec70ebea18a8a605d07c271047d216b",
+      "src/main/java/dev/trufflecel/Unknown.java": "962f8216b91f2d7e992fea48a5f5da0229321f60c161d7839cc2ff6f701ed49c",
+      "src/main/java/dev/trufflecel/Unparser.java": "1dcc9d58b30a2081c5810b7d3144aaa434c5ee80398d8a60ceb153e184fbc58c",
+      "src/main/java/dev/trufflecel/Validator.java": "880ab0659d6e76ed83e97ab603464ba70ba41d04a1a8d02233b5036c6798bea6",
+      "src/main/java/dev/trufflecel/Values.java": "aa91c183d2f9750dfe153bf553a8a433603c32b8275bffe5e8bf712d3e256863",
+      "src/main/java/dev/trufflecel/WellKnownTypes.java": "7934ece887d138673cbf297476949496a51f9d15cbde992b4dc8e587436c9c2a",
+      "src/main/java/dev/trufflecel/WriteNode.java": "2dd612fc80d0b5f0e490f656c04741633f96a88b6a47fdaf5085a53d98b5ffe6",
+      "src/main/java/dev/trufflecel/processor/BUILD.bazel": "2b004cffc1304ad1e33f2910cdf0f927713bf79f211ae899cc0168d31ca78d9b",
+      "src/main/java/dev/trufflecel/processor/META-INF/services/javax.annotation.processing.Processor": "3c7a5a97cf4b0080bf1aeb14e5eedf917d7aeae60ca577275c6e9f7875b8444c",
+      "src/main/java/dev/trufflecel/processor/PojoProcessor.java": "523d04e75407854d7a98b3e3c91418d03499c90b3f496ba308ee26d3511ac567",
+      "tools/bench/representative.py": "3afa5803c279a544c1d2c81b8022cc577c79a6639fc37caa404ed74e2f853168",
+      "tools/bench/startup.py": "cc960481bbb2c0da28e1fa542ab9e3991714330e5c6994c81709ca335fb58faf"
+    },
+    "artifacts": {
+      "memory-phases": "4055047770031aceef02373a96a967c3dcde538a080d9f3a4cc144b604cd92b3",
+      "startup.jar": "8eb40fc2b417aac8bb2a45d647c426e920851f865e3da84a7df1bb5af68598c5",
+      "startup-native": "8fae97917fe03ad8df038d1930ffbaf13dffff3a145ba56b251d4980d5a485f3",
+      "startup-prepared-native": "a8e45d1f6ccfcd24da7cf6b723742b61ed46c39e31257c597e30ae868f381166"
+    }
+  },
+  "binary_sha256": "4055047770031aceef02373a96a967c3dcde538a080d9f3a4cc144b604cd92b3",
+  "driver_sha256": "f819cbe8aa6b525905925b98f79e044abc54940890b3973316611fa4cf67ee4e",
+  "records": [
+    {
+      "profile": "default",
+      "engine": "trufflecel",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "trufflecel",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 23085,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 329475,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 81412,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 18087,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 17753760,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 62784,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 18142344,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 108480,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 46549041,
+          "heap_used": 100487168,
+          "heap_committed": 100487168,
+          "non_heap_used": 108480,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 13122295,
+          "heap_used": 872448,
+          "heap_committed": 101011456,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 40,
+          "heap_used": 1396736,
+          "heap_committed": 101011456,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 213471,
+          "heap_used": 872448,
+          "heap_committed": 101011456,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 242475,
+          "heap_used": 872448,
+          "heap_committed": 101011456,
+          "non_heap_used": 4464,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "default",
+      "engine": "truffle-interpreter",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 19369,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 311839,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 71998,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 17096,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 50,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 30,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 119961860,
+          "heap_used": 8212480,
+          "heap_committed": 135614464,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 1133062,
+          "heap_used": 872448,
+          "heap_committed": 132468736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 132468736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 159409,
+          "heap_used": 872448,
+          "heap_committed": 132468736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 198127,
+          "heap_used": 872448,
+          "heap_committed": 132468736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "default",
+      "engine": "cel-java",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 16715,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 90,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 730217,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 19369,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 20,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 253486447,
+          "heap_used": 74797056,
+          "heap_committed": 134565888,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 9199394,
+          "heap_used": 872448,
+          "heap_committed": 131944448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 131944448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 240411,
+          "heap_used": 872448,
+          "heap_committed": 131944448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 223937,
+          "heap_used": 872448,
+          "heap_committed": 131944448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "young-32m",
+      "engine": "trufflecel",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "trufflecel",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 16625,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 303386,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 73711,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 9124,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 18844398,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 62784,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 19507023,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 108480,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 34641619,
+          "heap_used": 26562560,
+          "heap_committed": 27086848,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 3161077,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 25513984,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 180130,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 50160,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 224787,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 4464,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "young-32m",
+      "engine": "truffle-interpreter",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "truffle-interpreter",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 19179,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 327672,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 72359,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 17306,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 40,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 30,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 112032013,
+          "heap_used": 17649664,
+          "heap_committed": 27086848,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 2060704,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 40,
+          "heap_used": 1396736,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 158698,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 198188,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "young-32m",
+      "engine": "cel-java",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "cel-java",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 16214,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 70,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 701944,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 19088,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 20,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 221410110,
+          "heap_used": 17649664,
+          "heap_committed": 27611136,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 2090470,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 217166,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 207872,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "shared-young-32m",
+      "engine": "trufflecel",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "-XX:-CompileInIsolates",
+        "trufflecel",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 15944,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 319620,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 73180,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 10216,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 17901802,
+          "heap_used": 13455360,
+          "heap_committed": 13455360,
+          "non_heap_used": 48,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 18974253,
+          "heap_used": 7688192,
+          "heap_committed": 27611136,
+          "non_heap_used": 72,
+          "non_heap_error": null,
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 42974412,
+          "heap_used": 7688192,
+          "heap_committed": 30232576,
+          "non_heap_used": null,
+          "non_heap_error": "java.lang.IllegalArgumentException: used parameter = -58248 is negative.",
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 1357088,
+          "heap_used": 1921024,
+          "heap_committed": 26038272,
+          "non_heap_used": null,
+          "non_heap_error": "java.lang.IllegalArgumentException: used parameter = -58248 is negative.",
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 50,
+          "heap_used": 2445312,
+          "heap_committed": 26038272,
+          "non_heap_used": null,
+          "non_heap_error": "java.lang.IllegalArgumentException: used parameter = -58248 is negative.",
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 603035,
+          "heap_used": 1921024,
+          "heap_committed": 26038272,
+          "non_heap_used": null,
+          "non_heap_error": "java.lang.IllegalArgumentException: used parameter = -58248 is negative.",
+          "last_tier": true,
+          "effective_options": {
+            "compilation": true,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 697197,
+          "heap_used": 1921024,
+          "heap_committed": 26038272,
+          "non_heap_used": null,
+          "non_heap_error": "java.lang.IllegalArgumentException: used parameter = -103944 is negative.",
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "shared-young-32m",
+      "engine": "truffle-interpreter",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 20991,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 342554,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 74722,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 16856,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 30,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 30,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 105522056,
+          "heap_used": 17649664,
+          "heap_committed": 27086848,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 1964941,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 151117,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": {
+            "compilation": false,
+            "background_compilation": false,
+            "compiler_idle_delay_ms": 10000,
+            "graph_cache_purge_delay_ms": 10000,
+            "compiler_options": "{compiler.TreatPerformanceWarningsAsErrors=all, compiler.DiagnoseFailure=true}"
+          }
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 193411,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    },
+    {
+      "profile": "shared-young-32m",
+      "engine": "cel-java",
+      "command": [
+        "/home/sam/trufflecel-issue42-20261109/baseline/memory-phases",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:MaxNewSize=32m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "comprehension",
+        "true",
+        "0"
+      ],
+      "phases": [
+        {
+          "phase": "baseline",
+          "elapsed_ns": 15644,
+          "heap_used": 524288,
+          "heap_committed": 524288,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context",
+          "elapsed_ns": 110,
+          "heap_used": 872448,
+          "heap_committed": 872448,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "prepared",
+          "elapsed_ns": 718649,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "first_results",
+          "elapsed_ns": 18758,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "warmup",
+          "elapsed_ns": 20,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "compiled",
+          "elapsed_ns": 20,
+          "heap_used": 1396736,
+          "heap_committed": 1396736,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "evaluated",
+          "elapsed_ns": 236570786,
+          "heap_used": 17649664,
+          "heap_committed": 27611136,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "application_gc",
+          "elapsed_ns": 2173744,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle",
+          "elapsed_ns": 30,
+          "heap_used": 1396736,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "idle_application_gc",
+          "elapsed_ns": 233781,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        },
+        {
+          "phase": "context_closed_gc",
+          "elapsed_ns": 223996,
+          "heap_used": 872448,
+          "heap_committed": 25513984,
+          "non_heap_used": 0,
+          "non_heap_error": null,
+          "last_tier": false,
+          "effective_options": null
+        }
+      ]
+    }
+  ]
+}

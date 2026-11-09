@@ -11,6 +11,14 @@ startup controls. [summary.json](summary.json) retains process values and ranges
 Ranges are observations across fresh processes, not confidence intervals or proof
 of statistical equivalence.
 
+The subsequent [young-generation qualification](young-generation/README.md) tests
+a 32 MiB cap, with and without shared compilation, in a separate 432-process
+matrix. It reduces native interpreter comprehension RSS to **59.85 MiB**, below
+matched optimized cel-java's **65.33 MiB**, with 0.5% higher hot evaluation time
+and overlapping timing ranges. Other fixtures have throughput tradeoffs. Its
+[charts](../../images/native-profiles-20261109/README.md), raw data and full tables
+are retained separately; do not pool the two runs.
+
 ## Compiler memory
 
 Both profiles use the same combined timing/memory executables and

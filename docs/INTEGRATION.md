@@ -47,6 +47,24 @@ at image build time is not a substitute for runtime initialization. Input creati
 decoding remain part of the first request unless the application explicitly prepares
 immutable inputs too.
 
+The [young-generation profile comparison](benchmarks/native-profiles-20261109/young-generation/README.md)
+tests a smaller young generation while retaining the default compiler isolation.
+Its exact 512 MiB Serial GC configuration is:
+
+```sh
+./application -Xms512m -Xmx512m -XX:MaxNewSize=32m
+```
+
+This reduces resident heap capacity in the measured fixtures without reducing the
+total heap limit or per-evaluation allocation. It can increase collection frequency;
+qualify the application's throughput and live-data requirements before selecting
+heap bounds. These measurements do not establish a universal young-generation size,
+and TruffleCEL does not change the application's GC settings.
+Across the six native fixtures, interpreter RSS falls 45.2–61.2%, while evaluation
+time changes by −5.1% to +6.1%. Guest-JIT RSS falls 5.6–40.0%, with time changes of
+−4.9% to +1.9%. These are three-process medians on a shared host, not performance
+guarantees. See the complete ranges and matched cel-java controls in the report.
+
 For Native Image applications using guest compilation, the pinned GraalVM
 `25.5.5-elide.27` also supports running the compiler in the application isolate:
 
@@ -61,6 +79,7 @@ application's other guest languages too. The native guest-JIT/blocklist smoke ga
 in both modes. The [paired profile measurements](benchmarks/native-profiles-20261109/README.md)
 report throughput, allocation, current RSS, peak RSS and compilation cost separately.
 Lower compiler memory does not imply lower live application heap or a universal RSS win.
+The same report also qualifies combining shared compilation with the 32 MiB cap.
 On `.27`, the shared-compiler profile also reproduces a known
 [non-heap management-counter defect](benchmarks/graalvm-nonheap-counter-issue.md):
 `getNonHeapMemoryUsage()` can throw after guest compilation. Applications that depend
