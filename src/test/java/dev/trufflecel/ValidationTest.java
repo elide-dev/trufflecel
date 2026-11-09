@@ -107,6 +107,13 @@ public final class ValidationTest {
     // such a call is a separate finding.
     assertEquals(1, rejects(env, "'abc'.matches('(')").issues().size());
     assertEquals(2, rejects(env, "(1 / 0 == 0 ? 'a' : 'b').matches('(')").issues().size());
+    // A validator defect inside an all-constant aggregate is reported once, at the inner defect,
+    // never duplicated at the enclosing list/map/select delimiter. One finding per appearance.
+    assertEquals(1, rejects(env, "[timestamp('abc')]").issues().size());
+    assertEquals(1, rejects(env, "['abc'.matches('('), true]").issues().size());
+    assertEquals(1, rejects(env, "[{'k': timestamp('abc')}]").issues().size());
+    assertEquals(1, rejects(env, "{'k': timestamp('abc')}.k").issues().size());
+    assertEquals(2, rejects(env, "[timestamp('abc'), timestamp('abd')]").issues().size());
     // Strict unchecked compilation of a sound program succeeds; literal validators only apply
     // to one-argument conversions of string literals.
     assertEquals(2L, env.parse("x + 1").evaluate(Map.of("x", 1L)));
@@ -123,6 +130,44 @@ public final class ValidationTest {
     assertEquals(
         CelException.Code.NO_OVERLOAD,
         assertThrows(CelException.class, () -> env.parse("same(1, 2)")).code());
+  }
+
+  @Test
+  public void strictReportsValidatorFindingOnceInsideConstantAggregate() {
+    Environment env = standard(Environment.Validation.STRICT);
+    // An invalid literal conversion or constant regex pattern inside an all-constant aggregate
+    // is folded on the ancestor, which captures the inner node's fresh exception on its own Fold.
+    // The validator finding is reported once, at the inner defect's position, never duplicated at
+    // the enclosing list/map/select delimiter, and one finding is emitted per appearance.
+    CelException list = rejects(env, "[timestamp('abc')]");
+    assertEquals(1, list.issues().size());
+    assertEquals(CelException.Code.INVALID_ARGUMENT, list.code());
+    assertEquals(1, list.offset());
+    assertEquals(2, list.column());
+    // A constant regex inside an all-constant list: one finding, at the pattern literal.
+    CelException matches = rejects(env, "['abc'.matches('('), true]");
+    assertEquals(1, matches.issues().size());
+    assertEquals(15, matches.offset());
+    // The validator finding keeps its inner position under nested aggregates and selection.
+    assertEquals(7, rejects(env, "[{'k': timestamp('abc')}]").offset());
+    assertEquals(6, rejects(env, "{'k': timestamp('abc')}.k").offset());
+    // Two distinct defects in one aggregate: one finding per appearance, no ancestor duplicate.
+    CelException twoDefects = rejects(env, "[timestamp('abc'), timestamp('abd')]");
+    assertEquals(2, twoDefects.issues().size());
+    assertEquals(1, twoDefects.issues().get(0).offset());
+    assertEquals(19, twoDefects.issues().get(1).offset());
+    // A non-validator fold failure (division by zero) is still reported once at the aggregate;
+    // the duplicate-suppression does not affect fold-only failures.
+    CelException divide = rejects(env, "[1 / 0]");
+    assertEquals(1, divide.issues().size());
+    assertEquals(CelException.Code.DIVIDE_BY_ZERO, divide.code());
+    assertEquals(0, divide.offset());
+    // A constant matches call whose receiver folds to a failed literal conversion reports the
+    // conversion once, at the inner call; the MatchesNode's own error field is null, so only the
+    // code/message dedupe recognizes the inner defect.
+    CelException receiver = rejects(env, "string(timestamp('abc')).matches('a')");
+    assertEquals(1, receiver.issues().size());
+    assertEquals(7, receiver.offset());
   }
 
   @Test
