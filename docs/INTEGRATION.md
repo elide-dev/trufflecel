@@ -31,6 +31,49 @@ A Polyglot integration can instead use language ID `cel`, MIME type `application
 and `context.getBindings("cel")`. Host object access is explicit: proxy objects, arrays,
 and hash entries are copied into CEL values. No Java methods are exposed to expressions.
 
+### Native startup and compiler memory
+
+The plain Java API does not require a Polyglot `Context`. For non-regex expressions,
+instantiate a prepared program and call it directly; creating and entering an otherwise
+unused context adds first-request work. Source-backed instrumentation and Polyglot
+bindings still require their context. TruffleRegex acceleration also requires an entered
+CEL context: retain it for regex workloads, especially when omitting the optional RE2/J
+fallback. Reuse environments, adapters, programs and applicable contexts across requests.
+
+`Environment.prepare` can run during image construction. Store the resulting
+`PreparedProgram` in a build-time initialized holder and call `instantiate()` at runtime.
+This embeds a checked AST, not guest machine code. Creating a context or a call target
+at image build time is not a substitute for runtime initialization. Input creation and
+decoding remain part of the first request unless the application explicitly prepares
+immutable inputs too.
+
+For Native Image applications using guest compilation, the pinned GraalVM
+`25.5.5-elide.27` also supports running the compiler in the application isolate:
+
+```sh
+./application -XX:-CompileInIsolates
+```
+
+This is an **application launch option**, not a TruffleCEL library default. It avoids a
+separate compiler isolate and makes compiler allocations share the application's heap
+and GC. Size that heap for compilation as well as application data, and qualify the
+application's other guest languages too. The native guest-JIT/blocklist smoke gate runs
+in both modes. The [paired profile measurements](benchmarks/native-profiles-20261109/README.md)
+report throughput, allocation, current RSS, peak RSS and compilation cost separately.
+Lower compiler memory does not imply lower live application heap or a universal RSS win.
+On `.27`, the shared-compiler profile also reproduces a known
+[non-heap management-counter defect](benchmarks/graalvm-nonheap-counter-issue.md):
+`getNonHeapMemoryUsage()` can throw after guest compilation. Applications that depend
+on that counter need the upstream fix before adopting this profile. Linux process RSS
+and application heap counters remain available in the measured reproducer.
+
+Choose interpretation for deployments that do not benefit from guest compilation,
+using the process option `-Dpolyglot.engine.Compilation=false` before any targets are
+created, or the equivalent engine option for context-owned programs. Do not change
+process-global options from request handlers. Measure cumulative work over the expected
+program lifetime before selecting a compilation threshold; a warmed evaluation ratio
+does not establish when compilation pays back.
+
 ### Borrowed input bindings
 
 `Program.evaluate(Map)` and `Program.test(Map)` borrow the supplied activation for the

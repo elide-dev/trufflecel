@@ -31,7 +31,7 @@ class NativeProfileReportTest(unittest.TestCase):
                                guest_last_tier=engine == 'truffle-jit', compilation_enabled=engine == 'truffle-jit',
                                background_compilation=False, compilation_failure_action='Throw',
                                compiler_options={'compiler.TreatPerformanceWarningsAsErrors': 'all'},
-                               process_memory=dict(smaps_rollup=dict(Rss=1048576), status=dict(VmHWM=2097152)))
+                               process_memory=dict(smaps_rollup=dict(Rss=1048576, Pss=524288), status=dict(VmHWM=2097152)))
                 rows.append(row)
             (root / f'{phase}-metadata.json').write_text(json.dumps(meta))
             (root / f'{phase}.json').write_text(json.dumps(rows))
@@ -59,6 +59,7 @@ class NativeProfileReportTest(unittest.TestCase):
             first = summary['cells'][0]
             self.assertEqual(dict(median=2., minimum=1., maximum=3., forks=[1., 2., 3.]), first['ns_per_op'])
             self.assertEqual(1., first['rss_mib']['median'])
+            self.assertEqual(.5, first['pss_mib']['median'])
             self.assertEqual(2., first['peak_mib']['median'])
             self.assertIn('2.00 [1.00–3.00]', report.tables(summary))
             evaluation = report.summarize(root, include_startup=False)

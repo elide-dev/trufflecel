@@ -73,6 +73,7 @@ def summarize(root, include_startup=True):
                 metrics = dict(ns_per_op=[statistics.median(r['ns_per_op']) for r in timing],
                                bytes_per_op=[statistics.median(r['allocated_bytes_per_op']) for r in memory],
                                rss_mib=[r['process_memory']['smaps_rollup']['Rss'] / 1048576 for r in memory],
+                               pss_mib=[r['process_memory']['smaps_rollup']['Pss'] / 1048576 for r in memory],
                                peak_mib=[r['process_memory']['status']['VmHWM'] / 1048576 for r in memory])
                 if engine == 'truffle-jit':
                     metrics['forced_guest_preparation_ms'] = [r['forced_guest_preparation_ns'] / 1e6 for r in timing]
@@ -107,11 +108,11 @@ def tables(summary):
     lines = ['# Native profile qualification tables', '',
              'Values are process medians with min–max process ranges in brackets. Timing and memory use separate processes; ranges are not confidence intervals.', '',
              '## Evaluation: interpreter first, guest JIT separate', '',
-             '| Workload | Engine | Profile | ns/op | B/op | Current RSS MiB | Peak RSS MiB |',
-             '| --- | --- | --- | ---: | ---: | ---: | ---: |']
+             '| Workload | Engine | Profile | ns/op | B/op | Current RSS MiB | Current PSS MiB | Peak RSS MiB |',
+             '| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |']
     for r in summary['cells']:
         lines.append('| ' + ' | '.join([r['workload'], r['engine'], r['profile']] +
-                                      [interval(r[k]) for k in ('ns_per_op', 'bytes_per_op', 'rss_mib', 'peak_mib')]) + ' |')
+                                      [interval(r[k]) for k in ('ns_per_op', 'bytes_per_op', 'rss_mib', 'pss_mib', 'peak_mib')]) + ' |')
     lines += ['', '## Forced guest preparation', '',
               'Includes 2,000 warmup evaluations and synchronous last-tier compilation. This is excluded from hot timing and is not natural-JIT payback.', '',
               '| Workload | Profile | Preparation ms |', '| --- | --- | ---: |']
