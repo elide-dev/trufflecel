@@ -30,7 +30,8 @@ public final class PojoTest {
     assertTrue(
         environment
             .compile(
-                "u.id == 42 && u.addresses[0].zip == 123 && u.groups.team == [1, 2] && u.state == 'ACTIVE' && u.payload == b'\\x01\\x02'")
+                "u.id == 42 && u.addresses[0].zip == 123 && u.groups.team == [1, 2] && u.state =="
+                    + " 'ACTIVE' && u.payload == b'\\x01\\x02'")
             .test(Map.of("u", owned)));
     assertFalse(type.accepts(original));
     assertTrue(type.accepts(owned));
@@ -269,5 +270,21 @@ public final class PojoTest {
     // Host-side Value.equals retains Java equality (NaN-reflexive), unchanged by the fix.
     assertEquals(nanA, nanB);
     assertEquals(nanA.hashCode(), nanB.hashCode());
+    // Adapter equal() short-circuits when either operand is not accepted by this type.
+    var userValue = PojoFixtures_UserCel.INSTANCE.construct(Map.of());
+    assertFalse(type.equal(new Object(), nanA));
+    assertFalse(type.equal(nanA, new Object()));
+    assertFalse(type.equal(nanA, userValue));
+    // Values.equal routes mismatched-type PojoType.Value pairs through the typeName guard.
+    assertFalse(Values.equal(nanA, userValue));
+    // Values.equal rejects same-type snapshots with differing field counts.
+    var onlyF = type.construct(Map.of("f", 1.5));
+    var fAndN = type.construct(Map.of("f", 1.5, "n", 2.5));
+    assertFalse(Values.equal(onlyF, fAndN));
+    // Values.equal rejects same-type, same-size snapshots with a key missing from the right.
+    var onlyN = type.construct(Map.of("n", 2.5));
+    assertFalse(Values.equal(onlyF, onlyN));
+    // Values.equal falls back to host equals when only the left operand is a PojoType.Value.
+    assertFalse(Values.equal(nanA, "x"));
   }
 }
