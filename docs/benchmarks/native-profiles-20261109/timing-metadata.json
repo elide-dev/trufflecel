@@ -1,0 +1,2465 @@
+{
+  "schema": 1,
+  "complete": true,
+  "phase": "timing",
+  "captured_at": "2026-11-09T04:06:05.542253+00:00",
+  "host": "unclemax",
+  "kernel": "7.0.0-43-generic",
+  "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 4006.040\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 0\ncpu cores\t: 24\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 1\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 1\ncpu cores\t: 24\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 2\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 2\ncpu cores\t: 24\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 3\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 3\ncpu cores\t: 24\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 4\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 4\ncpu cores\t: 24\napicid\t\t: 8\ninitial apicid\t: 8\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 5\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 5410.875\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 5\ncpu cores\t: 24\napicid\t\t: 10\ninitial apicid\t: 10\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 6\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 8\ncpu cores\t: 24\napicid\t\t: 16\ninitial apicid\t: 16\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 7\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 9\ncpu cores\t: 24\napicid\t\t: 18\ninitial apicid\t: 18\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 8\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 10\ncpu cores\t: 24\napicid\t\t: 20\ninitial apicid\t: 20\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 9\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 11\ncpu cores\t: 24\napicid\t\t: 22\ninitial apicid\t: 22\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 10\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 12\ncpu cores\t: 24\napicid\t\t: 24\ninitial apicid\t: 24\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 11\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 13\ncpu cores\t: 24\napicid\t\t: 26\ninitial apicid\t: 26\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 12\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 16\ncpu cores\t: 24\napicid\t\t: 32\ninitial apicid\t: 32\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 13\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 17\ncpu cores\t: 24\napicid\t\t: 34\ninitial apicid\t: 34\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 14\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 18\ncpu cores\t: 24\napicid\t\t: 36\ninitial apicid\t: 36\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 15\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 19\ncpu cores\t: 24\napicid\t\t: 38\ninitial apicid\t: 38\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 16\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 20\ncpu cores\t: 24\napicid\t\t: 40\ninitial apicid\t: 40\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 17\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 21\ncpu cores\t: 24\napicid\t\t: 42\ninitial apicid\t: 42\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 18\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 24\ncpu cores\t: 24\napicid\t\t: 48\ninitial apicid\t: 48\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 19\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 25\ncpu cores\t: 24\napicid\t\t: 50\ninitial apicid\t: 50\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 20\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 26\ncpu cores\t: 24\napicid\t\t: 52\ninitial apicid\t: 52\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 21\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 27\ncpu cores\t: 24\napicid\t\t: 54\ninitial apicid\t: 54\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 22\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 28\ncpu cores\t: 24\napicid\t\t: 56\ninitial apicid\t: 56\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 23\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 29\ncpu cores\t: 24\napicid\t\t: 58\ninitial apicid\t: 58\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 24\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 0\ncpu cores\t: 24\napicid\t\t: 1\ninitial apicid\t: 1\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 25\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 1\ncpu cores\t: 24\napicid\t\t: 3\ninitial apicid\t: 3\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 26\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 2\ncpu cores\t: 24\napicid\t\t: 5\ninitial apicid\t: 5\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 27\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 3\ncpu cores\t: 24\napicid\t\t: 7\ninitial apicid\t: 7\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 28\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 4\ncpu cores\t: 24\napicid\t\t: 9\ninitial apicid\t: 9\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 29\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 5\ncpu cores\t: 24\napicid\t\t: 11\ninitial apicid\t: 11\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 30\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 8\ncpu cores\t: 24\napicid\t\t: 17\ninitial apicid\t: 17\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 31\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 9\ncpu cores\t: 24\napicid\t\t: 19\ninitial apicid\t: 19\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 32\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 10\ncpu cores\t: 24\napicid\t\t: 21\ninitial apicid\t: 21\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 33\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 11\ncpu cores\t: 24\napicid\t\t: 23\ninitial apicid\t: 23\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 34\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 12\ncpu cores\t: 24\napicid\t\t: 25\ninitial apicid\t: 25\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 35\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 13\ncpu cores\t: 24\napicid\t\t: 27\ninitial apicid\t: 27\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 36\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 16\ncpu cores\t: 24\napicid\t\t: 33\ninitial apicid\t: 33\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 37\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 17\ncpu cores\t: 24\napicid\t\t: 35\ninitial apicid\t: 35\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 38\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 18\ncpu cores\t: 24\napicid\t\t: 37\ninitial apicid\t: 37\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 39\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 19\ncpu cores\t: 24\napicid\t\t: 39\ninitial apicid\t: 39\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 40\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 20\ncpu cores\t: 24\napicid\t\t: 41\ninitial apicid\t: 41\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 41\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 21\ncpu cores\t: 24\napicid\t\t: 43\ninitial apicid\t: 43\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 42\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 24\ncpu cores\t: 24\napicid\t\t: 49\ninitial apicid\t: 49\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 43\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 25\ncpu cores\t: 24\napicid\t\t: 51\ninitial apicid\t: 51\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 44\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 26\ncpu cores\t: 24\napicid\t\t: 53\ninitial apicid\t: 53\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 45\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 27\ncpu cores\t: 24\napicid\t\t: 55\ninitial apicid\t: 55\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 46\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 28\ncpu cores\t: 24\napicid\t\t: 57\ninitial apicid\t: 57\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 47\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 8\nmodel name\t: AMD Ryzen Threadripper PRO 9965WX 24-Cores\nstepping\t: 1\nmicrocode\t: 0xb008121\ncpu MHz\t\t: 1223.623\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 48\ncore id\t\t: 29\ncpu cores\t: 24\napicid\t\t: 59\ninitial apicid\t: 59\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d debug_swap amd_lbr_pmc_freeze\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass srso spectre_v2_user vmscape tlbi\nbogomips\t: 8386.75\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 52 bits physical, 57 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\n",
+  "cpus": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "load_start": [
+    1.12451171875,
+    0.7880859375,
+    0.46484375
+  ],
+  "host_conditions": "Shared unclemax Threadripper host, serial measurement lock, fixed CPUs 2-9; no global tuning or exclusive CPU reservation.",
+  "artifacts": {
+    "native": "/home/sam/trufflecel-release-010-20261109/timing-native",
+    "memory_native": "/home/sam/trufflecel-release-010-20261109/memory-native"
+  },
+  "sha256": {
+    "native": "fc6536f17e2a0c9473dc500ca57f4b4cf1d6bfd3f562611437f08674ced50c23",
+    "memory_native": "68097015146f38f873ae7121517119be358c3f6838e419da6a3530e577c8bd3a"
+  },
+  "source_manifest": {
+    "commit": "cf0d51d85cd6041a93e2aed6178f88a0c3cdaa73",
+    "base": "92a0944c18f64e65e46b06e9077fdb19ad6a3f9d",
+    "production_tree": "06e399d1096d1d03731a2544fe932334b71b315d",
+    "versions": {
+      "TruffleData": "0.10.0",
+      "GraalVM": "25.5.5-elide.27",
+      "cel-java": "0.15.0"
+    },
+    "regex_backend": "truffle-regex-re2",
+    "regex_policy": "compatibility",
+    "files": {
+      ".bazelrc": "bb5577c9caf66b66bfa304320716ba06f5ea8eda73507c517da4fd6c77e9503a",
+      ".bazelversion": "4d9dfd02f463b487bd0bff68cf9292b3626b31c81febb54e8911e493f64793d0",
+      "MODULE.bazel": "071c9b497fee2a6f2587f5821168b9e140d477f33c524e55f390e73f18674107",
+      "MODULE.bazel.lock": "9f6534ffc790b1d5413c4fe25e909be85876b97c3efcda77d0a4610273d666c8",
+      "bazel/BUILD.bazel": "819300db3de4b1d409198b95d4ba53c7f84fb5b45d1347265e01035825e99a47",
+      "bazel/codspeed_hooks.BUILD": "81fe9a90eaa6e3416aa59df7bb71ff091a27bf7ed45c731e38256941b7af5246",
+      "bazel/gazelle/BUILD.bazel": "c1f5495314b36a47db088c08c32abaead8af87dfba76092ac11bd3436198c461",
+      "bazel/gazelle/jvm.go": "4777b21c0a89049011e51131f3766a25d7480897fdba8f2378e4c48dcd296e32",
+      "bazel/gazelle/jvm_test.go": "99e5504c6ffb37af164d2de0e2058de3a1acd18a9ff560b6a81f64bcc85f4854",
+      "bazel/maven.bzl": "c1de93a9aeba7545db5ee3d9bafb4dfcda6d2ec5eb2a8eb702aeb47e160b1902",
+      "bazel/platforms/BUILD.bazel": "b8c9656c68d7e3c0516ccc8e22b07f6c57f2d95a5a3651342a0c00772ed22410",
+      "bazel/platforms/cc_toolchain.bzl": "9e8485feceb287f070eb6b6ce91237f85bef5e559244f3726cae97804f266af8",
+      "bazel/proto_schema.bzl": "6661a6baa9afcf2e7c9d0d81d517b620ef19d53e08dcc1db3dcadb56d07cccf9",
+      "bazel/simulation.bzl": "c59ba58da1ad8b41b8f36fd6d801e430aa90311e5e913c0e01e6842c740ac9ee",
+      "benchmarks/representative/ActivationEvaluation.java": "d517c074a8612684004489ccf4256b2ae9f352c5979ca1aa3407b9a7fe8c3cf8",
+      "benchmarks/representative/ActivationPreparation.java": "6a49bba9f7615931904c9251539808ffc359fd7dd7002786baea0892bc12fb40",
+      "benchmarks/representative/BUILD.bazel": "41a096a627e758716e51a91e86f55a18971f6e063b9d63ce8ad1eeebc08b43e1",
+      "benchmarks/representative/Engines.java": "ddb8fa0c891a412d3818428b6b5e5de90a1f85d56be85e8ea4a07ec44dbcc850",
+      "benchmarks/representative/EvaluationMemory.java": "5e7b45bb46ec490d51a3e04cff04af0e9c51a66157404fe0bbf9296c35293b2a",
+      "benchmarks/representative/FrontendStages.java": "acfc40e69e14b117840b43dfd7307bc146527ddf45fb87bfa959ee04caef47dd",
+      "benchmarks/representative/ImagePrepared.java": "66546cdcd1a4737895e785f200ace41eebe93e6bb2756bc9381bb70713c14f96",
+      "benchmarks/representative/IngestionNativeAllocation.java": "f9704f327b5b2e599ca4f153b05aa3e43980831c57973b7ff7d3812c7a65a1ed",
+      "benchmarks/representative/IngestionProfile.java": "6554d20e840cd6f3d5e0bc8c3956722ef4a6daae2bd95d3a0723e5c7ba38d471",
+      "benchmarks/representative/IngestionStages.java": "3f5a89cade692a9e7d65bb050a1bf5f7bf74af2f604e80614b44594378fd4d5b",
+      "benchmarks/representative/Lifecycle.java": "31d0b2d3be9a9b72ce2152ebe9fc7805a186a93b742021b65f9535ad521ab00d",
+      "benchmarks/representative/NegativeDifferentialTest.java": "d38ad15aa393367113b94f7c18398aa3acc78cacb98a2f07c4f3c86bcc9b4592",
+      "benchmarks/representative/PreparedLifecycle.java": "4b3c665a8ddf49246b4b45a194c7fc4ede46c0f87d3ecf02e134d23370555a68",
+      "benchmarks/representative/ProtobufZero.java": "4adb215d913b139353db879882fb894d811bdf9e82eb7c9b632105999996d064",
+      "benchmarks/representative/RegexQualification.java": "d175d2494157e5c5681e585d156035cffa24b60c33dc3941532ca7e874bad2cb",
+      "benchmarks/representative/SemanticsTest.java": "ac6c27240a17e4f06cb4e979960ecd48642a5a5370e8ee1420e5e6b5630395b6",
+      "benchmarks/representative/Smoke.java": "938a14f2205bcb5609f8dc12b9e5b9436393faf38971a7ff4ffb2c3e21fa99d0",
+      "benchmarks/representative/Startup.java": "c3cd5a2d425e79d217e724b9c9a15892a908c959f586968b9637b18195fd8bdf",
+      "benchmarks/representative/StartupImageMode.java": "66e54295f8b61bb240580a5726b49e54c48aaa04a066a451d528098cac09e9c2",
+      "benchmarks/representative/StartupPrepared.java": "14f026cd9d9391ee7f013dd28fd8f721e2f67c1e8a734d44f93e92991d65a2c4",
+      "benchmarks/representative/SteadyState.java": "718296ab8e48566ada4aabd643be6cd8026791ca2930d65c94437fbb09ddea28",
+      "benchmarks/representative/StructuredAccess.java": "502f5a75b46337b1476442586ab7e585af4e829eb534ef224b97f8d4afc26810",
+      "benchmarks/representative/UpstreamProtobufFeature.java": "8f375dbd1e6c1cd69c307c7f6115c51d68b6a3a3b00e65c172753791e2c3d371",
+      "benchmarks/representative/Workloads.java": "af0e610af712cdd068e4d131a2910645594b42bba0a3073d23920c6f381d8abc",
+      "benchmarks/representative/ingestion_native_allocation.sh": "92605289d318f94ed352f5f2b5af9063b0ce37da743e692e8360b6e5fd794129",
+      "benchmarks/representative/input_control_smoke.sh": "6cb57e506b9761c18441540e8183d8647bf6673cf4fdbc4d221650fb2a2c0d1d",
+      "benchmarks/representative/native_smoke.sh": "fb624ca9c8ee95963ac0f70815e2a5933d05f5361b5e9cd5e475eac2842c533c",
+      "benchmarks/representative/policy.proto": "b4285040affd5c149530b3345c6a685f8ba322d5ad715710a6aaaf86636c14aa",
+      "benchmarks/representative/prepared_native_smoke.sh": "b0824367d02f9923d43d83fd6be05ce88010fec398c32597d35a74e72fa0091e",
+      "benchmarks/representative/startup_smoke.sh": "25de725c84a0f10e19b7f8b8748e538aac7bc9e14a591d86075651a612dc1de5",
+      "cel_java_install.json": "8029578430b1acc274134f0fa37ef066a27b1f02eb07769f43c1674ee1dc5316",
+      "maven_install.json": "d87ab53d45dc3e40241bd691e63808a35c67190d277fa297761958f41e4b91dd",
+      "src/main/java/dev/trufflecel/Activation.java": "afa27d50ec0af4cc114b214063dbef72873361550e78e58a32f1d727cf2bef32",
+      "src/main/java/dev/trufflecel/Ast.java": "ecfa32e8ea895586b31a0c9f0a4ec0845a3f7d52b72ef22ced008a1accae8a36",
+      "src/main/java/dev/trufflecel/Attribute.java": "8e44dea2d79289bade09cbe583394b1f995ad89c1d22035058a44f190feee149",
+      "src/main/java/dev/trufflecel/AttributePattern.java": "60b4511c9b0946d696a933b0760c4f95df13857e3107b4160a69abd9630de9f5",
+      "src/main/java/dev/trufflecel/BUILD.bazel": "07e7d94af11f224aa13ad77d57192c0c7142ea44eab0031c9bb8775760388baa",
+      "src/main/java/dev/trufflecel/BorrowedBindings.java": "ecc29e7593c517e4dec097c47788778ba904dfac7cecff4b182b3a13d8f0278f",
+      "src/main/java/dev/trufflecel/Bytes.java": "b610ea18fb1809edb9a458357a5690c3597f443553b79b91244362df089584b9",
+      "src/main/java/dev/trufflecel/CanonicalAst.java": "c7b244c168f995d21ee803b08a69b5df8125a7fbabd0cfba8e5054e28f61a14f",
+      "src/main/java/dev/trufflecel/Cel.java": "2192bfc84c6daa7d6422e8ddfe83034d2402e44273d3d5d72aec769c5c4f9720",
+      "src/main/java/dev/trufflecel/CelException.java": "ca2184c4ae31a2a1ac787290c268b0a6b1c7050e07eb3805157ec3cee000f7c0",
+      "src/main/java/dev/trufflecel/CelField.java": "92ec3527b8fb111054878499df87a424a58fc6de0432aadc23db00ca60e92df3",
+      "src/main/java/dev/trufflecel/CelLanguage.java": "eff568c15d18a543b601e7ef7ec8cee91b97599453f8c007637b2c2dee073bd5",
+      "src/main/java/dev/trufflecel/CelNode.java": "5e7a39ecacb17adadb7a40cbf9c245fe9bfcf8231c15bc8f5dca6f712ea8b901",
+      "src/main/java/dev/trufflecel/CelNull.java": "b2c140503bc24f3188cb5c8f835160ac2216d3278ab95bde17b57e9d0084b160",
+      "src/main/java/dev/trufflecel/CelPojo.java": "77fead122b1834ea9a12173687001145d2ebe3f7163289f722476638b9556b60",
+      "src/main/java/dev/trufflecel/CelType.java": "e7c0df8d6162129a3d57c296e2cd3322ade281a4aa654c24e671e1973b1a748a",
+      "src/main/java/dev/trufflecel/Checker.java": "f0d76354a441e5c6e233ae3f64c0568976afbf52d03a4eadc4c2aec3ad3537ee",
+      "src/main/java/dev/trufflecel/ComprehensionNode.java": "7d0218c82c18a72c1da7cc8de55088b9118ebc36623df14229abdef3dbf8a253",
+      "src/main/java/dev/trufflecel/ConfigurationData.java": "fb41129d94b8a36d62aa620bdb26ff36fd81b32f3cb1ec334f69d8bf1b7cbc1f",
+      "src/main/java/dev/trufflecel/CostEstimator.java": "9a3dfe02f556c767f15a0a95ea37e931cd4af90846d020a1818d6e4d58ce2b6f",
+      "src/main/java/dev/trufflecel/CseOptimizer.java": "b5c790761f05988a336f5b29f4da3cc1f6ed51edb207507bcd61522ab652c044",
+      "src/main/java/dev/trufflecel/DataType.java": "652dd395786e2873fbfb64eb2df9effd9a5a769e974e4257738b73fcfe97e7b8",
+      "src/main/java/dev/trufflecel/DataValues.java": "ce3df626817e9aa2bee32a925a4dca967b68e1f40585a105aa754a9791139361",
+      "src/main/java/dev/trufflecel/EncoderFunctions.java": "389bdbf98fea6793f84f53432fc0744443c1dd9c8189103542909c1907beb221",
+      "src/main/java/dev/trufflecel/Environment.java": "2c21f9bbe5ecf108232e107d9ac448ce6b445e8812ecdce9863f110d2656e7d8",
+      "src/main/java/dev/trufflecel/EnvironmentYaml.java": "3faa0785c489ce4aa5330851be9a9d7ac2eb5b7e71f47e1d01bfaf88250d49d4",
+      "src/main/java/dev/trufflecel/EvalContext.java": "526d5c47d0a784ef780ad04586a7fd2320f4661c2a90ddfd5fe81970cc985b9b",
+      "src/main/java/dev/trufflecel/EvaluationOptions.java": "4d577d36aab26947f797484e4ac6504989291ad327959e37c9d3067491f890ed",
+      "src/main/java/dev/trufflecel/EvaluationResult.java": "7778b3ea8e9e46ca9e7677b2d8dfc5262e5da45a0cf4211b8c6c9d1b57ecf6e8",
+      "src/main/java/dev/trufflecel/EvaluationState.java": "ec8087f539b3364a73a36712fdaf0925551185326090fdabbb88466dea57004d",
+      "src/main/java/dev/trufflecel/ExprNode.java": "278d10a5c559d82dc2330a4f57f4a6595233d841fab7ec0cb1b88dfa6d5b1272",
+      "src/main/java/dev/trufflecel/ExtensionFunctions.java": "375726c6804d34d7c02e55eccdcd37de11a4f29a009a9a4d1ee34dc0d27fce2a",
+      "src/main/java/dev/trufflecel/FieldPlan.java": "62cfde053da7d9f61266268d518e040cd1e3ddca39f5f02c500af9e389a9598d",
+      "src/main/java/dev/trufflecel/FunctionOverloads.java": "c77811ab928eed7cf4103fe2f21a3b2c4a018e5d3d6e44b27e501a7ed9d15664",
+      "src/main/java/dev/trufflecel/Functions.java": "f9baa0a4ffc9c20b2750141a895aba036f6beb0046d2fc0ba95eb18831fb04f5",
+      "src/main/java/dev/trufflecel/GuestException.java": "ab3f00bda58ba27df0e9468f98ae57d754154cfb422c5765416c950f40c702b5",
+      "src/main/java/dev/trufflecel/GuestValue.java": "2a89fb09ff66ea15f74d39d2c21d0f31c0c464b86d02446313a947da40f2f255",
+      "src/main/java/dev/trufflecel/HostCollections.java": "844ccbed29f299622515fcdbb3c368d43ddbb915aa51037bd2ac799e404cab24",
+      "src/main/java/dev/trufflecel/JsonValues.java": "40662779deb49949666f4be4857ef90d316feff49be1934989bb3d63e7162de9",
+      "src/main/java/dev/trufflecel/LibraryPolicy.java": "b100e5210f11caf0b9565404dee79a51b8f24950f3fbeb1e3c21a422a0b071fa",
+      "src/main/java/dev/trufflecel/Macro.java": "3515aa60367212ee3154c1ad6fd9fb387111800915ba6633d8aa263665c17a8e",
+      "src/main/java/dev/trufflecel/NetworkValue.java": "d594b2d8e263eae838b96a085adb41fb420718c258276c77e72aeb129b9a589e",
+      "src/main/java/dev/trufflecel/ObjectType.java": "f1abcda2dad78b76b0a1854f521f43765594f6cad91773d9eaefa4e48b00350e",
+      "src/main/java/dev/trufflecel/Optimizer.java": "1b8adcdaeb27bc048e9ed649c87853c8b2de7bae6d4da789e729d868660164d5",
+      "src/main/java/dev/trufflecel/OptionalValue.java": "5208cc8ef454b3aba64fc224faef1e8b2cd58daa9adc2c451fc72d699a7bb6bc",
+      "src/main/java/dev/trufflecel/Parser.java": "fde8c8dda9be04133f6a16a2ca13ef81188582d8e535daa1f7343e3ce0bd6af2",
+      "src/main/java/dev/trufflecel/PartialActivation.java": "b658d4f07feb5d6c37987587506a852df707d98281f4198cf395c0822ecb3266",
+      "src/main/java/dev/trufflecel/PartialResult.java": "75c9e1d03f7a4cfb54b9c9d2305726895a7a1fafc4ab3472ffe7acf7a1105b91",
+      "src/main/java/dev/trufflecel/PartialState.java": "c3a1dc1c10731e393ffc2f2610671d88d53b481226e7c8e10423a970b8cf9ae2",
+      "src/main/java/dev/trufflecel/PojoType.java": "7b6a3bda26f9ca7bacc7fa62069dd24c59c7bb777ceca4bacec09a2e54ff4411",
+      "src/main/java/dev/trufflecel/PolicyCompiler.java": "024339f345e2f76220be86e9a3357d94fe36df60dcb40a7f7eb37107924d14e0",
+      "src/main/java/dev/trufflecel/PreparedProgram.java": "08731e430c8fe467eec14197e7fdc50c056a9ab79b7ab6c85c7be99460ceff43",
+      "src/main/java/dev/trufflecel/Program.java": "08724eb51e48b0640a2c43d8650be9390cb40d0a2cfefbf1a17a557390025814",
+      "src/main/java/dev/trufflecel/ProtobufType.java": "cab782a58071d29d58018fd192fcc24f8dbe82028d923b1ddce707d8877a5902",
+      "src/main/java/dev/trufflecel/Re2Regex.java": "eedd5564df3996ed47935987ea325523721569f27836fe3eef5579ccc77b5c3a",
+      "src/main/java/dev/trufflecel/Regex.java": "f4ae6ca3576ac5283a2ec5ba4af51a63a17d1594c0da1e8cf4a47d9a20ff03c8",
+      "src/main/java/dev/trufflecel/TraceEvent.java": "1ed99f655472e91a4ad234aabf48f86880792c077e6899effcab8ffd3f50d578",
+      "src/main/java/dev/trufflecel/TraceListener.java": "ca22249e3eb4222f848819a2762d7ee26de3d7536bbc443bc95bf9e91625561d",
+      "src/main/java/dev/trufflecel/TracedProgram.java": "bccc4bb369ed44d6e216320fdb6870ea61720da98c84f58f67fd54fa2a25fe86",
+      "src/main/java/dev/trufflecel/TypeSyntax.java": "7434111a4904f76bb8107c53fcc0ab2d62b8778438257e94019b41651f8e8f0f",
+      "src/main/java/dev/trufflecel/UInt.java": "87b980a1ef8098f0b1995e5e674b0f55eec70ebea18a8a605d07c271047d216b",
+      "src/main/java/dev/trufflecel/Unknown.java": "962f8216b91f2d7e992fea48a5f5da0229321f60c161d7839cc2ff6f701ed49c",
+      "src/main/java/dev/trufflecel/Unparser.java": "1dcc9d58b30a2081c5810b7d3144aaa434c5ee80398d8a60ceb153e184fbc58c",
+      "src/main/java/dev/trufflecel/Validator.java": "880ab0659d6e76ed83e97ab603464ba70ba41d04a1a8d02233b5036c6798bea6",
+      "src/main/java/dev/trufflecel/Values.java": "aa91c183d2f9750dfe153bf553a8a433603c32b8275bffe5e8bf712d3e256863",
+      "src/main/java/dev/trufflecel/WellKnownTypes.java": "7934ece887d138673cbf297476949496a51f9d15cbde992b4dc8e587436c9c2a",
+      "src/main/java/dev/trufflecel/WriteNode.java": "2dd612fc80d0b5f0e490f656c04741633f96a88b6a47fdaf5085a53d98b5ffe6",
+      "src/main/java/dev/trufflecel/processor/BUILD.bazel": "2b004cffc1304ad1e33f2910cdf0f927713bf79f211ae899cc0168d31ca78d9b",
+      "src/main/java/dev/trufflecel/processor/META-INF/services/javax.annotation.processing.Processor": "3c7a5a97cf4b0080bf1aeb14e5eedf917d7aeae60ca577275c6e9f7875b8444c",
+      "src/main/java/dev/trufflecel/processor/PojoProcessor.java": "523d04e75407854d7a98b3e3c91418d03499c90b3f496ba308ee26d3511ac567",
+      "tools/bench/BUILD.bazel": "e9549b6290a63a58c1398894befcced387d45b9014e72fe4093f6b4da2bdb9e4",
+      "tools/bench/activation_report.py": "75a2693f70fd9c9a9b9c150e3cb23658c8f502f803339f542a44d54abc39089f",
+      "tools/bench/activation_suite_report.py": "8574ff35bdb98a1643e81df1268b3c78e6683ba240721fe74b7909f679b2b9f6",
+      "tools/bench/bench.py": "92e76993a5eed7263e6f58e712411eb4da1df5458ecd38e514a71d07b3e8a4f4",
+      "tools/bench/cel_java_inputs.py": "57adec968d8c0afaaf02c49ff23f189081dbd5ec8db6083cd14059d25f904f92",
+      "tools/bench/codspeed_profile.py": "147a74793e6c0213c2e91ce6aa22fcf93cf06dbdcf8b7bfb8d08b604b2aed0e7",
+      "tools/bench/compare.py": "e003cd6c28b2ee82c4b6037c33c7e90b42c8ab7917190c562eab4e6f270b0f0c",
+      "tools/bench/evaluation_refresh.py": "9d86f11ed523b744d30bc408cc7cc3c9f4979e1847b4b88dd5919e7d5407bf27",
+      "tools/bench/focused_payback.py": "60f895ebedeb509f2861a8ad3fa2d1932d74e8fe56d5165700bb76e82ffae867",
+      "tools/bench/optional_regex_evaluation.py": "d54498f3355947cecb63c64c6bf92e54b99f3b276645632d7fad6a4e75cc5489",
+      "tools/bench/prepared_lifecycle.py": "11e749ae912f49dff5631a520a5d5ca87bcf43ac03d2aaea6094644704f15202",
+      "tools/bench/prepared_report.py": "149f83193de6c50e458dfff1e14a60e28bfa633abe585030f57ccbf401775df3",
+      "tools/bench/regex_evaluation.py": "b7353b890840a9151a0aff1b320b76f4e8064e73fa63793df4bc8681e6a390c3",
+      "tools/bench/representative.py": "3afa5803c279a544c1d2c81b8022cc577c79a6639fc37caa404ed74e2f853168",
+      "tools/bench/representative_report.py": "31535916c49d3493b053fc235a2bed9bf4709ad8f2894ead899ac259973d448b",
+      "tools/bench/startup.py": "cc960481bbb2c0da28e1fa542ab9e3991714330e5c6994c81709ca335fb58faf",
+      "tools/bench/startup_control.py": "f5f5b72eddeab11dabf4bb7646bfedbbff2b49e5282219b40d8ed78d1ca46a6b",
+      "tools/bench/structured.py": "c5f6684c31de3a1bc92aa1595333edc14127cdb0c36c12ce659e08a6284ca1ed",
+      "tools/bench/structured_report.py": "8cf91fb58366589568ac903ca791a42da87a1d7e71c04133fb39845ac658dd64",
+      "tools/bench/test.sh": "8e009dcad30cf9f32f874dfd7b5ffd01d7d04a76eedb8ad4fe470608764c27ad",
+      "tools/bench/test_bench.py": "d7339623a1ecd72f1204f2c518c57420e8245e37cd45b485ff5486d5b0e7a074",
+      "tools/bench/test_cel_java_inputs.py": "966a63adfa14f56a6e5f35030063de2e1632b06cc6bb7feee569c3a05c96ecef",
+      "tools/bench/test_compare.py": "37e5fd3849f6d97de61244c93d33e0844b93b5c5b788d2f2921217fa81db31fb",
+      "tools/bench/test_evaluation_refresh.py": "b98e3996a0d475b375d087c2113435af753d74d8bce7addec3fb1a4e30f44a28",
+      "tools/bench/test_focused_payback.py": "73baf51c082d59ff0669458821dc93ad0ab5f11c9cc4c412f2d006ef1634d162",
+      "tools/bench/test_optional_regex_evaluation.py": "1e95c1b431f7791d69d568c51705b604b25cc3033455f6b913e810126a1d565f",
+      "tools/bench/test_prepared_lifecycle.py": "8e39f2a5740ba597b7fb2c764142b8a963e9e0aa45099073c3daa571045d0143",
+      "tools/bench/test_prepared_report.py": "b232f9fde2e35d66385f06785d7d89940f2e42161eea1dab41a71d3bcd1a79e3",
+      "tools/bench/test_profile.py": "43b9c2188588714542bc68c3988bfe54cd2925347da2276425335247ab260d8d",
+      "tools/bench/test_regex_evaluation.py": "8bb61fe89ab6ccdd9187eac196a48391d39c30b02fe1be2cbfbae57f69b96127",
+      "tools/bench/test_representative.py": "5a9fcb13eeee726c84b37f85d5d95110780a9fc68245a450d4e5ffc506626e8f",
+      "tools/bench/test_startup.py": "37f8c2de2e8866516a714442a3a2acc0a5c7bbaac34534675611fa5db624c115",
+      "tools/bench/test_startup_control.py": "bd2df8122c1de63cf3ab82097020176b71b23ad43d340d2c71715e5c05039f74",
+      "tools/bench/test_structured.py": "f318fc8f977028f4d4b1a69f99cb697cd0a4c9c6b7752163a0b682e909b1897c"
+    }
+  },
+  "source_manifest_sha256": "11247d9af6c7a324e220938a9910901bad2c3382bb4354373ee3fe12b2a49b9e",
+  "driver_sha256": "dc3843b72d4e1720f21962e21cd8189bee34b6bd463340153aff50fb365553c0",
+  "shared_driver_sha256": "9d86f11ed523b744d30bc408cc7cc3c9f4979e1847b4b88dd5919e7d5407bf27",
+  "forks": 3,
+  "workloads": [
+    "scalar",
+    "scalar-wide",
+    "proto-policy",
+    "proto-repeated",
+    "map-regex",
+    "optimizer-policy"
+  ],
+  "engines": [
+    "truffle-interpreter",
+    "truffle-jit",
+    "cel-java",
+    "cel-java-optimized"
+  ],
+  "profiles": {
+    "default": [],
+    "shared-compiler": [
+      "-XX:-CompileInIsolates"
+    ]
+  },
+  "common_flags": [
+    "-Xms512m",
+    "-Xmx512m"
+  ],
+  "limits": "Fresh processes, same combined executables for every profile and engine. Fixed-work memory and timing are separate processes. Current/peak RSS are not retained heap or standalone binary footprint. Fewer than three forks is exploratory only.",
+  "commands": [
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.12451171875,
+        0.7880859375,
+        0.46484375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.1142578125,
+        0.7919921875,
+        0.4677734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.09619140625,
+        0.79931640625,
+        0.4736328125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.0810546875,
+        0.80615234375,
+        0.4794921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.07421875,
+        0.8095703125,
+        0.482421875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.06201171875,
+        0.81640625,
+        0.48828125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.13232421875,
+        0.83984375,
+        0.49951171875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.11181640625,
+        0.845703125,
+        0.50537109375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.1025390625,
+        0.8486328125,
+        0.50830078125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.08642578125,
+        0.8544921875,
+        0.51416015625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.07275390625,
+        0.859375,
+        0.52001953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.06689453125,
+        0.86181640625,
+        0.52294921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.05615234375,
+        0.86669921875,
+        0.52880859375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.046875,
+        0.87158203125,
+        0.53466796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.0390625,
+        0.87646484375,
+        0.54052734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.03564453125,
+        0.87890625,
+        0.54345703125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.02978515625,
+        0.8837890625,
+        0.548828125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.02490234375,
+        0.8876953125,
+        0.5537109375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.0224609375,
+        0.8896484375,
+        0.55615234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.09912109375,
+        0.91015625,
+        0.56640625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.08349609375,
+        0.91357421875,
+        0.5712890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.1572265625,
+        0.931640625,
+        0.5791015625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.1328125,
+        0.9345703125,
+        0.583984375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.11181640625,
+        0.9375,
+        0.5888671875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.09423828125,
+        0.9404296875,
+        0.59375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.08642578125,
+        0.94189453125,
+        0.59619140625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.07275390625,
+        0.94384765625,
+        0.60107421875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.0615234375,
+        0.94580078125,
+        0.60595703125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.13671875,
+        0.96337890625,
+        0.61376953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.19580078125,
+        0.98193359375,
+        0.6240234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1650390625,
+        0.98291015625,
+        0.62890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1513671875,
+        0.9833984375,
+        0.63134765625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.20849609375,
+        1.0009765625,
+        0.6416015625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.17578125,
+        1.0,
+        0.6455078125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1484375,
+        1.0,
+        0.6494140625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.13623046875,
+        1.0,
+        0.6513671875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1953125,
+        1.0166015625,
+        0.66064453125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.16455078125,
+        1.015625,
+        0.66455078125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.23193359375,
+        1.0322265625,
+        0.671875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.19580078125,
+        1.0302734375,
+        0.67578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.1650390625,
+        1.02880859375,
+        0.6796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.13916015625,
+        1.02783203125,
+        0.68359375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1279296875,
+        1.02734375,
+        0.685546875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.10791015625,
+        1.0263671875,
+        0.689453125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.0908203125,
+        1.025390625,
+        0.693359375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.08349609375,
+        1.02490234375,
+        0.6953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.0703125,
+        1.02392578125,
+        0.69921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.05908203125,
+        1.02294921875,
+        0.703125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.05419921875,
+        1.0224609375,
+        0.705078125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.04541015625,
+        1.021484375,
+        0.708984375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.0380859375,
+        1.0205078125,
+        0.712890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.03173828125,
+        1.01953125,
+        0.716796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.02880859375,
+        1.01904296875,
+        0.71875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.02392578125,
+        1.01806640625,
+        0.72265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.02001953125,
+        1.01708984375,
+        0.7265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.01806640625,
+        1.0166015625,
+        0.728515625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.08935546875,
+        1.0322265625,
+        0.73681640625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.15576171875,
+        1.04736328125,
+        0.7451171875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.13134765625,
+        1.04541015625,
+        0.748046875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.12060546875,
+        1.04443359375,
+        0.74951171875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.1015625,
+        1.04248046875,
+        0.75244140625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.166015625,
+        1.0576171875,
+        0.7607421875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.23291015625,
+        1.07373046875,
+        0.767578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1962890625,
+        1.07080078125,
+        0.7705078125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.16552734375,
+        1.06787109375,
+        0.7734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.15185546875,
+        1.06640625,
+        0.77490234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.12841796875,
+        1.0634765625,
+        0.77783203125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.18212890625,
+        1.07763671875,
+        0.7861328125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.15380859375,
+        1.07470703125,
+        0.7890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.14111328125,
+        1.0732421875,
+        0.79052734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.19287109375,
+        1.0869140625,
+        0.798828125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.16259765625,
+        1.083984375,
+        0.8017578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.1494140625,
+        1.08251953125,
+        0.80322265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.1259765625,
+        1.07958984375,
+        0.80615234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1064453125,
+        1.07666015625,
+        0.80908203125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.09765625,
+        1.0751953125,
+        0.810546875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.08203125,
+        1.072265625,
+        0.8134765625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.06884765625,
+        1.0693359375,
+        0.81640625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.0576171875,
+        1.06640625,
+        0.8193359375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.052734375,
+        1.06494140625,
+        0.8203125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.04443359375,
+        1.06201171875,
+        0.822265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.037109375,
+        1.05908203125,
+        0.82421875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.1943359375,
+        1.09130859375,
+        0.8359375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.1640625,
+        1.08740234375,
+        0.837890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.21923828125,
+        1.1015625,
+        0.84521484375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.18505859375,
+        1.09765625,
+        0.84716796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.25048828125,
+        1.11279296875,
+        0.853515625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.21142578125,
+        1.10888671875,
+        0.85546875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.25244140625,
+        1.12158203125,
+        0.86279296875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.23193359375,
+        1.119140625,
+        0.86376953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.2763671875,
+        1.1318359375,
+        0.87109375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.2333984375,
+        1.126953125,
+        0.873046875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.27099609375,
+        1.13916015625,
+        0.88037109375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.2490234375,
+        1.13671875,
+        0.88134765625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.28466796875,
+        1.1484375,
+        0.888671875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.24072265625,
+        1.14306640625,
+        0.890625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.3017578125,
+        1.15771484375,
+        0.89697265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.33544921875,
+        1.1689453125,
+        0.904296875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.357421875,
+        1.1796875,
+        0.9111328125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.4091796875,
+        1.193359375,
+        0.9169921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.345703125,
+        1.1865234375,
+        0.91796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.2919921875,
+        1.1796875,
+        0.9189453125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.32080078125,
+        1.18994140625,
+        0.92529296875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.294921875,
+        1.1865234375,
+        0.92578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.2490234375,
+        1.1796875,
+        0.9267578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.21044921875,
+        1.17333984375,
+        0.927734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.193359375,
+        1.17041015625,
+        0.92822265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.24365234375,
+        1.181640625,
+        0.9345703125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.2060546875,
+        1.1748046875,
+        0.935546875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.173828125,
+        1.1689453125,
+        0.9365234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.15966796875,
+        1.166015625,
+        0.93701171875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.13427734375,
+        1.16015625,
+        0.93798828125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.11279296875,
+        1.154296875,
+        0.93896484375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.103515625,
+        1.1513671875,
+        0.939453125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.08740234375,
+        1.1455078125,
+        0.9404296875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.15380859375,
+        1.15771484375,
+        0.94677734375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.14111328125,
+        1.15478515625,
+        0.947265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "optimizer-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.11865234375,
+        1.14892578125,
+        0.9482421875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.10009765625,
+        1.1435546875,
+        0.94921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.083984375,
+        1.138671875,
+        0.9501953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.0771484375,
+        1.13623046875,
+        0.95068359375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.2255859375,
+        1.1650390625,
+        0.96240234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.27099609375,
+        1.17626953125,
+        0.96875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.2490234375,
+        1.17333984375,
+        0.96923828125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.21044921875,
+        1.16748046875,
+        0.97021484375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.177734375,
+        1.16162109375,
+        0.97119140625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.14990234375,
+        1.15576171875,
+        0.97216796875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.1376953125,
+        1.15283203125,
+        0.97265625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.1162109375,
+        1.14697265625,
+        0.9736328125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.09765625,
+        1.14208984375,
+        0.974609375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.25,
+        1.17333984375,
+        0.98583984375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.21142578125,
+        1.16748046875,
+        0.98681640625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.1787109375,
+        1.16162109375,
+        0.98779296875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-jit",
+        "map-regex",
+        "steady"
+      ],
+      "load_before": [
+        1.15087890625,
+        1.15576171875,
+        0.98876953125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.138671875,
+        1.15283203125,
+        0.9892578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "truffle-interpreter",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.1171875,
+        1.14697265625,
+        0.990234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.0986328125,
+        1.14208984375,
+        0.9912109375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar-wide",
+        "steady"
+      ],
+      "load_before": [
+        1.09033203125,
+        1.1396484375,
+        0.99169921875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.076171875,
+        1.134765625,
+        0.99267578125
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "proto-policy",
+        "steady"
+      ],
+      "load_before": [
+        1.06396484375,
+        1.1298828125,
+        0.99365234375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.05859375,
+        1.12744140625,
+        0.994140625
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java-optimized",
+        "scalar",
+        "steady"
+      ],
+      "load_before": [
+        1.04931640625,
+        1.12255859375,
+        0.9951171875
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "-XX:-CompileInIsolates",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.12158203125,
+        1.134765625,
+        1.00146484375
+      ]
+    },
+    {
+      "argv": [
+        "/home/sam/trufflecel-release-010-20261109/timing-native",
+        "-Xms512m",
+        "-Xmx512m",
+        "cel-java",
+        "proto-repeated",
+        "steady"
+      ],
+      "load_before": [
+        1.1025390625,
+        1.1298828125,
+        1.00048828125
+      ]
+    }
+  ],
+  "load_end": [
+    1.09423828125,
+    1.12744140625,
+    1.0
+  ]
+}

@@ -1,6 +1,7 @@
-# Draft: Native Image non-heap memory counter becomes negative after guest compilation and GC
+# Native Image non-heap memory counter becomes negative after guest compilation and GC
 
-Status: prepared for upstream review; not filed. The observed runtime is the Elide
+Status: filed as [elide-dev/graal#227](https://github.com/elide-dev/graal/issues/227).
+The observed runtime is the Elide
 GraalVM distribution `25.5.5-elide.27`. Reproduction on an unmodified upstream
 GraalVM distribution has not been attempted.
 
@@ -109,3 +110,21 @@ observations of the accounting discrepancy, not proof of its implementation caus
 An upstream regression should exercise guest code replacement and reclamation in
 both compiler-isolation modes, assert nonnegative runtime-code accounting after
 GC, and verify installed guest code remains valid and future compilation works.
+
+## Reconfirmed with TruffleData 0.10.0
+
+The [November 9 phase exploration](native-profiles-20261109/phase-exploration.json)
+reproduces the defect on production revision `29269155d6c4b6470c74f55c5cbbe37b31fc3955`,
+GraalVM `25.5.5-elide.27` and TruffleData `0.10.0`. In the single shared-compiler
+comprehension process, the getter reports `used parameter = -58248 is negative`
+at the evaluated and subsequent GC/idle checkpoints, and `-103944` after context
+closure. The report preserves the binary/driver hashes, phases, heap counters,
+Linux RSS and last-tier checks. This is a fresh reproduction of the accounting
+failure, not a three-fork performance result or evidence of corrupted guest code.
+
+The later [exact-profile controls](native-profiles-20261109/young-generation/counter-controls/counters.json)
+also reproduce those negative values with both `-XX:-CompileInIsolates` and
+`-XX:MaxNewSize=32m`. With the cap alone and default compiler isolation, this
+single-process diagnostic completes without counter errors. Baseline, interpreter
+and cel-java controls also complete. This does not prove those configurations
+cannot fail under other workloads or longer lifetimes.

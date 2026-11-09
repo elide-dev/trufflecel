@@ -3,12 +3,14 @@ set -euo pipefail
 binary=$1
 mode=${2:-runtime}
 "$binary" control
+for embedding in context direct; do
 for engine in truffle-interpreter truffle-jit cel-java-optimized; do
   for workload in scalar scalar-wide proto-policy proto-repeated map-regex optimizer-policy; do
     for input in 0 1 2 3; do
-      "$binary" "$engine" "$workload" "$mode" "$input"
+      "$binary" "$engine" "$workload" "$mode" "$input" "$embedding"
     done
   done
+done
 done
 # Runtime-only JVM/native artifacts and image-prepared native artifacts must not mix.
 other=image
