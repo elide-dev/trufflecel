@@ -149,6 +149,7 @@ public final class CostEstimator {
           String[] names = (String[]) node.value;
           long condition = scopedCost(node.children[2], names);
           long step = scopedCost(node.children[3], names);
+          // Non-OwnedList ranges charge a snapshot copy before the first iteration tick.
           yield plus(
               1,
               plus(
@@ -156,9 +157,12 @@ public final class CostEstimator {
                   plus(
                       initial,
                       plus(
-                          times(size, plus(1, plus(condition, step))),
+                          size,
                           plus(
-                              condition, scopedCost(node.children[4], new String[] {names[0]}))))));
+                              times(size, plus(1, plus(condition, step))),
+                              plus(
+                                  condition,
+                                  scopedCost(node.children[4], new String[] {names[0]})))))));
         }
         default -> children(node, 1);
       };
@@ -175,13 +179,16 @@ public final class CostEstimator {
       long range = cost(node.children[0]);
       if (node.name.equals("bind"))
         return plus(1, plus(range, scopedCost(node.children[1], names)));
-      long size =
-          node.name.equals("optMap") || node.name.equals("optFlatMap") ? 1 : size(node.children[0]);
+      boolean optional = node.name.equals("optMap") || node.name.equals("optFlatMap");
+      long size = optional ? 1 : size(node.children[0]);
       if (size == 0) return plus(1, range);
       long body = 1;
       for (int i = 1; i < node.children.length; i++)
         body = plus(body, scopedCost(node.children[i], names));
-      long result = plus(1, plus(range, times(size, body)));
+      // Non-OwnedList ranges charge a snapshot copy before the first iteration tick; optMap
+      // and optFlatMap bypass HostCollections.range entirely so they pay no snapshot charge.
+      long snapshot = optional ? 0 : size;
+      long result = plus(1, plus(range, plus(snapshot, times(size, body))));
       // Runtime sortBy charges each comparison. n² conservatively bounds the JDK sort's
       // comparisons without assuming input order or a particular TimSort merge schedule.
       return node.name.equals("sortBy") ? plus(result, times(size, size)) : result;

@@ -159,10 +159,14 @@ final class Values {
 
   /** Internal read-only iteration may share our owned snapshot; public toArray still copies. */
   static OwnedList listRange(List<?> list) {
+    if (list.size() >= 1_000_000)
+      throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
     return new OwnedList(list.toArray());
   }
 
   static OwnedList mapRange(Map<?, ?> map) {
+    if (map.size() >= 1_000_000)
+      throw error(CelException.Code.RESOURCE_EXHAUSTED, "host data limit exceeded");
     return new OwnedList(map.keySet().toArray());
   }
 

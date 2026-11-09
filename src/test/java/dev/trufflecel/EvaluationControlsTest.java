@@ -182,4 +182,72 @@ public class EvaluationControlsTest {
     assertThrows(NullPointerException.class, () -> EvaluationOptions.newBuilder().deadline(null));
     assertThrows(NullPointerException.class, () -> EvaluationOptions.newBuilder().cancelled(null));
   }
+
+  @Test
+  public void snapshotCopyIsChargedAndCapped() {
+    // Non-OwnedList ranges charge the snapshot copy before the first tick, closing the
+    // budget-bypass where an early-exiting macro performed an uncharged O(n) copy per call.
+    var env = Cel.newBuilder().build();
+    // lists.range(10000) charges 10000 to produce the range; .all then charges 10000 for the
+    // snapshot copy. A budget that covers range production but not the snapshot fails.
+    var listRange = env.compile("lists.range(10000).all(i, false)");
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        listRange.evaluateWithDetails(Map.of(), budget(10_100)).error().code());
+    // With a budget that covers both the range and the snapshot, the macro short-circuits.
+    assertEquals(false, listRange.evaluateWithDetails(Map.of(), budget(20_100)).value());
+    // OwnedList ranges (list literals) skip the snapshot charge and stay on the fast path.
+    var owned = env.compile("[1, 2, 3].all(i, false)");
+    assertEquals(false, owned.evaluateWithDetails(Map.of(), budget(10_100)).value());
+    // Host maps pay mapRange's keySet snapshot: a 100-entry map charges 100 before iteration.
+    var mapEnv =
+        Cel.newBuilder().variable("m", CelType.map(CelType.STRING, CelType.STRING)).build();
+    var mapProgram = mapEnv.compile("m.all(k, false)");
+    var map = new LinkedHashMap<String, String>();
+    for (int i = 0; i < 100; i++) map.put("key" + i, "value" + i);
+    assertEquals(false, mapProgram.evaluateWithDetails(Map.of("m", map), budget(200)).value());
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        mapProgram.evaluateWithDetails(Map.of("m", map), budget(10)).error().code());
+    // The >=1M snapshot cap is independent of the budget: even with 50M ticks, a 1M-element
+    // concatenated range throws RESOURCE_EXHAUSTED from listRange's cap, matching the
+    // sibling materializers (scalarRange/ownedList/ownedMap).
+    var capped = env.compile("cel.bind(r, lists.range(500000), (r + r).all(i, false))");
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        capped.evaluateWithDetails(Map.of(), budget(50_000_000)).error().code());
+    // Values.listRange/mapRange enforce the same >=1M cap as the sibling materializers.
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () -> Values.listRange(List.copyOf(Collections.nCopies(1_000_000, 1L))))
+            .code());
+    var smallMap = new LinkedHashMap<String, Long>();
+    smallMap.put("a", 1L);
+    smallMap.put("b", 2L);
+    assertEquals(2, Values.mapRange(smallMap).size());
+    assertEquals("a", Values.mapRange(smallMap).get(0));
+    assertEquals("b", Values.mapRange(smallMap).get(1));
+  }
+
+  @Test
+  public void snapshotAmplificationIsKilled() {
+    // Reproduces the original exploit: lists.range(10000).map(i, m.all(k, false)) where m is a
+    // 400,000-entry host map. Before the fix, each outer iteration charged ~1 tick while
+    // performing an uncharged O(n) keySet().toArray() copy of 400k elements (~41 seconds under
+    // the default budget). After the fix, the snapshot charge exhausts the budget after 2-3
+    // outer iterations instead of running 10,000 uncharged copies.
+    var map = new LinkedHashMap<String, String>();
+    for (int i = 0; i < 400_000; i++) map.put("key" + i, "value" + i);
+    var env = Cel.newBuilder().variable("m", CelType.map(CelType.STRING, CelType.STRING)).build();
+    var program = env.compile("lists.range(10000).map(i, m.all(k, false))");
+    var start = System.currentTimeMillis();
+    var result = program.evaluateWithDetails(Map.of("m", map), budget(1_000_000));
+    var elapsed = System.currentTimeMillis() - start;
+    // The expression must throw RESOURCE_EXHAUSTED (budget exhausted by snapshot charges),
+    // not run for tens of seconds with 10,000 uncharged 400k-element copies.
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, result.error().code());
+    assertTrue("amplification took " + elapsed + "ms (expected sub-second)", elapsed < 5_000);
+  }
 }
