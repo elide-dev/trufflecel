@@ -709,7 +709,7 @@ final class ExtensionFunctions {
     if (v instanceof Double d) return Functions.doubleString(d);
     if (v instanceof Bytes b) {
       ctx.charge(b.size());
-      return (String) Functions.apply("string", new Object[] {b}, null);
+      return (String) Functions.apply("string", new Object[] {b}, (Environment) null);
     }
     if (v instanceof CelType t) return t.name();
     if (v instanceof Instant t) return t.toString();

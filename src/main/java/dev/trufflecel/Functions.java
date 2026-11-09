@@ -45,6 +45,22 @@ final class Functions {
     return applyHost(name, a, env);
   }
 
+  // String and bytes concatenation allocates proportionally to the result length, so the
+  // charge must be length-proportional too; a flat one-tick-per-node charge lets a small
+  // expression with nested cel.bind doubling grow values exponentially while exhausting
+  // only a few ticks of budget. Charging before the allocation lets RESOURCE_EXHAUSTED
+  // fire before the JVM runs out of heap, at both plan time (constant folding) and
+  // evaluation time.
+  static Object apply(String name, Object[] a, EvalContext ctx) {
+    if (a.length == 2 && name.equals("+")) {
+      if (a[0] instanceof String x && a[1] instanceof String y)
+        ctx.charge((long) x.length() + y.length());
+      else if (a[0] instanceof Bytes x && a[1] instanceof Bytes y)
+        ctx.charge((long) x.size() + y.size());
+    }
+    return apply(name, a, ctx.environment);
+  }
+
   // Signed 64-bit arithmetic with explicit overflow checks. The Math.*Exact intrinsics guard their
   // overflow branch with a speculation-free deoptimization, so compiled code that reached them
   // deoptimized on every overflow; these checks are plain control flow in guest code.

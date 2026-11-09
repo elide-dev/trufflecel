@@ -822,7 +822,7 @@ class ExprNode extends CelNode {
       if (!standardOverload) throw Values.overload(name);
     }
     if (extensionCall) return ExtensionFunctions.apply(name, args, ctx);
-    return Functions.apply(name, args, ctx.environment);
+    return Functions.apply(name, args, ctx);
   }
 
   // Avoid temporary argument arrays and repeated string dispatch in the interpreter.
@@ -866,7 +866,7 @@ class ExprNode extends CelNode {
         default -> Functions.multiply(x, y);
       };
     }
-    return Functions.apply(name, new Object[] {left, right}, ctx.environment);
+    return Functions.apply(name, new Object[] {left, right}, ctx);
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
