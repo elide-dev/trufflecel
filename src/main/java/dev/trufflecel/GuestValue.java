@@ -54,6 +54,8 @@ final class GuestValue implements TruffleObject {
     if (lib.isString(value)) return lib.asString(value);
     if (lib.fitsInLong(value)) return lib.asLong(value);
     if (lib.fitsInDouble(value)) return lib.asDouble(value);
+    if (lib.isInstant(value)) return lib.asInstant(value);
+    if (lib.isDuration(value)) return lib.asDuration(value);
     if (lib.hasHashEntries(value)) {
       var result = new LinkedHashMap<Object, Object>();
       Object iterator = lib.getHashEntriesIterator(value);
