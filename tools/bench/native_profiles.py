@@ -19,6 +19,8 @@ from evaluation_refresh import (ENGINES, WORKLOADS, NATIVE_FLAGS, fixed_memory,
 PROFILES = {
     'default': [],
     'shared-compiler': ['-XX:-CompileInIsolates'],
+    'shared-free-32m': ['-XX:-CompileInIsolates', '-XX:MaxHeapFree=32m'],
+    'shared-young-32m': ['-XX:-CompileInIsolates', '-XX:MaxNewSize=32m'],
 }
 
 
@@ -46,7 +48,7 @@ def main():
     parser.add_argument('--cpus', default='2,3,4,5,6,7,8,9')
     parser.add_argument('--forks', type=int, default=3)
     parser.add_argument('--workloads', nargs='+', choices=WORKLOADS, default=WORKLOADS)
-    parser.add_argument('--profiles', nargs='+', choices=PROFILES, default=list(PROFILES))
+    parser.add_argument('--profiles', nargs='+', choices=PROFILES, default=['default', 'shared-compiler'])
     parser.add_argument('--host-conditions', required=True)
     args = parser.parse_args()
     if platform.system() != 'Linux' or platform.machine() != 'x86_64':
