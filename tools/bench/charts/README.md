@@ -1,6 +1,46 @@
-# Elide benchmark chart renderer
+# Elide benchmark chart renderers
 
-This presentation layer reads the immutable
+## Release benchmark cards (0.11.0 and later)
+
+`render_cards.py` turns a retained release report into light and dark SVG cards
+that share TruffleData's benchmark design. The drawing module, [`cards.py`](cards.py),
+is ported from [`elide-dev/truffledata` `tools/bench/cards.py` at `6148472a`](https://github.com/elide-dev/truffledata/blob/6148472afcbeec47700d10e5ba5daf40bddfcaba/tools/bench/cards.py);
+the only changes are configurable legend labels and reproducible font subsets. Both repositories use the same
+light/dark Elide token values, two bar classes (the project's own engines and the
+comparison library), observed-range whiskers, plain-language comparison chips and
+embedded font subsets. The `fonts/` files are byte-identical to TruffleData's.
+
+```sh
+python3 -m venv /tmp/trufflecel-charts
+/tmp/trufflecel-charts/bin/pip install -r tools/bench/charts/requirements.txt
+/tmp/trufflecel-charts/bin/python tools/bench/charts/render_cards.py \
+  --report docs/benchmarks/release-0.11.0-20261110 \
+  --output docs/images/benchmark-0.11.0 --measured 2026-11-10
+python3 -m unittest discover -s tools/bench -p 'test_chart_cards.py'
+```
+
+The renderer reads `summary.json`, `prepared-inputs.json` and `source.json` from the
+report. Before drawing, it requires exactly 48 ordinary-map cells and 16 separate
+prepared-input cells, three finite positive forks per metric, and each aggregate
+inside its observed fork range. It recomputes every lower/tied/higher count against
+the lower cel-java planner aggregate and fails if any differs from `summary.json`.
+It never computes a new statistic: bars are the report's aggregates and whiskers
+are the minimum and maximum fork. A report with a `host-audit.json` that records
+concurrent work receives a visible shared-host note on every card.
+
+Each SVG embeds WOFF2 subsets containing only the glyphs it draws, so GitHub's
+image proxy displays Instrument Sans, Inter and JetBrains Mono without a font
+fetch; text remains selectable and searchable. Output is deterministic for pinned
+fontTools and Brotli. The renderer writes `cards.md` (every plotted value and range
+as text) and `manifest.json` (source, renderer, font and output hashes). It refuses
+to write into a directory that it did not create, so archived charts are preserved.
+README pages use `<picture>` with the dark card for `prefers-color-scheme: dark`.
+Review both themes at full size before committing; for example, headless Chrome
+can screenshot each SVG at 1280 px width.
+
+## Archived 0.10.0 charts
+
+The 0.10.0 gallery predates the card design. This presentation layer reads the immutable
 [`summary.json`](../../../docs/benchmarks/release-0.10.0-20261109/summary.json) and
 separate [`prepared-inputs.json`](../../../docs/benchmarks/release-0.10.0-20261109/prepared-inputs.json), then
 writes new charts to [`docs/images/benchmark-0.10.0-elide`](../../../docs/images/benchmark-0.10.0-elide/README.md).
@@ -15,7 +55,7 @@ zero-based linear scale; direct values and comparison labels remove the need to
 infer winners from a legend or a logarithmic axis. The separate prepared-input
 controls and the limits of RSS measurements remain prominent.
 
-## Brand and font provenance
+### Brand and font provenance
 
 Colors, surfaces and type roles come from
 [`elide-dev/components` at `cc312c76a7a6cce8c6277e3cf94c73686994d5a2`](https://github.com/elide-dev/components/blob/cc312c76a7a6cce8c6277e3cf94c73686994d5a2/packages/tokens/src/tokens.css).
@@ -47,7 +87,7 @@ system-font fallback is needed when GitHub displays a chart. PNG exports use the
 same font files. SVG/PNG chart content is covered by the repository license;
 the font files retain their accompanying SIL OFL terms.
 
-## Reproduce
+### Reproduce
 
 Use Python 3.12 or newer and an isolated environment:
 
