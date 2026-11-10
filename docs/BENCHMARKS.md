@@ -269,7 +269,7 @@ python3 tools/bench/startup.py --java /path/to/pinned-graalvm/bin/java \
   --cpus 2,3,4,5,6,7,8,9 --host-conditions 'Describe actual reservation, load and thermals'
 ```
 
-The pinned distribution is GraalVM 25.5.5-elide.27 from `MODULE.bazel`; its Java banner
+The pinned distribution is GraalVM 25.5.5-elide.28 from `MODULE.bazel`; its Java banner
 uses the JVM build number rather than that distribution filename. Preserve the source
 manifest's commit, dirty state, per-file hashes and exact artifact-build commands,
 including `MODULE.bazel`, lockfiles, `.bazelversion`, `.bazelrc`, `bazel/`, `src/main/`,
