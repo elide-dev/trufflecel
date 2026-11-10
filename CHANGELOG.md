@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.0](https://github.com/elide-dev/trufflecel/compare/v0.10.0...v0.11.0) (2026-11-10)
+
+
+### Features
+
+* **deps:** adopt TruffleData 0.11.0 and GraalVM elide.28 ([fd7bbaa](https://github.com/elide-dev/trufflecel/commit/fd7bbaa1a698c86e6edd3297457d9af47a1cf9e7))
+
+
+### Performance Improvements
+
+* generate validated native profile comparison tables ([21db3c9](https://github.com/elide-dev/trufflecel/commit/21db3c92d0459a9d64dccf154fd8f3cd2d4efe75))
+* qualify bounded native young generation and chart memory tradeoffs ([bfebb00](https://github.com/elide-dev/trufflecel/commit/bfebb00c9383d323167fca5b23da4fb011d143ca))
+* qualify native compiler and direct API startup profiles ([9abd196](https://github.com/elide-dev/trufflecel/commit/9abd196e448c06f89299dfd451760de4d01db5f4))
+* qualify native heap profiles and cumulative evaluation cost ([3f9d5ae](https://github.com/elide-dev/trufflecel/commit/3f9d5aec8156e543166ad33fcc46716592d7761d))
+* qualify native heap profiles and direct Java startup ([d7c6a8f](https://github.com/elide-dev/trufflecel/commit/d7c6a8f73f5e4116692a9ae06771cf5f76a66ece))
+* qualify native heap profiles and direct Java startup ([#73](https://github.com/elide-dev/trufflecel/issues/73)) ([d7c6a8f](https://github.com/elide-dev/trufflecel/commit/d7c6a8f73f5e4116692a9ae06771cf5f76a66ece))
+* retain current native phase and startup baselines ([435d0ae](https://github.com/elide-dev/trufflecel/commit/435d0aefe1b311d1b1d13789a81e02e92934d319))
+* retain native memory startup and cumulative-cost qualification ([4a26a36](https://github.com/elide-dev/trufflecel/commit/4a26a363c0a8887c801e674961824bec7bd04519))
+
 ## [0.10.0](https://github.com/elide-dev/trufflecel/compare/v0.9.0...v0.10.0) (2026-11-09)
 
 TruffleCEL 0.10.0 adopts published TruffleData 0.10.0 and completes this wave of
