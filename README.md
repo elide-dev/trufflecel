@@ -78,38 +78,73 @@ excludes compilation and warmup. The [comparison guide](docs/BENCHMARK_COMPARISO
 explains the evidence, comparator settings, and remaining limits in response to
 upstream methodology feedback.
 
-The [0.10.0 report](docs/benchmarks/release-0.10.0-20261109/README.md) covers six
+The [0.11.0 report](docs/benchmarks/release-0.11.0-20261110/README.md) covers six
 fixtures, including protobuf policy, materialized repeated fields, maps/regex,
 wide activations, and optimizer opportunities. cel-java 0.15.0 runs with both
 default and constant-folding/CSE planners. Every non-scalar fixture retains all
-69 bindings. Figures use ordinary Map inputs and three forks per cell on the
-recorded Linux host; they do not establish universal rankings.
+69 bindings. Figures use ordinary Map inputs and three forks per cell in one
+guarded round on the recorded Linux host; they do not establish universal rankings.
 
 | Metric | TruffleCEL interpreter: lower / tied / higher | Guest JIT: lower / tied / higher |
 | --- | ---: | ---: |
 | Hot evaluation time | 12 / 0 / 0 | 12 / 0 / 0 |
 | Current-thread allocation per evaluation | 11 / 1 / 0 | 12 / 0 / 0 |
-| Current whole-process RSS | 5 / 0 / 7 | 4 / 0 / 8 |
-| Lifetime peak whole-process RSS | 6 / 0 / 6 | 4 / 0 / 8 |
+| Current whole-process RSS | 5 / 0 / 7 | 3 / 0 / 9 |
+| Lifetime peak whole-process RSS | 6 / 0 / 6 | 3 / 0 / 9 |
 
 Each mode is compared with the lower cel-java planner aggregate for that metric,
-fixture and runtime. Counts are descriptive, not significance tests. Three of
-the interpreter peak-RSS comparisons have overlapping fork ranges.
+fixture and runtime. Counts are descriptive, not significance tests. Two of the
+interpreter peak-RSS comparisons have overlapping fork ranges.
 
-**Open a chart for readable values and observed ranges. Shorter bars are better.**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/benchmark-0.11.0/interpreter-time-dark.svg">
+  <img alt="Interpreter evaluation time on JVM and Native Image: the TruffleCEL interpreter is lower than both cel-java planners in all 12 fixture and runtime comparisons, from 1.31 to 35.96 times faster." src="docs/images/benchmark-0.11.0/interpreter-time-light.svg">
+</picture>
 
-| Interpreter evaluation | Allocation per evaluation |
-| --- | --- |
-| [![Interpreter evaluation: 12 lower ordinary-map times, guest JIT excluded.](docs/images/benchmark-0.10.0-elide/interpreter-time.svg)](docs/images/benchmark-0.10.0-elide/interpreter-time.svg) | [![Allocation: interpreter has 11 lower and one tied result; guest JIT has 12 lower results.](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg)](docs/images/benchmark-0.10.0-elide/evaluation-allocation.svg) |
-| **Current whole-process RSS** | **Peak whole-process RSS** |
-| [![Current RSS: interpreter is higher in 7 cases, guest JIT in 8.](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg)](docs/images/benchmark-0.10.0-elide/evaluation-rss.svg) | [![Peak RSS: interpreter is higher in 6 cases, guest JIT in 8.](docs/images/benchmark-0.10.0-elide/evaluation-peak-rss.svg)](docs/images/benchmark-0.10.0-elide/evaluation-peak-rss.svg) |
+<details>
+<summary>Hot evaluation with guest JIT</summary>
 
-[Full gallery and PNG downloads](docs/images/benchmark-0.10.0-elide/README.md) ·
-[Guest-JIT timing alongside interpreters](docs/images/benchmark-0.10.0-elide/evaluation-time.svg) ·
-[All values and ranges](docs/benchmarks/release-0.10.0-20261109/tables.md)
+Guest compilation is forced before timing and its cost is excluded.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/benchmark-0.11.0/evaluation-time-dark.svg">
+  <img alt="Hot evaluation time with both TruffleCEL modes: interpreter and guest JIT are each lower than the best cel-java planner in 12 of 12 comparisons." src="docs/images/benchmark-0.11.0/evaluation-time-light.svg">
+</picture>
+
+</details>
+
+<details>
+<summary>Allocation per evaluation</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/benchmark-0.11.0/evaluation-allocation-dark.svg">
+  <img alt="Current-thread allocation per evaluation: interpreter lower in 11 of 12 comparisons and tied at 96 bytes for JVM scalar; guest JIT lower in 12 of 12." src="docs/images/benchmark-0.11.0/evaluation-allocation-light.svg">
+</picture>
+
+</details>
+
+<details>
+<summary>Current and peak process memory: TruffleCEL is higher in most comparisons</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/benchmark-0.11.0/evaluation-rss-dark.svg">
+  <img alt="Current process RSS: interpreter lower in 5 and higher in 7 of 12 comparisons; guest JIT lower in 3 and higher in 9. Native Image protobuf, repeated protobuf, map and regex, and optimizer fixtures use more memory with TruffleCEL." src="docs/images/benchmark-0.11.0/evaluation-rss-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/benchmark-0.11.0/evaluation-peak-rss-dark.svg">
+  <img alt="Lifetime peak process RSS: interpreter lower in 6 and higher in 6 of 12 comparisons, with two overlapping fork ranges; guest JIT lower in 3 and higher in 9." src="docs/images/benchmark-0.11.0/evaluation-peak-rss-light.svg">
+</picture>
+
+</details>
+
+[All cards and controls](docs/images/benchmark-0.11.0/README.md) ·
+[Every plotted value](docs/images/benchmark-0.11.0/cards.md) ·
+[All values and ranges](docs/benchmarks/release-0.11.0-20261110/tables.md) ·
+[0.10.0 report](docs/benchmarks/release-0.10.0-20261109/README.md)
 
 **Input preparation changes the comparison.** cel-java copies ordinary maps but
-reuses Guava ImmutableMaps. In the [separate prepared-input controls](docs/images/benchmark-0.10.0-elide/README.md#prepared-input-controls),
+reuses Guava ImmutableMaps. In the [separate prepared-input controls](docs/images/benchmark-0.11.0/README.md#prepared-input-controls),
 JVM scalar-wide cel-java allocation falls from 2,936 to 72 B/op, below TruffleCEL
 interpreter's 120 B/op. Caller preparation is excluded. Only two fixtures have
 these controls; ordinary-map counts do not apply to every input API.

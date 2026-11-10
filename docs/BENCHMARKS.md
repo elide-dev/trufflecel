@@ -3,8 +3,29 @@
 Start with the [comparison guide](BENCHMARK_COMPARISON.md) for interpreter-first
 results, prepared-input controls, allocation/current/peak RSS definitions, and an
 explicit accounting of upstream methodology feedback and remaining evidence gaps.
-The [chart gallery](images/benchmark-0.10.0-elide/README.md) collects the current
-release's readable figures and downloadable SVG/PNG files.
+The [benchmark cards](images/benchmark-0.11.0/README.md) collect the current
+release's light and dark SVG figures, with every plotted value in text.
+
+## 0.11.0 release measurements
+
+The [November 10 release report](benchmarks/release-0.11.0-20261110/README.md)
+measures the published 0.11.0 source with TruffleData 0.11.0 and Elide GraalVM
+25.5.5-elide.28 against cel-java 0.15.0 on JVM and Native Image. It repeats the
+0.10.0 protocol: six ordinary-map fixtures, both TruffleCEL modes, both cel-java
+planners, caller-prepared input controls and ingestion allocation samples. The
+round ran under a five-second process guard that would abort it on competing
+compute work; it completed with no such observation and no timing cell above 10%
+window drift. An earlier [shared-host attempt](benchmarks/release-0.11.0-20261110-shared/README.md)
+that overlapped other work and three [interrupted attempts](benchmarks/release-0.11.0-20261110-interrupted/README.md)
+are retained separately and are not pooled.
+
+The ordinary-map matrix records 24/24 lower TruffleCEL evaluation times, 23/24 lower
+allocations with one tie, 8/24 lower current RSS values and 9/24 lower peak RSS
+values. Prepared immutable cel-java inputs reduce adaptation costs; process
+footprint remains a gap. The [cards](images/benchmark-0.11.0/README.md) share
+TruffleData's design and renderer: zero-based linear bars, direct values, fork-range
+whiskers and plain-language comparisons with the best cel-java planner per panel.
+This is not a controlled before/after experiment attributing changes to one dependency.
 
 ## Final 0.10.0 dependency qualification
 
