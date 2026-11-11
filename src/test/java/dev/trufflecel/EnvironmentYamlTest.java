@@ -109,17 +109,17 @@ public class EnvironmentYamlTest {
     var env =
         EnvironmentYaml.read(
             """
-        name: config
-        description: sample
-        variables:
-          - {name: x, type: 'map<string, list<int>>'}
-          - name: y
-            type_name: map
-            params:
-              - {type_name: string}
-              - {type_name: list, params: [{type_name: int}]}
-        result_type: int
-        """);
+            name: config
+            description: sample
+            variables:
+              - {name: x, type: 'map<string, list<int>>'}
+              - name: y
+                type_name: map
+                params:
+                  - {type_name: string}
+                  - {type_name: list, params: [{type_name: int}]}
+            result_type: int
+            """);
     assertEquals(
         5L,
         env.compile("x['k'][0] + y['k'][0]")
@@ -133,19 +133,19 @@ public class EnvironmentYamlTest {
     var env =
         EnvironmentYaml.read(
             """
-        functions:
-          - name: twice
-            description: doubles an integer
-            overloads:
-              - id: twice_int
-                args: [int]
-                return: int
-          - name: first
-            overloads:
-              - id: first_generic
-                target: {type_name: list, params: [{type_name: T, is_type_param: true}]}
-                return: {type_name: T, is_type_param: true}
-        """);
+            functions:
+              - name: twice
+                description: doubles an integer
+                overloads:
+                  - id: twice_int
+                    args: [int]
+                    return: int
+              - name: first
+                overloads:
+                  - id: first_generic
+                    target: {type_name: list, params: [{type_name: T, is_type_param: true}]}
+                    return: {type_name: T, is_type_param: true}
+            """);
     var options =
         EvaluationOptions.newBuilder()
             .function("twice_int", values -> (Long) values.getFirst() * 2)
@@ -170,25 +170,25 @@ public class EnvironmentYamlTest {
     var env =
         EnvironmentYaml.read(
             """
-        container:
-          name: pkg
-          abbreviations: [other.value]
-          aliases: [{alias: alias, qualified_name: other.value}]
-        variables: [{name: other.value, type_name: int}]
-        extensions: [{name: math, version: latest}]
-        features:
-          - {name: trufflecel.infer_variables, enabled: false}
-          - {name: trufflecel.homogeneous_literals, enabled: true}
-          - {name: trufflecel.strict_validation, enabled: true}
-          - {name: cel.feature.macro_call_tracking, enabled: true}
-        limits:
-          - {name: cel.limit.expression_code_points, value: 1000}
-          - {name: cel.limit.parse_recursion_depth, value: 64}
-          - {name: trufflecel.ast_nodes, value: 1000}
-          - {name: trufflecel.regex_program_size, value: 500}
-          - {name: trufflecel.comprehension_nesting, value: 2}
-          - {name: trufflecel.evaluation_budget, value: 10000}
-        """);
+            container:
+              name: pkg
+              abbreviations: [other.value]
+              aliases: [{alias: alias, qualified_name: other.value}]
+            variables: [{name: other.value, type_name: int}]
+            extensions: [{name: math, version: latest}]
+            features:
+              - {name: trufflecel.infer_variables, enabled: false}
+              - {name: trufflecel.homogeneous_literals, enabled: true}
+              - {name: trufflecel.strict_validation, enabled: true}
+              - {name: cel.feature.macro_call_tracking, enabled: true}
+            limits:
+              - {name: cel.limit.expression_code_points, value: 1000}
+              - {name: cel.limit.parse_recursion_depth, value: 64}
+              - {name: trufflecel.ast_nodes, value: 1000}
+              - {name: trufflecel.regex_program_size, value: 500}
+              - {name: trufflecel.comprehension_nesting, value: 2}
+              - {name: trufflecel.evaluation_budget, value: 10000}
+            """);
     for (Environment value : List.of(env, EnvironmentYaml.read(EnvironmentYaml.write(env)))) {
       assertEquals(6L, value.compile("alias + value").evaluate(Map.of("other.value", 3L)));
       assertEquals(4.0, value.compile("math.sqrt(16.0)").evaluate(Map.of()));
@@ -210,11 +210,11 @@ public class EnvironmentYamlTest {
     var env =
         EnvironmentYaml.read(
             """
-        stdlib:
-          disabled: true
-          include_functions: [{name: '_+_'}]
-          disable_macros: true
-        """);
+            stdlib:
+              disabled: true
+              include_functions: [{name: '_+_'}]
+              disable_macros: true
+            """);
     assertEquals(3L, env.compile("1 + 2").evaluate(Map.of()));
     assertThrows(CelException.class, () -> env.compile("1 - 2"));
     assertThrows(CelException.class, () -> env.compile("[1].exists(x, true)"));

@@ -111,3 +111,6 @@ For a future dependency wave, update all pins and repin normally, then run the f
 conformance, coverage, packaged-consumer, allocation and native/JIT gates. Do not
 change the gate just to unblock publication. Future dependency waves must update
 the policy explicitly.
+
+The 0.11.0 dependency wave advances the policy to TruffleData 0.11.0 for
+TruffleCEL releases starting at 0.11.0, aligned with Elide GraalVM 25.5.5-elide.28.

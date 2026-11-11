@@ -46,11 +46,10 @@ public class ActivationEvaluation {
         throw new AssertionError("map/" + workload + "/" + i);
     }
     // Both entry paths reach the same target and see all four activations before compilation.
-    engines.peak(
-        i ->
-            i % 2 == 0
-                ? program.evaluate(snapshots[(i / 2) & 3])
-                : program.evaluate(Workloads.input(workload, true, (i / 2) & 3)));
+    engines.peak(i ->
+        i % 2 == 0
+            ? program.evaluate(snapshots[(i / 2) & 3])
+            : program.evaluate(Workloads.input(workload, true, (i / 2) & 3)));
   }
 
   @Benchmark

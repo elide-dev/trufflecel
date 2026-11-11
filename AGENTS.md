@@ -55,9 +55,9 @@ optimizer/parser settings, full activations, materialized outputs, raw forks and
 source identities. Do not pool different hosts, protocols or dependency versions.
 Conformance corpus success is not exhaustive specification compliance.
 
-Generate charts from retained data with tools/bench/charts/render.py and its
-pinned requirements. Verify values, comparison counts, exact fonts, SVG/PNG
-appearance and checksums. Keep text alternatives and unresolved evidence gaps.
+Generate charts from retained data with tools/bench/charts/render_cards.py and its
+pinned requirements; archived charts are reproduced at the commit that drew them.
+Verify values, comparison counts, exact fonts, SVG/PNG appearance and checksums. Keep text alternatives and unresolved evidence gaps.
 Never hand-edit plotted numbers, select only favorable cells or relabel historical
 startup/retained-heap results as current-release measurements.
 

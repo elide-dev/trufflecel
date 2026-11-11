@@ -67,12 +67,11 @@ public final class EnvironmentYaml {
         throw new IllegalArgumentException("unregistered context type: " + contextType);
       adapter
           .fields()
-          .forEach(
-              (name, fieldType) -> {
-                if (!names.add(name))
-                  throw new IllegalArgumentException("duplicate context variable: " + name);
-                builder.variable(name, fieldType);
-              });
+          .forEach((name, fieldType) -> {
+            if (!names.add(name))
+              throw new IllegalArgumentException("duplicate context variable: " + name);
+            builder.variable(name, fieldType);
+          });
     }
     for (Object item : list(data, "functions")) {
       var function = object(item);
@@ -223,33 +222,31 @@ public final class EnvironmentYaml {
     data.put("variables", variables);
     var functions = new ArrayList<Object>();
     new TreeMap<>(environment.overloads)
-        .forEach(
-            (name, overloads) -> {
-              var signatures = new ArrayList<Object>();
-              for (var overload : overloads) {
-                if (overload.receiver() == null)
-                  throw new IllegalArgumentException(
-                      "function export requires an explicit global/receiver signature: " + name);
-                var signature = new LinkedHashMap<String, Object>();
-                signature.put("id", overload.id());
-                var types = new ArrayList<>(overload.binding().arguments());
-                if (overload.receiver()) signature.put("target", typeData(types.removeFirst()));
-                signature.put("args", types.stream().map(EnvironmentYaml::typeData).toList());
-                signature.put("return", typeData(overload.binding().result()));
-                signature.put("non_strict", overload.nonStrict());
-                signatures.add(signature);
-              }
-              functions.add(Map.of("name", name, "overloads", signatures));
-            });
+        .forEach((name, overloads) -> {
+          var signatures = new ArrayList<Object>();
+          for (var overload : overloads) {
+            if (overload.receiver() == null)
+              throw new IllegalArgumentException(
+                  "function export requires an explicit global/receiver signature: " + name);
+            var signature = new LinkedHashMap<String, Object>();
+            signature.put("id", overload.id());
+            var types = new ArrayList<>(overload.binding().arguments());
+            if (overload.receiver()) signature.put("target", typeData(types.removeFirst()));
+            signature.put("args", types.stream().map(EnvironmentYaml::typeData).toList());
+            signature.put("return", typeData(overload.binding().result()));
+            signature.put("non_strict", overload.nonStrict());
+            signatures.add(signature);
+          }
+          functions.add(Map.of("name", name, "overloads", signatures));
+        });
     data.put("functions", functions);
     data.put(
         "extensions",
         new TreeMap<>(environment.libraryPolicy.libraries)
             .entrySet().stream()
-                .map(
-                    entry ->
-                        Map.<String, Object>of(
-                            "name", entry.getKey(), "version", (long) entry.getValue()))
+                .map(entry ->
+                    Map.<String, Object>of(
+                        "name", entry.getKey(), "version", (long) entry.getValue()))
                 .toList());
     var stdlib = new LinkedHashMap<String, Object>();
     // The independent trufflecel.macros feature preserves the global enable flag below.

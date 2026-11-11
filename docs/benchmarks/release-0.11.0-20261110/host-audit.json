@@ -1,0 +1,64 @@
+{
+  "phases": [
+    {
+      "phase": "evaluation/memory",
+      "captured_at": "2026-11-10T22:59:12.495549+00:00",
+      "min_one_minute_load": 0.18359375,
+      "max_one_minute_load": 1.43701171875,
+      "commands_above_load_5": 0,
+      "commands": 144
+    },
+    {
+      "phase": "evaluation/jvm-timing",
+      "captured_at": "2026-11-10T23:03:55.544732+00:00",
+      "min_one_minute_load": 1.0791015625,
+      "max_one_minute_load": 1.96826171875,
+      "commands_above_load_5": 0,
+      "commands": 24
+    },
+    {
+      "phase": "evaluation/native-timing",
+      "captured_at": "2026-11-10T23:16:29.356229+00:00",
+      "min_one_minute_load": 1.05859375,
+      "max_one_minute_load": 1.96826171875,
+      "commands_above_load_5": 0,
+      "commands": 72
+    },
+    {
+      "phase": "prepared-inputs/memory",
+      "captured_at": "2026-11-10T23:26:43.611146+00:00",
+      "min_one_minute_load": 1.2041015625,
+      "max_one_minute_load": 1.3388671875,
+      "commands_above_load_5": 0,
+      "commands": 48
+    },
+    {
+      "phase": "prepared-inputs/jvm-timing",
+      "captured_at": "2026-11-10T23:27:42.990221+00:00",
+      "min_one_minute_load": 1.12451171875,
+      "max_one_minute_load": 1.81298828125,
+      "commands_above_load_5": 0,
+      "commands": 8
+    },
+    {
+      "phase": "prepared-inputs/native-timing",
+      "captured_at": "2026-11-10T23:31:53.032950+00:00",
+      "min_one_minute_load": 1.15869140625,
+      "max_one_minute_load": 1.4775390625,
+      "commands_above_load_5": 0,
+      "commands": 24
+    }
+  ],
+  "guard": {
+    "status": "complete",
+    "exit_code": 0,
+    "started_at": "2026-11-10T22:59:12.319225+00:00",
+    "completed_at": "2026-11-10T23:35:57.020642+00:00",
+    "interval_seconds": 5,
+    "measurement_observations": 439,
+    "observations_with_external_work": 0,
+    "max_one_minute_load": 1.96826171875
+  },
+  "timing_cells_over_10_percent_window_drift": [],
+  "caveat": "Every five seconds the guard flags other processes above 20% CPU for at least five seconds, or named compilers/build tools. It cannot detect shorter or lighter work, and it does not establish exclusive use of the host."
+}
