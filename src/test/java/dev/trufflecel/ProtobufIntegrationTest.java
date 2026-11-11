@@ -32,15 +32,14 @@ public class ProtobufIntegrationTest {
     try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
       var jobs = new ArrayList<java.util.concurrent.Callable<Object>>();
       for (int i = 0; i < 100; i++)
-        jobs.add(
-            () -> {
-              var value = (ProtobufType.Value) type.decode(input);
-              Arrays.fill(value.toBytes().toByteArray(), (byte) 0);
-              Arrays.fill(((Bytes) type.get(value, "bytes")).toByteArray(), (byte) 0);
-              Arrays.fill(value.row().unknownFieldBytes(), (byte) 0);
-              assertEquals(message, value.message());
-              return type.get(value, "bytes");
-            });
+        jobs.add(() -> {
+          var value = (ProtobufType.Value) type.decode(input);
+          Arrays.fill(value.toBytes().toByteArray(), (byte) 0);
+          Arrays.fill(((Bytes) type.get(value, "bytes")).toByteArray(), (byte) 0);
+          Arrays.fill(value.row().unknownFieldBytes(), (byte) 0);
+          assertEquals(message, value.message());
+          return type.get(value, "bytes");
+        });
       for (var job : executor.invokeAll(jobs))
         assertEquals(new Bytes(payload.toByteArray()), job.get());
     }

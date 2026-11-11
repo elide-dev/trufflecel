@@ -47,10 +47,9 @@ public final class AstInterchangeTest {
           before.stream().anyMatch(entry -> field(entry, "key").equals(failure.expressionId())));
       assertTrue(
           after.stream()
-              .anyMatch(
-                  entry ->
-                      field(entry, "key").equals(failure.expressionId())
-                          && field(entry, "value").equals(failure.offset())));
+              .anyMatch(entry ->
+                  field(entry, "key").equals(failure.expressionId())
+                      && field(entry, "value").equals(failure.offset())));
     }
     Message absent =
         parsed.toBuilder()
@@ -98,10 +97,9 @@ public final class AstInterchangeTest {
         assertTrue(
             events.stream()
                 .filter(event -> event.error() != null)
-                .allMatch(
-                    event ->
-                        event.error().offsetEncoding() == CelException.OffsetEncoding.CODE_POINT
-                            && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
+                .allMatch(event ->
+                    event.error().offsetEncoding() == CelException.OffsetEncoding.CODE_POINT
+                        && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
         if (source.contains("x +")) {
           assertCanonicalLocation(
               source,
@@ -169,10 +167,9 @@ public final class AstInterchangeTest {
       assertEquals(4L, program(env, check(env, input)).trace(events::add).evaluate(Map.of("x", 1)));
       assertTrue(
           events.stream()
-              .allMatch(
-                  event ->
-                      event.error() == null
-                          && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
+              .allMatch(event ->
+                  event.error() == null
+                      && event.offsetEncoding() == CelException.OffsetEncoding.CODE_POINT));
       TraceEvent literal =
           events.stream()
               .filter(

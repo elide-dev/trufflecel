@@ -388,11 +388,10 @@ public final class Environment {
       objectTypes.putAll(environment.objectTypes);
       constructorOnlyTypes.addAll(environment.constructorOnlyTypes);
       functions.putAll(environment.functions);
-      environment.overloads.forEach(
-          (name, signatures) -> {
-            overloads.put(name, new ArrayList<>(signatures));
-            for (var signature : signatures) overloadIds.add(signature.id());
-          });
+      environment.overloads.forEach((name, signatures) -> {
+        overloads.put(name, new ArrayList<>(signatures));
+        for (var signature : signatures) overloadIds.add(signature.id());
+      });
       libraries = environment.libraryPolicy.libraries;
       allowedFunctions = environment.libraryPolicy.functions;
       aliases.putAll(environment.aliases);

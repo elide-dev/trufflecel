@@ -39,10 +39,9 @@ public final class ProtoSchema {
   }
 
   public void register(Environment.Builder builder) {
-    schemas.forEach(
-        (name, fields) -> {
-          if (!name.startsWith("google.protobuf.")) builder.objectType(new Adapter(name, fields));
-        });
+    schemas.forEach((name, fields) -> {
+      if (!name.startsWith("google.protobuf.")) builder.objectType(new Adapter(name, fields));
+    });
   }
 
   public Object decode(String name, byte[] bytes) {
@@ -211,10 +210,9 @@ public final class ProtoSchema {
     @Override
     public Map<String, CelType> extensions() {
       var result = new LinkedHashMap<String, CelType>();
-      fields.forEach(
-          (name, type) -> {
-            if (name.contains(".")) result.put(name, type);
-          });
+      fields.forEach((name, type) -> {
+        if (name.contains(".")) result.put(name, type);
+      });
       return Map.copyOf(result);
     }
 

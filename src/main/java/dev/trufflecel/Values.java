@@ -66,9 +66,8 @@ final class Values {
       buckets = Math.max(1, Integer.highestOneBit(Math.max(1, size) - 1) << 1);
       entries = new Object[size * 2];
       index = new int[buckets + size];
-      source.forEach(
-          (key, value) ->
-              putNormalized(in(key, depth + 1, remaining), in(value, depth + 1, remaining)));
+      source.forEach((key, value) ->
+          putNormalized(in(key, depth + 1, remaining), in(value, depth + 1, remaining)));
     }
 
     private int bucket(Object key) {
