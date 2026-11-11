@@ -9,6 +9,12 @@ import java.util.Map;
 class WriteNode extends CelNode {
   private final String name;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal int frameSlot = -1;
+  // True once Truffle has wrapped this node for instrumentation (createWrapper ran). Re-enter
+  // (ProbeNode.UNWIND_ACTION_REENTER re-running execute without clear) can only happen through a
+  // wrapper, so the re-entrant-safe push/clear path is only needed when this is set; uninstrumented
+  // evaluation keeps the plain push/pop fast path. A plain (non-CompilationFinal) field so a guard
+  // deopts and recompiles if an instrument attaches after the node was already compiled.
+  private boolean instrumented;
 
   WriteNode() {
     this("", 0, 0);
@@ -23,7 +29,8 @@ class WriteNode extends CelNode {
   Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
     Object stored = ctx.store(value);
     if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, stored);
-    else ctx.pushReentrant(this, name, stored);
+    else if (instrumented) ctx.pushReentrant(this, name, stored);
+    else ctx.push(name, stored);
     return value;
   }
 
@@ -36,7 +43,8 @@ class WriteNode extends CelNode {
     WriteNode delegate =
         this instanceof WrapperNode wrapper ? (WriteNode) wrapper.getDelegateNode() : this;
     if (delegate.frameSlot >= 0) frame.setAuxiliarySlot(delegate.frameSlot, null);
-    else ctx.clearReentrant(delegate);
+    else if (delegate.instrumented) ctx.clearReentrant(delegate);
+    else ctx.pop();
   }
 
   @GenerateWrapper.OutgoingConverter
@@ -46,6 +54,7 @@ class WriteNode extends CelNode {
 
   @Override
   public WrapperNode createWrapper(ProbeNode probe) {
+    instrumented = true;
     return new WriteNodeWrapper(this, probe);
   }
 
