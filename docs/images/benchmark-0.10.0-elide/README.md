@@ -36,7 +36,7 @@ standalone deployment-footprint measurement. Hot timing excludes preparation and
 warmup, so it does not describe first-evaluation latency.
 
 The [complete tables](../../benchmarks/release-0.10.0-20261109/tables.md) provide a
-text alternative with all values and ranges. The [renderer and brand provenance](../../../tools/bench/charts/README.md)
+text alternative with all values and ranges. The [renderer and brand provenance](../../../tools/bench/charts/README.md#archived-charts)
 document the exact fonts, tokens, source data and reproduction command.
 
 ## Interpreter evaluation first

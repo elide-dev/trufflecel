@@ -176,12 +176,11 @@ public class PartialEvaluationTest {
       var work = new ArrayList<Callable<Object>>();
       for (long i = 0; i < 30; i++) {
         long n = i;
-        work.add(
-            () ->
-                program
-                    .partialEvaluate(activation)
-                    .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), n))
-                    .value());
+        work.add(() ->
+            program
+                .partialEvaluate(activation)
+                .advanceEvaluation(Map.of(Attribute.of("data").qualify("secret"), n))
+                .value());
       }
       var results = executor.invokeAll(work);
       for (int i = 0; i < results.size(); i++) assertEquals((long) i, results.get(i).get());

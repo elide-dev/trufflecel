@@ -1,0 +1,36 @@
+{
+  "release": "0.11.0",
+  "commit": "620a961b4020dd1ea7585eda98778949113cbc70",
+  "measured": "2026-11-10",
+  "source_sha256": {
+    "summary.json": "74d1fda5fea1955de2bb1b1ae0343a332334e03432a96a79531f405af415dff8",
+    "prepared-inputs.json": "521a7fced36589296d9bda61e485117c5910a9093fb03a007d1917ed2fb767a7",
+    "source.json": "1101dd2da81a5afb994a6f622c37b2d5a47ecad50216a0b8e3f7045590e31095"
+  },
+  "renderer_sha256": {
+    "render_cards.py": "105b00013c1abd61422346099af0ecf8dba4b3017d883598e48daf948ef3f0a8",
+    "cards.py": "810cb62b52b18904bdf9244f23ee2a9d2310aace54a9a74615e4e29f508a961c"
+  },
+  "font_sha256": {
+    "instrument-sans-latin-wght-normal.woff2": "2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971",
+    "inter-latin-wght-normal.woff2": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+    "jetbrains-mono-latin-wght-normal.woff2": "18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e"
+  },
+  "artifact_sha256": {
+    "interpreter-time-light.svg": "da92c0a34057dff1594725808e001bf7e32f1c7053ab1683dc5ad77ac7717315",
+    "interpreter-time-dark.svg": "c8345a336e2f32721a7006012d94ffaea56aed4ec7a7d66444a4105c61e87628",
+    "evaluation-time-light.svg": "bab7d3cb6d2724102d6599c6b02d00ca1570f52a2548c0790b63b88f74621a99",
+    "evaluation-time-dark.svg": "abe2117a26def8655dd08628e93f4087ced58c925e6064138825e89c4ac43a55",
+    "evaluation-allocation-light.svg": "94ae3ceebcd06dd1c052279d7208797667e34516f7d522ed000c9fa74141ebe1",
+    "evaluation-allocation-dark.svg": "0dbe7615b0c4da418c1bd2ba69d379109a6115dd2c0e170fc5e570f61bd80e49",
+    "evaluation-rss-light.svg": "cd16f918e072ebd0bb0e514af91381c27a5da4153cb74da1dccd5c7afadaff50",
+    "evaluation-rss-dark.svg": "706b17850239f9f0db1723a21357f5f77f2dd0abf3e0c832ea14751f78129ca2",
+    "evaluation-peak-rss-light.svg": "57a4e5d534b4c9119a6c547d999eeaac4996535817720ee61a9231add4e50a05",
+    "evaluation-peak-rss-dark.svg": "5bcd22c725cedebd7b969e7988a36dc6407c5f881fc171b2ecaf13b445db94ce",
+    "prepared-time-light.svg": "f88ef67414eb6601ea9567408b602ab8d3913ae051b08f1ad14453360a00ff85",
+    "prepared-time-dark.svg": "2c91fdcf58f8bd97b873f3a19dedfcfc5555e52443f1b307b6b3fd3c9ab8fff6",
+    "prepared-allocation-light.svg": "5e6608148c38b0aca8ac12ead3c38db2666a7a29b2fa2550d307325d152911b6",
+    "prepared-allocation-dark.svg": "3f55a91d67ede41edba5f77d23a3f3b621b1cd3af9c4ba458d21e656ed1c4a13",
+    "cards.md": "ab90a3362d49559d6c468a764d343e2677894e9842f425dad0b5aaf5445bde1a"
+  }
+}

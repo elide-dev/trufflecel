@@ -61,7 +61,7 @@ maven_publication = rule(
         "module": attr.string(mandatory = True),
         "dependencies": attr.string_list(),
         "optional_dependencies": attr.string_list(),
-        "graalvm_version": attr.string(default = "25.5.5-elide.27"),
+        "graalvm_version": attr.string(default = "25.5.5-elide.28"),
         "_singlejar": attr.label(default = "@bazel_tools//tools/jdk:singlejar", executable = True, cfg = "exec"),
         "_legal": attr.label_list(default = ["//:LICENSE", "//:LICENSE-MIT", "//:LICENSE-APACHE", "//:NOTICE"], allow_files = True),
         "_version": attr.label(default = "//tools/release:version"),

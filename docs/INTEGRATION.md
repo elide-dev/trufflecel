@@ -65,8 +65,8 @@ time changes by −5.1% to +6.1%. Guest-JIT RSS falls 5.6–40.0%, with time cha
 −4.9% to +1.9%. These are three-process medians on a shared host, not performance
 guarantees. See the complete ranges and matched cel-java controls in the report.
 
-For Native Image applications using guest compilation, the pinned GraalVM
-`25.5.5-elide.27` also supports running the compiler in the application isolate:
+For Native Image applications using guest compilation, GraalVM
+`25.5.5-elide.27` used in these measurements also supports running the compiler in the application isolate:
 
 ```sh
 ./application -XX:-CompileInIsolates
@@ -186,9 +186,9 @@ continue through the generic adapter.
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.10.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
-Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.27` Elide GraalVM artifacts.
-The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.10.0`,
+at `0.11.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.28` Elide GraalVM artifacts.
+The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.11.0`,
 which contains the native plans and codecs split from the protobuf-java bridge.
 No sibling checkout or local Maven cache is required.
 
