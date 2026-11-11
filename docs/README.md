@@ -12,7 +12,7 @@ configuration, runtime dependencies and artifact verification.
 | Import/export ASTs or run conformance RPC | [Interchange](INTERCHANGE.md) |
 | Configure environments, policies or cost bounds | [Tooling](TOOLING.md) |
 | Profile or debug expressions | [Instrumentation](INSTRUMENTATION.md) |
-| Compare engines and memory costs | [Comparison guide](BENCHMARK_COMPARISON.md), [chart gallery](images/benchmark-0.10.0-elide/README.md), [methodology/history](BENCHMARKS.md) |
+| Compare engines and memory costs | [Comparison guide](BENCHMARK_COMPARISON.md), [chart gallery](images/benchmark-0.11.0/README.md), [methodology/history](BENCHMARKS.md) |
 | Build and validate | [Bazel](BAZEL.md), [CI](CI.md), [coverage](COVERAGE.md) |
 | Contribute code, evidence or documentation | [Contributing](../CONTRIBUTING.md), [agent guidance](../AGENTS.md), [contributor agreement](../CONTRIBUTOR_AGREEMENT.md) |
 | Understand project responsibilities | [Governance](../GOVERNANCE.md), [conduct](../CODE_OF_CONDUCT.md), [support](../SUPPORT.md) |
@@ -20,5 +20,5 @@ configuration, runtime dependencies and artifact verification.
 | Redistribute code or dependencies | [Dual licensing](../LICENSE), [third-party scope](../THIRD_PARTY.md), [notices](../NOTICE) |
 
 Versioned benchmark reports keep their original measurements and dependencies.
-The current comparison guide identifies which evidence qualifies 0.10.0 and which
+The current comparison guide identifies which evidence qualifies 0.11.0 and which
 remains historical. Do not infer a current-release result from an older report's date.
