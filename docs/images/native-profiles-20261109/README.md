@@ -53,6 +53,7 @@ Map inputs and materialized lists on a shared Linux Threadripper host, without
 exclusive CPU or thermal control. See the [qualification report](../../benchmarks/native-profiles-20261109/young-generation/README.md)
 for raw records, source identities, method, tradeoffs and counter controls.
 
-Regenerate with `tools/bench/charts/render_native_profiles.py` in the pinned chart
-environment. SVG glyphs are outlined from the exact fonts; PNG uses the same files.
+Regenerate with `tools/bench/charts/render_native_profiles.py` at commit `710e163`
+in its pinned chart environment; see [archived charts](../../../tools/bench/charts/README.md#archived-charts).
+SVG glyphs are outlined from the exact fonts; PNG uses the same files.
 The renderer verifies all 72 cells against raw data and writes [SHA256SUMS](SHA256SUMS).
