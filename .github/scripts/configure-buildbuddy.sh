@@ -14,6 +14,10 @@ if [ -z "${BUILDBUDDY_API_KEY:-}" ]; then
 fi
 printf 'common --remote_header=x-buildbuddy-api-key=%s\n' "$BUILDBUDDY_API_KEY" > user.bazelrc
 printf 'common --config=ci\n' >> user.bazelrc
+if [ "${ELIDE_BUILD_CACHE_ENABLED:-}" = true ]; then
+  printf 'common --config=shared_cache\n' >> user.bazelrc
+  echo "GCP shared-cache execution enabled"
+fi
 # Bazel attaches this to each invocation in BuildBuddy, before the next command overwrites it.
 # Keep credentials out of the execution log: they are RPC headers, never action environment variables.
 if [ -n "${RUNNER_TEMP:-}" ]; then

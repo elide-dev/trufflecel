@@ -78,6 +78,13 @@ common:remote --disk_cache=
 common:remote --nobuild_runfile_links
 common:remote --verbose_failures
 
+
+# Nearby GCP execution; selected by trusted CI only after shared-cache setup succeeds.
+# --config=remote retains hosted BuildBuddy execution; --config=local remains host-local.
+common:shared_cache --remote_executor=grpcs://elide-dev.buildbuddy.io:443
+common:shared_cache --platforms=//bazel/platforms:rbe_linux_amd64_shared
+common:shared_cache --host_platform=//bazel/platforms:rbe_linux_amd64_shared
+
 # Explicit host execution for performance measurements and workspace tools (bazel run). Never write host results to
 # the remote cache: host tools may differ from the pinned executor image.
 common:local --remote_executor=

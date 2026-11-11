@@ -13,7 +13,7 @@ permissions:
   id-token: write
 jobs:
   jvm:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.RUNNER_DEFAULT || 'ubuntu-24.04' }}
     timeout-minutes: 60
     steps:
       - name: Harden runner
@@ -23,6 +23,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Connect shared build cache
+        if: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: elide-dev/.github/actions/setup-build-cache@f4a09766ff13bdea6a9c48ca63f41507e979bc25 # reviewed immutable action
+        with:
+          endpoint: ${{ vars.BUILD_CACHE_ENDPOINT }}
       - name: Configure BuildBuddy
         env:
           BUILDBUDDY_API_KEY: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY) || '' }}
@@ -108,7 +113,7 @@ jobs:
         if: always()
         run: rm -f user.bazelrc
   native-jit:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.RUNNER_DEFAULT || 'ubuntu-24.04' }}
     timeout-minutes: 60
     steps:
       - name: Harden runner
@@ -119,7 +124,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Reserve disk for guest compiler
+        if: runner.environment == 'github-hosted'
         run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+      - name: Connect shared build cache
+        if: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: elide-dev/.github/actions/setup-build-cache@f4a09766ff13bdea6a9c48ca63f41507e979bc25 # reviewed immutable action
+        with:
+          endpoint: ${{ vars.BUILD_CACHE_ENDPOINT }}
       - name: Configure BuildBuddy
         env:
           BUILDBUDDY_API_KEY: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (secrets.BUILDBUDDY_API_KEY || secrets.BUILDBUDDY_APIKEY) || '' }}
