@@ -95,13 +95,11 @@ public final class CanonicalAst {
     Message originalInfo = child(parsed, "source_info");
     var sourceInfo = originalInfo.toBuilder();
     FieldDescriptor positions = originalInfo.getDescriptorForType().findFieldByName("positions");
-    writer.positions.forEach(
-        (id, position) -> {
-          if (!reader.positions.containsKey(id))
-            sourceInfo.addRepeatedField(
-                positions,
-                message("cel.expr.SourceInfo.PositionsEntry", "key", id, "value", position));
-        });
+    writer.positions.forEach((id, position) -> {
+      if (!reader.positions.containsKey(id))
+        sourceInfo.addRepeatedField(
+            positions, message("cel.expr.SourceInfo.PositionsEntry", "key", id, "value", position));
+    });
     Message checked =
         message(
             "cel.expr.CheckedExpr",

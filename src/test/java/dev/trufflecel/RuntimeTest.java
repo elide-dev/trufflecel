@@ -129,13 +129,12 @@ public class RuntimeTest {
                 args -> {
                   var frames = new ArrayList<com.oracle.truffle.api.CallTarget>();
                   com.oracle.truffle.api.Truffle.getRuntime()
-                      .iterateFrames(
-                          frame -> {
-                            var target = frame.getCallTarget();
-                            if (target == programs[0].callTarget()
-                                || target == programs[1].callTarget()) frames.add(target);
-                            return null;
-                          });
+                      .iterateFrames(frame -> {
+                        var target = frame.getCallTarget();
+                        if (target == programs[0].callTarget()
+                            || target == programs[1].callTarget()) frames.add(target);
+                        return null;
+                      });
                   assertEquals(List.of(programs[0].callTarget(), programs[1].callTarget()), frames);
                   return 10L;
                 })
@@ -159,12 +158,11 @@ public class RuntimeTest {
       else assertEquals(10L / x, programs[1].evaluate(Map.of("x", x)));
       assertNull(
           com.oracle.truffle.api.Truffle.getRuntime()
-              .iterateFrames(
-                  frame ->
-                      frame.getCallTarget() == programs[0].callTarget()
-                              || frame.getCallTarget() == programs[1].callTarget()
-                          ? frame
-                          : null));
+              .iterateFrames(frame ->
+                  frame.getCallTarget() == programs[0].callTarget()
+                          || frame.getCallTarget() == programs[1].callTarget()
+                      ? frame
+                      : null));
     }
   }
 

@@ -18,31 +18,29 @@ public final class CustomValidatorTest {
     Environment environment =
         Cel.newBuilder()
             .constant("hidden", Map.of("x", 1))
-            .validator(
-                context -> {
-                  callbacks.incrementAndGet();
-                  assertEquals("hidden", context.source());
-                  assertEquals(Ast.Kind.IDENT, context.root().kind());
-                  assertNull(context.root().value());
-                  assertEquals(CelType.of("map"), context.type(context.root()));
-                  assertEquals(context.resultType(), context.type(context.root()));
-                  assertEquals(CelType.DYN, context.type(Ast.Node.identifier("other")));
-                  assertThrows(UnsupportedOperationException.class, () -> context.types().clear());
-                  return List.of();
-                })
+            .validator(context -> {
+              callbacks.incrementAndGet();
+              assertEquals("hidden", context.source());
+              assertEquals(Ast.Kind.IDENT, context.root().kind());
+              assertNull(context.root().value());
+              assertEquals(CelType.of("map"), context.type(context.root()));
+              assertEquals(context.resultType(), context.type(context.root()));
+              assertEquals(CelType.DYN, context.type(Ast.Node.identifier("other")));
+              assertThrows(UnsupportedOperationException.class, () -> context.types().clear());
+              return List.of();
+            })
             .build();
     assertEquals(Map.of("x", 1L), environment.compile("hidden").evaluate());
     assertEquals(Map.of("x", 1L), environment.toBuilder().build().compile("hidden").evaluate());
     assertEquals(2, callbacks.get());
     Cel.newBuilder()
         .constant("pkg.hidden", 1)
-        .validator(
-            context -> {
-              assertEquals(Ast.Kind.SELECT, context.root().kind());
-              assertEquals(CelType.INT, context.type(context.root()));
-              assertEquals(CelType.DYN, context.type(context.root().children().get(0)));
-              return List.of();
-            })
+        .validator(context -> {
+          assertEquals(Ast.Kind.SELECT, context.root().kind());
+          assertEquals(CelType.INT, context.type(context.root()));
+          assertEquals(CelType.DYN, context.type(context.root().children().get(0)));
+          return List.of();
+        })
         .build()
         .compile("pkg.hidden");
     var map = new HashMap<Long, CelType>();
@@ -89,12 +87,11 @@ public final class CustomValidatorTest {
         Cel.newBuilder()
             .macro(identity)
             .standardMacros(Set.of("has"))
-            .validator(
-                context -> {
-                  calls.incrementAndGet();
-                  assertTrue(context.root().id() > 0);
-                  return List.of();
-                })
+            .validator(context -> {
+              calls.incrementAndGet();
+              assertTrue(context.root().id() > 0);
+              return List.of();
+            })
             .build()
             .toBuilder()
             .build();
@@ -111,11 +108,10 @@ public final class CustomValidatorTest {
     var calls = new AtomicInteger();
     var environment =
         Cel.newBuilder()
-            .validator(
-                context -> {
-                  calls.incrementAndGet();
-                  return List.of();
-                })
+            .validator(context -> {
+              calls.incrementAndGet();
+              return List.of();
+            })
             .build();
     try (var executor = Executors.newFixedThreadPool(4)) {
       var work = new ArrayList<Callable<Object>>();

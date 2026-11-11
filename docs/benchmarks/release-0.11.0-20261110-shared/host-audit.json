@@ -1,0 +1,173 @@
+{
+  "phases": [
+    {
+      "phase": "evaluation/jvm-timing",
+      "captured_at": "2026-11-10T17:49:18.283960+00:00",
+      "min_one_minute_load": 1.083984375,
+      "max_one_minute_load": 18.4736328125,
+      "commands_above_load_5": 10,
+      "commands": 24
+    },
+    {
+      "phase": "evaluation/memory",
+      "captured_at": "2026-11-10T17:44:34.498784+00:00",
+      "min_one_minute_load": 0.6240234375,
+      "max_one_minute_load": 1.26220703125,
+      "commands_above_load_5": 0,
+      "commands": 144
+    },
+    {
+      "phase": "evaluation/native-timing",
+      "captured_at": "2026-11-10T18:01:57.208312+00:00",
+      "min_one_minute_load": 1.16259765625,
+      "max_one_minute_load": 20.244140625,
+      "commands_above_load_5": 16,
+      "commands": 72
+    },
+    {
+      "phase": "prepared-inputs/jvm-timing",
+      "captured_at": "2026-11-10T18:13:12.455749+00:00",
+      "min_one_minute_load": 1.14453125,
+      "max_one_minute_load": 1.38330078125,
+      "commands_above_load_5": 0,
+      "commands": 8
+    },
+    {
+      "phase": "prepared-inputs/memory",
+      "captured_at": "2026-11-10T18:12:11.773619+00:00",
+      "min_one_minute_load": 1.2177734375,
+      "max_one_minute_load": 1.38427734375,
+      "commands_above_load_5": 0,
+      "commands": 48
+    },
+    {
+      "phase": "prepared-inputs/native-timing",
+      "captured_at": "2026-11-10T18:17:22.851223+00:00",
+      "min_one_minute_load": 1.4326171875,
+      "max_one_minute_load": 15.8095703125,
+      "commands_above_load_5": 15,
+      "commands": 24
+    }
+  ],
+  "timing_cells_over_10_percent_window_drift": [
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "proto-policy",
+      "measurement_drift_percent": [
+        -15.057058839024073,
+        9.609168130603685,
+        17.2431799858616
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "scalar-wide",
+      "measurement_drift_percent": [
+        10.506491703541187,
+        -0.911321324426817,
+        29.665577361600736
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java-optimized",
+      "workload": "optimizer-policy",
+      "measurement_drift_percent": [
+        20.86710111176735,
+        15.597926007452113,
+        -0.28851379177350367
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "measurement_drift_percent": [
+        0.2628900921117783,
+        39.11711519965042,
+        17.807270586027755
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "scalar-wide",
+      "measurement_drift_percent": [
+        24.034567367080495,
+        -12.660772497555739,
+        -11.309030484330208
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "cel-java",
+      "workload": "proto-policy",
+      "measurement_drift_percent": [
+        -25.187595092977045,
+        -2.6428005183436687,
+        33.91285751627393
+      ]
+    },
+    {
+      "runtime": "jvm",
+      "engine": "truffle-jit",
+      "workload": "map-regex",
+      "measurement_drift_percent": [
+        24.994650389971685,
+        -8.461395619674173,
+        23.237024379049664
+      ]
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-policy",
+      "measurement_drift_percent": [
+        -33.13960544604411,
+        -0.051212777371256735,
+        6.894875511159859
+      ]
+    },
+    {
+      "runtime": "svm",
+      "engine": "truffle-jit",
+      "workload": "proto-repeated",
+      "measurement_drift_percent": [
+        22.138396667042382,
+        0.4885717173796156,
+        0.22748301054080766
+      ]
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java",
+      "workload": "scalar-wide",
+      "measurement_drift_percent": [
+        -11.347660026949502,
+        -0.07066258839037998,
+        -1.2682039893624375
+      ]
+    },
+    {
+      "runtime": "svm",
+      "engine": "cel-java-optimized",
+      "workload": "map-regex",
+      "measurement_drift_percent": [
+        -2.1737074660077904,
+        12.692702676091706,
+        21.286655079409677
+      ]
+    }
+  ],
+  "concurrent_workload_observation": {
+    "observed_at_utc": "2026-11-10T18:23:06Z",
+    "process": "ffm-aot",
+    "controller_pid": 940941,
+    "controller_cwd": "/tmp/myna-ffm-static.e8Uy2K/source",
+    "elide_parent_pid": 946032,
+    "elide_elapsed_seconds": 253
+  },
+  "caveat": "Another Myna workload was observed during this round. Load and window drift prevent treating this as a quiet-host timing qualification. No samples have been dropped; causation of individual timing changes is not established. The driver generic low-load label is not a verified host-reservation claim."
+}

@@ -27,11 +27,10 @@ public final class CostEstimator {
       Environment environment, String source, Map<String, Long> sizeBounds) {
     Objects.requireNonNull(source);
     var bounds = Map.copyOf(sizeBounds);
-    bounds.forEach(
-        (name, size) -> {
-          if (name.isBlank() || size < 0)
-            throw new IllegalArgumentException("invalid collection size bound");
-        });
+    bounds.forEach((name, size) -> {
+      if (name.isBlank() || size < 0)
+        throw new IllegalArgumentException("invalid collection size bound");
+    });
     environment.checkSource(source);
     ExprNode expression = new Parser(source, environment).parse();
     environment.prepare(source, expression, true);

@@ -201,13 +201,12 @@ public class InstrumentationTest {
       var values = new ArrayList<String>();
       var debugger = com.oracle.truffle.api.debug.Debugger.find(context.getEngine());
       try (var session =
-          debugger.startSession(
-              event -> {
-                var scope = event.getTopStackFrame().getScope();
-                assertNotNull(scope);
-                assertNotNull(scope.getDeclaredValue("x"));
-                values.add(scope.getDeclaredValue("x").toDisplayString());
-              })) {
+          debugger.startSession(event -> {
+            var scope = event.getTopStackFrame().getScope();
+            assertNotNull(scope);
+            assertNotNull(scope.getDeclaredValue("x"));
+            values.add(scope.getDeclaredValue("x").toDisplayString());
+          })) {
         session.install(
             com.oracle.truffle.api.debug.Breakpoint.newBuilder(source.getURI()).lineIs(2).build());
         assertEquals(2L, context.eval(source).asLong());

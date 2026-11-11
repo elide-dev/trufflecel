@@ -146,14 +146,13 @@ public final class ValidationTest {
     lazy.put("x + 1 / 0 == 1", Unknown.of("x"));
     lazy.put("pair(x, 1 / 0)", Unknown.of("x"));
     lazy.put("same(x)", Unknown.of("x"));
-    lazy.forEach(
-        (source, expected) -> {
-          Program program = env.compile(source);
-          Object value = expected instanceof Unknown ? Unknown.of("x") : 0L;
-          Map<String, Object> bindings =
-              Map.of("x", value, "b", false, "s", "", "xs", List.of(), "m", Map.of());
-          assertEquals(source, expected, program.evaluate(bindings));
-        });
+    lazy.forEach((source, expected) -> {
+      Program program = env.compile(source);
+      Object value = expected instanceof Unknown ? Unknown.of("x") : 0L;
+      Map<String, Object> bindings =
+          Map.of("x", value, "b", false, "s", "", "xs", List.of(), "m", Map.of());
+      assertEquals(source, expected, program.evaluate(bindings));
+    });
     // Deferred failures keep their evaluation category when the lazy path is taken after all.
     assertEquals(
         CelException.Code.DIVIDE_BY_ZERO,
@@ -434,9 +433,8 @@ public final class ValidationTest {
     durations.put("+1µs", Duration.ofNanos(1000));
     durations.put("-1μs", Duration.ofNanos(-1000));
     durations.put("0", Duration.ZERO);
-    durations.forEach(
-        (text, expected) ->
-            assertEquals(text, expected, env.compile("duration(s)").evaluate(Map.of("s", text))));
+    durations.forEach((text, expected) ->
+        assertEquals(text, expected, env.compile("duration(s)").evaluate(Map.of("s", text))));
     for (String text : List.of("", "s", "1", "1.5", ".s", "1x", "1s2", "1ss", "1 s", "+", "1.5.5s"))
       assertEquals(
           text,
