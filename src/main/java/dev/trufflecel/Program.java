@@ -235,17 +235,16 @@ public final class Program {
     Objects.requireNonNull(options);
     Objects.requireNonNull(executor);
     var result = new java.util.concurrent.CompletableFuture<Object>();
-    executor.execute(
-        () -> {
-          if (result.isCancelled()) return;
-          try {
-            result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
-          } catch (RuntimeException failure) {
-            result.completeExceptionally(failure);
-          } catch (Error failure) {
-            result.completeExceptionally(failure);
-          }
-        });
+    executor.execute(() -> {
+      if (result.isCancelled()) return;
+      try {
+        result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
+      } catch (RuntimeException failure) {
+        result.completeExceptionally(failure);
+      } catch (Error failure) {
+        result.completeExceptionally(failure);
+      }
+    });
     return result;
   }
 
