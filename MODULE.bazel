@@ -64,7 +64,7 @@ bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
 bazel_dep(name = "platforms", version = "1.1.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
-go_sdk.download(version = "1.26.7")
+go_sdk.download(version = "1.27.4")
 
 bazel_dep(name = "rules_cc", version = "0.2.28")
 register_toolchains("//bazel/platforms:cc_toolchain")
@@ -108,8 +108,8 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "codspeed_hooks",
     build_file = "//bazel:codspeed_hooks.BUILD",
-    sha256 = "a1a486756f307e3dfe42518784a9d8d29217878c5e36a9ebe72d3e5a89150bda",
-    strip_prefix = "instrument-hooks-1ec92c8c9db59db2d0adc37f47d003d3db4e1c64",
-    urls = ["https://codeload.github.com/CodSpeedHQ/instrument-hooks/tar.gz/1ec92c8c9db59db2d0adc37f47d003d3db4e1c64"],
+    sha256 = "4cc3b05659a3f72d1bacf4f1e151d784a2451ff15f8503bfbf4183acfa12572f",
+    strip_prefix = "instrument-hooks-8fd5b878499f819561b33219cdafaa6f8c28b4e4",
+    urls = ["https://codeload.github.com/CodSpeedHQ/instrument-hooks/tar.gz/8fd5b878499f819561b33219cdafaa6f8c28b4e4"],
     type = "tar.gz",
 )
