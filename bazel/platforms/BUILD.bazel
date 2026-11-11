@@ -41,3 +41,14 @@ toolchain(
     exec_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
     target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
 )
+
+# Opt-in GCP workers: same image/toolchains and hermetic network policy as hosted RBE.
+platform(
+    name = "rbe_linux_amd64_shared",
+    parents = [":rbe_linux_amd64"],
+    exec_properties = {
+        "workload-isolation-type": "oci",
+        "use-self-hosted-executors": "true",
+        "Pool": "bb-native-128",
+    },
+)
