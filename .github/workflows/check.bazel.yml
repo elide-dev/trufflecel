@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
       - name: Connect shared build cache
         if: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
-        uses: elide-tools/buildcache@8793ebc8390759f473d8174276e6d1a836ccc456 # reviewed immutable action
+        uses: elide-tools/buildcache@9b3ee1dbb06dcbf21ba49a48bf2106f14a6a7a7e # reviewed immutable action
         with:
           endpoint: ${{ vars.BUILD_CACHE_ENDPOINT }}
       - name: Configure BuildBuddy
@@ -128,7 +128,7 @@ jobs:
         run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet
       - name: Connect shared build cache
         if: ${{ vars.BUILD_CACHE_ENABLED == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
-        uses: elide-tools/buildcache@8793ebc8390759f473d8174276e6d1a836ccc456 # reviewed immutable action
+        uses: elide-tools/buildcache@9b3ee1dbb06dcbf21ba49a48bf2106f14a6a7a7e # reviewed immutable action
         with:
           endpoint: ${{ vars.BUILD_CACHE_ENDPOINT }}
       - name: Configure BuildBuddy
