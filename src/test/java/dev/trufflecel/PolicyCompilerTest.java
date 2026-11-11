@@ -257,26 +257,26 @@ public class PolicyCompilerTest {
         PolicyCompiler.compile(
             env,
             """
-        name: first
-        description: first matching output
-        rule:
-          id: root
-          description: choices
-          match:
-            - {condition: 'x > 0', output: "'positive'", explanation: "'reason'"}
-            - {output: "'other'"}
-        """);
+            name: first
+            description: first matching output
+            rule:
+              id: root
+              description: choices
+              match:
+                - {condition: 'x > 0', output: "'positive'", explanation: "'reason'"}
+                - {output: "'other'"}
+            """);
     assertEquals("positive", complete.evaluate(Map.of("x", 1)));
     assertEquals("other", complete.evaluate(Map.of("x", 0)));
     var conditional =
         PolicyCompiler.compile(
             env,
             """
-        name: conditional
-        rule:
-          match:
-            - {condition: 'x > 0', output: 'x * 2'}
-        """);
+            name: conditional
+            rule:
+              match:
+                - {condition: 'x > 0', output: 'x * 2'}
+            """);
     assertEquals(4L, conditional.evaluate(Map.of("x", 2)));
     assertEquals(OptionalValue.none(), conditional.evaluate(Map.of("x", 0)));
   }
@@ -300,21 +300,21 @@ public class PolicyCompilerTest {
         PolicyCompiler.compile(
             env,
             """
-        name: variables
-        rule:
-          variables:
-            - {name: unused, expression: '1 / 0'}
-            - {name: a, expression: 'load()'}
-            - {name: b, expression: 'variables.a * 2'}
-          match:
-            - condition: 'x > 0'
-              rule:
-                variables:
-                  - {name: a, expression: 'variables.b + 1'}
-                match:
-                  - {output: 'variables.a + variables.b'}
-            - {output: '0'}
-        """);
+            name: variables
+            rule:
+              variables:
+                - {name: unused, expression: '1 / 0'}
+                - {name: a, expression: 'load()'}
+                - {name: b, expression: 'variables.a * 2'}
+              match:
+                - condition: 'x > 0'
+                  rule:
+                    variables:
+                      - {name: a, expression: 'variables.b + 1'}
+                    match:
+                      - {output: 'variables.a + variables.b'}
+                - {output: '0'}
+            """);
     assertEquals(0L, program.evaluate(Map.of("x", 0)));
     assertEquals(0, calls.get());
     assertEquals(17L, program.evaluate(Map.of("x", 1)));
@@ -337,15 +337,15 @@ public class PolicyCompilerTest {
         PolicyCompiler.compile(
             env,
             """
-        name: tags
-        rule:
-          aggregate:
-            - {condition: 'x > 0', output: "'positive'"}
-            - rule:
-                match:
-                  - {condition: 'x > 10', output: "'large'"}
-            - {output: "'always'"}
-        """);
+            name: tags
+            rule:
+              aggregate:
+                - {condition: 'x > 0', output: "'positive'"}
+                - rule:
+                    match:
+                      - {condition: 'x > 10', output: "'large'"}
+                - {output: "'always'"}
+            """);
     assertEquals(List.of("always"), aggregate.evaluate(Map.of("x", 0)));
     assertEquals(List.of("positive", "large", "always"), aggregate.evaluate(Map.of("x", 20)));
     assertEquals(
@@ -353,12 +353,12 @@ public class PolicyCompilerTest {
         PolicyCompiler.compile(
                 Cel.newBuilder().build(),
                 """
-        name: lists
-        rule:
-          aggregate:
-            - {output: '[1, 2]'}
-            - {output: '[3]'}
-        """)
+                name: lists
+                rule:
+                  aggregate:
+                    - {output: '[1, 2]'}
+                    - {output: '[3]'}
+                """)
             .evaluate(Map.of()));
     assertEquals(
         List.of(OptionalValue.none()),
@@ -375,29 +375,29 @@ public class PolicyCompilerTest {
         PolicyCompiler.compile(
             env,
             """
-        name: fallthrough
-        rule:
-          match:
-            - rule:
-                match:
-                  - {condition: 'x > 0', output: "'inner'"}
-            - {output: "'fallback'"}
-        """);
+            name: fallthrough
+            rule:
+              match:
+                - rule:
+                    match:
+                      - {condition: 'x > 0', output: "'inner'"}
+                - {output: "'fallback'"}
+            """);
     assertEquals("inner", program.evaluate(Map.of("x", 1)));
     assertEquals("fallback", program.evaluate(Map.of("x", 0)));
     var aggregate =
         PolicyCompiler.compile(
             env,
             """
-        name: nested-aggregate
-        rule:
-          match:
-            - condition: 'x > 0'
-              rule:
-                aggregate:
-                  - {output: 'x'}
-            - {output: '[]'}
-        """);
+            name: nested-aggregate
+            rule:
+              match:
+                - condition: 'x > 0'
+                  rule:
+                    aggregate:
+                      - {output: 'x'}
+                - {output: '[]'}
+            """);
     assertEquals(List.of(2L), aggregate.evaluate(Map.of("x", 2)));
     assertEquals(List.of(), aggregate.evaluate(Map.of("x", 0)));
   }

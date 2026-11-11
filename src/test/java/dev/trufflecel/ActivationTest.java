@@ -154,12 +154,11 @@ public class ActivationTest {
         var locals = new ArrayList<String>();
         try (var session =
             Debugger.find(context.getEngine())
-                .startSession(
-                    event -> {
-                      var scope = event.getTopStackFrame().getScope();
-                      locals.add(scope.getDeclaredValue("x").toDisplayString());
-                      assertEquals("10", scope.getDeclaredValue("offset").toDisplayString());
-                    })) {
+                .startSession(event -> {
+                  var scope = event.getTopStackFrame().getScope();
+                  locals.add(scope.getDeclaredValue("x").toDisplayString());
+                  assertEquals("10", scope.getDeclaredValue("offset").toDisplayString());
+                })) {
           session.install(Breakpoint.newBuilder(source).lineIs(2).build());
           assertEquals(List.of(11L, 12L), program.evaluate(snapshot));
           assertEquals(List.of("1", "2"), locals);

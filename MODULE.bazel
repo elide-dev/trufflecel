@@ -9,18 +9,18 @@ bazel_dep(name = "rules_jvm_external", version = "7.2")
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
-        "org.graalvm.truffle:truffle-api:25.5.5-elide.27",
-        "org.graalvm.truffle:truffle-dsl-processor:25.5.5-elide.27",
-        "org.graalvm.polyglot:polyglot:25.5.5-elide.27",
-        "org.graalvm.truffle:truffle-runtime:25.5.5-elide.27",
-        "org.graalvm.regex:regex:25.5.5-elide.27",
-        "org.graalvm.sdk:nativeimage:25.5.5-elide.27",
+        "org.graalvm.truffle:truffle-api:25.5.5-elide.28",
+        "org.graalvm.truffle:truffle-dsl-processor:25.5.5-elide.28",
+        "org.graalvm.polyglot:polyglot:25.5.5-elide.28",
+        "org.graalvm.truffle:truffle-runtime:25.5.5-elide.28",
+        "org.graalvm.regex:regex:25.5.5-elide.28",
+        "org.graalvm.sdk:nativeimage:25.5.5-elide.28",
         "com.google.re2j:re2j:1.8",
-        "dev.elide:truffledata-core:0.10.0",
-        "dev.elide:truffledata-protobuf:0.10.0",
-        "dev.elide:truffledata-protobuf-runtime:0.10.0",
-        "dev.elide:truffledata-jdbc:0.10.0",
-        "org.graalvm.shadowed:json:25.5.5-elide.27",
+        "dev.elide:truffledata-core:0.11.0",
+        "dev.elide:truffledata-protobuf:0.11.0",
+        "dev.elide:truffledata-protobuf-runtime:0.11.0",
+        "dev.elide:truffledata-jdbc:0.11.0",
+        "org.graalvm.shadowed:json:25.5.5-elide.28",
         "com.google.protobuf:protobuf-java:4.36.2",
         "com.h2database:h2:2.5.252",
         "junit:junit:4.13.2",
@@ -29,9 +29,9 @@ maven.install(
         "io.grpc:grpc-netty-shaded:1.85.1",
         "io.grpc:grpc-protobuf:1.85.1",
         "io.grpc:grpc-stub:1.85.1",
-        "com.google.googlejavaformat:google-java-format:1.37.0",
+        "com.google.googlejavaformat:google-java-format:2.0.0",
     ],
-    repositories = ["https://repo.maven.apache.org/maven2", "https://maven.elide.dev", "https://maven.elide.dev/gvm-elide/25.5.5-elide.27"],
+    repositories = ["https://repo.maven.apache.org/maven2", "https://maven.elide.dev", "https://maven.elide.dev/gvm-elide/25.5.5-elide.28"],
     lock_file = "//:maven_install.json",
     version_conflict_policy = "pinned",
     fail_if_repin_required = True,
@@ -64,7 +64,7 @@ bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
 bazel_dep(name = "platforms", version = "1.1.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
-go_sdk.download(version = "1.26.7")
+go_sdk.download(version = "1.27.4")
 
 bazel_dep(name = "rules_cc", version = "0.2.28")
 register_toolchains("//bazel/platforms:cc_toolchain")
@@ -84,10 +84,10 @@ gvm.graalvm(
     distribution = "ce",
     java_version = "25",
     platform = "linux-x64",
-    version = "25.5.5-elide.27",
-    sha256s = {"linux-x64": "b6d316ed0b81354949704afe632e1e2a1551d637736df5b6b03088cc5b09c852"},
-    strip_prefixes = {"linux-x64": "graalvm-ce-25.5.5-elide.27-linux-amd64"},
-    urls = {"linux-x64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.27/dist/graalvm-ce-25.5.5-elide.27-linux-amd64.tar.gz"},
+    version = "25.5.5-elide.28",
+    sha256s = {"linux-x64": "398d8587d0ac7ab2610a979cdc43f0ad03a484b4be0e09a1bcc64f2ec703f148"},
+    strip_prefixes = {"linux-x64": "graalvm-ce-25.5.5-elide.28-linux-amd64"},
+    urls = {"linux-x64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.28/dist/graalvm-ce-25.5.5-elide.28-linux-amd64.tar.gz"},
 )
 gvm.graalvm(
     name = "graalvm_macos_aarch64",
@@ -96,10 +96,10 @@ gvm.graalvm(
     distribution = "ce",
     java_version = "25",
     platform = "macos-aarch64",
-    version = "25.5.5-elide.27",
-    sha256s = {"macos-aarch64": "e8ece6d4c8f3f1bc582d447ec36e7ade69d9cf4fc0e30c58bc40af39a9541f0c"},
-    strip_prefixes = {"macos-aarch64": "graalvm-ce-25.5.5-elide.27-macos-aarch64"},
-    urls = {"macos-aarch64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.27/dist/graalvm-ce-25.5.5-elide.27-macos-aarch64.tar.gz"},
+    version = "25.5.5-elide.28",
+    sha256s = {"macos-aarch64": "8a244c653dc7875c72efbb8e1a42b5dd8e11fe73e616beb6b84e598ab170b207"},
+    strip_prefixes = {"macos-aarch64": "graalvm-ce-25.5.5-elide.28-macos-aarch64"},
+    urls = {"macos-aarch64": "https://maven.elide.dev/gvm-elide/25.5.5-elide.28/dist/graalvm-ce-25.5.5-elide.28-macos-aarch64.tar.gz"},
 )
 use_repo(gvm, "graalvm_linux_amd64", "graalvm_linux_amd64_toolchains", "graalvm_macos_aarch64", "graalvm_macos_aarch64_toolchains")
 register_toolchains("@graalvm_macos_aarch64_toolchains//:all")
@@ -108,8 +108,8 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "codspeed_hooks",
     build_file = "//bazel:codspeed_hooks.BUILD",
-    sha256 = "a1a486756f307e3dfe42518784a9d8d29217878c5e36a9ebe72d3e5a89150bda",
-    strip_prefix = "instrument-hooks-1ec92c8c9db59db2d0adc37f47d003d3db4e1c64",
-    urls = ["https://codeload.github.com/CodSpeedHQ/instrument-hooks/tar.gz/1ec92c8c9db59db2d0adc37f47d003d3db4e1c64"],
+    sha256 = "4cc3b05659a3f72d1bacf4f1e151d784a2451ff15f8503bfbf4183acfa12572f",
+    strip_prefix = "instrument-hooks-8fd5b878499f819561b33219cdafaa6f8c28b4e4",
+    urls = ["https://codeload.github.com/CodSpeedHQ/instrument-hooks/tar.gz/8fd5b878499f819561b33219cdafaa6f8c28b4e4"],
     type = "tar.gz",
 )

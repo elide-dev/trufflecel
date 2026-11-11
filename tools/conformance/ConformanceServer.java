@@ -387,17 +387,16 @@ public final class ConformanceServer implements BindableService {
     for (String name : List.of("Parse", "Check", "Eval"))
       service.addMethod(
           method(name),
-          ServerCalls.asyncUnaryCall(
-              (request, observer) -> {
-                Message response =
-                    switch (name) {
-                      case "Parse" -> parse(request);
-                      case "Check" -> check(request);
-                      default -> eval(request);
-                    };
-                observer.onNext(response);
-                observer.onCompleted();
-              }));
+          ServerCalls.asyncUnaryCall((request, observer) -> {
+            Message response =
+                switch (name) {
+                  case "Parse" -> parse(request);
+                  case "Check" -> check(request);
+                  default -> eval(request);
+                };
+            observer.onNext(response);
+            observer.onCompleted();
+          }));
     return service.build();
   }
 
@@ -460,11 +459,10 @@ public final class ConformanceServer implements BindableService {
             .start();
     Runtime.getRuntime()
         .addShutdownHook(
-            new Thread(
-                () -> {
-                  server.shutdownNow();
-                  executor.shutdownNow();
-                }));
+            new Thread(() -> {
+              server.shutdownNow();
+              executor.shutdownNow();
+            }));
     System.out.println("TruffleCEL conformance service listening on 127.0.0.1:" + server.getPort());
     server.awaitTermination();
   }

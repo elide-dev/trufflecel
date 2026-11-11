@@ -46,14 +46,11 @@ public final class AstLocationTest {
       assertFailure(edited.compile(ENV), position, CelException.OffsetEncoding.CODE_POINT, 2, 3);
       var rejecting =
           ENV.toBuilder()
-              .validator(
-                  context -> {
-                    assertNode(
-                        context.root(), position, CelException.OffsetEncoding.CODE_POINT, 2, 3);
-                    return List.of(
-                        context.issue(
-                            context.root(), CelException.Code.TYPE, "application finding"));
-                  })
+              .validator(context -> {
+                assertNode(context.root(), position, CelException.OffsetEncoding.CODE_POINT, 2, 3);
+                return List.of(
+                    context.issue(context.root(), CelException.Code.TYPE, "application finding"));
+              })
               .build();
       for (Runnable compile :
           List.<Runnable>of(() -> ast.compile(rejecting), () -> program(rejecting, input))) {
@@ -84,10 +81,8 @@ public final class AstLocationTest {
     assertFailure(ast.compile(ENV), -1, CelException.OffsetEncoding.CODE_POINT, -1, -1);
     var rejecting =
         ENV.toBuilder()
-            .validator(
-                context ->
-                    List.of(
-                        context.issue(context.root(), CelException.Code.TYPE, "unlocated finding")))
+            .validator(context ->
+                List.of(context.issue(context.root(), CelException.Code.TYPE, "unlocated finding")))
             .build();
     CelException failure = assertThrows(CelException.class, () -> ast.compile(rejecting));
     assertEquals(-1, failure.offset());

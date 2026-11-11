@@ -210,11 +210,10 @@ public abstract class PojoType<T> implements ObjectType {
       } else if (value instanceof Map<?, ?> map) {
         enter(map);
         try {
-          map.forEach(
-              (key, item) -> {
-                inspectOwned(key);
-                inspectOwned(item);
-              });
+          map.forEach((key, item) -> {
+            inspectOwned(key);
+            inspectOwned(item);
+          });
         } finally {
           leave(map);
         }
@@ -257,13 +256,12 @@ public abstract class PojoType<T> implements ObjectType {
       enter(value);
       try {
         var result = new LinkedHashMap<Object, Object>();
-        value.forEach(
-            (k, v) -> {
-              Object convertedKey = key.apply(k);
-              if (convertedKey == CelNull.INSTANCE)
-                throw Values.error(CelException.Code.INVALID_ARGUMENT, "null POJO map key");
-              result.put(convertedKey, element.apply(v));
-            });
+        value.forEach((k, v) -> {
+          Object convertedKey = key.apply(k);
+          if (convertedKey == CelNull.INSTANCE)
+            throw Values.error(CelException.Code.INVALID_ARGUMENT, "null POJO map key");
+          result.put(convertedKey, element.apply(v));
+        });
         return Collections.unmodifiableMap(result);
       } finally {
         leave(value);
