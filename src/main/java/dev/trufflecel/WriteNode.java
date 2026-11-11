@@ -9,12 +9,6 @@ import java.util.Map;
 class WriteNode extends CelNode {
   private final String name;
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal int frameSlot = -1;
-  // True once Truffle has wrapped this node for instrumentation (createWrapper ran). Re-enter
-  // (ProbeNode.UNWIND_ACTION_REENTER re-running execute without clear) can only happen through a
-  // wrapper, so the re-entrant-safe push/clear path is only needed when this is set; uninstrumented
-  // evaluation keeps the plain push/pop fast path. A plain (non-CompilationFinal) field so a guard
-  // deopts and recompiles if an instrument attaches after the node was already compiled.
-  private boolean instrumented;
 
   WriteNode() {
     this("", 0, 0);
@@ -29,8 +23,7 @@ class WriteNode extends CelNode {
   Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
     Object stored = ctx.store(value);
     if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, stored);
-    else if (instrumented) ctx.pushReentrant(this, name, stored);
-    else ctx.push(name, stored);
+    else ctx.pushReentrant(this, name, stored);
     return value;
   }
 
@@ -38,13 +31,12 @@ class WriteNode extends CelNode {
     // When instrumented, the generated wrapper replaces bindings[i] in the @Children array; clear
     // is then dispatched on the wrapper, whose own frameSlot/scope state were never set by
     // execute (the wrapper delegates execute to this node). Forward to the delegate so the
-    // scope depth recorded on the first push is restored rather than reading the wrapper's
-    // untouched defaults.
+    // pair it owns is removed rather than reading the wrapper's untouched defaults. Ownership is
+    // recorded on every push, so a wrapper inserted between a push and its clear stays balanced.
     WriteNode delegate =
         this instanceof WrapperNode wrapper ? (WriteNode) wrapper.getDelegateNode() : this;
     if (delegate.frameSlot >= 0) frame.setAuxiliarySlot(delegate.frameSlot, null);
-    else if (delegate.instrumented) ctx.clearReentrant(delegate);
-    else ctx.pop();
+    else ctx.clearReentrant(delegate);
   }
 
   @GenerateWrapper.OutgoingConverter
@@ -54,7 +46,6 @@ class WriteNode extends CelNode {
 
   @Override
   public WrapperNode createWrapper(ProbeNode probe) {
-    instrumented = true;
     return new WriteNodeWrapper(this, probe);
   }
 

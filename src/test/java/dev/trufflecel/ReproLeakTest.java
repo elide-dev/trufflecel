@@ -299,23 +299,66 @@ public class ReproLeakTest {
 
   /**
    * Exercises the defensive no-op branches of {@link EvalContext#clearReentrant}: clearing a node
-   * before any re-entrant push has initialized the per-context depth map (writeDepths still null),
-   * and clearing a node that never pushed when the map already holds an entry for a different node
-   * (holder == null). Both paths must leave the scope stack untouched.
+   * before any push has allocated the scope stack, and clearing a node that never pushed while a
+   * different node owns the top pair. Both paths must leave the scope stack untouched.
    */
   @Test
   public void clearReentrantNoOpsWhenNoPushRecorded() {
     var ctx = new EvalContext.Scoped(Cel.newBuilder().build(), Map.of());
     var nodeA = new WriteNode();
     var nodeB = new WriteNode();
-    // No pushes yet: writeDepths is null; clearReentrant returns without touching the stack.
+    // No pushes yet: there is no ownership record; clearReentrant returns without effect.
     ctx.clearReentrant(nodeA);
-    // A push for nodeA initializes the depth map; clearing an unrelated nodeB finds no entry and
-    // must skip the unwind (holder == null branch).
+    assertTrue(ctx.visibleBindings().isEmpty());
+    // nodeA owns the only pair; clearing an unrelated nodeB finds no pair and must not unwind.
     ctx.pushReentrant(nodeA, "a", 1L);
     ctx.clearReentrant(nodeB);
-    // Restore the stack by clearing nodeA's recorded push.
+    assertEquals(Map.of("a", 1L), ctx.visibleBindings());
+    // A re-entered push replaces nodeA's pair, and anything pushed above it, instead of stacking.
+    ctx.pushReentrant(nodeB, "b", 2L);
+    ctx.pushReentrant(nodeA, "a", 3L);
+    assertEquals(Map.of("a", 3L), ctx.visibleBindings());
+    // Restore the stack by clearing nodeA's pair.
     ctx.clearReentrant(nodeA);
+    assertTrue(ctx.visibleBindings().isEmpty());
+  }
+
+  /**
+   * An instrument that attaches while a comprehension is iterating wraps the binding between its
+   * push and its clear. The clear must still remove the pair pushed before the wrapper existed;
+   * otherwise later iterations read the stale first value through the absolute local slot.
+   */
+  @Test
+  public void instrumentAttachedDuringIterationKeepsScopeBalanced() throws Exception {
+    try (Context context = Context.newBuilder("cel").build()) {
+      context.initialize("cel");
+      context.enter();
+      try {
+        var attached = new AtomicBoolean();
+        var environment =
+            Cel.newBuilder()
+                .function(
+                    "attach",
+                    List.of(CelType.INT),
+                    CelType.INT,
+                    args -> {
+                      // The first lookup creates the instrument and wraps the running program.
+                      if (attached.compareAndSet(false, true)) control(context);
+                      return args.get(0);
+                    })
+                .build();
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder(
+                    "cel", "[1,2,3].map(x, attach(x) + 1)", "late-attach.cel")
+                .build();
+        var program = environment.compile(source);
+        assertEquals(List.of(2L, 3L, 4L), program.evaluate(Map.of()));
+        assertTrue(attached.get());
+        assertEquals(List.of(2L, 3L, 4L), program.evaluate(Map.of()));
+      } finally {
+        context.leave();
+      }
+    }
   }
 
   private static List<Long> evalList(Context context, String expression) throws Exception {
