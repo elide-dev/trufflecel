@@ -12,7 +12,7 @@ upload convention. It produces four thin Maven artifacts under `dev.elide`:
 
 The protobuf and JSON adapters depend on the same version of `trufflecel-core`.
 The processor has no runtime dependencies; its generated adapters compile against matching core. Java 25 is
-required. Publications built from the current source tree pin TruffleData `0.10.0` and Elide GraalVM `25.5.5-elide.27`,
+required. Publications built from the current source tree pin TruffleData `0.11.0` and Elide GraalVM `25.5.5-elide.28`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 
@@ -84,7 +84,7 @@ manual recovery. No external CI secrets or bucket settings are modified by this 
 repositories {
     mavenCentral()
     maven("https://maven.elide.dev")
-    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.27")
+    maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.28")
 }
 dependencies {
     implementation("dev.elide:trufflecel-core:<published-version>")
@@ -106,9 +106,10 @@ reusable publisher checks out and verifies the exact release tag before calling 
 with its version. All modules release together. The explicit local `--publish` command
 remains available; coordinate manual publishes with CI to avoid concurrent metadata writes.
 
-The published 0.10.0 release satisfied its TruffleData 0.10.0 adoption requirement;
-see [the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). The recorded
-dependency contract remains enforced. Staging a development build does not by
+Releases starting at 0.11.0 require TruffleData 0.11.0; see
+[the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). TruffleData 0.11.0
+was built with Myna 0.16.0. TruffleCEL has no direct Myna dependency and does not
+ship the optional Myna cells artifacts. Staging a development build does not by
 itself qualify a new release.
 The staging script resolves Bazel's physical configuration output directory rather
 than following the mutable `bazel-bin` symlink while copying publication files.

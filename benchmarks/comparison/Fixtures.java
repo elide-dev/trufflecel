@@ -54,20 +54,19 @@ final class Fixtures {
 
   static List<Map<String, Object>> inputs(int workload) {
     return INPUTS.stream()
-        .map(
-            input ->
-                switch (workload) {
-                  case 0 -> Map.of("x", input.get("x"));
-                  case 1 ->
-                      Map.of(
-                          "x",
-                          input.get("x"),
-                          "enabled",
-                          input.get("enabled"),
-                          "email",
-                          input.get("email"));
-                  default -> Map.of("xs", input.get("xs"));
-                })
+        .map(input ->
+            switch (workload) {
+              case 0 -> Map.of("x", input.get("x"));
+              case 1 ->
+                  Map.of(
+                      "x",
+                      input.get("x"),
+                      "enabled",
+                      input.get("enabled"),
+                      "email",
+                      input.get("email"));
+              default -> Map.of("xs", input.get("xs"));
+            })
         .toList();
   }
 }

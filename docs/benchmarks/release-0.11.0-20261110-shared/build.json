@@ -1,0 +1,35 @@
+{
+  "source_commit": "620a961b4020dd1ea7585eda98778949113cbc70",
+  "build_result": "success",
+  "build_invocation": "https://app.buildbuddy.io/invocation/7a73292f-1b7c-4d5f-b6fb-a76cdbfc80de",
+  "build_log_sha256": "a2c9733884dd34c268f408f99319d16084db14186e6479a714c6cff508eff0f0",
+  "toolchain_archive_sha256": "398d8587d0ac7ab2610a979cdc43f0ad03a484b4be0e09a1bcc64f2ec703f148",
+  "artifacts": {
+    "jmh.jar": {
+      "sha256": "ac54c5616c3069b4500a34eebcfad1c2f11ebe98a449e2a88eeea4d561ca9c5a",
+      "bytes": 41571380
+    },
+    "memory.jar": {
+      "sha256": "a4baf0052556e85ceeb1f71f871c7cf5c14d8f60b829cf9e3dd2bfd1c7398025",
+      "bytes": 38548036
+    },
+    "timing-native": {
+      "sha256": "50a98e0b8c47f7fbd1987e60374a65f0ce713f98b0df56b577757d39a55c83b7",
+      "bytes": 86509848
+    },
+    "memory-native": {
+      "sha256": "c125b568c29bae0b854928e560133607c36acb3f6e77b61af4fc930f343e8ca0",
+      "bytes": 86444312
+    },
+    "ingestion.jar": {
+      "sha256": "afda98e0c71c3fcf1d52e186fbe27cf2410c42e163e3f2631ee252320afb9073",
+      "bytes": 38553767
+    },
+    "ingestion-native": {
+      "sha256": "aa9cef7b56e1c82fbe25d7ed080fc45980f88a8beb069b4b39a60411b1126312",
+      "bytes": 87034136
+    }
+  },
+  "build_log": "build.log.gz (authentication-related lines filtered, if present)",
+  "build_log_content_sha256": "ee9d6b9eebadd6836c84fb80c4453a80737bde9989dc4940899e1bbe42cabc30"
+}

@@ -4,29 +4,29 @@
     "com.google.code.findbugs:jsr305": 495355163,
     "com.google.code.gson:gson": -1217141342,
     "com.google.errorprone:error_prone_annotations": -1035138750,
-    "com.google.googlejavaformat:google-java-format": 1363255210,
+    "com.google.googlejavaformat:google-java-format": -83084973,
     "com.google.guava:guava": 1943808618,
     "com.google.j2objc:j2objc-annotations": 2003271689,
     "com.google.protobuf:protobuf-java": -226930769,
     "com.google.re2j:re2j": 2014474964,
     "com.h2database:h2": -1123940597,
-    "dev.elide:truffledata-core": -843231110,
-    "dev.elide:truffledata-jdbc": 1455171798,
-    "dev.elide:truffledata-protobuf": 382369382,
-    "dev.elide:truffledata-protobuf-runtime": 915891377,
+    "dev.elide:truffledata-core": 1654784827,
+    "dev.elide:truffledata-jdbc": -341779561,
+    "dev.elide:truffledata-protobuf": -1414581977,
+    "dev.elide:truffledata-protobuf-runtime": -881059982,
     "io.grpc:grpc-netty-shaded": -1844670555,
     "io.grpc:grpc-protobuf": 253571854,
     "io.grpc:grpc-stub": 1508805937,
     "junit:junit": 1633899997,
-    "org.graalvm.polyglot:polyglot": -911000915,
-    "org.graalvm.regex:regex": 1573204627,
-    "org.graalvm.sdk:nativeimage": 1432929993,
-    "org.graalvm.shadowed:json": 1843112104,
-    "org.graalvm.truffle:truffle-api": -1596888058,
-    "org.graalvm.truffle:truffle-dsl-processor": -299646818,
-    "org.graalvm.truffle:truffle-runtime": 430429960,
+    "org.graalvm.polyglot:polyglot": 1576511918,
+    "org.graalvm.regex:regex": -234249836,
+    "org.graalvm.sdk:nativeimage": -374524470,
+    "org.graalvm.shadowed:json": 35657641,
+    "org.graalvm.truffle:truffle-api": 890624775,
+    "org.graalvm.truffle:truffle-dsl-processor": -2107101281,
+    "org.graalvm.truffle:truffle-runtime": -1377024503,
     "org.snakeyaml:snakeyaml-engine": 976355645,
-    "repositories": 825798344
+    "repositories": 579485257
   },
   "__RESOLVED_ARTIFACTS_HASH": {
     "com.google.android:annotations": 769933135,
@@ -34,7 +34,7 @@
     "com.google.code.findbugs:jsr305": -1038659426,
     "com.google.code.gson:gson": 936204930,
     "com.google.errorprone:error_prone_annotations": 492382488,
-    "com.google.googlejavaformat:google-java-format": -973705397,
+    "com.google.googlejavaformat:google-java-format": 506650975,
     "com.google.guava:failureaccess": -268223546,
     "com.google.guava:guava": 1240305771,
     "com.google.guava:listenablefuture": 1588902908,
@@ -43,10 +43,10 @@
     "com.google.protobuf:protobuf-java-util": 204051468,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1852482952,
-    "dev.elide:truffledata-core": 2041808851,
-    "dev.elide:truffledata-jdbc": -1342096233,
-    "dev.elide:truffledata-protobuf": 845655868,
-    "dev.elide:truffledata-protobuf-runtime": 2040738580,
+    "dev.elide:truffledata-core": -34226792,
+    "dev.elide:truffledata-jdbc": 1019637101,
+    "dev.elide:truffledata-protobuf": -1353065371,
+    "dev.elide:truffledata-protobuf-runtime": -657335088,
     "io.grpc:grpc-api": 171745444,
     "io.grpc:grpc-context": -376394919,
     "io.grpc:grpc-core": 1298872075,
@@ -61,19 +61,19 @@
     "org.codehaus.mojo:animal-sniffer-annotations": -1570976252,
     "org.commonmark:commonmark": 127068869,
     "org.commonmark:commonmark-ext-gfm-tables": -2040303003,
-    "org.graalvm.polyglot:polyglot": 570840508,
-    "org.graalvm.regex:regex": 1149759159,
-    "org.graalvm.sdk:collections": -675922321,
-    "org.graalvm.sdk:jniutils": -1774515877,
-    "org.graalvm.sdk:nativeimage": 1468200941,
-    "org.graalvm.sdk:word": 1503246758,
-    "org.graalvm.shadowed:icu4j": -752292855,
-    "org.graalvm.shadowed:json": 142413964,
-    "org.graalvm.shadowed:xz": -1307531224,
-    "org.graalvm.truffle:truffle-api": -1352110340,
-    "org.graalvm.truffle:truffle-compiler": -1947637326,
-    "org.graalvm.truffle:truffle-dsl-processor": -855901528,
-    "org.graalvm.truffle:truffle-runtime": -2109089950,
+    "org.graalvm.polyglot:polyglot": 1535672563,
+    "org.graalvm.regex:regex": -863315257,
+    "org.graalvm.sdk:collections": -1603740390,
+    "org.graalvm.sdk:jniutils": 1843446778,
+    "org.graalvm.sdk:nativeimage": 1447698022,
+    "org.graalvm.sdk:word": 1341864256,
+    "org.graalvm.shadowed:icu4j": 1157536236,
+    "org.graalvm.shadowed:json": 601695331,
+    "org.graalvm.shadowed:xz": 2002405637,
+    "org.graalvm.truffle:truffle-api": 660591408,
+    "org.graalvm.truffle:truffle-compiler": 407455691,
+    "org.graalvm.truffle:truffle-dsl-processor": 1824378674,
+    "org.graalvm.truffle:truffle-runtime": 1710985219,
     "org.hamcrest:hamcrest-core": 866476646,
     "org.jspecify:jspecify": -857182007,
     "org.snakeyaml:snakeyaml-engine": 1070167874
@@ -111,9 +111,9 @@
     },
     "com.google.googlejavaformat:google-java-format": {
       "shasums": {
-        "jar": "49874ad1d6b1006d2f8660482135609eb124888e0046c3dbfefc706a0387c700"
+        "jar": "7a03f28f7379dcb32e5fc5a6ded62524c4a31e9616e3b477a2f71d7124c5ccad"
       },
-      "version": "1.37.0"
+      "version": "2.0.0"
     },
     "com.google.guava:failureaccess": {
       "shasums": {
@@ -165,27 +165,27 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "5436739de618ff85da17a25f3a08894619e0cb5f15a1e7dfc4a052dac4b818f8"
+        "jar": "e59e250e85c80571457cfb95a735f0a60245995b9255033091ff4a14b9102980"
       },
-      "version": "0.10.0"
+      "version": "0.11.0"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
         "jar": "c4cb30e7985810586968f3e80231984a902c0b0bcd553deb0a4745abb64f99eb"
       },
-      "version": "0.10.0"
+      "version": "0.11.0"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "d4e36ab3ce2092969d395b11a33b65905324e06222219dec94d74d5c2809d345"
+        "jar": "16242d99b73393e361c5d79606c0ae8f91789416f74a02920a25187b1f0f34c4"
       },
-      "version": "0.10.0"
+      "version": "0.11.0"
     },
     "dev.elide:truffledata-protobuf-runtime": {
       "shasums": {
-        "jar": "3819622117828db2408756262d64a52c94fbed0da2416581dfb87878c392d643"
+        "jar": "408d84bf72e4cd2065a62d31e399db0a646e629f3e2ffea8adf1633e3ad49346"
       },
-      "version": "0.10.0"
+      "version": "0.11.0"
     },
     "io.grpc:grpc-api": {
       "shasums": {
@@ -273,81 +273,81 @@
     },
     "org.graalvm.polyglot:polyglot": {
       "shasums": {
-        "jar": "a7603c01bb67cd8fb456a4768240224e599fd4d2a5885a0eda101d4aa73c43d0"
+        "jar": "c47e0a861d8a045db7c4116d7bd62b8bc97fee5d1f0a4dbcdd02b3330094f4c4"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.regex:regex": {
       "shasums": {
-        "jar": "137489ae39c96d30e4f15eae21681107842dbd4d1e41a8e7fc86de3392f914fa"
+        "jar": "4b53c185724eb557a52e1ebdd82068dd93426f7800bf2b3a56514b92b830a0d9"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.sdk:collections": {
       "shasums": {
-        "jar": "292f6d4790a6d7a8388d80030c2054ee49b2984a0ad3f71805c53f478ac0c65e"
+        "jar": "a86ac0d32318395b4af7a4e445afd7af0111194c4a12fc40ae75fc56023c0164"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.sdk:jniutils": {
       "shasums": {
-        "jar": "e3d394d1aaed5759dbe359bba6e2d71deb1b393a51a75084b6e1dbd6a1037697"
+        "jar": "db08bf185e676283728c44dab38c3fc4803824763e97590cadfb1ef098883175"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.sdk:nativeimage": {
       "shasums": {
-        "jar": "ee275de735ba0f42474b66180bcffa74e3477d8240613523ec4a72b8827d52ad"
+        "jar": "461477057c380d3551d004641708733722ed7e09535d75043c8122a6aa683cdd"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.sdk:word": {
       "shasums": {
-        "jar": "ac51a84d136ad1c006bde742f454d9528ec3b0aa499bcb5ae74e5269c6e40723"
+        "jar": "05261758e6a95c7e9820558fd2ac26c68c63caab844dab639140606cf4f78a4d"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.shadowed:icu4j": {
       "shasums": {
-        "jar": "0eeda941bc0379816f968a2ec91d4427e9f85d2d19ae24c483eb0817fc70099a"
+        "jar": "3217b8a76dbb0974225617cba57344ba2ab4f544407e171965a58babeb67a9b2"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.shadowed:json": {
       "shasums": {
-        "jar": "ff3f63e3c1dc1109cfd0e13f7b74a477bd5fdf34ecf05e8a0b6b0f33c4f122b8"
+        "jar": "f4e7a037688573bfcf7f074518c4b981f90865bfaf2db8c720a8dad7c8b255e8"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.shadowed:xz": {
       "shasums": {
-        "jar": "d036e9b7d2aac8b226b8f0264e1c0b5812eb98df2433fa2d98a27ed12ee31a45"
+        "jar": "b82b7afa4a4000cb91637775350cb76dadcca8fa7e625ac6b687acff4e264adc"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.truffle:truffle-api": {
       "shasums": {
-        "jar": "98d6bf994bcf0cf8ae681bd02a3566e869449d96dfc9b8967d0acbae681a71b6"
+        "jar": "8d4a1366a2fa828bd1bc9dc7222b21d49e78961bb115417fd347cd29c0186442"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.truffle:truffle-compiler": {
       "shasums": {
-        "jar": "a45f04fcc5d5fd3e9a43786bef1c0b84af4e517352a8238a512d91434ee9b03b"
+        "jar": "2df893af9aa72815b8a20c83417da0393a5dd486799fd3b51c881cee09362d61"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.truffle:truffle-dsl-processor": {
       "shasums": {
-        "jar": "591364b426860606799bc2aa2982add3c6a3f17ef8994a3f55fa7edd92bdb212"
+        "jar": "64226384efde3e78645169125118489db4aaba0fa25812414510c1ea3c7c5438"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.graalvm.truffle:truffle-runtime": {
       "shasums": {
-        "jar": "301af5174d698f822c98c2502e2193e56cd1c0a5f1efe45e96f62095b6e16f16"
+        "jar": "8f64968acf04eaae94d43f6f70d937784da815c94db40d3c254737ae435a0a86"
       },
-      "version": "25.5.5-elide.27"
+      "version": "25.5.5-elide.28"
     },
     "org.hamcrest:hamcrest-core": {
       "shasums": {
@@ -546,7 +546,8 @@
       "com.google.googlejavaformat",
       "com.google.googlejavaformat.java",
       "com.google.googlejavaformat.java.filer",
-      "com.google.googlejavaformat.java.javadoc"
+      "com.google.googlejavaformat.java.javadoc",
+      "com.google.googlejavaformat.layout"
     ],
     "com.google.guava:failureaccess": [
       "com.google.common.util.concurrent.internal"
@@ -1152,7 +1153,7 @@
       "org.jspecify:jspecify",
       "org.snakeyaml:snakeyaml-engine"
     ],
-    "https://maven.elide.dev/gvm-elide/25.5.5-elide.27/": [
+    "https://maven.elide.dev/gvm-elide/25.5.5-elide.28/": [
       "com.google.android:annotations",
       "com.google.api.grpc:proto-google-common-protos",
       "com.google.code.findbugs:jsr305",

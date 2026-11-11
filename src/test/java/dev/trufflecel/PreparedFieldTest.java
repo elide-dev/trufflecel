@@ -40,11 +40,10 @@ public final class PreparedFieldTest {
       var templateNodes = new ArrayList<ExprNode>();
       prepared
           .expression()
-          .accept(
-              node -> {
-                if (node instanceof ExprNode expression) templateNodes.add(expression);
-                return true;
-              });
+          .accept(node -> {
+            if (node instanceof ExprNode expression) templateNodes.add(expression);
+            return true;
+          });
       var types = templateNodes.stream().map(node -> node.checkedType).toList();
       var folds = templateNodes.stream().map(node -> node.fold).toList();
       var bindings = Map.of("x", 42L);
@@ -57,32 +56,31 @@ public final class PreparedFieldTest {
         var jobs = new ArrayList<Future<?>>();
         for (int i = 0; i < 16; i++)
           jobs.add(
-              executor.submit(
-                  () -> {
-                    var program = prepared.instantiate();
-                    var result = program.evaluateWithDetails(bindings, options);
-                    assertEquals(source, expected.actualCost(), result.actualCost());
-                    if (expected.error() == null) {
-                      assertNull(result.error());
-                      assertEquals(source, expected.value(), result.value());
-                    } else {
-                      assertEquals(expected.error().code(), result.error().code());
-                      assertEquals(expected.error().offset(), result.error().offset());
-                      assertEquals(expected.error().expressionId(), result.error().expressionId());
-                    }
-                    var events = new ArrayList<TraceEvent>();
-                    program.trace(events::add).evaluateWithDetails(bindings, options);
-                    assertEquals(
-                        expectedEvents.stream().map(TraceEvent::expressionId).toList(),
-                        events.stream().map(TraceEvent::expressionId).toList());
-                    assertEquals(
-                        expectedEvents.stream().map(TraceEvent::offset).toList(),
-                        events.stream().map(TraceEvent::offset).toList());
-                    var activation = PartialActivation.of(bindings, AttributePattern.of("x"));
-                    assertEquals(
-                        reference.partialEvaluate(activation).unknownAttributes(),
-                        program.partialEvaluate(activation).unknownAttributes());
-                  }));
+              executor.submit(() -> {
+                var program = prepared.instantiate();
+                var result = program.evaluateWithDetails(bindings, options);
+                assertEquals(source, expected.actualCost(), result.actualCost());
+                if (expected.error() == null) {
+                  assertNull(result.error());
+                  assertEquals(source, expected.value(), result.value());
+                } else {
+                  assertEquals(expected.error().code(), result.error().code());
+                  assertEquals(expected.error().offset(), result.error().offset());
+                  assertEquals(expected.error().expressionId(), result.error().expressionId());
+                }
+                var events = new ArrayList<TraceEvent>();
+                program.trace(events::add).evaluateWithDetails(bindings, options);
+                assertEquals(
+                    expectedEvents.stream().map(TraceEvent::expressionId).toList(),
+                    events.stream().map(TraceEvent::expressionId).toList());
+                assertEquals(
+                    expectedEvents.stream().map(TraceEvent::offset).toList(),
+                    events.stream().map(TraceEvent::offset).toList());
+                var activation = PartialActivation.of(bindings, AttributePattern.of("x"));
+                assertEquals(
+                    reference.partialEvaluate(activation).unknownAttributes(),
+                    program.partialEvaluate(activation).unknownAttributes());
+              }));
         for (var job : jobs) job.get();
       }
       assertEquals(syntax, Ast.snapshot(prepared.expression()));
@@ -207,14 +205,13 @@ public final class PreparedFieldTest {
         var locals = new ArrayList<String>();
         try (var session =
             Debugger.find(context.getEngine())
-                .startSession(
-                    event ->
-                        locals.add(
-                            event
-                                .getTopStackFrame()
-                                .getScope()
-                                .getDeclaredValue("v")
-                                .toDisplayString()))) {
+                .startSession(event ->
+                    locals.add(
+                        event
+                            .getTopStackFrame()
+                            .getScope()
+                            .getDeclaredValue("v")
+                            .toDisplayString()))) {
           session.install(Breakpoint.newBuilder(text).lineIs(2).build());
           assertEquals(List.of(11L, 12L), program.evaluate(input));
         }
@@ -351,10 +348,8 @@ public final class PreparedFieldTest {
     }
     assertEquals(
         CelException.Code.NO_OVERLOAD,
-        outcome(
-            () ->
-                env.compile("r.count")
-                    .evaluate(Map.of("r", other.construct(Map.of("count", 1L))))));
+        outcome(() ->
+            env.compile("r.count").evaluate(Map.of("r", other.construct(Map.of("count", 1L))))));
   }
 
   private interface Evaluation {
