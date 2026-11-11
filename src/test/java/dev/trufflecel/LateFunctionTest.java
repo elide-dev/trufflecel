@@ -88,11 +88,9 @@ public class LateFunctionTest {
       var jobs = new ArrayList<Callable<Object>>();
       for (long i = 0; i < 100; i++) {
         long result = i;
-        jobs.add(
-            () ->
-                program.evaluate(
-                    Map.of(),
-                    EvaluationOptions.newBuilder().function("f_int", a -> result).build()));
+        jobs.add(() ->
+            program.evaluate(
+                Map.of(), EvaluationOptions.newBuilder().function("f_int", a -> result).build()));
       }
       var results = pool.invokeAll(jobs);
       for (int i = 0; i < results.size(); i++) assertEquals((long) i, results.get(i).get());

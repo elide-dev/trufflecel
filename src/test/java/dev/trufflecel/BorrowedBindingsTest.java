@@ -89,19 +89,18 @@ public class BorrowedBindingsTest {
       for (int i = 0; i < 100; i++) {
         int n = i;
         Program program = programs.get(i % programs.size());
-        calls.add(
-            () -> {
-              int[] traversals = {0};
-              Iterable<Integer> left =
-                  () -> {
-                    assertEquals("one conversion per evaluation", 0, traversals[0]++);
-                    return List.of(n).iterator();
-                  };
-              var input = Map.of("left", left, "right", List.of(n + 1));
-              return n % 2 == 0
-                  ? program.evaluate(input)
-                  : program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build());
-            });
+        calls.add(() -> {
+          int[] traversals = {0};
+          Iterable<Integer> left =
+              () -> {
+                assertEquals("one conversion per evaluation", 0, traversals[0]++);
+                return List.of(n).iterator();
+              };
+          var input = Map.of("left", left, "right", List.of(n + 1));
+          return n % 2 == 0
+              ? program.evaluate(input)
+              : program.evaluate(input, EvaluationOptions.newBuilder().budget(100).build());
+        });
       }
       var answers = executor.invokeAll(calls);
       for (int i = 0; i < answers.size(); i++) assertEquals(3L * i + 1, answers.get(i).get());

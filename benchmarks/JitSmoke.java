@@ -50,14 +50,13 @@ public final class JitSmoke {
       var locals = new ArrayList<String>();
       try (var session =
           Debugger.find(context.getEngine())
-              .startSession(
-                  event ->
-                      locals.add(
-                          event
-                              .getTopStackFrame()
-                              .getScope()
-                              .getDeclaredValue("x")
-                              .toDisplayString()))) {
+              .startSession(event ->
+                  locals.add(
+                      event
+                          .getTopStackFrame()
+                          .getScope()
+                          .getDeclaredValue("x")
+                          .toDisplayString()))) {
         session.install(Breakpoint.newBuilder(debugSource.getURI()).lineIs(2).build());
         if (context.eval(debugSource).asLong() != 2 || !locals.equals(List.of("1", "2")))
           throw new AssertionError("Native debugger source scopes: " + locals);
@@ -143,11 +142,10 @@ public final class JitSmoke {
         Ast edited =
             syntax
                 .editor()
-                .transform(
-                    n ->
-                        n.kind() == Ast.Kind.CONSTANT && Long.valueOf(1).equals(n.value())
-                            ? Ast.Node.literal(3)
-                            : n)
+                .transform(n ->
+                    n.kind() == Ast.Kind.CONSTANT && Long.valueOf(1).equals(n.value())
+                        ? Ast.Node.literal(3)
+                        : n)
                 .freeze();
         var legacy = CanonicalAst.toV1Alpha1(CanonicalAst.parsed(edited));
         var checked = CanonicalAst.check(macros, legacy);

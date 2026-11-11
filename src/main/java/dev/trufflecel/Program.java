@@ -69,14 +69,13 @@ public final class Program {
     if (hasBindings) body.resolveLocals(new ArrayList<>(), frameDescriptor);
     contextInArguments = truffleSource != null || hasBindings && !frameLocals;
     if (contextInArguments)
-      body.accept(
-          node -> {
-            if (node instanceof ExprNode expression) {
-              expression.boundaryReads = true;
-              expression.instrumentedSource = truffleSource != null;
-            }
-            return true;
-          });
+      body.accept(node -> {
+        if (node instanceof ExprNode expression) {
+          expression.boundaryReads = true;
+          expression.instrumentedSource = truffleSource != null;
+        }
+        return true;
+      });
     body.rootBody = true;
     target =
         new ExpressionRoot(
@@ -160,11 +159,10 @@ public final class Program {
       else {
         var original = (ExpressionRoot) target.getRootNode();
         ExprNode body = com.oracle.truffle.api.nodes.NodeUtil.cloneNode(original.body);
-        body.accept(
-            node -> {
-              if (node instanceof ExprNode expression) expression.boundaryReads = true;
-              return true;
-            });
+        body.accept(node -> {
+          if (node instanceof ExprNode expression) expression.boundaryReads = true;
+          return true;
+        });
         body.resolveBlocks(null);
         body.resolveLazyBindings(Map.of());
         controlledTarget =
@@ -183,15 +181,14 @@ public final class Program {
       body.resolveLazyBindings(Map.of());
       body.resolveAttributes(false);
       body.resolveLocals(new ArrayList<>(), null);
-      body.accept(
-          node -> {
-            if (node instanceof ExprNode expression) {
-              expression.boundaryReads = true;
-              expression.observe = true;
-              expression.instrumentedSource = false;
-            }
-            return true;
-          });
+      body.accept(node -> {
+        if (node instanceof ExprNode expression) {
+          expression.boundaryReads = true;
+          expression.observe = true;
+          expression.instrumentedSource = false;
+        }
+        return true;
+      });
       body.rootBody = true;
       traceTarget = new ExpressionRoot(body, environment, true, null, null, null).getCallTarget();
     }
@@ -238,15 +235,14 @@ public final class Program {
     Objects.requireNonNull(options);
     Objects.requireNonNull(executor);
     var result = new java.util.concurrent.CompletableFuture<Object>();
-    executor.execute(
-        () -> {
-          if (result.isCancelled()) return;
-          try {
-            result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
-          } catch (RuntimeException failure) {
-            result.completeExceptionally(failure);
-          }
-        });
+    executor.execute(() -> {
+      if (result.isCancelled()) return;
+      try {
+        result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
+      } catch (RuntimeException failure) {
+        result.completeExceptionally(failure);
+      }
+    });
     return result;
   }
 

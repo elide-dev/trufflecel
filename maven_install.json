@@ -4,7 +4,7 @@
     "com.google.code.findbugs:jsr305": 495355163,
     "com.google.code.gson:gson": -1217141342,
     "com.google.errorprone:error_prone_annotations": -1035138750,
-    "com.google.googlejavaformat:google-java-format": 1363255210,
+    "com.google.googlejavaformat:google-java-format": -83084973,
     "com.google.guava:guava": 1943808618,
     "com.google.j2objc:j2objc-annotations": 2003271689,
     "com.google.protobuf:protobuf-java": -226930769,
@@ -34,7 +34,7 @@
     "com.google.code.findbugs:jsr305": -1038659426,
     "com.google.code.gson:gson": 936204930,
     "com.google.errorprone:error_prone_annotations": 492382488,
-    "com.google.googlejavaformat:google-java-format": -973705397,
+    "com.google.googlejavaformat:google-java-format": 506650975,
     "com.google.guava:failureaccess": -268223546,
     "com.google.guava:guava": 1240305771,
     "com.google.guava:listenablefuture": 1588902908,
@@ -111,9 +111,9 @@
     },
     "com.google.googlejavaformat:google-java-format": {
       "shasums": {
-        "jar": "49874ad1d6b1006d2f8660482135609eb124888e0046c3dbfefc706a0387c700"
+        "jar": "7a03f28f7379dcb32e5fc5a6ded62524c4a31e9616e3b477a2f71d7124c5ccad"
       },
-      "version": "1.37.0"
+      "version": "2.0.0"
     },
     "com.google.guava:failureaccess": {
       "shasums": {
@@ -546,7 +546,8 @@
       "com.google.googlejavaformat",
       "com.google.googlejavaformat.java",
       "com.google.googlejavaformat.java.filer",
-      "com.google.googlejavaformat.java.javadoc"
+      "com.google.googlejavaformat.java.javadoc",
+      "com.google.googlejavaformat.layout"
     ],
     "com.google.guava:failureaccess": [
       "com.google.common.util.concurrent.internal"

@@ -29,13 +29,11 @@ final class LibraryPolicy {
     this.libraries = Map.copyOf(libraries);
     unrestrictedLibraries = this.libraries.equals(LATEST);
     this.functions = functions == null ? null : Set.copyOf(functions);
-    this.libraries.forEach(
-        (name, version) -> {
-          Integer latest = LATEST.get(name);
-          if (latest == null || version < 0 || version > latest)
-            throw new IllegalArgumentException(
-                "unsupported library version: " + name + ":" + version);
-        });
+    this.libraries.forEach((name, version) -> {
+      Integer latest = LATEST.get(name);
+      if (latest == null || version < 0 || version > latest)
+        throw new IllegalArgumentException("unsupported library version: " + name + ":" + version);
+    });
   }
 
   void name(String name, int offset) {

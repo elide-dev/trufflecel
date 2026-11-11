@@ -29,7 +29,7 @@ maven.install(
         "io.grpc:grpc-netty-shaded:1.85.1",
         "io.grpc:grpc-protobuf:1.85.1",
         "io.grpc:grpc-stub:1.85.1",
-        "com.google.googlejavaformat:google-java-format:1.37.0",
+        "com.google.googlejavaformat:google-java-format:2.0.0",
     ],
     repositories = ["https://repo.maven.apache.org/maven2", "https://maven.elide.dev", "https://maven.elide.dev/gvm-elide/25.5.5-elide.28"],
     lock_file = "//:maven_install.json",

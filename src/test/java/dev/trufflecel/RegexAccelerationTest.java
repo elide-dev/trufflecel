@@ -268,27 +268,25 @@ public class RegexAccelerationTest {
       }
       var start = new CountDownLatch(1);
       var accelerated =
-          executor.submit(
-              () -> {
-                owner.enter();
-                try {
-                  start.countDown();
-                  for (int i = 0; i < 200; i++)
-                    assertEquals(true, program.evaluate(Map.of("s", "alice@example.com")));
-                  assertTrue(matcher(program).isAccelerated());
-                } finally {
-                  owner.leave();
-                }
-              });
+          executor.submit(() -> {
+            owner.enter();
+            try {
+              start.countDown();
+              for (int i = 0; i < 200; i++)
+                assertEquals(true, program.evaluate(Map.of("s", "alice@example.com")));
+              assertTrue(matcher(program).isAccelerated());
+            } finally {
+              owner.leave();
+            }
+          });
       var fallback =
-          executor.submit(
-              () -> {
-                start.await();
-                for (int i = 0; i < 200; i++)
-                  assertEquals(false, program.evaluate(Map.of("s", "alice@other.com")));
-                assertFalse(matcher(program).isAccelerated());
-                return null;
-              });
+          executor.submit(() -> {
+            start.await();
+            for (int i = 0; i < 200; i++)
+              assertEquals(false, program.evaluate(Map.of("s", "alice@other.com")));
+            assertFalse(matcher(program).isAccelerated());
+            return null;
+          });
       accelerated.get();
       fallback.get();
     }
@@ -375,18 +373,17 @@ public class RegexAccelerationTest {
       for (int worker = 0; worker < 8; worker++) {
         final int id = worker;
         jobs.add(
-            workers.submit(
-                () -> {
-                  start.await();
-                  for (int i = 0; i < 300; i++) {
-                    String pattern = "worker" + id + "value" + i;
-                    assertTrue(Regex.cached(pattern, 10000).find(pattern));
-                    assertThrows(CelException.class, () -> Regex.cached("a{88}", 1));
-                    assertTrue(Regex.cached("a{88}", 10000).find("a".repeat(88)));
-                    assertTrue(Regex.cacheSize() <= 256);
-                  }
-                  return null;
-                }));
+            workers.submit(() -> {
+              start.await();
+              for (int i = 0; i < 300; i++) {
+                String pattern = "worker" + id + "value" + i;
+                assertTrue(Regex.cached(pattern, 10000).find(pattern));
+                assertThrows(CelException.class, () -> Regex.cached("a{88}", 1));
+                assertTrue(Regex.cached("a{88}", 10000).find("a".repeat(88)));
+                assertTrue(Regex.cacheSize() <= 256);
+              }
+              return null;
+            }));
       }
       start.countDown();
       for (var job : jobs) job.get();

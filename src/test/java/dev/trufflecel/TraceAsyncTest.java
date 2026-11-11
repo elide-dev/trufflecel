@@ -142,10 +142,9 @@ public class TraceAsyncTest {
         IllegalStateException.class,
         () ->
             Cel.compile("1")
-                .trace(
-                    e -> {
-                      throw new IllegalStateException("listener");
-                    })
+                .trace(e -> {
+                  throw new IllegalStateException("listener");
+                })
                 .evaluate());
     assertThrows(NullPointerException.class, () -> program.trace(null));
     var bytes = Cel.compile("b'ab'");

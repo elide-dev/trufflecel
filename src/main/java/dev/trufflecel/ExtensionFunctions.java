@@ -475,11 +475,10 @@ final class ExtensionFunctions {
       Functions.compare(k, k);
       order.add(i);
     }
-    order.sort(
-        (i, j) -> {
-          ctx.tick();
-          return Functions.compare(keys.get(i), keys.get(j));
-        });
+    order.sort((i, j) -> {
+      ctx.tick();
+      return Functions.compare(keys.get(i), keys.get(j));
+    });
     var out = new ArrayList<Object>();
     for (int i : order) out.add(values.get(i));
     return List.copyOf(out);
