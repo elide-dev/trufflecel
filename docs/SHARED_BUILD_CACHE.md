@@ -26,8 +26,13 @@ long-lived cache key is added to the action. Bazel retains its existing BuildBud
 API-key permissions, separate from the HTTP gateway's repository/ref isolation.
 The action does not install either client or change the pinned JDK/toolchains.
 
-Fork PRs retain hosted local execution without BuildBuddy secrets. ARM and
-explicit local/benchmark profiles retain their existing execution policy. No
+The checked-in workflow routes fork PRs to hosted local execution without
+BuildBuddy secrets. A contributor can edit workflow YAML, so that condition alone
+is not an authorization boundary. Organization policy requires maintainer
+approval for every outside contributor's workflow run. Before approving, review
+workflow changes and reject attempts to request private runners or privileged
+contexts; the private runner group does not itself restrict workflow files.
+ARM and explicit local/benchmark profiles retain their existing execution policy. No
 organization-wide BuildBuddy default is changed. If setup fails, trusted jobs use
 the existing hosted BuildBuddy profile. Clearing `BUILD_CACHE_ENABLED` rolls back
 new jobs; no running job needs interruption. Local users can explicitly select
