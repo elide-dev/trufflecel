@@ -83,15 +83,15 @@ public final class PojoProcessorTest {
             true,
             "sample.Bean",
             """
-          package sample;
-          import dev.trufflecel.*;
-          @CelPojo("app.Bean") public class Bean {
-            public String name;
-            public java.util.List<Nested> values;
-            @CelPojo public record Nested(int score) {}
-            @CelField("custom") public long value() { return 1; }
-          }
-          """,
+            package sample;
+            import dev.trufflecel.*;
+            @CelPojo("app.Bean") public class Bean {
+              public String name;
+              public java.util.List<Nested> values;
+              @CelPojo public record Nested(int score) {}
+              @CelField("custom") public long value() { return 1; }
+            }
+            """,
             "Plain",
             "@dev.trufflecel.CelPojo class Plain { public int x; }");
     assertTrue(result.diagnostics, result.success);
@@ -135,42 +135,42 @@ public final class PojoProcessorTest {
             true,
             "fixture.All",
             """
-        package fixture;
-        import dev.trufflecel.*;
-        import java.util.*;
-        import java.time.*;
-        @CelPojo class All {
-          public byte a; public short b; public int c; public long d;
-          public float e; public double f; public boolean g; public char h;
-          public Byte i; public Short j; public Integer k; public Long l;
-          public Float m; public Double n; public Boolean o; public Character p;
-          public String q; public UInt r; public Bytes s; public Instant t; public Duration u;
-          public byte[] bytes; public Choice choice;
-          public List<Record> records; public Map<String, List<Integer>> groups;
-          public Map<Boolean, Choice> choices; public Map<UInt, String> unsigned;
-          public static Object staticValue;
-          public class Marker {}
-          @CelField(ignore = true) private Object hidden;
-          @CelField(ignore = true) public Object ignored;
-          public void setName(String name) {}
-          public int ordinary() {return 1;}
-          public int get() {return 1;}
-          public int is() {return 1;}
-          public String isText() {return "x";}
-          public boolean isGood() {return true;}
-          public Boolean isReady() {return true;}
-          public String getURL() {return "url";}
-          public int getX() {return 1;}
-          public String getlower() {return "lower";}
-          @CelField public String getLabel() {return "label";}
-          @CelField(ignore = true) public void ignore(int value) {}
-          @CelField(ignore = true) private int privateMethod() {return 1;}
-          @CelField(ignore = true) public Object getIgnored() {return null;}
-          enum Choice { FIRST }
-          @CelPojo("fixture.Child") public record Record(@CelField("number") int value,
-              @CelField(ignore = true) Object ignored) {}
-        }
-        """);
+            package fixture;
+            import dev.trufflecel.*;
+            import java.util.*;
+            import java.time.*;
+            @CelPojo class All {
+              public byte a; public short b; public int c; public long d;
+              public float e; public double f; public boolean g; public char h;
+              public Byte i; public Short j; public Integer k; public Long l;
+              public Float m; public Double n; public Boolean o; public Character p;
+              public String q; public UInt r; public Bytes s; public Instant t; public Duration u;
+              public byte[] bytes; public Choice choice;
+              public List<Record> records; public Map<String, List<Integer>> groups;
+              public Map<Boolean, Choice> choices; public Map<UInt, String> unsigned;
+              public static Object staticValue;
+              public class Marker {}
+              @CelField(ignore = true) private Object hidden;
+              @CelField(ignore = true) public Object ignored;
+              public void setName(String name) {}
+              public int ordinary() {return 1;}
+              public int get() {return 1;}
+              public int is() {return 1;}
+              public String isText() {return "x";}
+              public boolean isGood() {return true;}
+              public Boolean isReady() {return true;}
+              public String getURL() {return "url";}
+              public int getX() {return 1;}
+              public String getlower() {return "lower";}
+              @CelField public String getLabel() {return "label";}
+              @CelField(ignore = true) public void ignore(int value) {}
+              @CelField(ignore = true) private int privateMethod() {return 1;}
+              @CelField(ignore = true) public Object getIgnored() {return null;}
+              enum Choice { FIRST }
+              @CelPojo("fixture.Child") public record Record(@CelField("number") int value,
+                  @CelField(ignore = true) Object ignored) {}
+            }
+            """);
     assertTrue(result.diagnostics, result.success);
     String source = result.generated.get("fixture/AllCel.java");
     assertTrue(source.contains("\"label\""));
@@ -187,14 +187,14 @@ public final class PojoProcessorTest {
             true,
             "sample.Concrete",
             """
-        package sample;
-        class Base<T, U> {
-          public T field;
-          public T getLabel() { return field; }
-          public U isReady() { return null; }
-        }
-        @dev.trufflecel.CelPojo public final class Concrete extends Base<String, Boolean> {}
-        """);
+            package sample;
+            class Base<T, U> {
+              public T field;
+              public T getLabel() { return field; }
+              public U isReady() { return null; }
+            }
+            @dev.trufflecel.CelPojo public final class Concrete extends Base<String, Boolean> {}
+            """);
     assertTrue(result.diagnostics, result.success);
     String source = result.generated.get("sample/ConcreteCel.java");
     assertTrue(source.contains("\"field\", dev.trufflecel.CelType.STRING"));

@@ -9,10 +9,9 @@ public final class MemoryPhasesTest {
   @Test
   public void unavailableNonHeapCounterPreservesItsError() {
     var result =
-        MemoryPhases.nonHeapMeasurement(
-            () -> {
-              throw new IllegalArgumentException("used parameter = -13896 is negative.");
-            });
+        MemoryPhases.nonHeapMeasurement(() -> {
+          throw new IllegalArgumentException("used parameter = -13896 is negative.");
+        });
     assertNull(result.used());
     assertEquals(
         "java.lang.IllegalArgumentException: used parameter = -13896 is negative.", result.error());
@@ -30,9 +29,8 @@ public final class MemoryPhasesTest {
     assertThrows(
         IllegalStateException.class,
         () ->
-            MemoryPhases.nonHeapMeasurement(
-                () -> {
-                  throw new IllegalStateException("broken management bean");
-                }));
+            MemoryPhases.nonHeapMeasurement(() -> {
+              throw new IllegalStateException("broken management bean");
+            }));
   }
 }
