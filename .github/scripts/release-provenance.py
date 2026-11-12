@@ -15,6 +15,10 @@ release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 
 BUILD_TYPE = 'https://github.com/elide-dev/trufflecel/blob/main/docs/PROVENANCE.md#build-type-v1'
+# GitHub's attestation service rejects slsa.dev/provenance/v1 statements whose buildType it
+# does not define (v0.11.0 and v0.12.0 failed signing with "unsupported build type"), so the
+# SLSA-shaped body below is signed under this project-owned predicate type instead.
+PREDICATE_TYPE = 'https://github.com/elide-dev/trufflecel/blob/main/docs/PROVENANCE.md#predicate-v1'
 
 
 def describe(root, staged, version, env, git):

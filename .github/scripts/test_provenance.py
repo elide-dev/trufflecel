@@ -78,6 +78,13 @@ class ProvenanceTest(unittest.TestCase):
                 with self.assertRaises(ValueError): self.describe()
                 self.env[key] = previous
 
+    def test_workflow_signs_the_predicate_type_the_script_defines(self):
+        workflow = (Path(__file__).parents[2] / '.github/workflows/publish.maven.yml').read_text()
+        self.assertIn('predicate-type: ' + provenance.PREDICATE_TYPE + '\n', workflow)
+        # GitHub rejects slsa.dev/provenance/v1 for project-defined build types.
+        self.assertNotIn('slsa.dev/provenance', workflow)
+        self.assertNotEqual(provenance.PREDICATE_TYPE, 'https://slsa.dev/provenance/v1')
+
     def test_rejects_staging_outside_build_directory(self):
         self.stage = self.root
         with self.assertRaisesRegex(ValueError, 'staged by publish.sh'): self.describe()
