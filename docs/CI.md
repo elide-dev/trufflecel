@@ -114,3 +114,7 @@ the policy explicitly.
 
 The 0.11.0 dependency wave advances the policy to TruffleData 0.11.0 for
 TruffleCEL releases starting at 0.11.0, aligned with Elide GraalVM 25.5.5-elide.28.
+
+The 0.12.0 dependency wave advances the policy to TruffleData 0.12.0 for
+TruffleCEL releases starting at 0.12.0; the Elide GraalVM pin stays at
+25.5.5-elide.28.
