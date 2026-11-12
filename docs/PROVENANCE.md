@@ -8,16 +8,32 @@ The attestation is stored in GitHub's attestation service. A separate job attach
 the Sigstore bundle, signed DSSE envelope and subject checksums to the existing
 GitHub release without replacing assets.
 
-This applies to releases built with the updated publisher. **Version 0.10.0 has no
-such build attestation.** Its bytes and historical evidence remain unchanged.
+This applies to releases built with a publisher whose signing step succeeded.
+**Versions 0.10.0, 0.11.0 and 0.12.0 have no such build attestation.** 0.10.0 predates
+the signing step. In 0.11.0 and 0.12.0 the publisher signed but GitHub's attestation
+service rejected the statement (`unsupported build type`, see
+[predicate type v1](#predicate-type-v1)), so no bundle was retained or attached. Their
+Maven bytes and historical evidence remain unchanged; the gap is not backfilled.
 Local `publish.sh --publish` does not obtain GitHub's signing identity.
+
+## Predicate type v1
+
+The statement is signed with predicate type
+`https://github.com/elide-dev/trufflecel/blob/main/docs/PROVENANCE.md#predicate-v1`.
+Its body is shaped like a [SLSA v1 provenance](https://slsa.dev/spec/v1.2/build-provenance)
+predicate but is deliberately **not** published as `https://slsa.dev/provenance/v1`.
+GitHub's attestation service rejected that predicate type with this project's
+`buildType` (`unsupported build type`; the rule is not documented). The one GitHub
+`buildType` we know of describes a top-level workflow with a fixed parameter set and has
+no place for the release version or the source tag's commit. Consumers must not treat
+this statement as SLSA-conformant provenance or infer a SLSA level.
 
 ## Build type v1
 
 Build type identifier:
 `https://github.com/elide-dev/trufflecel/blob/main/docs/PROVENANCE.md#build-type-v1`.
-The predicate uses the [SLSA v1 format](https://slsa.dev/spec/v1.2/build-provenance),
-with these project-specific semantics:
+The predicate body follows the SLSA v1 provenance layout, with these
+project-specific semantics:
 
 | Field | Meaning |
 | --- | --- |
@@ -47,7 +63,7 @@ gh release download "v$version" --repo elide-dev/trufflecel \
 gh attestation verify "trufflecel-core-$version.jar" \
   --repo elide-dev/trufflecel \
   --signer-workflow elide-dev/trufflecel/.github/workflows/publish.maven.yml \
-  --predicate-type https://slsa.dev/provenance/v1 \
+  --predicate-type https://github.com/elide-dev/trufflecel/blob/main/docs/PROVENANCE.md#predicate-v1 \
   --bundle trufflecel-provenance.sigstore.json \
   --format json > verified-provenance.json
 ```
