@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0](https://github.com/elide-dev/trufflecel/compare/v0.11.0...v0.12.0) (2026-11-12)
+
+
+### Features
+
+* **ci:** connect correctness builds to shared GCP cache ([#144](https://github.com/elide-dev/trufflecel/issues/144)) ([9705809](https://github.com/elide-dev/trufflecel/commit/9705809176f53c61a7fd8e91d2501a9df50af192))
+* **deps:** adopt TruffleData 0.12.0 ([#148](https://github.com/elide-dev/trufflecel/issues/148)) ([c7156ce](https://github.com/elide-dev/trufflecel/commit/c7156ceff282a909782987ef16dc62eeb81033bb))
+
+
+### Bug Fixes
+
+* make instrumented WriteNode scope pushes re-entrant safe ([#123](https://github.com/elide-dev/trufflecel/issues/123)) ([7049577](https://github.com/elide-dev/trufflecel/commit/70495778e81c93bcfa996fb7264b563c02a7da30)), closes [#95](https://github.com/elide-dev/trufflecel/issues/95)
+
 ## [0.11.0](https://github.com/elide-dev/trufflecel/compare/v0.10.0...v0.11.0) (2026-11-10)
 
 TruffleCEL 0.11.0 adopts TruffleData 0.11.0 and Elide GraalVM 25.5.5-elide.28.
