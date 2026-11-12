@@ -23,13 +23,20 @@ class WriteNode extends CelNode {
   Object execute(VirtualFrame frame, EvalContext ctx, Object value) {
     Object stored = ctx.store(value);
     if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, stored);
-    else ctx.push(name, stored);
+    else ctx.pushReentrant(this, name, stored);
     return value;
   }
 
   void clear(VirtualFrame frame, EvalContext ctx) {
-    if (frameSlot >= 0) frame.setAuxiliarySlot(frameSlot, null);
-    else ctx.pop();
+    // When instrumented, the generated wrapper replaces bindings[i] in the @Children array; clear
+    // is then dispatched on the wrapper, whose own frameSlot/scope state were never set by
+    // execute (the wrapper delegates execute to this node). Forward to the delegate so the
+    // pair it owns is removed rather than reading the wrapper's untouched defaults. Ownership is
+    // recorded on every push, so a wrapper inserted between a push and its clear stays balanced.
+    WriteNode delegate =
+        this instanceof WrapperNode wrapper ? (WriteNode) wrapper.getDelegateNode() : this;
+    if (delegate.frameSlot >= 0) frame.setAuxiliarySlot(delegate.frameSlot, null);
+    else ctx.clearReentrant(delegate);
   }
 
   @GenerateWrapper.OutgoingConverter

@@ -15,7 +15,25 @@ sealed class EvalContext {
     private Object[] scopes;
     private int scopeSize;
     private final EvalContext budgetParent;
+
+    /** The binding that pushed each scope pair, parallel to {@code scopes}; null if unowned. */
+    private WriteNode[] owners;
+
     ExprNode.BlockScope block;
+
+    /** Remove the pair pushed by {@code node}, and anything above it, if it is on the stack. */
+    private void truncateTo(WriteNode node) {
+      if (owners == null) return;
+      for (int pair = (scopeSize >> 1) - 1; pair >= 0; pair--) {
+        if (owners[pair] != node) continue;
+        while (scopeSize > pair * 2) {
+          scopes[--scopeSize] = null;
+          scopes[--scopeSize] = null;
+          owners[scopeSize >> 1] = null;
+        }
+        return;
+      }
+    }
 
     Scoped(Environment environment, Object activation) {
       this(environment, null, activation);
@@ -32,6 +50,7 @@ sealed class EvalContext {
       if (original instanceof Scoped scoped) {
         singleName = scoped.singleName;
         scopes = scoped.scopes == null ? null : scoped.scopes.clone();
+        owners = scoped.owners == null ? null : scoped.owners.clone();
         scopeSize = scoped.scopeSize;
         budgetParent = scoped.budgetParent == null ? original : scoped.budgetParent;
         block = scoped.block;
@@ -276,12 +295,39 @@ sealed class EvalContext {
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   void push(String name, Object value) {
+    push(null, name, value);
+  }
+
+  private void push(WriteNode owner, String name, Object value) {
     Scoped scoped = (Scoped) this;
-    if (scoped.scopes == null) scoped.scopes = new Object[8];
-    else if (scoped.scopeSize == scoped.scopes.length)
+    if (scoped.scopes == null) {
+      scoped.scopes = new Object[8];
+      scoped.owners = new WriteNode[4];
+    } else if (scoped.scopeSize == scoped.scopes.length) {
       scoped.scopes = Arrays.copyOf(scoped.scopes, scoped.scopeSize * 2);
+      scoped.owners = Arrays.copyOf(scoped.owners, scoped.scopeSize);
+    }
+    scoped.owners[scoped.scopeSize >> 1] = owner;
     scoped.scopes[scoped.scopeSize++] = name;
     scoped.scopes[scoped.scopeSize++] = value;
+  }
+
+  /**
+   * Re-entrant safe push for {@link WriteNode}. Each pair records the binding that pushed it. A
+   * re-enter ({@code ProbeNode.UNWIND_ACTION_REENTER} re-runs {@code execute} without {@code
+   * clear}) first removes the pair that binding already pushed, so the stack stays balanced.
+   * Ownership is per-{@code EvalContext}, so concurrent evaluations of one program do not race.
+   */
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  void pushReentrant(WriteNode node, String name, Object value) {
+    ((Scoped) this).truncateTo(node);
+    push(node, name, value);
+  }
+
+  /** Counterpart to {@link #pushReentrant}: a no-op when {@code node} never pushed its pair. */
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
+  void clearReentrant(WriteNode node) {
+    ((Scoped) this).truncateTo(node);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -289,5 +335,6 @@ sealed class EvalContext {
     Scoped scoped = (Scoped) this;
     scoped.scopes[--scoped.scopeSize] = null;
     scoped.scopes[--scoped.scopeSize] = null;
+    scoped.owners[scoped.scopeSize >> 1] = null;
   }
 }
