@@ -21,7 +21,7 @@ Sam Gammon ([sgammon](https://github.com/sgammon)) leads the project and resolve
 technical-direction disputes after discussion. Repository administrators are
 [sgammon](https://github.com/sgammon), [darvld](https://github.com/darvld), and
 [TravisCow](https://github.com/TravisCow); GitHub admin permissions were verified
-on November 9, 2026. CODEOWNERS routes review requests to them.
+on November 9, 2026.
 
 Administrators handle issue triage, independent review, CI maintenance, release
 qualification, private security reports, and community moderation. Review access
