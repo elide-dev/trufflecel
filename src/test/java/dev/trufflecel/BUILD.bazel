@@ -661,3 +661,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "optionalValue",
+    srcs = ["OptionalValueTest.java"],
+    test_class = "dev.trufflecel.OptionalValueTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
