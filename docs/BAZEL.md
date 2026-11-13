@@ -36,7 +36,7 @@ XML remain available with minimal downloads. Cache namespace: `elide-dev/truffle
 ## Commands
 
 ```sh
-bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json
+bazel build //:trufflecel //:trufflecel-protobuf //:trufflecel-json //:trufflecel-processor
 bazel test //...
 bazel coverage //src/test/...
 bazel run //tools:coverage --config=local
@@ -64,7 +64,7 @@ run under `bazel test //...`; language behavior tests all run on the JVM.
 ## CI
 
 `.github/workflows/ci.yml` checks Gazelle, Java formatting, the whole test suite, coverage,
-and all three JARs. Configure the repository's `BUILDBUDDY_API_KEY` secret for RBE. Fork pull
+and all the JARs. Configure the repository's `BUILDBUDDY_API_KEY` secret for RBE. Fork pull
 requests receive no secret and use host Linux execution. Credentials are written to a
 mode-0600 untracked RC file and removed even if a step fails. Reports and the JARs are
 uploaded as GitHub Actions artifacts. Reusable CodSpeed simulation checks run alongside
