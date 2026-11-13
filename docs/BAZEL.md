@@ -27,6 +27,7 @@ Available configurations:
 * `local`: entirely host-side execution, with no uploads to the shared action cache.
 * `ci` / `workflows`: CI metadata and minimal test downloads.
 * `untrusted`: a separate action-cache namespace for BuildBuddy pull-request workflows.
+* `shared_cache`: nearby GCP execution for trusted CI; see [Shared GCP build cache](SHARED_BUILD_CACHE.md).
 
 Outputs are separated by platform. BLAKE3 digests, compressed/chunked cache transfers,
 repository download caching with direct fallback, action-path stripping, lost-input
