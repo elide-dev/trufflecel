@@ -77,7 +77,7 @@ public final class EnvironmentYaml {
       var function = object(item);
       keys(function, "name", "description", "overloads");
       if (function.containsKey("description")) string(function.get("description"));
-      String name = string(function.get("name"));
+      String name = operator(string(function.get("name")));
       List<?> overloads = list(function, "overloads");
       if (overloads.isEmpty())
         throw new IllegalArgumentException("function has no overloads: " + name);
