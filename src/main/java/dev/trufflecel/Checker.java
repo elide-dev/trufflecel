@@ -577,7 +577,16 @@ final class Checker {
 
   private void bind(ExprNode n, CelType expected, CelType actual, Map<String, CelType> bindings) {
     if (expected.name().startsWith("$")) {
-      bindings.merge(expected.name(), actual, CelType::join);
+      CelType existing = bindings.get(expected.name());
+      if (existing == null || existing.accepts(actual) || actual.accepts(existing)) {
+        bindings.merge(expected.name(), actual, (a, b) -> a.isDyn() ? a : b);
+        return;
+      }
+      if (existing.isNumeric() && actual.isNumeric()) {
+        bindings.merge(expected.name(), actual, (a, b) -> CelType.DYN);
+        return;
+      }
+      require(n, false, "function argument type mismatch");
       return;
     }
     require(n, expected.accepts(actual), "function argument type mismatch");
