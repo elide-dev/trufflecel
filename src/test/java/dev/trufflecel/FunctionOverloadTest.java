@@ -303,4 +303,93 @@ public class FunctionOverloadTest {
     assertEquals(2000L, env.compile("1.getFullYear()").evaluate());
     assertEquals(1970L, env.compile("timestamp(0).getFullYear()").evaluate());
   }
+
+  // A single-global host overload (the 4-argument convenience API) whose name collides with a
+  // standard builtin or extension function must be type-checked against the standard/extension
+  // signature, not the host declaration, because runtime dispatch reaches the standard/extension
+  // implementation first and never falls back to the host binding.  Mirrors Optimizer.hostOverload.
+  @Test
+  public void singleGlobalHostOverloadDoesNotShadowStandardOrExtensionDispatch() {
+    // Symptom 1: wrong static result type.  Host declares trim(string) -> int, but the runtime
+    // dispatches to the extension trim, which returns string.  The static result type must match
+    // the extension, not the host declaration.
+    var trim =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .function("trim", List.of(CelType.STRING), CelType.INT, args -> 42L)
+            .build();
+    assertEquals(CelType.STRING, trim.compile("trim(s)").resultType());
+    assertEquals("hi", trim.compile("trim(' hi ')").evaluate());
+    // The host implementation is unreachable at runtime for the colliding name.
+    assertThrows(CelException.class, () -> trim.compile("trim(1)").evaluate());
+
+    // Symptom 2: false rejection at check time.  Host declares reverse(int) -> int, but the
+    // runtime dispatches to the extension reverse, which accepts string.  The checker must not
+    // reject reverse('abc') by applying the host's int-only signature.
+    var reverse =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .function("reverse", List.of(CelType.INT), CelType.INT, args -> -1L)
+            .build();
+    assertEquals(CelType.STRING, reverse.compile("reverse(s)").resultType());
+    assertEquals("cba", reverse.compile("reverse('abc')").evaluate());
+
+    // Symptom 3: false acceptance of statically-known-to-fail calls.  Host declares neg(string) ->
+    // int, but the runtime dispatches to the builtin neg, which accepts only int/double.  The
+    // checker must reject neg(s) for a string variable, matching the runtime NO_OVERLOAD.
+    var neg =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .function("neg", List.of(CelType.STRING), CelType.INT, args -> 7L)
+            .build();
+    assertThrows(CelException.class, () -> neg.compile("neg(s)"));
+    assertEquals(
+        CelException.Code.NO_OVERLOAD,
+        assertThrows(CelException.class, () -> neg.parse("neg('abc')").evaluate()).code());
+    // The builtin neg still works for int.
+    assertEquals(-1L, neg.compile("neg(1)").evaluate());
+
+    // get* names: the builtin time getters dispatch before the host binding.
+    var getYear =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .function("getFullYear", List.of(CelType.STRING), CelType.INT, args -> 2000L)
+            .build();
+    assertThrows(CelException.class, () -> getYear.compile("getFullYear(s)"));
+    assertEquals(1970L, getYear.compile("timestamp(0).getFullYear()").evaluate());
+
+    // size: a STANDARD name.  The builtin size dispatches before the host binding.
+    var size =
+        Cel.newBuilder().function("size", List.of(CelType.INT), CelType.INT, args -> -1L).build();
+    assertEquals(CelType.INT, size.compile("size('abc')").resultType());
+    assertEquals(3L, size.compile("size('abc')").evaluate());
+    // The host binding size(int) is unreachable; the builtin size rejects int at check time.
+    assertThrows(CelException.class, () -> size.compile("size(1)"));
+
+    // first/last: the exception.  An existing host binding keeps dispatch ahead of the new
+    // optional list helpers, so the host declaration is authoritative.
+    var calls = new int[1];
+    var first =
+        Cel.newBuilder()
+            .function(
+                "first",
+                List.of(CelType.list(CelType.STRING)),
+                CelType.STRING,
+                args -> {
+                  calls[0]++;
+                  return "host";
+                })
+            .build();
+    assertEquals(CelType.STRING, first.compile("first(['x'])").resultType());
+    assertEquals("host", first.compile("first(['x'])").evaluate());
+    assertEquals(1, calls[0]);
+    // The host signature is checked: a non-list argument is rejected.
+    assertThrows(CelException.class, () -> first.compile("first(1)"));
+
+    // A non-colliding single-global host overload still uses the host declaration.
+    var plain =
+        Cel.newBuilder().function("myFunc", List.of(CelType.INT), CelType.INT, args -> 99L).build();
+    assertEquals(CelType.INT, plain.compile("myFunc(1)").resultType());
+    assertEquals(99L, plain.compile("myFunc(1)").evaluate());
+  }
 }

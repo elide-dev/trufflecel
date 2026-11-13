@@ -35,8 +35,9 @@ final class Optimizer {
   private static final int NO_IDENTIFIERS = 1 << 28, UNBOUND = -1;
 
   // Names with standard or extension overloads dispatch before a host binding of the same name,
-  // so a static argument check against the host declaration would not describe evaluation.
-  private static final Set<String> STANDARD =
+  // so a static argument check against the host declaration would not describe evaluation. The
+  // Checker mirrors this set for its single-global host fast path.
+  static final Set<String> STANDARD =
       Set.of(
           "!",
           "neg",
