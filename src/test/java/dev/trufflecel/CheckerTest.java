@@ -216,6 +216,24 @@ public class CheckerTest {
   }
 
   @Test
+  public void hasMacroRequiresFieldSelection() {
+    var checker = new Checker(Cel.newBuilder().build(), Map.of(), true);
+    // A bare IDENT as the has argument is rejected, mirroring the parser's guard.
+    var ident = new ExprNode(ExprNode.Kind.IDENT, "x", null, 0);
+    var malformed = new ExprNode(ExprNode.Kind.MACRO, "has", null, 0, ident);
+    var error = assertThrows(CelException.class, () -> checker.check(malformed, Map.of()));
+    assertTrue(error.getMessage().contains("has requires a field selection"));
+    // A SELECT argument passes the structural guard and type-checks normally.
+    var mapEnv = Cel.newBuilder().variable("x", CelType.map(CelType.STRING, CelType.INT)).build();
+    var mapChecker = new Checker(mapEnv, mapEnv.variables, true);
+    var select =
+        new ExprNode(
+            ExprNode.Kind.SELECT, "a", false, 0, new ExprNode(ExprNode.Kind.IDENT, "x", null, 0));
+    var valid = new ExprNode(ExprNode.Kind.MACRO, "has", null, 0, select);
+    assertEquals(CelType.BOOL, mapChecker.check(valid, Map.of()));
+  }
+
+  @Test
   public void nullIsOnlyAssignableToNullableMessageFields() {
     var builder = Cel.newBuilder();
     TestObjects.register(builder);
