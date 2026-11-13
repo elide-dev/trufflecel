@@ -773,8 +773,10 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
   }
 
   public boolean has(Object value, String name) {
+    Value v = (Value) value;
+    if (v.type != this) return v.type.has(v, name);
     FieldDescriptor f = field(name);
-    return ((Value) value).row().has(ordinals.get(f));
+    return v.row().has(ordinals.get(f));
   }
 
   /** Ingest a row produced by this type's plan and apply CEL well-known mappings. */
