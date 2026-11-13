@@ -24,22 +24,27 @@ final class EncoderFunctions {
       String json = buffer.toString();
       if (!yaml) return json;
       // Dump only the data model already validated for JSON. No bean representer is involved.
-      Object data = new Load(LoadSettings.builder().build()).loadFromString(json);
-      var yamlOutput = new StringBuilder();
-      new Dump(DumpSettings.builder().build())
-          .dump(
-              data,
-              new StreamDataWriter() {
-                public void write(String text) {
-                  write(text, 0, text.length());
-                }
+      var settings = LoadSettings.builder().setCodePointLimit(Integer.MAX_VALUE).build();
+      try {
+        Object data = new Load(settings).loadFromString(json);
+        var yamlOutput = new StringBuilder();
+        new Dump(DumpSettings.builder().build())
+            .dump(
+                data,
+                new StreamDataWriter() {
+                  public void write(String text) {
+                    write(text, 0, text.length());
+                  }
 
-                public void write(String text, int offset, int length) {
-                  ctx.charge(length);
-                  yamlOutput.append(text, offset, offset + length);
-                }
-              });
-      return yamlOutput.toString();
+                  public void write(String text, int offset, int length) {
+                    ctx.charge(length);
+                    yamlOutput.append(text, offset, offset + length);
+                  }
+                });
+        return yamlOutput.toString();
+      } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
+        throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "encoder limit exceeded");
+      }
     }
     String text = (String) args[0];
     if (text.length() > MAX_TEXT)

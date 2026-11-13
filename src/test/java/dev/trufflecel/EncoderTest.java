@@ -247,5 +247,39 @@ public final class EncoderTest {
             .code());
   }
 
+  @Test
+  public void yamlEncodeLargePayloadSucceedsUnderHighBudget() {
+    var env = Cel.newBuilder().evaluationBudget(500_000_000L).inferVariables(true).build();
+    var large = "a".repeat(3_500_000);
+    var jsonResult = env.compile("json.encode(x)").evaluate(Map.of("x", large));
+    assertEquals("\"" + large + "\"", jsonResult);
+    var yamlResult = env.compile("yaml.encode(x)").evaluate(Map.of("x", large));
+    assertTrue(yamlResult instanceof String);
+    assertEquals(large, env.compile("yaml.parse(s).value()").evaluate(Map.of("s", yamlResult)));
+  }
+
+  @Test
+  public void yamlEncodeLargeListPayloadSucceedsUnderHighBudget() {
+    var env = Cel.newBuilder().evaluationBudget(500_000_000L).inferVariables(true).build();
+    var items = new ArrayList<String>(500_000);
+    for (int i = 0; i < 500_000; i++) items.add("a");
+    var yamlResult = env.compile("yaml.encode(xs)").evaluate(Map.of("xs", items));
+    assertTrue(yamlResult instanceof String);
+    assertEquals(items, env.compile("yaml.parse(s).value()").evaluate(Map.of("s", yamlResult)));
+  }
+
+  @Test
+  public void yamlEncodeConvertsEngineExceptionToResourceExhausted() {
+    // A C1 control character (U+0080) is emitted raw by the JSON writer but rejected by
+    // snakeyaml-engine's reader, so the encode path must translate the engine exception
+    // into a catchable CEL error instead of letting a RuntimeException escape.
+    var env = Cel.newBuilder().inferVariables(true).build();
+    var error =
+        assertThrows(
+            CelException.class,
+            () -> env.compile("yaml.encode(s)").evaluate(Map.of("s", "\u0080")));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, error.code());
+  }
+
   private record Record(Map<String, Object> fields) {}
 }
