@@ -276,4 +276,51 @@ public class InteropTest {
       }
     }
   }
+
+  @Test
+  public void hostTemporalBindings() {
+    try (Context context =
+        Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false").build()) {
+      var bindings = context.getBindings("cel");
+      var instant = java.time.Instant.parse("2023-01-01T00:00:00Z");
+      var duration = java.time.Duration.ofSeconds(3);
+      // Instant and Duration bind as first-class CEL temporals (previously threw).
+      bindings.putMember("ts", instant);
+      bindings.putMember("d", duration);
+      assertTrue(context.eval("cel", "ts == timestamp(\"2023-01-01T00:00:00Z\")").asBoolean());
+      assertTrue(context.eval("cel", "d == duration(\"3s\")").asBoolean());
+      assertTrue(
+          context.eval("cel", "type(ts) == type(timestamp(\"2023-01-01T00:00:00Z\"))").asBoolean());
+      assertTrue(context.eval("cel", "type(d) == type(duration(\"3s\"))").asBoolean());
+      assertEquals(2023L, context.eval("cel", "ts.getFullYear()").asLong());
+      assertEquals(3L, context.eval("cel", "d.getSeconds()").asLong());
+      assertEquals("2023-01-01T00:00:00Z", context.eval("cel", "string(ts)").asString());
+      assertEquals("3s", context.eval("cel", "string(d)").asString());
+      // Temporal arithmetic with bound values.
+      assertTrue(context.eval("cel", "ts + d == timestamp(\"2023-01-01T00:00:03Z\")").asBoolean());
+      assertTrue(context.eval("cel", "(ts + d) - ts == duration(\"3s\")").asBoolean());
+      // Legacy java.util.Date binds as a timestamp via HostObject.asInstant.
+      var date = new java.util.Date(instant.toEpochMilli());
+      bindings.putMember("dt", date);
+      assertTrue(context.eval("cel", "dt == timestamp(\"2023-01-01T00:00:00Z\")").asBoolean());
+      assertTrue(
+          context.eval("cel", "type(dt) == type(timestamp(\"2023-01-01T00:00:00Z\"))").asBoolean());
+      // Nested temporals inside host maps are converted recursively.
+      var map = new LinkedHashMap<Object, Object>();
+      map.put("ts", instant);
+      map.put("d", duration);
+      map.put("plain", "plain");
+      bindings.putMember("m", ProxyHashMap.from(map));
+      assertTrue(context.eval("cel", "m.ts == timestamp(\"2023-01-01T00:00:00Z\")").asBoolean());
+      assertTrue(context.eval("cel", "m.d == duration(\"3s\")").asBoolean());
+      assertEquals("plain", context.eval("cel", "m.plain").asString());
+      // Nested temporals inside host lists are converted recursively.
+      bindings.putMember("lst", ProxyArray.fromArray(instant, duration));
+      assertTrue(context.eval("cel", "lst[0] == timestamp(\"2023-01-01T00:00:00Z\")").asBoolean());
+      assertTrue(context.eval("cel", "lst[1] == duration(\"3s\")").asBoolean());
+      // Re-binding over an existing temporal binding still works.
+      bindings.putMember("ts", java.time.Instant.parse("2024-06-15T12:00:00Z"));
+      assertTrue(context.eval("cel", "ts == timestamp(\"2024-06-15T12:00:00Z\")").asBoolean());
+    }
+  }
 }
