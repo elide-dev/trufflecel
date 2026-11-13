@@ -78,7 +78,9 @@ final class ConfigurationData {
         start = newline < 0 ? end : newline + 1;
         text = yaml.substring(start, end);
       } else if (style == org.snakeyaml.engine.v2.common.ScalarStyle.SINGLE_QUOTED
-          || style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED) start++;
+          || style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED) {
+        start++;
+      } else text = yaml.substring(start, end);
       return new Expression(text, start);
     }
     if (node instanceof MappingNode mapping) {
