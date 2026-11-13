@@ -309,9 +309,12 @@ final class Values {
     if (a instanceof Double x && b instanceof Double y) return x.doubleValue() == y.doubleValue();
     if (numeric(a) && numeric(b)) {
       // Double/double equality was handled above; an integer cannot equal a non-finite double.
+      // Mixed numeric equality uses the same lossy double basis as ordering (Functions.compare),
+      // so `x == y` stays consistent with `x <= y && x >= y` at magnitudes where IEEE-754 rounding
+      // collapses distinct integers onto the same double value.
       if (a instanceof Double d && !Double.isFinite(d)) return false;
       if (b instanceof Double d && !Double.isFinite(d)) return false;
-      return decimal(a).compareTo(decimal(b)) == 0;
+      return Functions.compare(a, b) == 0;
     }
     if (a instanceof CelType x && b instanceof CelType y) return x.name().equals(y.name());
     if (a instanceof List<?> x && b instanceof List<?> y) {

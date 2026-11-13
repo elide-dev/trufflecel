@@ -212,7 +212,10 @@ public class RuntimeTest {
             new Object[] {new UInt(-1L), new UInt(-1L)},
             new Object[] {-0.0, 0.0},
             new Object[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY},
-            new Object[] {42L, new UInt(42L)}))
+            new Object[] {42L, new UInt(42L)},
+            // 2^53 + 1 rounds to 2^53 as a double, so mixed equality (lossy, like ordering) is
+            // true.
+            new Object[] {9007199254740993L, 9007199254740992.0}))
       assertTrue(equal.test(Map.of("x", pair[0], "y", pair[1])));
     for (Object[] pair :
         List.of(
@@ -220,9 +223,44 @@ public class RuntimeTest {
             new Object[] {new UInt(-1L), new UInt(-2L)},
             new Object[] {Double.NaN, Double.NaN},
             new Object[] {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},
-            new Object[] {9007199254740993L, 9007199254740992.0},
             new Object[] {-1L, new UInt(-1L)}))
       assertFalse(equal.test(Map.of("x", pair[0], "y", pair[1])));
+  }
+
+  @Test
+  public void mixedNumericEqualityMatchesOrderingAtLossyBoundaries() {
+    // At magnitudes where IEEE-754 rounding collapses distinct integers onto the same double,
+    // `x == y` must agree with `x <= y && x >= y` (CEL spec: e1 <= e2 == (e1 < e2) || (e1 == e2)).
+    for (Object[] c :
+        new Object[][] {
+          // MaxUint64 (2^64 - 1) vs 2^64 as double: both round to 2^64.
+          {"18446744073709551615u == 18446744073709551616.0", true},
+          {"18446744073709551615u != 18446744073709551616.0", false},
+          {"18446744073709551615u <= 18446744073709551616.0", true},
+          {"18446744073709551615u >= 18446744073709551616.0", true},
+          {"18446744073709551615u < 18446744073709551616.0", false},
+          {"18446744073709551615u > 18446744073709551616.0", false},
+          // MaxInt64 (2^63 - 1) vs 2^63 as double: both round to 2^63.
+          {"9223372036854775807 == 9223372036854775808.0", true},
+          {"9223372036854775807 != 9223372036854775808.0", false},
+          {"9223372036854775807 <= 9223372036854775808.0", true},
+          {"9223372036854775807 >= 9223372036854775808.0", true},
+          {"9223372036854775807 < 9223372036854775808.0", false},
+          {"9223372036854775807 > 9223372036854775808.0", false},
+          // dyn-wrapped MaxUint64 vs 2^64 as double (1.8446744073709552e19 == 2^64).
+          {"dyn(18446744073709551615u) == 1.8446744073709552e19", true},
+          {"dyn(18446744073709551615u) <= 1.8446744073709552e19", true},
+          {"dyn(18446744073709551615u) >= 1.8446744073709552e19", true},
+          // dyn-wrapped MaxInt64 vs 2^63 as double.
+          {"dyn(9223372036854775807) == 9223372036854775808.0", true},
+          {"dyn(9223372036854775807) <= 9223372036854775808.0", true},
+          {"dyn(9223372036854775807) >= 9223372036854775808.0", true},
+        }) {
+      String expr = (String) c[0];
+      boolean result = Cel.compile(expr).test();
+      if ((boolean) c[1]) assertTrue(expr, result);
+      else assertFalse(expr, result);
+    }
   }
 
   @Test
