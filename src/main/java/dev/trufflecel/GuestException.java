@@ -11,7 +11,11 @@ final class GuestException extends AbstractTruffleException {
 
   GuestException(CelException failure, boolean parsing) {
     super(failure.getMessage());
-    type = parsing ? ExceptionType.PARSE_ERROR : ExceptionType.RUNTIME_ERROR;
+    type =
+        switch (failure.code()) {
+          case SYNTAX -> ExceptionType.PARSE_ERROR;
+          default -> ExceptionType.RUNTIME_ERROR;
+        };
   }
 
   @ExportMessage
