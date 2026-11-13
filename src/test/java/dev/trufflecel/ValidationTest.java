@@ -359,6 +359,65 @@ public final class ValidationTest {
   }
 
   @Test
+  public void stringConcatenationChargesProportionallyToResultLength() {
+    // The fuzz-harness configuration: untrusted CEL text with a tight evaluation budget.
+    Environment env =
+        Cel.newBuilder()
+            .inferVariables(true)
+            .maxSourceLength(4096)
+            .maxAstNodes(2048)
+            .maxDepth(64)
+            .evaluationBudget(10000)
+            .build();
+    // A nested cel.bind chain that doubles a ~1900-char string at each level. The source
+    // is ~2.3 KB (well under maxSourceLength), the AST is ~85 nodes (well under
+    // maxAstNodes), and the depth is ~10 (well under maxDepth). Without length-proportional
+    // charging, the flat one-tick-per-node charge lets the chain allocate exponentially
+    // while consuming only a few dozen ticks, OOMing the JVM at both plan time and
+    // evaluation time.
+    String seed = "a".repeat(1900);
+    var sb = new StringBuilder();
+    for (int i = 0; i < 10; i++) {
+      sb.append("cel.bind(b").append(i).append(", ");
+      if (i == 0) sb.append("'").append(seed).append("'");
+      else sb.append("b").append(i - 1).append(" + b").append(i - 1);
+      sb.append(", ");
+    }
+    sb.append("b9 + b9 == \"x\"");
+    for (int i = 0; i < 10; i++) sb.append(")");
+    String doubling = sb.toString();
+    // Compile-time: the fold attempt catches RESOURCE_EXHAUSTED and skips folding, so
+    // parse/prepare succeed without OOM. The expression is left to evaluation.
+    assertNotNull(env.parse(doubling));
+    assertNotNull(env.prepare(doubling));
+    // Evaluation-time: the length-proportional charge exhausts the budget before the
+    // exponential allocation, so evaluate throws RESOURCE_EXHAUSTED, not OutOfMemoryError.
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> env.parse(doubling).evaluate(Map.of())).code());
+    // The evaluation-time variant (free identifier prevents folding) also throws
+    // RESOURCE_EXHAUSTED, not OutOfMemoryError.
+    String evalDoubling = doubling + " && input";
+    Program evalProgram = env.parse(evalDoubling);
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> evalProgram.evaluate(Map.of("input", true))).code());
+    // Normal string and bytes concatenation still works (no regression).
+    assertEquals("abcdef", Cel.compile("'abc' + 'def'").evaluate());
+    assertEquals(4L, Cel.compile("size(b'ab' + b'cd')").evaluate());
+    // A large single concatenation also charges proportionally and exhausts a small budget.
+    Environment tiny = Cel.newBuilder().evaluationBudget(20).build();
+    String big = "a".repeat(100);
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class, () -> tiny.compile("'" + big + "' + '" + big + "'").evaluate())
+            .code());
+    // A small concatenation within the budget still succeeds.
+    assertEquals("abcdef", tiny.compile("'abc' + 'def'").evaluate());
+  }
+
+  @Test
   public void constantPatternsArePrecompiledAndDynamicPatternsAreCached() throws Exception {
     Environment env = standard(Environment.Validation.DEFERRED);
     Program program = env.compile("s.matches('^a+$')");
