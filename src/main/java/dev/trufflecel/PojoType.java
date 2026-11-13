@@ -43,6 +43,11 @@ public abstract class PojoType<T> implements ObjectType {
     return value instanceof Value snapshot && name.equals(snapshot.type);
   }
 
+  @Override
+  public boolean equal(Object a, Object b) {
+    return accepts(a) && accepts(b) && Values.equal(a, b);
+  }
+
   public final Object construct(Map<String, Object> values) {
     var owned = new LinkedHashMap<String, Object>();
     var context = new SnapshotContext(100, 1_000_000);

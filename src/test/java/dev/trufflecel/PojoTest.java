@@ -30,7 +30,8 @@ public final class PojoTest {
     assertTrue(
         environment
             .compile(
-                "u.id == 42 && u.addresses[0].zip == 123 && u.groups.team == [1, 2] && u.state == 'ACTIVE' && u.payload == b'\\x01\\x02'")
+                "u.id == 42 && u.addresses[0].zip == 123 && u.groups.team == [1, 2] && u.state =="
+                    + " 'ACTIVE' && u.payload == b'\\x01\\x02'")
             .test(Map.of("u", owned)));
     assertFalse(type.accepts(original));
     assertTrue(type.accepts(owned));
@@ -224,5 +225,66 @@ public final class PojoTest {
     assertThrows(
         CelException.class,
         () -> userType.construct(Map.of("groups", Collections.singletonMap(null, List.of(1)))));
+  }
+
+  @Test
+  public void pojoSnapshotEqualityPreservesIeeeNanSemantics() {
+    var type = PojoFixtures_ScalarsCel.INSTANCE;
+    var environment =
+        type.register(Cel.newBuilder())
+            .variable("a", CelType.of(type.name()))
+            .variable("b", CelType.of(type.name()))
+            .build();
+    var nanA = type.construct(Map.of("f", Double.NaN));
+    var nanB = type.construct(Map.of("f", Double.NaN));
+    var nanBoxedA = type.construct(Map.of("n", Double.NaN));
+    var nanBoxedB = type.construct(Map.of("n", Double.NaN));
+    var finiteA = type.construct(Map.of("f", 1.5));
+    var finiteB = type.construct(Map.of("f", 1.5));
+    var different = type.construct(Map.of("f", 2.5));
+    var nanBindings = Map.<String, Object>of("a", nanA, "b", nanB);
+
+    // Whole-snapshot == must be false for NaN-containing POJOs (IEEE/CEL semantics).
+    assertFalse(environment.compile("a == b").test(nanBindings));
+    assertTrue(environment.compile("a != b").test(nanBindings));
+    // List membership must also be false: Values.equal routes PojoType.Value pairs field-wise.
+    assertFalse(environment.compile("a in [b]").test(nanBindings));
+    // Field-level comparison bypasses adapter dispatch and is already IEEE-correct.
+    assertFalse(environment.compile("a.f == b.f").test(nanBindings));
+    // Boxed Double fields with NaN are also IEEE-unequal at the snapshot level.
+    assertFalse(type.equal(nanBoxedA, nanBoxedB));
+    assertFalse(Values.equal(nanBoxedA, nanBoxedB));
+    // Non-NaN snapshots compare equal.
+    assertTrue(environment.compile("a == b").test(Map.of("a", finiteA, "b", finiteB)));
+    assertTrue(environment.compile("a in [b]").test(Map.of("a", finiteA, "b", finiteB)));
+    assertTrue(type.equal(finiteA, finiteB));
+    assertTrue(Values.equal(finiteA, finiteB));
+    // Distinct non-NaN snapshots compare unequal.
+    assertFalse(environment.compile("a == b").test(Map.of("a", finiteA, "b", different)));
+    assertFalse(type.equal(finiteA, different));
+    assertFalse(Values.equal(finiteA, different));
+    // Direct adapter equal() is IEEE-safe.
+    assertFalse(type.equal(nanA, nanB));
+    // Direct Values.equal() is IEEE-safe for POJO snapshot pairs.
+    assertFalse(Values.equal(nanA, nanB));
+    // Host-side Value.equals retains Java equality (NaN-reflexive), unchanged by the fix.
+    assertEquals(nanA, nanB);
+    assertEquals(nanA.hashCode(), nanB.hashCode());
+    // Adapter equal() short-circuits when either operand is not accepted by this type.
+    var userValue = PojoFixtures_UserCel.INSTANCE.construct(Map.of());
+    assertFalse(type.equal(new Object(), nanA));
+    assertFalse(type.equal(nanA, new Object()));
+    assertFalse(type.equal(nanA, userValue));
+    // Values.equal routes mismatched-type PojoType.Value pairs through the typeName guard.
+    assertFalse(Values.equal(nanA, userValue));
+    // Values.equal rejects same-type snapshots with differing field counts.
+    var onlyF = type.construct(Map.of("f", 1.5));
+    var fAndN = type.construct(Map.of("f", 1.5, "n", 2.5));
+    assertFalse(Values.equal(onlyF, fAndN));
+    // Values.equal rejects same-type, same-size snapshots with a key missing from the right.
+    var onlyN = type.construct(Map.of("n", 2.5));
+    assertFalse(Values.equal(onlyF, onlyN));
+    // Values.equal falls back to host equals when only the left operand is a PojoType.Value.
+    assertFalse(Values.equal(nanA, "x"));
   }
 }
