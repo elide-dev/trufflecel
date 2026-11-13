@@ -1113,7 +1113,8 @@ getter failures are explicitly `null` with their error text, rather than zero or
 omitted phases; suspect positive readings remain recorded but are unreliable.
 Independent executable anonymous mappings occupy 20 KiB after
 comprehension evaluation in all three compiler configurations; file-backed compiler
-and runtime code is accounted separately. The upstream report remains a draft.
+and runtime code is accounted separately. The upstream report is filed as
+[elide-dev/graal#227](https://github.com/elide-dev/graal/issues/227).
 Correctness, checksums, effective target options and last-tier validity remain
 mandatory throughout the diagnostic.
 
