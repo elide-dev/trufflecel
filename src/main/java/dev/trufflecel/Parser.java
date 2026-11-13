@@ -299,6 +299,10 @@ final class Parser {
               throw error("cel." + name + " requires nonnegative integer literals");
             id += ":" + number;
           }
+          if (name.equals("iterVar")) {
+            env.libraryPolicy.name("cel.iterVar", offset);
+            env.libraryPolicy.library("cel.iterVar", CelType.DYN, offset);
+          }
           return name.equals("index")
               ? node(ExprNode.Kind.BLOCK_INDEX, "cel.index", args.get(1).value, offset)
               : node(ExprNode.Kind.IDENT, id, null, offset);

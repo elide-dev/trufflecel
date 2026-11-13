@@ -97,7 +97,10 @@ final class LibraryPolicy {
                 "format")
             .contains(name)) return "strings";
     if (NetworkValue.supports(name)) return "net";
-    if (name.equals("cel.bind")) return "bindings";
+    if (name.equals("cel.bind")
+        || name.equals("cel.block")
+        || name.equals("cel.index")
+        || name.equals("cel.iterVar")) return "bindings";
     if (name.startsWith("proto.")) return "protos";
     if (name.startsWith("transform") || name.equals("cel.@mapInsert")) return "comprehensions";
     return null;
