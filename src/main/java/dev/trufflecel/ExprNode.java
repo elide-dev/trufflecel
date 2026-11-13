@@ -1107,6 +1107,7 @@ class ExprNode extends CelNode {
       }
     }
     Values.OwnedList values = HostCollections.range(range);
+    if (!(range instanceof Values.OwnedList)) ctx.charge(values.size());
     boolean mapResult = name.equals("transformMap") || name.equals("transformMapEntry");
     boolean sorting = name.equals("sortBy");
     boolean mapping = name.equals("map") || name.startsWith("transform");

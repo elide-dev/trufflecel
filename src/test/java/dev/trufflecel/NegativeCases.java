@@ -918,6 +918,7 @@ public final class NegativeCases {
         .upstream(Upstream.rejects(Phase.PARSE))
         .parseLimit();
     c("flatten-limit", "lists.range(1000000).map(i, [i]).flatten()").limit();
+    c("snapshot-list-cap", "cel.bind(r, lists.range(500000), (r + r).all(i, false))").limit();
     c("range-cap", "lists.range(1000001)")
         .upstream(Upstream.notApplicable("TruffleCEL extension cap"))
         .strict(CelException.Code.INVALID_ARGUMENT)

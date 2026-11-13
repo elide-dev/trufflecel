@@ -38,6 +38,7 @@ final class ComprehensionNode extends ExprNode {
     Object accumulator = children[1].execute(frame, ctx);
     Attribute accumulatorAttribute = ctx.attribute();
     Values.OwnedList items = HostCollections.range(range);
+    if (!(range instanceof Values.OwnedList)) ctx.charge(items.size());
     String[] names = (String[]) value;
     long index = 0;
     for (int position = 0; position < items.size(); position++) {
