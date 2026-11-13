@@ -672,3 +672,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "foreignOrdinalBug",
+    srcs = ["ForeignOrdinalBugTest.java"],
+    test_class = "dev.trufflecel.ForeignOrdinalBugTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
