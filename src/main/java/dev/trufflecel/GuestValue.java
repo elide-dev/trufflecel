@@ -48,6 +48,7 @@ final class GuestValue implements TruffleObject {
     if (value instanceof dev.elide.truffledata.ExactNumber
         || value == dev.elide.truffledata.Missing.INSTANCE) return DataValues.from(value);
     if (value instanceof Double || value instanceof Float) return ((Number) value).doubleValue();
+    if (value instanceof byte[] b) return new Bytes(b);
     InteropLibrary lib = InteropLibrary.getUncached(value);
     if (lib.isNull(value)) return CelNull.INSTANCE;
     if (lib.isBoolean(value)) return lib.asBoolean(value);
