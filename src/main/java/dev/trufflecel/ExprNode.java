@@ -1221,33 +1221,63 @@ class ExprNode extends CelNode {
   private Object list(VirtualFrame frame, EvalContext ctx) {
     var list = HostCollections.list();
     Unknown unknown = null;
+    CelException error = null;
     for (ExprNode child : children) {
-      Object v = child.execute(frame, ctx);
-      if (v instanceof Unknown u) unknown = unknown == null ? u : unknown.merge(u);
-      if (child.optionalEntry && !(v instanceof Unknown)) {
-        OptionalValue o = optional(v);
-        if (!o.present()) continue;
-        v = o.value();
-      }
-      HostCollections.add(list, v);
-    }
-    return unknown == null ? HostCollections.freezeList(list) : unknown;
-  }
-
-  @com.oracle.truffle.api.nodes.ExplodeLoop
-  private Object map(VirtualFrame frame, EvalContext ctx) {
-    var map = HostCollections.<Object>map();
-    Unknown unknown = null;
-    for (int i = 0; i < children.length; i += 2) {
-      Object k = children[i].execute(frame, ctx), v = children[i + 1].execute(frame, ctx);
-      if (k instanceof Unknown u) {
-        unknown = unknown == null ? u : unknown.merge(u);
+      Object v;
+      try {
+        v = child.execute(frame, ctx);
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        error = e;
         continue;
       }
       if (v instanceof Unknown u) {
         unknown = unknown == null ? u : unknown.merge(u);
         continue;
       }
+      if (child.optionalEntry) {
+        OptionalValue o = optional(v);
+        if (!o.present()) continue;
+        v = o.value();
+      }
+      HostCollections.add(list, v);
+    }
+    if (unknown != null) return unknown;
+    if (error != null) throw error;
+    return HostCollections.freezeList(list);
+  }
+
+  @com.oracle.truffle.api.nodes.ExplodeLoop
+  private Object map(VirtualFrame frame, EvalContext ctx) {
+    var map = HostCollections.<Object>map();
+    Unknown unknown = null;
+    CelException error = null;
+    for (int i = 0; i < children.length; i += 2) {
+      Object k = null, v = null;
+      boolean skip = false;
+      try {
+        k = children[i].execute(frame, ctx);
+        if (k instanceof Unknown u) {
+          unknown = unknown == null ? u : unknown.merge(u);
+          skip = true;
+        }
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        error = e;
+        skip = true;
+      }
+      try {
+        v = children[i + 1].execute(frame, ctx);
+        if (v instanceof Unknown u) {
+          unknown = unknown == null ? u : unknown.merge(u);
+          skip = true;
+        }
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        error = e;
+        skip = true;
+      }
+      if (skip) continue;
       if (children[i + 1].optionalEntry) {
         OptionalValue o = optional(v);
         if (!o.present()) continue;
@@ -1259,23 +1289,39 @@ class ExprNode extends CelNode {
         throw Values.error(CelException.Code.INVALID_ARGUMENT, "duplicate map key");
       HostCollections.put(map, k, v);
     }
-    return unknown == null ? HostCollections.freezeMap(map) : unknown;
+    if (unknown != null) return unknown;
+    if (error != null) throw error;
+    return HostCollections.freezeMap(map);
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object object(VirtualFrame frame, EvalContext ctx) {
     var fields = HostCollections.<String>map();
     String[] names = (String[]) value;
+    Unknown unknown = null;
+    CelException error = null;
     for (int i = 0; i < children.length; i++) {
-      Object v = children[i].execute(frame, ctx);
+      Object v;
+      try {
+        v = children[i].execute(frame, ctx);
+      } catch (CelException e) {
+        if (e.code() == CelException.Code.RESOURCE_EXHAUSTED) throw e;
+        error = e;
+        continue;
+      }
       if (children[i].optionalEntry && !(v instanceof Unknown)) {
         OptionalValue o = optional(v);
         if (!o.present()) continue;
         v = o.value();
       }
-      if (v instanceof Unknown) return v;
+      if (v instanceof Unknown u) {
+        unknown = unknown == null ? u : unknown.merge(u);
+        continue;
+      }
       HostCollections.put(fields, names[i], v);
     }
+    if (unknown != null) return unknown;
+    if (error != null) throw error;
     return construct(ctx, fields);
   }
 
