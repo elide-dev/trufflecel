@@ -363,7 +363,18 @@ final class Checker {
       require(n, FunctionOverloads.standard(n.name), "no matching overload: " + n.name);
     }
     var custom = n.customOverloads ? null : env.functions.get(n.name);
-    if (custom != null) {
+    // A single-global host binding whose name dispatches to a standard builtin or extension first
+    // never reaches the host binding at runtime, so the host declaration must not drive static
+    // argument checking or the exported result type.  first/last are the exception: the runtime
+    // keeps an existing host binding ahead of the new optional list helpers (extensionCall = false
+    // below), so the host declaration is authoritative for those two names.  Mirrors
+    // Optimizer.hostOverload.
+    if (custom != null
+        && !Optimizer.STANDARD.contains(n.name)
+        && !n.name.startsWith("get")
+        && (!ExtensionFunctions.supports(n.name)
+            || n.name.equals("first")
+            || n.name.equals("last"))) {
       n.overloadIds = List.of(signatures.get(0).id());
       // New optional list helpers must not take over existing host functions.
       if (n.name.equals("first") || n.name.equals("last")) n.extensionCall = false;
