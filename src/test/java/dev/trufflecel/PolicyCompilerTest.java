@@ -417,6 +417,62 @@ public class PolicyCompilerTest {
   }
 
   @Test
+  public void hasOverPolicyVariableReportsCleanDiagnosticInsteadOfCrashing() {
+    var env = Cel.newBuilder().variable("x", CelType.INT).build();
+    // Variant A: foldable condition previously crashed at compile time with
+    // ArrayIndexOutOfBoundsException during optimizer constant folding.
+    var foldable =
+        assertThrows(
+            CelException.class,
+            () ->
+                PolicyCompiler.compile(
+                    env,
+                    "name: repro\nrule: {variables: [{name: v, expression: '1 + 1'}],"
+                        + " match: [{condition: 'has(variables.v)', output: \"'yes'\"},"
+                        + " {output: \"'no'\"}]}"));
+    assertTrue(foldable.getMessage().contains("has requires a field selection"));
+    // Variant B: non-foldable condition previously crashed at evaluate time.
+    var deferred =
+        assertThrows(
+            CelException.class,
+            () ->
+                PolicyCompiler.compile(
+                    env,
+                    "name: deferred\nrule: {variables: [{name: v, expression: '1'}],"
+                        + " match: [{condition: 'x > 0 && has(variables.v)', output: \"'yes'\"},"
+                        + " {output: \"'no'\"}]}"));
+    assertTrue(deferred.getMessage().contains("has requires a field selection"));
+    // The diagnostic is located, not a raw unlocated RuntimeException.
+    assertTrue(foldable.offset() >= 0);
+    assertTrue(deferred.offset() >= 0);
+    // has over a nested select on a policy variable keeps the SELECT shape and works.
+    assertEquals(
+        "yes",
+        PolicyCompiler.compile(
+                env,
+                "name: nested\nrule: {variables: [{name: m, expression: \"{'a': 1}\"}],"
+                    + " match: [{condition: 'has(variables.m.a)', output: \"'yes'\"},"
+                    + " {output: \"'no'\"}]}")
+            .evaluate(Map.of()));
+    // has over a declared map variable is unaffected (regression guard).
+    var mapEnv = Cel.newBuilder().variable("x", CelType.map(CelType.STRING, CelType.INT)).build();
+    assertEquals(
+        true,
+        PolicyCompiler.compile(
+                mapEnv,
+                "name: declared\nrule: {match: [{condition: 'has(x.a)', output: 'true'},"
+                    + " {output: 'false'}]}")
+            .evaluate(Map.of("x", Map.of("a", 1))));
+    assertEquals(
+        false,
+        PolicyCompiler.compile(
+                mapEnv,
+                "name: absent\nrule: {match: [{condition: 'has(x.b)', output: 'true'},"
+                    + " {output: 'false'}]}")
+            .evaluate(Map.of("x", Map.of("a", 1))));
+  }
+
+  @Test
   public void declaredInvariantsAreValidatedDataNotImplicitProofs() {
     String yaml =
         """
