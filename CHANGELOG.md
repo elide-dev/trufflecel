@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.12.1](https://github.com/elide-dev/trufflecel/compare/v0.12.0...v0.12.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* bound macro-expanded constant bytes in canonical AST import ([461df2a](https://github.com/elide-dev/trufflecel/commit/461df2aed8737b8a6ff8a3513006b1086cf720d4))
+* bound regex nesting depth and convert StackOverflowError to CelException ([a5c2384](https://github.com/elide-dev/trufflecel/commit/a5c2384597675bcd839db5463d3e4d9c6c9d2650))
+* bound yaml.encode re-parse and convert engine exceptions to CEL errors ([9742c0a](https://github.com/elide-dev/trufflecel/commit/9742c0a2ecdb83343d7e5362d2f2efe010b425bb))
+* charge and cap comprehension snapshot copies ([c47dd25](https://github.com/elide-dev/trufflecel/commit/c47dd25106b2d222efe196697cd94ef89469d87b))
+* charge string and bytes concatenation proportionally to result length ([86fb114](https://github.com/elide-dev/trufflecel/commit/86fb114699983ff48ba66721aec4cc9bd3153d8c))
+* classify polyglot guest exceptions by CelException code, not throw site ([3d19d11](https://github.com/elide-dev/trufflecel/commit/3d19d119a25ee488080bfb7707a49a552cdf6d01))
+* convert host Instant/Duration in polyglot bindings ([ef105c2](https://github.com/elide-dev/trufflecel/commit/ef105c2b154cd48f3df9db7626fbe617573ed3ad))
+* delegate protobuf extension presence checks to the producing adapter ([fab3495](https://github.com/elide-dev/trufflecel/commit/fab349527de20f0cb21e3918603e5d08f3b08e24))
+* gate cel.block/cel.index/cel.iterVar through LibraryPolicy ([2b55594](https://github.com/elide-dev/trufflecel/commit/2b555943a3dcc977c0245753037655ce703812b9))
+* merge unknowns and defer errors in INDEX evaluation ([b70e2bf](https://github.com/elide-dev/trufflecel/commit/b70e2bfee2fe7b46c582ae87a33ed99eebd1640d))
+* mirror runtime dispatch precedence for colliding host function names in checker ([96cdf92](https://github.com/elide-dev/trufflecel/commit/96cdf9243174ff15d4304616788a3b553127828b))
+* normalize canonical operator names in YAML function declarations ([aca07d4](https://github.com/elide-dev/trufflecel/commit/aca07d4be5a0a5495d6413ee0130ea8331f5c89c))
+* normalize OptionalValue payloads in the canonical constructor ([775e92b](https://github.com/elide-dev/trufflecel/commit/775e92b426292b6c7887254e782763fb9891b1e2))
+* normalize polyglot-bound host byte arrays to CEL bytes ([4131b8d](https://github.com/elide-dev/trufflecel/commit/4131b8d91d09b7da0dc5871f6d03cfbb12bd8804))
+* preserve IEEE NaN equality for POJO snapshots ([13aca08](https://github.com/elide-dev/trufflecel/commit/13aca08831933a27d8c9a8fe5d214dcca27700a7))
+* preserve overload_id and call style in conformance Check ([b9b8f54](https://github.com/elide-dev/trufflecel/commit/b9b8f54fcdf164203c453c0ea2a4e22f2898d123))
+* preserve policy source locations for multi-line plain YAML scalars ([70a2427](https://github.com/elide-dev/trufflecel/commit/70a24273a711a2e52c268f05fba0b07a758a7540))
+* preserve unknown-over-error precedence in object, list, and map literals ([fa9c5ec](https://github.com/elide-dev/trufflecel/commit/fa9c5ecd55178085110073319bb7157d4fdde803))
+* preserve unsigned identity for native ARRAY element constraints ([1c4d5dd](https://github.com/elide-dev/trufflecel/commit/1c4d5dde36eca3a8ef45755ce46e22a6bd93aaca))
+* reject custom macros that shadow enabled standard macros ([927dfc4](https://github.com/elide-dev/trufflecel/commit/927dfc4f9615c0cbaea3c15f15968f095661a6e1))
+* reject inconsistent declared generic host function bindings ([eb7ea27](https://github.com/elide-dev/trufflecel/commit/eb7ea277db3ac0b16e528ecba60415fea0aee9d1))
+* **release:** pin Release Please baseline after history rewrite ([53fd130](https://github.com/elide-dev/trufflecel/commit/53fd130b21febfef4d4c9aaff1b596a00c3e825c))
+* **release:** set last-release-sha at the manifest root ([b486e68](https://github.com/elide-dev/trufflecel/commit/b486e686fef7d3f56b31bab4d717d536b65d1bc6))
+* report constant-aggregate validator findings once at the defect ([b47ae2d](https://github.com/elide-dev/trufflecel/commit/b47ae2d676331a488933dafa84b5cd79094d560b))
+* resolve related attributes independent of map iteration order ([522ad34](https://github.com/elide-dev/trufflecel/commit/522ad342ce1eb56989d462ad0ca790ab1cf520b6))
+* sign release provenance under a project predicate type ([#151](https://github.com/elide-dev/trufflecel/issues/151)) ([1ce877a](https://github.com/elide-dev/trufflecel/commit/1ce877a95b1029467b7c4c5830245fb8b5afb47c))
+* type nullable schema columns as wrappers instead of dyn ([175b0d2](https://github.com/elide-dev/trufflecel/commit/175b0d26e3749145307bcd03be24a0850fa41933))
+* unify mixed numeric equality with ordering ([01d994c](https://github.com/elide-dev/trufflecel/commit/01d994c957379d830a1472ffb19ba26e52362b1a))
+* validate has macro argument is a field selection ([8005753](https://github.com/elide-dev/trufflecel/commit/800575344e046889fdce1a6c3c36aacabe843407))
+* validate protobuf Timestamp seconds range in WellKnownTypes.time ([66ba9a0](https://github.com/elide-dev/trufflecel/commit/66ba9a0c1e288c289b4f08c1f8702e93491e0b64))
+
 ## [0.12.0](https://github.com/elide-dev/trufflecel/compare/v0.11.0...v0.12.0) (2026-11-12)
 
 
