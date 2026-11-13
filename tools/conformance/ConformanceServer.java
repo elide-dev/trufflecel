@@ -80,11 +80,18 @@ public final class ConformanceServer implements BindableService {
           else builder.variable(name, CanonicalAst.type(nested(ident, "type")));
         } else if (present(declaration, "function")) {
           declaredFunctions.add(name);
+          int generatedIds = 0;
           for (Message overload : repeated(nested(declaration, "function"), "overloads")) {
             List<CelType> args =
                 repeated(overload, "params").stream().map(CanonicalAst::type).toList();
+            String overloadId = text(overload, "overload_id");
+            boolean instance = (Boolean) field(overload, "is_instance_function");
             builder.function(
                 name,
+                overloadId == null || overloadId.isEmpty()
+                    ? name + "#" + generatedIds++
+                    : overloadId,
+                instance,
                 args,
                 CanonicalAst.type(nested(overload, "result_type")),
                 unused -> {
