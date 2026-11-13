@@ -20,7 +20,7 @@ Production code has no cel-java dependency.
 
 ## Get started
 
-Use Java 25 and Elide GraalVM `25.5.5-elide.28`. TruffleCEL **0.12.0** uses
+Use Java 25 and Elide GraalVM `25.5.5-elide.28`. TruffleCEL **0.12.1** uses
 TruffleData **0.12.0**. Add the thin core JAR and the matching runtime repository:
 
 ```kotlin
@@ -30,7 +30,7 @@ repositories {
     maven("https://maven.elide.dev/gvm-elide/25.5.5-elide.28")
 }
 dependencies {
-    implementation("dev.elide:trufflecel-core:0.12.0")
+    implementation("dev.elide:trufflecel-core:0.12.1")
 }
 ```
 
