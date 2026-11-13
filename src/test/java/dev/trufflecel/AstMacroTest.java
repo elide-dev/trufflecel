@@ -346,4 +346,148 @@ public final class AstMacroTest {
         CelException.class, () -> Ast.parse(Cel.newBuilder().maxSourceLength(1).build(), "12"));
     assertThrows(CelException.class, () -> Ast.parse(DYNAMIC, "!"));
   }
+
+  @Test
+  public void customMacrosCannotShadowEnabledStandardMacros() {
+    Macro.Expander noop = (ctx, target, args) -> Ast.Node.literal(0);
+
+    // Collisions with comprehension standard macros (receiver style).
+    for (Macro conflicting :
+        List.of(
+            Macro.receiver("map", 2, noop),
+            Macro.receiver("map", 3, noop),
+            Macro.receiver("all", 2, noop),
+            Macro.receiver("all", 3, noop),
+            Macro.receiver("exists", 2, noop),
+            Macro.receiver("exists", 3, noop),
+            Macro.receiver("existsOne", 2, noop),
+            Macro.receiver("existsOne", 3, noop),
+            Macro.receiver("exists_one", 2, noop),
+            Macro.receiver("filter", 2, noop),
+            Macro.receiver("optMap", 2, noop),
+            Macro.receiver("optFlatMap", 2, noop),
+            Macro.receiver("sortBy", 2, noop),
+            Macro.receiver("transformList", 3, noop),
+            Macro.receiver("transformList", 4, noop),
+            Macro.receiver("transformMap", 3, noop),
+            Macro.receiver("transformMap", 4, noop),
+            Macro.receiver("transformMapEntry", 3, noop),
+            Macro.receiver("transformMapEntry", 4, noop)))
+      try {
+        Cel.newBuilder().macro(conflicting).build();
+        fail("expected IllegalArgumentException for: " + conflicting.name());
+      } catch (IllegalArgumentException expected) {
+        // expected
+      }
+
+    // Collision with the standard has macro (global style).
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Cel.newBuilder().macro(Macro.global("has", 1, noop)).build());
+
+    // Collisions with cel.* macros: receiver-style with the simple name.
+    for (Macro conflicting :
+        List.of(
+            Macro.receiver("bind", 3, noop),
+            Macro.receiver("block", 2, noop),
+            Macro.receiver("index", 1, noop),
+            Macro.receiver("iterVar", 2, noop)))
+      try {
+        Cel.newBuilder().macro(conflicting).build();
+        fail("expected IllegalArgumentException for cel.* receiver: " + conflicting.name());
+      } catch (IllegalArgumentException expected) {
+        // expected
+      }
+
+    // Collisions with cel.* macros: global-style with the qualified name.
+    for (Macro conflicting :
+        List.of(
+            Macro.global("cel.bind", 3, noop),
+            Macro.global("cel.block", 2, noop),
+            Macro.global("cel.index", 1, noop),
+            Macro.global("cel.iterVar", 2, noop)))
+      try {
+        Cel.newBuilder().macro(conflicting).build();
+        fail("expected IllegalArgumentException for cel.* global: " + conflicting.name());
+      } catch (IllegalArgumentException expected) {
+        // expected
+      }
+
+    // Collisions with proto.* macros: both receiver-style and global-style.
+    for (Macro conflicting :
+        List.of(
+            Macro.receiver("getExt", 2, noop),
+            Macro.receiver("hasExt", 2, noop),
+            Macro.global("proto.getExt", 2, noop),
+            Macro.global("proto.hasExt", 2, noop)))
+      try {
+        Cel.newBuilder().macro(conflicting).build();
+        fail("expected IllegalArgumentException for proto.*: " + conflicting.name());
+      } catch (IllegalArgumentException expected) {
+        // expected
+      }
+
+    // Variadic custom macros that overlap with standard macro arities.
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Cel.newBuilder().macro(Macro.receiverVarargs("map", 2, noop)).build());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Cel.newBuilder().macro(Macro.receiverVarargs("map", 3, noop)).build());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Cel.newBuilder().macro(Macro.globalVarargs("has", 1, noop)).build());
+
+    // Non-matching arity does not collide: map with arity 4 is not a standard map arity.
+    Cel.newBuilder().macro(Macro.receiver("map", 4, noop)).build();
+    // Non-matching receiver style: global "map" is not a receiver standard macro.
+    Cel.newBuilder().macro(Macro.global("map", 2, noop)).build();
+    // Non-matching name does not collide.
+    Cel.newBuilder().macro(Macro.receiver("custom", 2, noop)).build();
+    // Variadic with minimum above all standard arities does not collide.
+    Cel.newBuilder().macro(Macro.receiverVarargs("map", 4, noop)).build();
+    // Receiver "has" does not collide: standard has is global, not receiver.
+    Cel.newBuilder().macro(Macro.receiver("has", 1, noop)).build();
+    // exists_one with arity 3 does not collide: standard exists_one only accepts arity 2.
+    Cel.newBuilder().macro(Macro.receiver("exists_one", 3, noop)).build();
+
+    // Disabling the conflicting standard macro allows the custom registration.
+    Cel.newBuilder().standardMacros(Set.of("has")).macro(Macro.receiver("map", 2, noop)).build();
+    Cel.newBuilder().standardMacros(Set.of()).macro(Macro.global("has", 1, noop)).build();
+    Cel.newBuilder().standardMacros(Set.of("has")).macro(Macro.global("cel.bind", 3, noop)).build();
+    Cel.newBuilder().standardMacros(Set.of("has")).macro(Macro.receiver("bind", 3, noop)).build();
+
+    // The error message identifies the conflicting macro.
+    String message =
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Cel.newBuilder().macro(Macro.receiver("map", 2, noop)).build())
+            .getMessage();
+    assertTrue(message.contains("map"));
+    assertTrue(message.contains("standard"));
+
+    // Custom macros that do not collide still expand correctly.
+    Environment env =
+        Cel.newBuilder().macro(Macro.global("choose", 1, (c, t, a) -> a.getFirst())).build();
+    assertEquals(1L, env.compile("choose(1)").evaluate());
+
+    // Standard macros still expand correctly when no custom macro collides.
+    Environment withHas = Cel.newBuilder().standardMacros(Set.of("has")).build();
+    assertEquals(true, withHas.compile("has({'a':1}.a)").evaluate());
+    Environment withMap = Cel.newBuilder().build();
+    assertEquals(List.of(2L, 3L), withMap.compile("[1,2].map(x, x + 1)").evaluate());
+
+    // toBuilder preserves existing custom macros and rejects new conflicting ones.
+    Environment base =
+        Cel.newBuilder()
+            .standardMacros(Set.of("has"))
+            .macro(Macro.receiver("map", 2, noop))
+            .build();
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> base.toBuilder().macro(Macro.global("has", 1, noop)).build());
+
+    // An unknown standard-macro name never shadows anything.
+    assertFalse(Macro.shadows("unknown", Macro.global("has", 1, noop)));
+  }
 }
