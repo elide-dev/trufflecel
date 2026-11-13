@@ -92,6 +92,9 @@ final class Optimizer {
   private final String source;
   private final boolean strict;
   private List<CelException.Issue> issues;
+  // Validator findings already issued by analyze(), keyed by code and message, so a failure
+  // captured on a foldable ancestor's Fold is not re-reported at the ancestor's offset.
+  private Set<String> reported;
   // Lexical scope of binder variables and the depth that bound them; only binders allocate it.
   private String[] scopeNames;
   private int[] scopeDepths;
@@ -254,6 +257,7 @@ final class Optimizer {
         Functions.apply(n.name, new Object[] {n.children[0].value}, env);
       } catch (CelException e) {
         issue(e.code(), e.getMessage(), n);
+        remember(e);
       }
     }
     if (n.kind == ExprNode.Kind.CALL
@@ -268,7 +272,10 @@ final class Optimizer {
         if (e.code() == CelException.Code.RESOURCE_EXHAUSTED)
           throw new CelException(
               List.of(n.children[1].issue(e.code(), e.issues().get(0).message())));
-        if (strict) issue(e.code(), e.getMessage(), n.children[1]);
+        if (strict) {
+          issue(e.code(), e.getMessage(), n.children[1]);
+          remember(e);
+        }
         n = new MatchesNode(n, null, e);
       }
     }
@@ -393,8 +400,14 @@ final class Optimizer {
   private void report(ExprNode n, boolean strictPath) {
     if (!strict) return;
     CelException error = n.fold.error();
-    // The literal validators already reported this pattern or conversion.
-    if (n instanceof MatchesNode matches && matches.error == error || literalConversion(n)) return;
+    // The literal validators already reported this pattern or conversion. The folded node may be
+    // the defect itself (a flat matches/timestamp/duration call), or a foldable ancestor (an
+    // all-constant list, map or select, or a matches call whose receiver threw) that captured the
+    // inner node's fresh exception on its own Fold. Dedupe the ancestor by code and message,
+    // since the fold-time exception is a fresh instance with no shared identity.
+    if (n instanceof MatchesNode matches && matches.error == error
+        || literalConversion(n)
+        || alreadyReported(error)) return;
     if (strictPath) issue(error.code(), error.issues().get(0).message(), n);
   }
 
@@ -405,6 +418,22 @@ final class Optimizer {
         && n.children.length == 1
         && n.children[0].kind == ExprNode.Kind.CONSTANT
         && n.children[0].value instanceof String;
+  }
+
+  /** Remember a validator finding so a captured fold failure with the same defect is suppressed. */
+  private void remember(CelException error) {
+    if (reported == null) reported = new HashSet<>();
+    reported.add(validatorKey(error));
+  }
+
+  /** Whether {@code analyze} already issued a validator finding with this code and message. */
+  private boolean alreadyReported(CelException error) {
+    return reported != null && reported.contains(validatorKey(error));
+  }
+
+  /** A stable key for a validator finding; the fold-time exception is a fresh instance. */
+  private static String validatorKey(CelException error) {
+    return error.code().name() + "\n" + error.issues().get(0).message();
   }
 
   /** Whether an error in child {@code i} propagates from {@code n} whatever its siblings yield. */
