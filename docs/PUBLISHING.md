@@ -106,6 +106,13 @@ reusable publisher checks out and verifies the exact release tag before calling 
 with its version. All modules release together. The explicit local `--publish` command
 remains available; coordinate manual publishes with CI to avoid concurrent metadata writes.
 
+The repository history was rewritten once (2026-11-13) to remove tool attribution lines.
+Tags `v0.8.0` through `v0.12.0` and the published artifacts were left untouched and still
+point at the pre-rewrite commits, which are no longer reachable from `main`. Release Please
+therefore cannot find the last release by tag, so `release-please-config.json` pins
+`last-release-sha` to the rewritten 0.12.0 release commit (identical tree). Advance it, or
+remove it once a release created after the rewrite exists, rather than moving release tags.
+
 Releases starting at 0.12.0 require TruffleData 0.12.0; see
 [the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). TruffleData 0.12.0
 was built with Myna 0.18.0. TruffleCEL has no direct Myna dependency and does not
