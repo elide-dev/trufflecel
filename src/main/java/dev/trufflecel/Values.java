@@ -334,6 +334,16 @@ final class Values {
       }
       return true;
     }
+    if (a instanceof PojoType.Value x && b instanceof PojoType.Value y) {
+      if (!x.typeName().equals(y.typeName())) return false;
+      var xf = x.fields();
+      var yf = y.fields();
+      if (xf.size() != yf.size()) return false;
+      for (var entry : xf.entrySet())
+        if (!yf.containsKey(entry.getKey()) || !equal(entry.getValue(), yf.get(entry.getKey())))
+          return false;
+      return true;
+    }
     return a.equals(b);
   }
 
