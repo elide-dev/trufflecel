@@ -211,7 +211,14 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
     @CompilerDirectives.TruffleBoundary
     void writeMember(String name, Object value) throws UnsupportedTypeException {
       try {
-        values.put(name, GuestValue.unwrap(value, 0));
+        Object toUnwrap = value;
+        try {
+          Object hostObject = env.asHostObject(value);
+          if (hostObject instanceof byte[] b) toUnwrap = b;
+        } catch (ClassCastException e) {
+          // Not a host object; unwrap the original value.
+        }
+        values.put(name, GuestValue.unwrap(toUnwrap, 0));
       } catch (InteropException | CelException e) {
         throw UnsupportedTypeException.create(new Object[] {value}, e.getMessage());
       }

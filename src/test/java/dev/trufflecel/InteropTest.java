@@ -240,4 +240,40 @@ public class InteropTest {
       assertThrows(IllegalArgumentException.class, () -> bindings.putMember("wide", tooManyKeys));
     }
   }
+
+  @Test
+  public void hostByteArraysBindAsCelBytes() {
+    for (boolean allAccess : List.of(true, false)) {
+      var builder = Context.newBuilder("cel");
+      if (allAccess) builder.allowHostAccess(HostAccess.ALL);
+      try (Context context = builder.build()) {
+        var bindings = context.getBindings("cel");
+        bindings.putMember("ba", new byte[] {(byte) 255});
+        assertTrue(context.eval("cel", "type(ba) == bytes").asBoolean());
+        assertEquals(255, context.eval("cel", "ba").getArrayElement(0).asInt());
+        assertEquals(1, context.eval("cel", "size(ba)").asInt());
+        assertTrue(context.eval("cel", "ba == b'\\xff'").asBoolean());
+        assertEquals(1, context.eval("cel", "size(bytes(ba))").asInt());
+        bindings.putMember("empty", new byte[0]);
+        assertTrue(context.eval("cel", "type(empty) == bytes").asBoolean());
+        assertEquals(0, context.eval("cel", "size(empty)").asInt());
+        bindings.putMember("multi", new byte[] {1, 2, (byte) 200});
+        assertTrue(context.eval("cel", "type(multi) == bytes").asBoolean());
+        assertEquals(3, context.eval("cel", "size(multi)").asInt());
+        var multiVal = context.eval("cel", "multi");
+        assertEquals(1, multiVal.getArrayElement(0).asInt());
+        assertEquals(2, multiVal.getArrayElement(1).asInt());
+        assertEquals(200, multiVal.getArrayElement(2).asInt());
+        var guest = context.eval("cel", "b'\\xff'");
+        bindings.putMember("roundtrip", guest);
+        assertTrue(context.eval("cel", "type(roundtrip) == bytes").asBoolean());
+        assertEquals(255, context.eval("cel", "roundtrip").getArrayElement(0).asInt());
+        if (allAccess) {
+          bindings.putMember("ints", new int[] {255});
+          assertFalse(context.eval("cel", "type(ints) == bytes").asBoolean());
+          assertEquals(255, context.eval("cel", "ints[0]").asInt());
+        }
+      }
+    }
+  }
 }
