@@ -39,6 +39,7 @@ public final class PartialActivation {
   /** Return a new snapshot; this activation remains unchanged and safe for concurrent reuse. */
   public PartialActivation resolve(Map<Attribute, ?> values) {
     var resolved = new LinkedHashMap<>(resolutions);
+    var supplied = new LinkedHashMap<Attribute, Object>();
     for (var entry : values.entrySet()) {
       Attribute attribute = Objects.requireNonNull(entry.getKey());
       boolean applicable = false;
@@ -47,10 +48,15 @@ public final class PartialActivation {
         throw new IllegalArgumentException("attribute is outside unknown patterns: " + attribute);
       Object value = Values.in(entry.getValue());
       requireKnown(value);
-      // A newly supplied parent replaces previous child resolutions. A child may refine a parent.
-      resolved.keySet().removeIf(attribute::prefixOf);
-      resolved.put(attribute, value);
+      supplied.put(attribute, value);
     }
+    // A newly supplied parent replaces previous child resolutions. A child may refine a parent.
+    // Drop only pre-existing resolutions covered by a supplied attribute, then insert the
+    // supplied entries ancestors before descendants so the outcome is caller-order independent.
+    for (Attribute attribute : supplied.keySet()) resolved.keySet().removeIf(attribute::prefixOf);
+    supplied.entrySet().stream()
+        .sorted(Comparator.comparingInt(e -> e.getKey().qualifiers().size()))
+        .forEach(e -> resolved.put(e.getKey(), e.getValue()));
     return new PartialActivation(activation, patterns, Collections.unmodifiableMap(resolved));
   }
 }
