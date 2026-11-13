@@ -267,22 +267,22 @@ public class EnvironmentYamlTest {
     var env =
         EnvironmentYaml.read(
             """
-        functions:
-              - name: '_+_'
-                overloads:
-                  - id: custom_plus
-                    args: [int, int]
-                    return: bool
-              - name: '!_'
-                overloads:
-                  - id: custom_not
-                    args: [bool]
-                    return: int
-              - name: '@in'
-                overloads:
-                  - id: custom_in
-                    args: [int, list<int>]
-                    return: string
+            functions:
+                  - name: '_+_'
+                    overloads:
+                      - id: custom_plus
+                        args: [int, int]
+                        return: bool
+                  - name: '!_'
+                    overloads:
+                      - id: custom_not
+                        args: [bool]
+                        return: int
+                  - name: '@in'
+                    overloads:
+                      - id: custom_in
+                        args: [int, list<int>]
+                        return: string
             """);
     assertEquals(CelType.BOOL, env.compile("1 + 2").resultType());
     assertEquals(CelType.INT, env.compile("!true").resultType());
@@ -306,22 +306,22 @@ public class EnvironmentYamlTest {
     var plain =
         EnvironmentYaml.read(
             """
-        functions:
-              - name: '+'
-                overloads:
-                  - id: custom_plus
-                    args: [int, int]
-                    return: bool
-              - name: '!'
-                overloads:
-                  - id: custom_not
-                    args: [bool]
-                    return: int
-              - name: in
-                overloads:
-                  - id: custom_in
-                    args: [int, list<int>]
-                    return: string
+            functions:
+                  - name: '+'
+                    overloads:
+                      - id: custom_plus
+                        args: [int, int]
+                        return: bool
+                  - name: '!'
+                    overloads:
+                      - id: custom_not
+                        args: [bool]
+                        return: int
+                  - name: in
+                    overloads:
+                      - id: custom_in
+                        args: [int, list<int>]
+                        return: string
             """);
     assertEquals(CelType.BOOL, plain.compile("1 + 2").resultType());
     assertEquals(CelType.INT, plain.compile("!true").resultType());
