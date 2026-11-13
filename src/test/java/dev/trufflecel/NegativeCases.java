@@ -817,6 +817,18 @@ public final class NegativeCases {
     c("unknown-map-value", "{'a': x}['a']").bind("x", x).unknown("x");
     c("unknown-map-key", "{x: 1}").bind("x", x).unknown("x");
     c("unknown-map-index", "m[s]").bind("s", Unknown.of("s")).unknown("s");
+    c("unknown-index-merge", "dynv[y]")
+        .bind("dynv", Unknown.of("dynv"))
+        .bind("y", Unknown.of("y"))
+        .unknown("dynv", "y");
+    c("unknown-index-beats-key-error", "dynv[1/0]")
+        .bind("dynv", Unknown.of("dynv"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
+        .unknown("dynv");
+    c("unknown-index-beats-receiver-error", "dyn(1/0)[y]")
+        .bind("y", Unknown.of("y"))
+        .strict(CelException.Code.DIVIDE_BY_ZERO)
+        .unknown("y");
     c("unknown-range", "xs.all(i, i > 0)").bind("xs", Unknown.of("xs")).unknown("xs");
     c("unknown-in-all", "[1, 2].all(i, i > x)").bind("x", x).unknown("x");
     c("unknown-exists-short-circuit", "[1, 2].exists(i, i == x || i == 2)")
