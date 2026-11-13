@@ -8,12 +8,47 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 final class Re2Regex {
   private Re2Regex() {}
 
+  private static final int MAX_NESTING_DEPTH = 1000;
+
   static Regex.Compiled compile(String source) {
+    checkNestingDepth(source);
     try {
       return new Re2(Pattern.compile(source));
     } catch (PatternSyntaxException failure) {
       throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid regular expression");
+    } catch (StackOverflowError overflow) {
+      throw Values.error(
+          CelException.Code.RESOURCE_EXHAUSTED, "regex pattern complexity limit exceeded");
     }
+  }
+
+  private static void checkNestingDepth(String source) {
+    int depth = 0;
+    int max = 0;
+    boolean inClass = false;
+    for (int i = 0; i < source.length(); i++) {
+      char c = source.charAt(i);
+      if (inClass) {
+        if (c == '\\') i++;
+        else if (c == ']') inClass = false;
+        continue;
+      }
+      if (c == '\\') {
+        i++;
+        continue;
+      }
+      if (c == '[') {
+        inClass = true;
+      } else if (c == '(') {
+        depth++;
+        if (depth > max) max = depth;
+      } else if (c == ')') {
+        depth--;
+      }
+    }
+    if (max > MAX_NESTING_DEPTH)
+      throw Values.error(
+          CelException.Code.RESOURCE_EXHAUSTED, "regex nesting depth limit exceeded");
   }
 
   private record Re2(Pattern pattern) implements Regex.Compiled {

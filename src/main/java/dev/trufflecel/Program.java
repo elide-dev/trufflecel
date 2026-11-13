@@ -241,6 +241,8 @@ public final class Program {
         result.complete(evaluate(activation, options.withCancellation(result::isCancelled)));
       } catch (RuntimeException failure) {
         result.completeExceptionally(failure);
+      } catch (Error failure) {
+        result.completeExceptionally(failure);
       }
     });
     return result;
