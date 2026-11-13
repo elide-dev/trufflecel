@@ -104,10 +104,46 @@ public class LibraryPolicyTest {
             "base64.encode(b'a')",
             "optional.of(1)",
             "cel.bind(x, 1, x)",
+            "cel.block([1], cel.index(0))",
+            "cel.iterVar(0, 1)",
             "[1].transformList(i, x, x)",
             "[1].all(i, x, true)")) disabled(env, source);
     assertEquals(true, env.compile("[1].all(x, x == 1)").evaluate());
     disabled(env, "false && json.parse('{}').hasValue()");
+  }
+
+  @Test
+  public void blockMacrosRespectFunctionAndLibraryRestrictions() {
+    var empty = Cel.newBuilder().libraries(Map.of()).build();
+    disabled(empty, "cel.block([1], cel.index(0))");
+    disabled(empty, "cel.block([1 + 1], cel.index(0))");
+    disabled(empty, "cel.iterVar(0, 1)");
+    var allowList = Cel.newBuilder().allowedFunctions(Set.of("+", "size")).build();
+    disabled(allowList, "cel.block([1 + 1], cel.index(0))");
+    disabled(allowList, "cel.block([size('ab')], cel.index(0))");
+    disabled(allowList, "cel.iterVar(0, 1)");
+    disabled(allowList, "cel.bind(x, 1, x)");
+    var bindings = Cel.newBuilder().libraries(Map.of("bindings", 0)).build();
+    assertEquals(1L, bindings.compile("cel.block([1], cel.index(0))").evaluate());
+    assertEquals(2L, bindings.compile("cel.block([1 + 1], cel.index(0))").evaluate());
+    var explicit = Cel.newBuilder().allowedFunctions(Set.of("cel.block", "cel.index")).build();
+    assertEquals(1L, explicit.compile("cel.block([1], cel.index(0))").evaluate());
+    disabled(
+        Cel.newBuilder().allowedFunctions(Set.of("cel.block")).build(),
+        "cel.block([1], cel.index(0))");
+    var ast = CanonicalAst.parse(Cel.newBuilder().build(), "cel.block([1 + 1], cel.index(0))");
+    assertThrows(
+        CelException.class,
+        () -> CanonicalAst.program(Cel.newBuilder().libraries(Map.of()).build(), ast));
+    assertThrows(
+        CelException.class,
+        () ->
+            CanonicalAst.program(
+                Cel.newBuilder().allowedFunctions(Set.of("+", "size")).build(), ast));
+    assertEquals(
+        2L,
+        CanonicalAst.program(Cel.newBuilder().libraries(Map.of("bindings", 0)).build(), ast)
+            .evaluate());
   }
 
   @Test
