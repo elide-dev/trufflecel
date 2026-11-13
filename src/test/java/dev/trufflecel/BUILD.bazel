@@ -52,6 +52,19 @@ java_test(
 )
 
 java_test(
+    name = "nullableTyping",
+    srcs = ["NullableTypingTest.java"],
+    data = ["//third_party/cel-spec:schemas.json"],
+    test_class = "dev.trufflecel.NullableTypingTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:dev_elide_truffledata_core",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "interop",
     srcs = ["InteropTest.java"],
     test_class = "dev.trufflecel.InteropTest",

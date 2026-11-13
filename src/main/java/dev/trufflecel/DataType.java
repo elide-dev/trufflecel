@@ -31,7 +31,7 @@ public final class DataType implements ObjectType {
             case EXACT, ANY -> CelType.DYN;
           };
       if (unsigned(f)) type = CelType.UINT;
-      types.put(f.name(), f.nullable() ? CelType.DYN : type);
+      types.put(f.name(), f.nullable() ? CelType.wrapper(type) : type);
     }
     fields = Map.copyOf(types);
   }
