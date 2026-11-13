@@ -188,4 +188,152 @@ public class DataIntegrationTest {
         assertThrows(CelException.class, () -> type.construct(Map.of("value", new UInt(1))))
             .code());
   }
+
+  @Test
+  public void unsignedArrayElementsPreserveIdentity() {
+    Schema schema =
+        Schema.of(
+            new Field(
+                "u64",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, false, false))),
+            new Field(
+                "u32",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 32, false, false, false))),
+            new Field(
+                "signed",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, true, false, false))));
+    var type = new DataType("Native", schema);
+    assertEquals(CelType.list(CelType.UINT), type.fields().get("u64"));
+    assertEquals(CelType.list(CelType.UINT), type.fields().get("u32"));
+    assertEquals(CelType.list(CelType.DYN), type.fields().get("signed"));
+    Object row =
+        type.construct(
+            Map.of(
+                "u64",
+                new DataArray(
+                    new Object[] {new ExactNumber(new BigDecimal("18446744073709551615"))}),
+                "u32",
+                new DataArray(new Object[] {4294967295L}),
+                "signed",
+                new DataArray(new Object[] {5L})));
+    assertEquals(new UInt(-1), ((List<?>) type.get(row, "u64")).get(0));
+    assertEquals(new UInt(4294967295L), ((List<?>) type.get(row, "u32")).get(0));
+    assertEquals(5L, ((List<?>) type.get(row, "signed")).get(0));
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    assertTrue(
+        env.compile(
+                "r.u64[0] == 18446744073709551615u && r.u32[0] == 4294967295u && r.signed[0] == 5"
+                    + " && type(r.u64[0]) == type(1u) && type(r.u32[0]) == type(1u)"
+                    + " && type(r.signed[0]) == type(0)")
+            .test(Map.of("r", row)));
+  }
+
+  @Test
+  public void unsignedArrayElementsConstructFromList() {
+    Schema schema =
+        Schema.of(
+            new Field(
+                "u64",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, false, false))),
+            new Field(
+                "u32",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 32, false, false, false))));
+    var type = new DataType("Native", schema);
+    Object row =
+        type.construct(
+            Map.of(
+                "u64",
+                List.of(UInt.parse("18446744073709551615"), UInt.parse("0")),
+                "u32",
+                List.of(UInt.parse("4294967295"), UInt.parse("1"))));
+    assertEquals(new UInt(-1), ((List<?>) type.get(row, "u64")).get(0));
+    assertEquals(new UInt(0), ((List<?>) type.get(row, "u64")).get(1));
+    assertEquals(new UInt(4294967295L), ((List<?>) type.get(row, "u32")).get(0));
+    assertEquals(new UInt(1), ((List<?>) type.get(row, "u32")).get(1));
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    assertTrue(
+        env.compile(
+                "r.u64[0] == 18446744073709551615u && r.u32[0] == 4294967295u && r.u32[1] == 1u")
+            .test(Map.of("r", row)));
+  }
+
+  @Test
+  public void unsignedArrayElementsPreserveEquality() {
+    Schema schema =
+        Schema.of(
+            new Field(
+                "arr",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, false, false))));
+    var type = new DataType("Native", schema);
+    Object row =
+        type.construct(
+            Map.of(
+                "arr",
+                new DataArray(
+                    new Object[] {
+                      new ExactNumber(new BigDecimal("4294967296")),
+                      new ExactNumber(new BigDecimal("18446744073709551615"))
+                    })));
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    assertTrue(
+        env.compile(
+                "r.arr[0] == 4294967296u && r.arr[1] == 18446744073709551615u"
+                    + " && type(r.arr[0]) == type(1u) && type(r.arr[1]) == type(1u)"
+                    + " && !(type(r.arr[0]) == type(0))")
+            .test(Map.of("r", row)));
+    assertTrue(
+        type.equal(
+            row, type.construct(Map.of("arr", List.of(UInt.parse("4294967296"), new UInt(-1))))));
+  }
+
+  @Test
+  public void unsignedArrayElementEdges() {
+    // CelNull list elements thread through to native DataNull on construct and read
+    // back as CEL null identity. The element is nullable so DataNull is permitted.
+    Schema nullableSchema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, true, false))));
+    var nullableType = new DataType("Native", nullableSchema);
+    Object nullRow = nullableType.construct(Map.of("vals", List.of(CelNull.INSTANCE)));
+    assertEquals(CelNull.INSTANCE, ((List<?>) nullableType.get(nullRow, "vals")).get(0));
+
+    // Non-UInt, non-CelNull list items (e.g. Long) pass through unchanged on the
+    // construct path for an INT64 unsigned element and read back as UInt.
+    Schema int64Schema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 32, false, false, false))));
+    var int64Type = new DataType("Native", int64Schema);
+    Object longRow = int64Type.construct(Map.of("vals", List.of(UInt.parse("0"), 9L)));
+    var longRead = (List<?>) int64Type.get(longRow, "vals");
+    assertEquals(new UInt(0), longRead.get(0));
+    assertEquals(new UInt(9L), longRead.get(1));
+  }
 }
