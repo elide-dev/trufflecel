@@ -206,4 +206,215 @@ public final class ConformanceServerTest {
       java.nio.file.Files.deleteIfExists(path);
     }
   }
+
+  @Test
+  public void checkExportsDeclaredOverloadIdFromTypeEnv() {
+    var service = new ConformanceServer();
+    Message parsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "g(1)")), "parsed_expr");
+    Message decl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "g",
+            "function",
+            message(
+                "cel.expr.Decl.FunctionDecl",
+                "overloads",
+                List.of(
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "overload_id",
+                        "g_int_int",
+                        "params",
+                        List.of(type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT),
+                        "is_instance_function",
+                        false))));
+    Message response =
+        service.check(
+            message(P + "CheckRequest", "parsed_expr", parsed, "type_env", List.of(decl)));
+    assertTrue(has(response, "checked_expr"));
+    var ids = overloadIds(nested(response, "checked_expr"));
+    assertTrue(ids.contains("g_int_int"));
+    assertFalse(ids.contains("g#0"));
+  }
+
+  @Test
+  public void checkMixedStyleOverloadsNotAmbiguous() {
+    var service = new ConformanceServer();
+    Message globalParsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "f(1, 2)")), "parsed_expr");
+    Message memberParsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "x.f(2)")), "parsed_expr");
+    Message xDecl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "x",
+            "ident",
+            message("cel.expr.Decl.IdentDecl", "type", type(CelType.INT)));
+    Message fDecl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "f",
+            "function",
+            message(
+                "cel.expr.Decl.FunctionDecl",
+                "overloads",
+                List.of(
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "overload_id",
+                        "f_global",
+                        "params",
+                        List.of(type(CelType.INT), type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT),
+                        "is_instance_function",
+                        false),
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "overload_id",
+                        "f_member",
+                        "params",
+                        List.of(type(CelType.INT), type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT),
+                        "is_instance_function",
+                        true))));
+    Message globalResponse =
+        service.check(
+            message(P + "CheckRequest", "parsed_expr", globalParsed, "type_env", List.of(fDecl)));
+    assertTrue(has(globalResponse, "checked_expr"));
+    var globalIds = overloadIds(nested(globalResponse, "checked_expr"));
+    assertTrue(globalIds.contains("f_global"));
+    assertFalse(globalIds.contains("f#0"));
+    Message memberResponse =
+        service.check(
+            message(
+                P + "CheckRequest",
+                "parsed_expr",
+                memberParsed,
+                "type_env",
+                List.of(xDecl, fDecl)));
+    assertTrue(has(memberResponse, "checked_expr"));
+    assertTrue(overloadIds(nested(memberResponse, "checked_expr")).contains("f_member"));
+  }
+
+  @Test
+  public void checkRejectsGlobalCallOnInstanceOnlyOverload() {
+    var service = new ConformanceServer();
+    Message parsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "f(1)")), "parsed_expr");
+    Message decl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "f",
+            "function",
+            message(
+                "cel.expr.Decl.FunctionDecl",
+                "overloads",
+                List.of(
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "overload_id",
+                        "f_member",
+                        "params",
+                        List.of(type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT),
+                        "is_instance_function",
+                        true))));
+    Message response =
+        service.check(
+            message(P + "CheckRequest", "parsed_expr", parsed, "type_env", List.of(decl)));
+    assertTrue(has(response, "issues"));
+    assertFalse(has(response, "checked_expr"));
+    assertTrue(firstErrorMessage(response).contains("no matching overload"));
+  }
+
+  @Test
+  public void checkRejectsMemberCallOnGlobalOnlyOverload() {
+    var service = new ConformanceServer();
+    Message parsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "x.g(1)")), "parsed_expr");
+    Message xDecl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "x",
+            "ident",
+            message("cel.expr.Decl.IdentDecl", "type", type(CelType.INT)));
+    Message gDecl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "g",
+            "function",
+            message(
+                "cel.expr.Decl.FunctionDecl",
+                "overloads",
+                List.of(
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "overload_id",
+                        "g_int",
+                        "params",
+                        List.of(type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT),
+                        "is_instance_function",
+                        false))));
+    Message response =
+        service.check(
+            message(P + "CheckRequest", "parsed_expr", parsed, "type_env", List.of(xDecl, gDecl)));
+    assertTrue(has(response, "issues"));
+    assertFalse(has(response, "checked_expr"));
+    assertTrue(firstErrorMessage(response).contains("no matching overload"));
+  }
+
+  @Test
+  public void checkFallsBackToGeneratedIdWhenOverloadIdMissing() {
+    var service = new ConformanceServer();
+    Message parsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "g(1)")), "parsed_expr");
+    Message decl =
+        message(
+            "cel.expr.Decl",
+            "name",
+            "g",
+            "function",
+            message(
+                "cel.expr.Decl.FunctionDecl",
+                "overloads",
+                List.of(
+                    message(
+                        "cel.expr.Decl.FunctionDecl.Overload",
+                        "params",
+                        List.of(type(CelType.INT)),
+                        "result_type",
+                        type(CelType.INT)))));
+    Message response =
+        service.check(
+            message(P + "CheckRequest", "parsed_expr", parsed, "type_env", List.of(decl)));
+    assertTrue(has(response, "checked_expr"));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<String> overloadIds(Message checked) {
+    var ids = new ArrayList<String>();
+    for (Object entry : (List<?>) field(checked, "reference_map"))
+      for (Object id : (List<?>) field(nested((Message) entry, "value"), "overload_id"))
+        ids.add((String) id);
+    return ids;
+  }
+
+  private static String firstErrorMessage(Message response) {
+    var errors = (List<?>) field(nested(response, "issues"), "errors");
+    return errors.isEmpty() ? null : (String) field((Message) errors.get(0), "message");
+  }
 }
