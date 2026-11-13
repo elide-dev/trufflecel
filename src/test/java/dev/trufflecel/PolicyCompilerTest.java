@@ -212,6 +212,28 @@ public class PolicyCompilerTest {
           compile.format(invalid),
           compile.format(invalid).endsWith("        undeclared\n        ^"));
     }
+    String plainValid = "name: '😀'\nrule:\n  match:\n    - output: x +\n        2\n";
+    assertEquals(5L, PolicyCompiler.compile(env, plainValid).evaluate(Map.of("x", 3)));
+    String plainRuntime = "name: '😀'\nrule:\n  match:\n    - output: x\n        / 0\n";
+    var plainError =
+        assertThrows(
+            CelException.class,
+            () -> PolicyCompiler.compile(env, plainRuntime).evaluate(Map.of("x", 1)));
+    assertEquals(CelException.Code.DIVIDE_BY_ZERO, plainError.code());
+    assertEquals(plainRuntime.indexOf('/'), plainError.offset());
+    assertEquals(5, plainError.line());
+    assertEquals(9, plainError.column());
+    assertTrue(plainError.expressionId() > 0);
+    String plainInvalid = "name: '😀'\nrule:\n  match:\n    - output: x +\n        undeclared\n";
+    var plainCompile =
+        assertThrows(CelException.class, () -> PolicyCompiler.compile(env, plainInvalid));
+    assertEquals(5, plainCompile.line());
+    assertEquals(9, plainCompile.column());
+    assertEquals(plainInvalid.indexOf("undeclared"), plainCompile.offset());
+    assertEquals(CelException.OffsetEncoding.UTF16, plainCompile.offsetEncoding());
+    assertTrue(
+        plainCompile.format(plainInvalid),
+        plainCompile.format(plainInvalid).endsWith("        undeclared\n        ^"));
   }
 
   @Test
