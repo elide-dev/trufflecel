@@ -95,10 +95,13 @@ accepts CEL Policy documents and does not implement Kubernetes admission matchin
 ## Cost bounds and fuzzing
 
 `CostEstimator.estimate(environment, source, sizeBounds)` reports conservative
-bounds on charged CEL operations. Collection-size bounds are explicit caller
-guarantees. An absent maximum names the work that could not be bounded; it is
-never a finite estimate of host callback time, CPU time or allocation. Execution
-budgets and cancellation remain necessary independently of static estimation.
+bounds on charged CEL operations whose per-operation cost is fixed; `+` on
+dynamic strings or bytes charges proportionally to result length, so a present
+maximum may understate the actual cost when an operand size is unknown.
+Collection-size bounds are explicit caller guarantees. An absent maximum names
+the work that could not be bounded; it is never a finite estimate of host
+callback time, CPU time or allocation. Execution budgets and cancellation
+remain necessary independently of static estimation.
 
 `//tools/fuzz:regression` exercises the seed corpus and deterministic mutations.
 On Linux x86-64, `//tools/fuzz:smoke` runs Jazzer against parsing, checking,
