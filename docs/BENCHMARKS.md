@@ -3,8 +3,8 @@
 Start with the [comparison guide](BENCHMARK_COMPARISON.md) for interpreter-first
 results, prepared-input controls, allocation/current/peak RSS definitions, and an
 explicit accounting of upstream methodology feedback and remaining evidence gaps.
-The [benchmark cards](images/benchmark-0.11.0/README.md) collect the current
-release's light and dark SVG figures, with every plotted value in text.
+The [benchmark cards](images/benchmark-0.11.0/README.md) collect light and dark
+SVG figures, with every plotted value in text.
 
 ## 0.11.0 release measurements
 
