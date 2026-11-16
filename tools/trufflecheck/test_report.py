@@ -74,6 +74,15 @@ class SarifTest(unittest.TestCase):
         self.assertEqual(boundary["properties"], {"priority": "P1", "area": "main"})
 
 
+class WriteTest(unittest.TestCase):
+    def test_creates_missing_directories(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            target = pathlib.Path(folder) / "build" / "reports" / "trufflecheck.profile.log"
+            report.write(target, "log")
+            self.assertEqual(target.read_text(encoding="utf-8"), "log")
+
+
 class ProfileTest(unittest.TestCase):
     def test_reads_enforced_severities(self):
         severity = report.severities(HERE.parents[1])

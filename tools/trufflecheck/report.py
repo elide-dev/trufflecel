@@ -42,6 +42,13 @@ def bazel(workspace, *args):
     return subprocess.run(command, cwd=workspace, text=True, capture_output=True, check=False)
 
 
+def write(path, text):
+    """Writes a report output, creating its directory (build/reports/ does not exist on a fresh checkout)."""
+    path = pathlib.Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
 def build(workspace, configs, targets, run, extra):
     nonce = "--javacopt=-XepOpt:TrufflecheckReport:Run=%s" % run
     result = bazel(workspace, "build", *configs, "--config=trufflecheck_report", nonce, *extra, "--", *targets)
@@ -323,8 +330,8 @@ def main():
         if not options.no_probe:
             probe_code, probe_log = build(workspace, configs, targets, run + "-probe", PROBE)
     if options.log and not options.from_logs:
-        pathlib.Path(options.log + ".profile.log").write_text(log, encoding="utf-8")
-        pathlib.Path(options.log + ".probe.log").write_text(probe_log, encoding="utf-8")
+        write(workspace / (options.log + ".profile.log"), log)
+        write(workspace / (options.log + ".probe.log"), probe_log)
     failures = []
     for name, rc, text in (("profile", code, log), ("probe", probe_code, probe_log)):
         if rc != 0:
@@ -349,12 +356,10 @@ def main():
     probe = [item for item in parse(probe_log) if item["check"] == "NullAway"]
     severity = severities(workspace)
     if options.output:
-        (workspace / options.output).write_text(render(findings, probe, severity, meta), encoding="utf-8")
+        write(workspace / options.output, render(findings, probe, severity, meta))
         print("wrote %s: %d findings, %d NullAway probe findings" % (options.output, len(findings), len(probe)))
     if options.sarif:
-        path = workspace / options.sarif
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(sarif(findings, severity, meta), indent=1) + "\n", encoding="utf-8")
+        write(workspace / options.sarif, json.dumps(sarif(findings, severity, meta), indent=1) + "\n")
         print("wrote %s: %d results" % (options.sarif, len(findings)))
     return 1 if failures else 0
 
