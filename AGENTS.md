@@ -26,6 +26,14 @@ bazel coverage --config=local //src/test/...
 bazel run --config=local //tools:coverage
 ```
 
+Static analysis is Error Prone, NullAway and the trufflecheck Truffle rules
+(`tools/trufflecheck`). `--config=trufflecheck` enforces the profile; while
+`docs/TRUFFLECHECK_BASELINE.md` has open findings it is not yet a default gate.
+Fix findings or add a narrow, commented `@SuppressWarnings`, then regenerate the
+baseline with `bazel run --config=local //tools/trufflecheck:report`. The
+`elide-dev:truffle-language` skill (plugin enabled in `.claude/settings.json`)
+covers the rules' principles; use it when changing nodes, DSL, interop or frames.
+
 CI additionally runs `bazel test //benchmarks:jit_smoke` on Linux. Changes affecting
 compilation, allocation or native behavior need that gate; JVM success alone does
 not establish Native Image compatibility. For workflow changes run `actionlint` and

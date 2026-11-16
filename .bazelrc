@@ -109,5 +109,8 @@ coverage --combined_report=lcov
 coverage --instrumentation_filter=//src/main/java/dev/trufflecel[/:]
 coverage --remote_download_toplevel
 
+# Static analysis (Error Prone, NullAway, trufflecheck): --config=trufflecheck and --config=trufflecheck_report.
+import %workspace%/tools/trufflecheck/errorprone.bazelrc
+
 # Credentials stay outside version control.
 try-import %workspace%/user.bazelrc

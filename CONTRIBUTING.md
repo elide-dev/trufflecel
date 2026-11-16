@@ -30,9 +30,12 @@ bazel run --config=local //tools:format
 bazel test --config=local //...
 bazel coverage --config=local //src/test/...
 bazel run --config=local //tools:coverage
+bazel build --config=local --config=trufflecheck_report //src/...   # static analysis
 ```
 
-Gazelle maintains Java targets. See the [coverage audit](docs/COVERAGE.md) for
+Gazelle maintains Java targets. Static analysis (Error Prone, NullAway and the
+[trufflecheck](https://github.com/elide-dev/trufflecheck) Truffle rules) is tracked in
+the [baseline](docs/TRUFFLECHECK_BASELINE.md): do not add findings to it. See the [coverage audit](docs/COVERAGE.md) for
 coverage requirements and [benchmark methodology](docs/BENCHMARKS.md) for
 performance work. Native JIT/blocklist validation runs in CI. Describe which
 checks you ran and any limitations in the pull request; fork contributors do
