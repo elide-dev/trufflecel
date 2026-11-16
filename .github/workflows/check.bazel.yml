@@ -40,6 +40,7 @@ jobs:
         run: |
           python3 -m unittest discover -s .github/scripts -p 'test_*.py'
           python3 -m unittest discover -s tools/bench -p 'test_*.py'
+          python3 -m unittest discover -s tools/trufflecheck -p 'test_*.py'
       - name: Check generated targets
         run: bazel run //bazel/gazelle:check
       - name: Check Java formatting

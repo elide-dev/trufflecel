@@ -39,6 +39,9 @@ extensions or custom repositories cannot run inside its updater environment.
 - `security.yml` runs CodeQL on Java, Python and Actions on PRs, main and weekly.
   Java uses source analysis (`build-mode: none`); generated Truffle classes and full
   build dependency resolution are outside this analysis. CI still compiles and tests them.
+- `security.yml` also runs Error Prone, NullAway and trufflecheck (`tools/trufflecheck/report.py`) over every
+  Java target and uploads SARIF to code scanning (category `trufflecheck`; fork PRs keep the artifact only).
+  Findings are not yet a build gate; see `docs/TRUFFLECHECK_BASELINE.md`.
 - Dependency review rejects introduced high/critical known vulnerabilities on PRs.
   Its visibility is limited to dependencies recognized by GitHub's dependency graph;
   custom archives and embedded dependency representations still need manual review.

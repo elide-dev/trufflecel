@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 Elide Technologies, Inc. and TruffleCEL contributors
 # SPDX-License-Identifier: Apache-2.0 OR MIT
-"""Builds every Java target with --config=trufflecheck_report and writes a Markdown baseline of the findings.
+"""Builds every Java target with --config=trufflecheck_report and reports the findings as Markdown and/or SARIF.
 
-  bazel run --config=local //tools/trufflecheck:report [-- --output docs/TRUFFLECHECK_BASELINE.md] [--log <file>]
+  bazel run --config=local //tools/trufflecheck:report                  # refresh docs/TRUFFLECHECK_BASELINE.md
+  tools/trufflecheck/report.py --remote --no-probe --output '' --sarif build/reports/trufflecheck.sarif   # CI
 
-Two sequential local builds:
+Two sequential builds:
   1. the configured profile (Error Prone defaults + trufflecheck + NullAway), errors downgraded to warnings;
-  2. a NullAway probe treating dev.trufflecel as annotated, which sizes the nullness work before any @NullMarked lands.
+  2. unless --no-probe, a NullAway probe treating dev.trufflecel as annotated, which sizes the nullness work before
+     any @NullMarked lands. Probe findings are hypothetical, so they appear only in the Markdown, never in SARIF.
 Each build passes a unique, inert -XepOpt so compile actions rerun: Bazel does not replay cached actions' warnings.
+Builds use --config=local unless --remote, which keeps the configured (RBE or user.bazelrc) execution.
 """
 import argparse
 import collections
@@ -17,6 +20,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 
@@ -29,18 +33,18 @@ AREAS = [("src/main/", "main"), ("src/test/", "test"), ("benchmarks/", "benchmar
 NULLNESS = {"NullAway", "RequireExplicitNullMarking", "ReturnMissingNullable", "FieldMissingNullable",
             "EqualsMissingNullable", "VoidMissingNullable", "RedundantNullCheck", "ParameterMissingNullable"}
 SEVERITY_ORDER = {"ERROR": 0, "WARN": 1, "OFF": 2}
+SARIF_LEVEL = {"ERROR": "error", "WARN": "warning"}
 
 
-def bazel(workspace, *args, capture=True):
-    command = ["bazelisk", *args]
+def bazel(workspace, *args):
+    command = [shutil.which("bazelisk") or "bazel", *args]
     print("+", " ".join(command[:6]), "..." if len(command) > 6 else "", file=sys.stderr)
-    return subprocess.run(command, cwd=workspace, text=True, capture_output=capture, check=False)
+    return subprocess.run(command, cwd=workspace, text=True, capture_output=True, check=False)
 
 
-def build(workspace, targets, run, extra):
+def build(workspace, configs, targets, run, extra):
     nonce = "--javacopt=-XepOpt:TrufflecheckReport:Run=%s" % run
-    result = bazel(workspace, "build", "--config=local", "--config=trufflecheck_report", nonce, *extra, "--",
-                   *targets)
+    result = bazel(workspace, "build", *configs, "--config=trufflecheck_report", nonce, *extra, "--", *targets)
     return result.returncode, result.stdout + result.stderr
 
 
@@ -52,10 +56,14 @@ def parse(log):
         # Generated sources: Error Prone already skips them (-XepExcludedPaths); this also drops javac's own lints.
         if not match or match["path"].startswith("bazel-out/"):
             continue
-        snippet = lines[index + 1].strip() if index + 1 < len(lines) else ""
+        snippet = lines[index + 1] if index + 1 < len(lines) else ""
+        caret = lines[index + 2] if index + 2 < len(lines) else ""
+        # javac echoes the source line verbatim, then a caret under the reported position.
+        column = caret.index("^") + 1 if caret.strip() == "^" else None
         key = (match["path"], int(match["line"]), match["check"], match["message"])
-        findings[key] = {"path": match["path"], "line": int(match["line"]), "check": match["check"],
-                         "message": match["message"].strip(), "snippet": snippet, "kind": match["kind"]}
+        findings[key] = {"path": match["path"], "line": int(match["line"]), "column": column,
+                         "check": match["check"], "message": match["message"].strip(), "snippet": snippet.strip(),
+                         "kind": match["kind"]}
     return list(findings.values())
 
 
@@ -66,6 +74,20 @@ def severities(workspace):
     for match in re.finditer(r"^build:trufflecheck --javacopt=-Xep:([A-Za-z]+):([A-Z]+)$", rc, re.MULTILINE):
         result[match[1]] = match[2]
     return result
+
+
+def effective(check, severity):
+    """Severity under --config=trufflecheck. Unlisted checks are Bazel's always-on Error Prone errors; javac lints
+    (lowercase keys such as deprecation) are warnings."""
+    return "WARN" if check.islower() else severity.get(check, "ERROR")
+
+
+def doc_url(check):
+    if check.startswith("Truffle"):
+        return "https://github.com/elide-dev/trufflecheck#%s" % check.lower()
+    if check in ("NullAway", "RequireExplicitNullMarking"):
+        return "https://github.com/uber/NullAway/wiki"
+    return None if check.islower() else "https://errorprone.info/bugpattern/%s" % check
 
 
 def area(path):
@@ -112,8 +134,7 @@ def render(findings, probe, severity, meta):
         by_check[finding["check"]].append(finding)
 
     def sev(check):
-        # Unlisted checks are Bazel's always-on Error Prone errors; javac lints are warnings.
-        return "WARN" if check.islower() else severity.get(check, "ERROR")
+        return effective(check, severity)
 
     def check_priority(check):
         return min(priority(item, sev(check)) for item in by_check[check])
@@ -136,7 +157,10 @@ def render(findings, probe, severity, meta):
          "`tools/trufflecheck/trufflecheck.properties` |")
     emit("| Scope | %d Java targets (`%s`); Bazel-generated sources excluded |" % (meta["targets"], TARGETS))
     emit("| Findings | **%d** (%s) |" % (len(findings), ", ".join("%s %d" % (a, totals[a]) for a in areas if totals[a])))
-    emit("| NullAway probe | **%d** findings if `dev.trufflecel` were `@NullMarked` today |" % len(probe))
+    if meta.get("probe", True):
+        emit("| NullAway probe | **%d** findings if `dev.trufflecel` were `@NullMarked` today |" % len(probe))
+    else:
+        emit("| NullAway probe | not run (`--no-probe`) |")
     if meta["failures"]:
         emit("| Build | ⚠️ %s |" % meta["failures"])
     emit("")
@@ -187,9 +211,7 @@ def render(findings, probe, severity, meta):
         emit("")
         emit("### `%s`" % check)
         emit("")
-        doc = ("https://github.com/elide-dev/trufflecheck#%s" % check.lower() if check.startswith("Truffle")
-               else "https://github.com/uber/NullAway/wiki" if check in ("NullAway", "RequireExplicitNullMarking")
-               else None if check.islower() else "https://errorprone.info/bugpattern/%s" % check)
+        doc = doc_url(check)
         emit("%s · %s · P%d · %d finding%s%s" % (source(check), sev(check), check_priority(check), len(items),
                                                  "" if len(items) == 1 else "s", " · [docs](%s)" % doc if doc else ""))
         emit("")
@@ -216,23 +238,90 @@ def render(findings, probe, severity, meta):
     return "\n".join(out)
 
 
+def sarif(findings, severity, meta):
+    """SARIF 2.1.0 for GitHub code scanning: one run, one rule per check, levels from the enforced profile."""
+    checks = sorted({item["check"] for item in findings})
+    index = {check: position for position, check in enumerate(checks)}
+    rules = []
+    for check in checks:
+        level = SARIF_LEVEL.get(effective(check, severity), "warning")
+        advice = common_message([item for item in findings if item["check"] == check])
+        rule = {
+            "id": check,
+            "name": check,
+            "shortDescription": {"text": check},
+            "fullDescription": {"text": advice},
+            "defaultConfiguration": {"level": level},
+            "properties": {"tags": [source(check)], "precision": "high" if check.startswith("Truffle") else "medium",
+                           # GitHub ranks alerts by this; map the profile's errors above its warnings.
+                           "problem.severity": "error" if level == "error" else "warning"},
+        }
+        if doc_url(check):
+            rule["helpUri"] = doc_url(check)
+        rules.append(rule)
+    results = []
+    for item in sorted(findings, key=lambda f: (f["path"], f["line"], f["check"], f["message"])):
+        region = {"startLine": item["line"]}
+        if item["column"]:
+            region["startColumn"] = item["column"]
+        results.append({
+            "ruleId": item["check"],
+            "ruleIndex": index[item["check"]],
+            "level": SARIF_LEVEL.get(effective(item["check"], severity), "warning"),
+            "message": {"text": item["message"]},
+            "locations": [{"physicalLocation": {
+                "artifactLocation": {"uri": item["path"], "uriBaseId": "%SRCROOT%"},
+                "region": region,
+            }}],
+            "properties": {"priority": "P%d" % priority(item, effective(item["check"], severity)),
+                           "area": area(item["path"])},
+        })
+    return {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {"driver": {
+                "name": "trufflecheck",
+                "fullName": "Error Prone %s with trufflecheck %s and NullAway %s"
+                            % (meta["errorprone"], meta["trufflecheck"], meta["nullaway"]),
+                "version": meta["trufflecheck"],
+                "informationUri": "https://github.com/elide-dev/trufflecheck",
+                "rules": rules,
+            }},
+            "automationDetails": {"id": "trufflecheck/"},
+            "results": results,
+        }],
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="docs/TRUFFLECHECK_BASELINE.md")
+    parser.add_argument("--output", default="docs/TRUFFLECHECK_BASELINE.md", help="Markdown report; '' to skip")
+    parser.add_argument("--sarif", help="also write SARIF 2.1.0 here (relative to the workspace)")
+    parser.add_argument("--no-probe", action="store_true", help="skip the NullAway probe build")
+    parser.add_argument("--remote", action="store_true", help="keep the configured execution, not --config=local")
     parser.add_argument("--log", help="also write the raw build logs here (prefix)")
     parser.add_argument("--from-logs", help="re-render from logs written by --log (prefix) instead of building")
     options = parser.parse_args()
     workspace = pathlib.Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY", ".")).resolve()
 
-    targets = bazel(workspace, "query", "--config=local", TARGETS).stdout.split()
+    configs = [] if options.remote else ["--config=local"]
+    query = bazel(workspace, "query", *configs, TARGETS)
+    targets = query.stdout.split()
+    if query.returncode != 0 or not targets:
+        print(query.stderr, file=sys.stderr)
+        return 1
+    probe_log, probe_code = "", 0
     if options.from_logs:
-        code = probe_code = 0
+        code = 0
         log = pathlib.Path(options.from_logs + ".profile.log").read_text(encoding="utf-8")
-        probe_log = pathlib.Path(options.from_logs + ".probe.log").read_text(encoding="utf-8")
+        probe_path = pathlib.Path(options.from_logs + ".probe.log")
+        probe_log = "" if options.no_probe or not probe_path.exists() else probe_path.read_text(encoding="utf-8")
     else:
         run = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S")
-        code, log = build(workspace, targets, run, [])
-        probe_code, probe_log = build(workspace, targets, run + "-probe", PROBE)
+        code, log = build(workspace, configs, targets, run, [])
+        if not options.no_probe:
+            probe_code, probe_log = build(workspace, configs, targets, run + "-probe", PROBE)
     if options.log and not options.from_logs:
         pathlib.Path(options.log + ".profile.log").write_text(log, encoding="utf-8")
         pathlib.Path(options.log + ".probe.log").write_text(probe_log, encoding="utf-8")
@@ -254,12 +343,19 @@ def main():
         "errorprone": (re.search(r"Error Prone (\S+)", rc_text) or [None, "?"])[1],
         "targets": len(targets),
         "failures": "; ".join(failures),
+        "probe": bool(probe_log),
     }
     findings = parse(log)
     probe = [item for item in parse(probe_log) if item["check"] == "NullAway"]
-    output = workspace / options.output
-    output.write_text(render(findings, probe, severities(workspace), meta), encoding="utf-8")
-    print("wrote %s: %d findings, %d NullAway probe findings" % (options.output, len(findings), len(probe)))
+    severity = severities(workspace)
+    if options.output:
+        (workspace / options.output).write_text(render(findings, probe, severity, meta), encoding="utf-8")
+        print("wrote %s: %d findings, %d NullAway probe findings" % (options.output, len(findings), len(probe)))
+    if options.sarif:
+        path = workspace / options.sarif
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(sarif(findings, severity, meta), indent=1) + "\n", encoding="utf-8")
+        print("wrote %s: %d results" % (options.sarif, len(findings)))
     return 1 if failures else 0
 
 
