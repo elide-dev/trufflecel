@@ -81,7 +81,7 @@ final class Re2Regex {
         for (long count = 0; (limit < 0 || count < limit) && matcher.find(); count++) {
           context.tick();
           context.charge(matcher.start() - end);
-          output.append(text, end, matcher.start());
+          output.append(text, /* start= */ end, /* end= */ matcher.start());
           for (int i = 0; i < replacement.length(); i++) {
             char c = replacement.charAt(i);
             if (c == '\\') {

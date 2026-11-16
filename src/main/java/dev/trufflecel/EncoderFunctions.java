@@ -32,10 +32,12 @@ final class EncoderFunctions {
             .dump(
                 data,
                 new StreamDataWriter() {
+                  @Override
                   public void write(String text) {
                     write(text, 0, text.length());
                   }
 
+                  @Override
                   public void write(String text, int offset, int length) {
                     ctx.charge(length);
                     yamlOutput.append(text, offset, offset + length);
@@ -300,15 +302,18 @@ final class EncoderFunctions {
       this.context = context;
     }
 
+    @Override
     public void write(char[] chars, int offset, int count) throws IOException {
       context.charge(count);
       target.write(chars, offset, count);
     }
 
+    @Override
     public void flush() throws IOException {
       target.flush();
     }
 
+    @Override
     public void close() throws IOException {
       target.close();
     }

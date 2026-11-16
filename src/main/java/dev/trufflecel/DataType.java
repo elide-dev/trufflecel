@@ -50,14 +50,17 @@ public final class DataType implements ObjectType {
     return element != null && unsigned(element) ? CelType.UINT : CelType.DYN;
   }
 
+  @Override
   public String name() {
     return name;
   }
 
+  @Override
   public Map<String, CelType> fields() {
     return fields;
   }
 
+  @Override
   public boolean accepts(Object value) {
     return value instanceof AbstractRow row && row.schema() == schema;
   }
@@ -78,6 +81,7 @@ public final class DataType implements ObjectType {
     return index;
   }
 
+  @Override
   public Object get(Object value, String field) {
     Object result = DataLibrary.factory().getUncached().read(value, index(field));
     if (result == Missing.INSTANCE) throw Values.error(CelException.Code.NO_SUCH_KEY, field);
@@ -103,10 +107,12 @@ public final class DataType implements ObjectType {
     return List.copyOf(list);
   }
 
+  @Override
   public boolean has(Object value, String field) {
     return DataLibrary.factory().getUncached().isPresent(value, index(field));
   }
 
+  @Override
   public Object construct(Map<String, Object> values) {
     for (String field : values.keySet()) index(field);
     Object[] row = new Object[schema.size()];

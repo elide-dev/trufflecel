@@ -55,6 +55,7 @@ class WriteNode extends CelNode {
   }
 
   @Override
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   public Object getNodeObject() {
     return GuestValue.wrap(Map.of(StandardTags.WriteVariableTag.NAME, name));
   }

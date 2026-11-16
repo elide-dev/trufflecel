@@ -38,10 +38,12 @@ final class ConfigurationData {
         .dump(
             data,
             new StreamDataWriter() {
+              @Override
               public void write(String text) {
                 write(text, 0, text.length());
               }
 
+              @Override
               public void write(String text, int offset, int length) {
                 context.charge(length);
                 output.append(text, offset, offset + length);

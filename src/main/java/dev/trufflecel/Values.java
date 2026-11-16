@@ -133,18 +133,22 @@ final class Values {
     @Override
     public Set<Entry<Object, Object>> entrySet() {
       return new AbstractSet<>() {
+        @Override
         public int size() {
           return length;
         }
 
+        @Override
         public Iterator<Entry<Object, Object>> iterator() {
           return new Iterator<>() {
             private int cursor;
 
+            @Override
             public boolean hasNext() {
               return cursor < length;
             }
 
+            @Override
             public Entry<Object, Object> next() {
               if (!hasNext()) throw new NoSuchElementException();
               int position = cursor++ * 2;
@@ -231,6 +235,7 @@ final class Values {
     private Object[] values = EMPTY;
     private int length;
 
+    @Override
     public boolean add(Object value) {
       if (length == values.length) grow();
       values[length++] = value;
@@ -242,10 +247,12 @@ final class Values {
       values = Arrays.copyOf(values, values.length == 0 ? 8 : Math.multiplyExact(values.length, 2));
     }
 
+    @Override
     public Object get(int index) {
       return values[Objects.checkIndex(index, length)];
     }
 
+    @Override
     public int size() {
       return length;
     }
