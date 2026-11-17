@@ -149,6 +149,130 @@ public final class CseTest {
   }
 
   @Test
+  public void restrictedLibraryPolicyExportsWithoutCseAndRoundTrips() {
+    // Reproduces 2b55594: commonSubexpressions(true) combined with a restricted LibraryPolicy
+    // emits a CheckedExpr the same environment cannot re-import because cel.block/cel.index were
+    // injected after the original gate-check. The optimizer now falls back, so the export omits
+    // synthetic blocks and the same restricted environment consumes its own export.
+    String source = "(a + b + c) + (a + b + c) * 2";
+    var bindings = Map.of("a", 1L, "b", 2L, "c", 3L);
+    var restricted =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .libraries(Map.of())
+            .commonSubexpressions(true)
+            .build();
+    var parsed = CanonicalAst.parse(restricted, source);
+    var checked = CanonicalAst.check(restricted, parsed);
+    // CSE falls back: no cel.block is emitted into the restricted export.
+    assertFalse(checked.toString(), checked.toString().contains("cel.block"));
+    assertFalse(checked.toString().contains("cel.index"));
+    assertEquals(18L, CanonicalAst.program(restricted, checked).evaluate(bindings));
+    // The same restricted environment (without CSE) round-trips unchanged.
+    var plain =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .libraries(Map.of())
+            .commonSubexpressions(false)
+            .build();
+    var plainChecked = CanonicalAst.check(plain, CanonicalAst.parse(plain, source));
+    assertFalse(plainChecked.toString().contains("cel.block"));
+    assertEquals(18L, CanonicalAst.program(plain, plainChecked).evaluate(bindings));
+    // In-process compile under restricted policy + CSE still evaluates (no UNDECLARED thrown).
+    assertEquals(18L, restricted.compile(source).evaluate(bindings));
+  }
+
+  @Test
+  public void restrictedFunctionAllowListExportsWithoutCseAndRoundTrips() {
+    String source = "(a + b + c) + (a + b + c) * 2";
+    var bindings = Map.of("a", 1L, "b", 2L, "c", 3L);
+    // Minimal allow-list covering the source operators but neither cel.block nor cel.index.
+    var restricted =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .allowedFunctions(Set.of("+", "*"))
+            .commonSubexpressions(true)
+            .build();
+    var checked = CanonicalAst.check(restricted, CanonicalAst.parse(restricted, source));
+    assertFalse(checked.toString(), checked.toString().contains("cel.block"));
+    assertFalse(checked.toString(), checked.toString().contains("cel.index"));
+    assertEquals(18L, CanonicalAst.program(restricted, checked).evaluate(bindings));
+    // Allowing cel.block but not cel.index also forces the fallback (CSE emits both).
+    var halfAllowed =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .allowedFunctions(Set.of("+", "*", "cel.block"))
+            .commonSubexpressions(true)
+            .build();
+    var halfChecked = CanonicalAst.check(halfAllowed, CanonicalAst.parse(halfAllowed, source));
+    assertFalse(halfChecked.toString(), halfChecked.toString().contains("cel.block"));
+    assertFalse(halfChecked.toString(), halfChecked.toString().contains("cel.index"));
+    assertEquals(18L, CanonicalAst.program(halfAllowed, halfChecked).evaluate(bindings));
+  }
+
+  @Test
+  public void bindingsLibraryAndExplicitAllowListExportCseAndRoundTrip() {
+    String source = "(a + b + c) + (a + b + c) * 2";
+    var bindings = Map.of("a", 1L, "b", 2L, "c", 3L);
+    // libraries(Map.of("bindings", 0)) lets cel.block/cel.index through: CSE applies both ways.
+    var bindingsEnv =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .libraries(Map.of("bindings", 0))
+            .commonSubexpressions(true)
+            .build();
+    var bindingsChecked = CanonicalAst.check(bindingsEnv, CanonicalAst.parse(bindingsEnv, source));
+    assertTrue(bindingsChecked.toString(), bindingsChecked.toString().contains("cel.block"));
+    assertTrue(bindingsChecked.toString().contains("cel.index"));
+    assertEquals(18L, CanonicalAst.program(bindingsEnv, bindingsChecked).evaluate(bindings));
+    // An explicit allow-list with both cel.block and cel.index, plus the default latest library
+    // set (which already provides bindings), also permits CSE round-trip.
+    var allowEnv =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .variable("b", CelType.INT)
+            .variable("c", CelType.INT)
+            .allowedFunctions(Set.of("+", "*", "cel.block", "cel.index"))
+            .commonSubexpressions(true)
+            .build();
+    var allowChecked = CanonicalAst.check(allowEnv, CanonicalAst.parse(allowEnv, source));
+    assertTrue(allowChecked.toString(), allowChecked.toString().contains("cel.block"));
+    assertTrue(allowChecked.toString().contains("cel.index"));
+    assertEquals(18L, CanonicalAst.program(allowEnv, allowChecked).evaluate(bindings));
+  }
+
+  @Test
+  public void cseFallbackDoesNotBypassUserWrittenBlockGate() {
+    // A user-written cel.block under a restricted policy is rejected by the checker before
+    // CSE synthesis runs; the fallback must not make pre-existing source validate.
+    var restricted =
+        Cel.newBuilder()
+            .variable("a", CelType.INT)
+            .libraries(Map.of())
+            .commonSubexpressions(true)
+            .build();
+    var parsed = CanonicalAst.parse(Cel.newBuilder().build(), "cel.block([a + 1], cel.index(0))");
+    CelException failure =
+        assertThrows(CelException.class, () -> CanonicalAst.check(restricted, parsed));
+    assertEquals(CelException.Code.UNDECLARED, failure.code());
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(
+                CelException.class, () -> restricted.compile("cel.block([a + 1], cel.index(0))"))
+            .code());
+  }
+
+  @Test
   public void sourceInstrumentationAndConcurrentReuseRemainIndependent() throws Exception {
     Environment environment = environment(true);
     String source = "(x + 1) * (x + 1)";

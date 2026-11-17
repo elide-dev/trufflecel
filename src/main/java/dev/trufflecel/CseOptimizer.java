@@ -45,9 +45,17 @@ final class CseOptimizer {
     if (!optimizer.changed) return input;
     try {
       environment.checkDepth(result);
+      // cel.block/cel.index are synthesised after the checker already gate-checked the source
+      // tree, so an environment whose LibraryPolicy forbids them must keep the original tree;
+      // otherwise the exported CheckedExpr would carry calls the same environment rejects.
+      environment.libraryPolicy.name("cel.block", result.offset);
+      environment.libraryPolicy.library("cel.block", CelType.DYN, result.offset);
+      environment.libraryPolicy.name("cel.index", result.offset);
+      environment.libraryPolicy.library("cel.index", CelType.DYN, result.offset);
       return result;
     } catch (CelException limit) {
-      // Optimizing a valid source must not introduce a depth or node-limit rejection.
+      // Optimizing a valid source must not introduce a depth, node-limit, or library-policy
+      // rejection.
       return input;
     }
   }
