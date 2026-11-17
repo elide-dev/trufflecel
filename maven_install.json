@@ -10,10 +10,10 @@
     "com.google.protobuf:protobuf-java": -226930769,
     "com.google.re2j:re2j": 2014474964,
     "com.h2database:h2": -1123940597,
-    "dev.elide:truffledata-core": -142166532,
-    "dev.elide:truffledata-jdbc": -2138730920,
-    "dev.elide:truffledata-protobuf": 1083433960,
-    "dev.elide:truffledata-protobuf-runtime": 1616955955,
+    "dev.elide:truffledata-core": 558898046,
+    "dev.elide:truffledata-jdbc": -1437666342,
+    "dev.elide:truffledata-protobuf": 1784498538,
+    "dev.elide:truffledata-protobuf-runtime": -1976946763,
     "io.grpc:grpc-netty-shaded": -1844670555,
     "io.grpc:grpc-protobuf": 253571854,
     "io.grpc:grpc-stub": 1508805937,
@@ -43,10 +43,10 @@
     "com.google.protobuf:protobuf-java-util": 204051468,
     "com.google.re2j:re2j": -461460138,
     "com.h2database:h2": -1852482952,
-    "dev.elide:truffledata-core": 1537007991,
-    "dev.elide:truffledata-jdbc": 1502721102,
-    "dev.elide:truffledata-protobuf": 325468869,
-    "dev.elide:truffledata-protobuf-runtime": -1473436947,
+    "dev.elide:truffledata-core": -911916490,
+    "dev.elide:truffledata-jdbc": 839663151,
+    "dev.elide:truffledata-protobuf": 922734328,
+    "dev.elide:truffledata-protobuf-runtime": -1229225951,
     "io.grpc:grpc-api": 171745444,
     "io.grpc:grpc-context": -376394919,
     "io.grpc:grpc-core": 1298872075,
@@ -165,27 +165,27 @@
     },
     "dev.elide:truffledata-core": {
       "shasums": {
-        "jar": "e59e250e85c80571457cfb95a735f0a60245995b9255033091ff4a14b9102980"
+        "jar": "0d38f26a6ef1808f00b33b90993d514855bfca5425bf4ba4ce314a98a89dba80"
       },
-      "version": "0.12.0"
+      "version": "0.14.0"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
-        "jar": "c4cb30e7985810586968f3e80231984a902c0b0bcd553deb0a4745abb64f99eb"
+        "jar": "100bc1224b8fcace15a1aaca128b8edb983854573c40b8c821c4f6ebf5f38394"
       },
-      "version": "0.12.0"
+      "version": "0.14.0"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
-        "jar": "16242d99b73393e361c5d79606c0ae8f91789416f74a02920a25187b1f0f34c4"
+        "jar": "c923020d924acc0574be8cdc57cb020e31cc4b5e049c45218f614bf28af189f5"
       },
-      "version": "0.12.0"
+      "version": "0.14.0"
     },
     "dev.elide:truffledata-protobuf-runtime": {
       "shasums": {
-        "jar": "408d84bf72e4cd2065a62d31e399db0a646e629f3e2ffea8adf1633e3ad49346"
+        "jar": "0008820c9dad53306546db90f40366cf1ffa80664ab9e71c4db7a6bc81816731"
       },
-      "version": "0.12.0"
+      "version": "0.14.0"
     },
     "io.grpc:grpc-api": {
       "shasums": {
