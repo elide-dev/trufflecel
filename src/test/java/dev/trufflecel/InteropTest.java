@@ -387,6 +387,17 @@ public class InteropTest {
         assertTrue(context.eval("cel", "bools[0]").asBoolean());
         assertFalse(context.eval("cel", "bools[1]").asBoolean());
 
+        bindings.putMember("shorts", new short[] {(short) 7, (short) 9});
+        assertTrue(context.eval("cel", "type(shorts) == list").asBoolean());
+        assertEquals(2, context.eval("cel", "size(shorts)").asInt());
+        assertEquals(7, context.eval("cel", "shorts[0]").asInt());
+        assertEquals(9, context.eval("cel", "shorts[1]").asInt());
+
+        bindings.putMember("floats", new float[] {1.5f, 2.5f});
+        assertEquals(2, context.eval("cel", "size(floats)").asInt());
+        assertEquals(1.5, context.eval("cel", "floats[0]").asDouble(), 0);
+        assertEquals(2.5, context.eval("cel", "floats[1]").asDouble(), 0);
+
         // Object[] of mixed scalars converts to a list.
         bindings.putMember("objs", new Object[] {1L, "x", true});
         assertEquals(3, context.eval("cel", "size(objs)").asInt());
@@ -445,12 +456,10 @@ public class InteropTest {
       if (allAccess) builder.allowHostAccess(HostAccess.ALL);
       try (Context context = builder.build()) {
         var bindings = context.getBindings("cel");
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> bindings.putMember("bd", new java.math.BigDecimal("1.5")));
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> bindings.putMember("ld", java.time.LocalDate.of(2020, 1, 1)));
+        var bigDecimal = new java.math.BigDecimal("1.5");
+        var localDate = java.time.LocalDate.of(2020, 1, 1);
+        assertThrows(IllegalArgumentException.class, () -> bindings.putMember("bd", bigDecimal));
+        assertThrows(IllegalArgumentException.class, () -> bindings.putMember("ld", localDate));
         // The rejected bindings were not stored.
         assertFalse(bindings.hasMember("bd"));
         assertFalse(bindings.hasMember("ld"));
@@ -489,6 +498,31 @@ public class InteropTest {
       assertTrue(context.eval("cel", "m.dur == duration(\"3s\")").asBoolean());
       assertEquals(1L, context.eval("cel", "m.i").asLong());
       assertEquals(1.5, context.eval("cel", "m.d").asDouble(), 0);
+    }
+  }
+
+  @Test
+  public void hostPrimitiveArraySizeLimits() {
+    // Primitive arrays that exceed the per-array size bound or the overall host data size bound are
+    // rejected loudly at putMember rather than silently accepted, under both default and
+    // unrestricted host access.
+    for (boolean allAccess : List.of(true, false)) {
+      var builder = Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false");
+      if (allAccess) builder.allowHostAccess(HostAccess.ALL);
+      try (Context context = builder.build()) {
+        var bindings = context.getBindings("cel");
+        var tooLong = new int[1_000_001];
+        assertThrows(IllegalArgumentException.class, () -> bindings.putMember("tooLong", tooLong));
+        assertFalse(bindings.hasMember("tooLong"));
+        // An array at the per-array limit still exceeds the remaining host data budget after the
+        // entry decrement, so it is also rejected.
+        var atLimit = new int[1_000_000];
+        assertThrows(IllegalArgumentException.class, () -> bindings.putMember("atLimit", atLimit));
+        assertFalse(bindings.hasMember("atLimit"));
+        // A subsequent valid binding still works after rejected ones.
+        bindings.putMember("ok", new int[] {1});
+        assertEquals(1, context.eval("cel", "ok[0]").asInt());
+      }
     }
   }
 }

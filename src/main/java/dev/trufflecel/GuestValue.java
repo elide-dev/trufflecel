@@ -144,8 +144,7 @@ final class GuestValue implements TruffleObject {
    * Boxes a primitive array into an immutable list of CEL scalar values, enforcing the size bound.
    */
   private static List<Object> primitiveList(
-      int length, java.util.function.IntFunction<Object> at, int[] remaining)
-      throws InteropException {
+      int length, java.util.function.IntFunction<Object> at, int[] remaining) {
     if (length > 1000000)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "host array size limit exceeded");
     if ((remaining[0] -= length) < 0)
