@@ -5,11 +5,9 @@ import static org.junit.Assert.*;
 
 import com.google.protobuf.*;
 import java.util.*;
-import org.jspecify.annotations.NullMarked;
 import org.junit.Test;
 
 /** Runtime container-qualified binding resolution for unchecked/parsed evaluation. */
-@NullMarked
 public final class ContainerResolutionTest {
   private static Program parsedProgram(String source, String container) {
     Environment environment = Cel.newBuilder().container(container).inferVariables(true).build();
