@@ -231,4 +231,43 @@ public class DeepPatternReproTest {
     assertTrue(partial.value() instanceof Unknown);
     assertFalse(partial.isComplete());
   }
+
+  /**
+   * Two deeper-than-the-hop patterns intersecting the same SELECT path merge their {@link Unknown}
+   * roots via {@link PartialState#unknownIntersect}, exercising the multi-pattern merge arm.
+   */
+  @Test
+  public void multipleDeepPatternsIntersectingSameHopMergeUnknowns() {
+    var activation =
+        PartialActivation.of(
+            Map.of(),
+            AttributePattern.of("data").qualify("secret").qualify("deep"),
+            AttributePattern.of("data").qualify("secret").qualify("deeper"));
+    var partial = Cel.compile("data.secret").partialEvaluate(activation);
+    assertNull("merged deep patterns should not produce a hard error", partial.error());
+    assertTrue(partial.value() instanceof Unknown);
+    assertFalse(partial.isComplete());
+    assertFalse(partial.unknownAttributes().isEmpty());
+  }
+
+  /**
+   * The intersect fallback is a no-op outside partial evaluation: a non-partial read of a missing
+   * map key still raises {@code NO_SUCH_KEY}. This exercises the {@code evaluation.partial == null}
+   * arm of {@link EvalContext#attributeIntersect} so the PR's new error-path call is covered. The
+   * {@code evaluate(Map, EvaluationOptions)} entry is used (not the bare {@code evaluate(Map)})
+   * because only the options-bearing path configures an {@link EvaluationState} with a non-null
+   * {@code evaluation} and a null {@code partial}.
+   */
+  @Test
+  public void nonPartialMissingKeyStillThrowsNoSuchKey() {
+    var env = Cel.newBuilder().variable("m", CelType.map(CelType.STRING, CelType.INT)).build();
+    var thrown =
+        assertThrows(
+            CelException.class,
+            () ->
+                env.compile("m.missing")
+                    .evaluate(
+                        Map.of("m", Map.of("other", 1L)), EvaluationOptions.newBuilder().build()));
+    assertEquals(CelException.Code.NO_SUCH_KEY, thrown.code());
+  }
 }
