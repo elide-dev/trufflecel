@@ -215,7 +215,15 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
         Object toUnwrap = value;
         try {
           Object hostObject = env.asHostObject(value);
-          if (hostObject instanceof byte[] b) toUnwrap = b;
+          // Unwrap known raw Java data containers from the polyglot host-object wrapper so
+          // GuestValue.unwrap can convert them by Java instanceof. This bypasses host-access-gated
+          // interop (getMembers/hasArrayElements expose nothing under Truffle's default,
+          // restrictive
+          // host access), keeping Map/List/array bindings working without allowHostAccess, and
+          // matching the byte[] precedent. Scalars and unknown host objects stay wrapped; unwrap
+          // converts them via structural interop messages (BigInteger, Instant, Duration) or
+          // rejects them loudly via the empty-members guard (BigDecimal, LocalDate, ...).
+          if (GuestValue.isHostDataContainer(hostObject)) toUnwrap = hostObject;
         } catch (ClassCastException e) {
           // Not a host object; unwrap the original value.
         }

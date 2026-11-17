@@ -272,6 +272,13 @@ public class InteropTest {
           bindings.putMember("ints", new int[] {255});
           assertFalse(context.eval("cel", "type(ints) == bytes").asBoolean());
           assertEquals(255, context.eval("cel", "ints[0]").asInt());
+        } else {
+          // Under default (restrictive) host access int[] previously silently degraded to an empty
+          // map; it must now bind as a list of ints under both access modes.
+          bindings.putMember("ints", new int[] {255});
+          assertFalse(context.eval("cel", "type(ints) == bytes").asBoolean());
+          assertTrue(context.eval("cel", "type(ints) == list").asBoolean());
+          assertEquals(255, context.eval("cel", "ints[0]").asInt());
         }
       }
     }
@@ -321,6 +328,167 @@ public class InteropTest {
       // Re-binding over an existing temporal binding still works.
       bindings.putMember("ts", java.time.Instant.parse("2024-06-15T12:00:00Z"));
       assertTrue(context.eval("cel", "ts == timestamp(\"2024-06-15T12:00:00Z\")").asBoolean());
+    }
+  }
+
+  @Test
+  public void hostContainersBindUnderDefaultAccess() {
+    // Under Truffle's default (restrictive) host access, raw Java Map/List/Set/array instances
+    // must convert to proper CEL map/list values when bound via bindings.putMember, rather than
+    // silently degrading to empty CEL maps. This must hold under both default and unrestricted
+    // host access (matching the byte[]/Instant/Duration precedent).
+    for (boolean allAccess : List.of(true, false)) {
+      var builder = Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false");
+      if (allAccess) builder.allowHostAccess(HostAccess.ALL);
+      try (Context context = builder.build()) {
+        var bindings = context.getBindings("cel");
+
+        // Plain Java Map converts to a CEL map with its entries intact.
+        var map = new LinkedHashMap<Object, Object>();
+        map.put("a", "b");
+        map.put("n", 42L);
+        bindings.putMember("m", map);
+        assertTrue(context.eval("cel", "type(m) == map").asBoolean());
+        assertEquals(2, context.eval("cel", "size(m)").asInt());
+        assertTrue(context.eval("cel", "'a' in m").asBoolean());
+        assertEquals("b", context.eval("cel", "m.a").asString());
+        assertEquals(42L, context.eval("cel", "m.n").asLong());
+
+        // Plain Java List converts to a CEL list with its elements intact.
+        var list = new ArrayList<Object>(List.of("a", "bb"));
+        bindings.putMember("lst", list);
+        assertTrue(context.eval("cel", "type(lst) == list").asBoolean());
+        assertEquals(2, context.eval("cel", "size(lst)").asInt());
+        assertEquals("a", context.eval("cel", "lst[0]").asString());
+        assertTrue(context.eval("cel", "'a' in lst").asBoolean());
+
+        // A Set is iterable and converts to a CEL list of its elements.
+        bindings.putMember("set", new HashSet<>(List.of("a")));
+        assertTrue(context.eval("cel", "type(set) == list").asBoolean());
+        assertEquals(1, context.eval("cel", "size(set)").asInt());
+        assertTrue(context.eval("cel", "'a' in set").asBoolean());
+
+        // Primitive arrays convert to typed lists (not bytes, not empty maps).
+        bindings.putMember("ints", new int[] {255, 1});
+        assertTrue(context.eval("cel", "type(ints) == list").asBoolean());
+        assertFalse(context.eval("cel", "type(ints) == bytes").asBoolean());
+        assertEquals(2, context.eval("cel", "size(ints)").asInt());
+        assertEquals(255, context.eval("cel", "ints[0]").asInt());
+        assertEquals(1, context.eval("cel", "ints[1]").asInt());
+
+        bindings.putMember("longs", new long[] {1L, 2L, 3L});
+        assertEquals(3, context.eval("cel", "size(longs)").asInt());
+        assertEquals(3L, context.eval("cel", "longs[2]").asLong());
+
+        bindings.putMember("doubles", new double[] {1.5, 2.5});
+        assertEquals(2.5, context.eval("cel", "doubles[1]").asDouble(), 0);
+
+        bindings.putMember("bools", new boolean[] {true, false});
+        assertTrue(context.eval("cel", "bools[0]").asBoolean());
+        assertFalse(context.eval("cel", "bools[1]").asBoolean());
+
+        // Object[] of mixed scalars converts to a list.
+        bindings.putMember("objs", new Object[] {1L, "x", true});
+        assertEquals(3, context.eval("cel", "size(objs)").asInt());
+        assertEquals(1L, context.eval("cel", "objs[0]").asLong());
+        assertEquals("x", context.eval("cel", "objs[1]").asString());
+        assertTrue(context.eval("cel", "objs[2]").asBoolean());
+
+        // Nested containers convert recursively.
+        var nested = new LinkedHashMap<Object, Object>();
+        nested.put("list", new ArrayList<Object>(List.of(1L, 2L)));
+        var inner = new LinkedHashMap<Object, Object>();
+        inner.put("k", "v");
+        nested.put("map", inner);
+        bindings.putMember("nx", nested);
+        assertEquals(2, context.eval("cel", "size(nx.list)").asInt());
+        assertEquals(2L, context.eval("cel", "nx.list[1]").asLong());
+        assertEquals("v", context.eval("cel", "nx.map.k").asString());
+
+        // Byte arrays remain bytes (precedent preserved).
+        bindings.putMember("ba", new byte[] {(byte) 255});
+        assertTrue(context.eval("cel", "type(ba) == bytes").asBoolean());
+        assertEquals(255, context.eval("cel", "ba").getArrayElement(0).asInt());
+        assertTrue(context.eval("cel", "ba == b'\\xff'").asBoolean());
+
+        // Empty Java containers convert to empty CEL containers of the right type.
+        bindings.putMember("emptyList", new ArrayList<Object>());
+        assertTrue(context.eval("cel", "type(emptyList) == list").asBoolean());
+        assertEquals(0, context.eval("cel", "size(emptyList)").asInt());
+        bindings.putMember("emptyMap", new LinkedHashMap<Object, Object>());
+        assertTrue(context.eval("cel", "type(emptyMap) == map").asBoolean());
+        assertEquals(0, context.eval("cel", "size(emptyMap)").asInt());
+
+        // A polyglot proxy with no keys still binds as an intentional empty CEL map.
+        bindings.putMember("proxy", ProxyObject.fromMap(Map.of()));
+        assertTrue(context.eval("cel", "type(proxy) == map").asBoolean());
+        assertEquals(0, context.eval("cel", "size(proxy)").asInt());
+
+        // Binding map values that are null produces CEL null, not a dropped entry.
+        var withNull = new LinkedHashMap<Object, Object>();
+        withNull.put("k", null);
+        bindings.putMember("withNull", withNull);
+        assertTrue(context.eval("cel", "'k' in withNull").asBoolean());
+        assertTrue(context.eval("cel", "withNull.k == null").asBoolean());
+        assertEquals(1, context.eval("cel", "size(withNull)").asInt());
+      }
+    }
+  }
+
+  @Test
+  public void hostUnsupportedTypesRejectedLoudly() {
+    // Types unwrap cannot represent (BigDecimal, LocalDate) must be rejected at putMember with a
+    // loud error rather than silently degrading to an empty CEL map, under both default and
+    // unrestricted host access.
+    for (boolean allAccess : List.of(true, false)) {
+      var builder = Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false");
+      if (allAccess) builder.allowHostAccess(HostAccess.ALL);
+      try (Context context = builder.build()) {
+        var bindings = context.getBindings("cel");
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> bindings.putMember("bd", new java.math.BigDecimal("1.5")));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> bindings.putMember("ld", java.time.LocalDate.of(2020, 1, 1)));
+        // The rejected bindings were not stored.
+        assertFalse(bindings.hasMember("bd"));
+        assertFalse(bindings.hasMember("ld"));
+        // A subsequent valid binding still works after a rejected one.
+        bindings.putMember("ok", 1);
+        assertEquals(2, context.eval("cel", "ok+1").asInt());
+      }
+    }
+  }
+
+  @Test
+  public void hostContainerConversionPreservesScalarTypes() {
+    // Scalars reached inside host containers must retain their CEL types (long/double/string/
+    // bool/bytes/instant/duration), exercised under default host access where the host-object
+    // wrapper is unwrapped to raw Java and converted by instanceof.
+    try (Context context =
+        Context.newBuilder("cel").option("engine.WarnInterpreterOnly", "false").build()) {
+      var bindings = context.getBindings("cel");
+      var map = new LinkedHashMap<Object, Object>();
+      map.put("i", 1);
+      map.put("l", 1L);
+      map.put("d", 1.5);
+      map.put("s", "hi");
+      map.put("b", true);
+      map.put("bytes", new byte[] {1});
+      map.put("ts", java.time.Instant.parse("2023-01-01T00:00:00Z"));
+      map.put("dur", java.time.Duration.ofSeconds(3));
+      bindings.putMember("m", map);
+      assertTrue(context.eval("cel", "type(m.i) == int").asBoolean());
+      assertTrue(context.eval("cel", "type(m.l) == int").asBoolean());
+      assertTrue(context.eval("cel", "type(m.d) == double").asBoolean());
+      assertTrue(context.eval("cel", "type(m.s) == string").asBoolean());
+      assertTrue(context.eval("cel", "type(m.b) == bool").asBoolean());
+      assertTrue(context.eval("cel", "type(m.bytes) == bytes").asBoolean());
+      assertTrue(context.eval("cel", "m.ts == timestamp(\"2023-01-01T00:00:00Z\")").asBoolean());
+      assertTrue(context.eval("cel", "m.dur == duration(\"3s\")").asBoolean());
+      assertEquals(1L, context.eval("cel", "m.i").asLong());
+      assertEquals(1.5, context.eval("cel", "m.d").asDouble(), 0);
     }
   }
 }
