@@ -321,11 +321,11 @@ final class ExtensionFunctions {
             throw new IllegalArgumentException("Sort key count differs from list size");
           return sortBy(new ArrayList<>((List<?>) a), new ArrayList<>((List<?>) args[1]), ctx);
         case "cel.@mapInsert":
-          var merged = HostCollections.<Object>map();
-          HostCollections.mergeEntries(merged, (Map<?, ?>) a);
-          HostCollections.mergeEntries(
-              merged, args.length == 2 ? (Map<?, ?>) args[1] : Map.of(args[1], args[2]));
-          return HostCollections.freezeMap(merged);
+          var merged = HostCollections.numericKeyMap();
+          merged.mergeEntries((Map<?, ?>) a, ctx);
+          merged.mergeEntries(
+              args.length == 2 ? (Map<?, ?>) args[1] : Map.of(args[1], args[2]), ctx);
+          return merged.freeze();
         case "sets.contains":
           return containsAll((List<?>) a, (List<?>) args[1], ctx);
         case "sets.equivalent":
