@@ -170,9 +170,10 @@ final class Checker {
           if (operand.name().equals("map")) result = parameter(operand, 1);
           else if (!operand.isDyn()) {
             ObjectType type = env.objectTypes.get(operand.name());
+            boolean selectable = type != null && !env.constructorOnlyTypes.contains(operand.name());
             require(
-                n, type != null && type.fields().containsKey(n.name), "undefined field: " + n.name);
-            if (type != null) result = type.fields().getOrDefault(n.name, CelType.DYN);
+                n, selectable && type.fields().containsKey(n.name), "undefined field: " + n.name);
+            if (selectable) result = type.fields().getOrDefault(n.name, CelType.DYN);
           }
         } else {
           CelType index = check(n.children[1], locals);

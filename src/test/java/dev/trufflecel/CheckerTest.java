@@ -84,6 +84,11 @@ public class CheckerTest {
             "int(true)",
             "uint(true)",
             "double(true)",
+            "timestamp(1).seconds",
+            "duration('1s').nanos",
+            "google.protobuf.Timestamp{seconds: 1}.seconds",
+            "google.protobuf.FieldMask{paths: ['a','b']}.paths",
+            "has(google.protobuf.Duration{nanos: 5}.nanos)",
             "true + true",
             "1.getHours()",
             "duration('1s').getDate()")) {
@@ -251,5 +256,83 @@ public class CheckerTest {
           assertThrows(CelException.class, () -> env.compile(type + "{" + field + ": null}"))
               .code());
     assertThrows(CelException.class, () -> env.parse(type + "{single_int32: null}").evaluate());
+  }
+
+  @Test
+  public void constructorOnlyWellKnownTypesRejectFieldSelection() {
+    for (Environment env :
+        List.of(
+            Cel.newBuilder().build(),
+            Cel.newBuilder().validation(Environment.Validation.STRICT).build())) {
+      for (String expr :
+          List.of(
+              "timestamp(1).seconds",
+              "timestamp(1).nanos",
+              "duration('1s').seconds",
+              "duration('1s').nanos",
+              "google.protobuf.Timestamp{seconds: 1}.seconds",
+              "google.protobuf.Timestamp{seconds: 1}.nanos",
+              "google.protobuf.Duration{seconds: 1}.seconds",
+              "google.protobuf.Duration{nanos: 5}.nanos",
+              "google.protobuf.FieldMask{paths: ['a','b']}.paths",
+              "has(google.protobuf.Timestamp{seconds: 1}.seconds)",
+              "has(google.protobuf.Duration{nanos: 5}.nanos)",
+              "has(google.protobuf.FieldMask{paths: ['a']}.paths)")) {
+        assertEquals(
+            expr,
+            CelException.Code.TYPE,
+            assertThrows(CelException.class, () -> env.compile(expr)).code());
+      }
+    }
+    var env = Cel.newBuilder().build();
+    assertEquals(
+        java.time.Instant.ofEpochSecond(1),
+        env.compile("google.protobuf.Timestamp{seconds: 1}").evaluate());
+    assertEquals(
+        java.time.Duration.ofSeconds(1),
+        env.compile("google.protobuf.Duration{seconds: 1}").evaluate());
+    assertEquals("a,b", env.compile("google.protobuf.FieldMask{paths: ['a','b']}").evaluate());
+    assertEquals(1L, env.compile("timestamp(1).getSeconds()").evaluate());
+    assertEquals(1L, env.compile("duration('1s').getSeconds()").evaluate());
+    assertEquals(2L, env.compile("{'a': 1, 'b': 2}.b").evaluate());
+    assertEquals(1L, env.compile("[1, 2][0]").evaluate());
+    for (String expr :
+        List.of(
+            "timestamp(1).seconds",
+            "duration('1s').nanos",
+            "google.protobuf.Timestamp{seconds: 1}.seconds",
+            "google.protobuf.FieldMask{paths: ['a','b']}.paths",
+            "has(google.protobuf.Duration{nanos: 5}.nanos)")) {
+      assertThrows(expr, CelException.class, () -> env.parse(expr).evaluate());
+    }
+  }
+
+  @Test
+  public void descriptorMappedWellKnownTypesRejectFieldSelection() {
+    var builder = Cel.newBuilder().container("cel.expr.conformance");
+    TestObjects.register(builder);
+    String type = "cel.expr.conformance.proto3.TestAllTypes";
+    builder.variable("r", CelType.of(type));
+    var env = builder.build();
+    for (String expr :
+        List.of(
+            type + "{single_timestamp: timestamp(0)}.single_timestamp.seconds",
+            type + "{single_timestamp: timestamp(0)}.single_timestamp.nanos",
+            type + "{single_duration: duration('1s')}.single_duration.seconds",
+            type + "{single_duration: duration('1s')}.single_duration.nanos",
+            "r.single_timestamp.seconds",
+            "r.single_duration.nanos",
+            "has(r.single_timestamp.seconds)",
+            "has(r.single_duration.nanos)")) {
+      assertEquals(
+          expr,
+          CelException.Code.TYPE,
+          assertThrows(CelException.class, () -> env.compile(expr)).code());
+    }
+    env.compile(type + "{single_timestamp: timestamp(0)}");
+    env.compile(type + "{single_duration: duration('1s')}");
+    assertEquals(
+        CelType.TIMESTAMP,
+        env.compile(type + "{single_timestamp: timestamp(0)}.single_timestamp").resultType());
   }
 }

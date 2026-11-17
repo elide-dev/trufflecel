@@ -235,6 +235,40 @@ public class BoundaryTest {
   }
 
   @Test
+  public void constructorOnlyWellKnownTypesRejectFieldSelectionAtCheckTime() {
+    for (Environment env :
+        List.of(
+            Cel.newBuilder().build(),
+            Cel.newBuilder().validation(Environment.Validation.STRICT).build())) {
+      for (String expr :
+          List.of(
+              "timestamp(1).seconds",
+              "duration('1s').nanos",
+              "google.protobuf.Timestamp{seconds: 1}.seconds",
+              "google.protobuf.Duration{nanos: 5}.nanos",
+              "google.protobuf.FieldMask{paths: ['a','b']}.paths",
+              "has(google.protobuf.Duration{nanos: 5}.nanos)",
+              "has(google.protobuf.FieldMask{paths: ['a']}.paths)")) {
+        assertEquals(
+            expr,
+            CelException.Code.TYPE,
+            assertThrows(CelException.class, () -> env.compile(expr)).code());
+      }
+    }
+    var deferred = Cel.newBuilder().build();
+    assertEquals(1L, deferred.compile("timestamp(1).getSeconds()").evaluate());
+    assertEquals(1L, deferred.compile("duration('1s').getSeconds()").evaluate());
+    assertEquals(
+        java.time.Instant.ofEpochSecond(1),
+        deferred.compile("google.protobuf.Timestamp{seconds: 1}").evaluate());
+    assertEquals("a,b", deferred.compile("google.protobuf.FieldMask{paths: ['a','b']}").evaluate());
+    assertThrows(CelException.class, () -> deferred.parse("timestamp(1).seconds").evaluate());
+    assertThrows(
+        CelException.class,
+        () -> deferred.parse("google.protobuf.Timestamp{seconds: 1}.seconds").evaluate());
+  }
+
+  @Test
   public void runtimeFallbacksRejectMismatchedOperands() {
     for (Object[] arguments :
         List.of(
