@@ -48,25 +48,20 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       // hash identically too, regardless of which producing adapter registered extensions.
       // The empty registry sees every extension as an opaque unknown field, so its parse
       // result is the same regardless of which sibling's registry governs the comparison.
-      try {
-        return DynamicMessage.parseFrom(
-                type.descriptor, toBytes().toByteArray(), ExtensionRegistry.getEmptyRegistry())
-            .hashCode();
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalStateException("Invalid native protobuf row", e);
-      }
+      return parseUnder(this, ExtensionRegistry.getEmptyRegistry()).hashCode();
     }
 
     /** Explicit host export. Binary ingestion and CEL field access use the native row directly. */
     public Message message() {
-      try {
-        return DynamicMessage.parseFrom(type.descriptor, toBytes().toByteArray(), type.registry);
-      } catch (InvalidProtocolBufferException e) {
-        throw new IllegalStateException("Invalid native protobuf row", e);
-      }
+      return parseUnder(this, type.registry);
     }
 
-    /** Parse {@code value}'s wire bytes under {@code registry}, governed by one adapter. */
+    /**
+     * Parse {@code value}'s wire bytes under {@code registry}, governed by one adapter. The catch
+     * only fires on a corrupt native row, which host snapshotting cannot produce, so the stack walk
+     * is diagnostic-only and never runs on a hot path.
+     */
+    @SuppressWarnings("TruffleStackfulException")
     private static Message parseUnder(Value value, ExtensionRegistry registry) {
       try {
         return DynamicMessage.parseFrom(
