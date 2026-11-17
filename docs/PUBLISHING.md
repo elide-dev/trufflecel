@@ -12,7 +12,7 @@ upload convention. It produces four thin Maven artifacts under `dev.elide`:
 
 The protobuf and JSON adapters depend on the same version of `trufflecel-core`.
 The processor has no runtime dependencies; its generated adapters compile against matching core. Java 25 is
-required. Publications built from the current source tree pin TruffleData `0.12.0` and Elide GraalVM `25.5.5-elide.28`,
+required. Publications built from the current source tree pin TruffleData `0.14.0` and Elide GraalVM `25.5.5-elide.28`,
 matching `maven_install.json`. JARs contain owned classes only; test libraries, JDBC
 drivers, GraalVM and other runtime dependencies are not bundled.
 
@@ -113,9 +113,9 @@ therefore cannot find the last release by tag, so `release-please-config.json` p
 top-level `last-release-sha` to the rewritten 0.12.0 release commit (identical tree). Advance it, or
 remove it once a release created after the rewrite exists, rather than moving release tags.
 
-Releases starting at 0.12.0 require TruffleData 0.12.0; see
-[the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). TruffleData 0.12.0
-was built with Myna 0.18.0. TruffleCEL has no direct Myna dependency and does not
+Releases starting at 0.13.0 require TruffleData 0.14.0; see
+[the dependency gate](CI.md#truffledata-gate-for-the-0100-wave). TruffleData 0.14.0
+was built with Myna 0.19.0. TruffleCEL has no direct Myna dependency and does not
 ship the optional Myna cells artifacts. Staging a development build does not by
 itself qualify a new release.
 The staging script resolves Bazel's physical configuration output directory rather
