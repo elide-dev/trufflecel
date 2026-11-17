@@ -4,10 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import java.util.List;
-import org.jspecify.annotations.NullUnmarked;
 import org.junit.Test;
 
-@NullUnmarked
 public class HostDivideByZeroReproTest {
 
   private static CelException.Code singleOverload(String source) {
