@@ -6,10 +6,14 @@ import dev.trufflecel.processor.PojoProcessor;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
+import java.util.regex.Pattern;
 import javax.tools.*;
 import org.junit.Test;
 
 public final class PojoProcessorTest {
+  private static final Pattern DUPLICATE_CEL_OBJECT_TYPE_NAME =
+      Pattern.compile("duplicate CEL object type name: example\\.X");
+
   private record Compilation(boolean success, String diagnostics, Map<String, String> generated) {}
 
   private static Compilation compile(boolean core, String... sources) throws Exception {
@@ -286,7 +290,7 @@ public final class PojoProcessorTest {
                 + "@CelPojo(\"example.X\") class R {}");
     assertFalse(triple.diagnostics, triple.success);
     long reported =
-        java.util.regex.Pattern.compile("duplicate CEL object type name: example\\.X")
+        DUPLICATE_CEL_OBJECT_TYPE_NAME
             .matcher(triple.diagnostics)
             .results()
             .count();
