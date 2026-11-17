@@ -336,4 +336,53 @@ public class DataIntegrationTest {
     assertEquals(new UInt(0), longRead.get(0));
     assertEquals(new UInt(9L), longRead.get(1));
   }
+
+  @Test
+  public void unsignedArrayBareJavaNullElement() {
+    // A host binding raw Java data (e.g. a JDBC-style batch) may pass a mutable
+    // List containing a bare Java null for an unsigned-element ARRAY column.
+    // That null must be normalized to the same handling as CelNull.INSTANCE
+    // (DataNull in the native row) so DataArray never sees a Java null and no
+    // raw NullPointerException escapes past the ContractViolation -> CelException
+    // conversion in construct.
+
+    // Nullable unsigned element: a bare Java null threads through to DataNull
+    // and reads back as CelNull.INSTANCE, matching CelNull.INSTANCE input.
+    Schema nullableSchema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, true, false))));
+    var nullableType = new DataType("Native", nullableSchema);
+    var nullableList = new ArrayList<Object>();
+    nullableList.add(null);
+    nullableList.add(CelNull.INSTANCE);
+    nullableList.add(UInt.parse("7"));
+    Object nullRow = nullableType.construct(Map.of("vals", nullableList));
+    var nullRead = (List<?>) nullableType.get(nullRow, "vals");
+    assertEquals(CelNull.INSTANCE, nullRead.get(0));
+    assertEquals(CelNull.INSTANCE, nullRead.get(1));
+    assertEquals(new UInt(7), nullRead.get(2));
+
+    // Non-nullable unsigned element: a bare Java null must surface as a clean
+    // CelException (INVALID_ARGUMENT via ContractViolation), not a raw NPE.
+    Schema requiredSchema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, false, false))));
+    var requiredType = new DataType("Native", requiredSchema);
+    var requiredList = new ArrayList<Object>();
+    requiredList.add(null);
+    assertEquals(
+        CelException.Code.INVALID_ARGUMENT,
+        assertThrows(CelException.class, () -> requiredType.construct(Map.of("vals", requiredList)))
+            .code());
+  }
 }
