@@ -8,7 +8,7 @@ import org.junit.Test;
 
 /**
  * Regression coverage for source locations of CEL expressions embedded inside quoted YAML scalars.
- * Reported bug: {@link ConfigurationData#policyValue} paired the YAML-decoded quoted scalar with a
+ * Reported bug: {@link ConfigurationData} paired the YAML-decoded quoted scalar with a
  * raw document base offset, so diagnostics on tokens past the first YAML line fold drifted left by
  * the folded-region size; the caret landed on indentation instead of the defect.
  */
@@ -19,8 +19,11 @@ public class QuotedFoldReproTest {
     assertTrue("token '" + token + "' must occur in the policy", offset >= 0);
     assertEquals(yaml.indexOf(token), error.offset());
     int lineStart = yaml.lastIndexOf('\n', offset - 1) + 1;
-    long line = 1 + yaml.substring(0, offset).chars().filter(c -> c == '\n').count();
-    assertEquals((int) line, error.line());
+    int line = 1;
+    for (int i = 0; i < offset; i++) {
+      if (yaml.charAt(i) == '\n') line++;
+    }
+    assertEquals(line, error.line());
     assertEquals(offset - lineStart + 1, error.column());
   }
 
@@ -117,10 +120,11 @@ public class QuotedFoldReproTest {
   @Test
   public void escapedDoubleQuotedScalarsStillParseAgainstTheDecodedValue() {
     var env = Cel.newBuilder().variable("x", CelType.BOOL).build();
-    // `tr\u0075e` decodes to `true`; the raw interior carries the backslash escape, which the
-    // CEL parser cannot tokenize outside string literals, so the decoded value must remain the
-    // parser source. Using a non-constant `x` keeps the first choice non-unconditional. The
-    // regression guard is that the policy still parses and evaluates; the raw interior would not.
+    // The YAML scalar spells `true` via a unicode escape; the raw interior carries the backslash
+    // escape, which the CEL parser cannot tokenize outside string literals, so the decoded value
+    // must remain the parser source. Using a non-constant `x` keeps the first choice
+    // non-unconditional. The regression guard is that the policy still parses and evaluates; the
+    // raw interior would not.
     String clean =
         """
         name: escape-clean
