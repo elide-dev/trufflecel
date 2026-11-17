@@ -463,6 +463,70 @@ public final class ValidationTest {
   }
 
   @Test
+  public void listConcatenationChargesProportionallyToResultLength() {
+    // The fuzz-harness configuration: untrusted CEL text with a tight evaluation budget.
+    Environment env =
+        Cel.newBuilder()
+            .inferVariables(true)
+            .maxSourceLength(4096)
+            .maxAstNodes(2048)
+            .maxDepth(64)
+            .evaluationBudget(10000)
+            .build();
+    // A nested cel.bind chain that doubles a 1000-element list at each level. The source
+    // is ~2.5 KB (well under maxSourceLength), the AST is ~1300 nodes (well under
+    // maxAstNodes), and the depth is ~20 (well under maxDepth). Without a result-size cap,
+    // the flat one-tick-per-node charge lets the chain allocate exponentially while
+    // consuming only ~1300 ticks — OOMing the JVM at both plan time and evaluation time —
+    // the same gap 86fb114 closed for String/Bytes. List `+` allocates a result proportional
+    // to the sum of operand sizes via ArrayList(x) + addAll + List.copyOf; the cap mirrors
+    // the 1,000,000-element ceiling on Values.listRange/mapRange and lists.range, and fires
+    // before the allocation rather than as an OutOfMemoryError that escapes the optimizer's
+    // catch-and-skip-fold.
+    String seed = "[0" + ", 0".repeat(999) + "]";
+    var sb = new StringBuilder();
+    for (int i = 0; i < 10; i++) {
+      sb.append("cel.bind(b").append(i).append(", ");
+      if (i == 0) sb.append(seed);
+      else sb.append("b").append(i - 1).append(" + b").append(i - 1);
+      sb.append(", ");
+    }
+    sb.append("size(b9 + b9) > 0");
+    for (int i = 0; i < 10; i++) sb.append(")");
+    String doubling = sb.toString();
+    // The final concat b9 + b9 produces 1,000 * 2^10 = 1,024,000 elements, which crosses
+    // the 1,000,000-element cap, so RESOURCE_EXHAUSTED fires before the allocation.
+    // Compile-time: the fold attempt catches RESOURCE_EXHAUSTED and skips folding, so
+    // parse/prepare succeed without OOM. The expression is left to evaluation.
+    assertNotNull(env.parse(doubling));
+    assertNotNull(env.prepare(doubling));
+    // Evaluation-time: the cap fires before the exponential allocation, so evaluate throws
+    // RESOURCE_EXHAUSTED, not OutOfMemoryError.
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> env.parse(doubling).evaluate(Map.of())).code());
+    // The evaluation-time variant (free identifier prevents folding) also throws
+    // RESOURCE_EXHAUSTED, not OutOfMemoryError.
+    String evalDoubling = doubling + " && input";
+    Program evalProgram = env.parse(evalDoubling);
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> evalProgram.evaluate(Map.of("input", true))).code());
+    // Normal list concatenation still works (no regression).
+    assertEquals(List.of(1L, 2L, 3L, 4L), Cel.compile("[1, 2] + [3, 4]").evaluate());
+    // A single concatenation that crosses the 1,000,000-element cap throws
+    // RESOURCE_EXHAUSTED before allocating the result, regardless of budget.
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(
+                CelException.class,
+                () -> Cel.compile("lists.range(500000) + lists.range(500000)").evaluate())
+            .code());
+    // A small concatenation well under the cap still succeeds.
+    assertEquals(List.of(1L, 2L, 3L, 4L), Cel.compile("[1, 2] + [3, 4]").evaluate());
+  }
+
+  @Test
   public void constantPatternsArePrecompiledAndDynamicPatternsAreCached() throws Exception {
     Environment env = standard(Environment.Validation.DEFERRED);
     Program program = env.compile("s.matches('^a+$')");
