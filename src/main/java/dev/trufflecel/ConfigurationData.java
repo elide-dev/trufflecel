@@ -81,7 +81,20 @@ final class ConfigurationData {
         text = yaml.substring(start, end);
       } else if (style == org.snakeyaml.engine.v2.common.ScalarStyle.SINGLE_QUOTED
           || style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED) {
+        // Re-slice the raw interior so the parser's baseOffset stays a valid document offset for
+        // YAML line folding, which collapses each newline plus indentation into a single space in
+        // the decoded value. Folding only differs in whitespace, which the CEL parser skips, so
+        // the raw slice tokenizes identically while keeping document-accurate offsets. Escapes
+        // change token text: when the raw slice contains one, keep the decoded value, whose offset
+        // drift is documented in docs/TOOLING.md, so escaping-rich policies keep parsing.
         start++;
+        end--;
+        String raw = yaml.substring(start, end);
+        boolean escape =
+            style == org.snakeyaml.engine.v2.common.ScalarStyle.DOUBLE_QUOTED
+                ? raw.indexOf('\\') >= 0
+                : raw.indexOf("''") >= 0;
+        if (!escape) text = raw;
       } else text = yaml.substring(start, end);
       return new Expression(text, start);
     }
