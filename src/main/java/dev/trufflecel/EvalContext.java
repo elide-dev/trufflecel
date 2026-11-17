@@ -261,7 +261,6 @@ sealed class EvalContext {
     return readStored(((Scoped) this).scopes[slot * 2 + 1]);
   }
 
-  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   private Object rootBinding(String name, boolean absolute) {
     Attribute path = evaluation == null || evaluation.partial == null ? null : Attribute.of(name);
     Object override = attributeRead(path, false);
