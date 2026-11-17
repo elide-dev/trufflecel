@@ -24,7 +24,7 @@ abstract class CelNode extends Node implements InstrumentableNode {
   public SourceSection getSourceSection() {
     var root = getRootNode();
     SourceSection section = root == null ? null : root.getSourceSection();
-    return section == null
+    return sourceStart < 0 || section == null
         ? null
         : section.getSource().createSection(sourceStart, sourceEnd - sourceStart);
   }

@@ -1,6 +1,7 @@
 package dev.trufflecel;
 
 import static org.junit.Assert.*;
+import com.google.protobuf.Message;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.*;
 import com.oracle.truffle.api.interop.*;
@@ -323,6 +324,66 @@ public class InstrumentationTest {
       // A lazy initializer is absent on entry to its first read, then visible on return.
       assertTrue(events.returnedValues.contains(5L));
       assertTrue(events.localValues.contains(2L));
+    }
+  }
+
+  // Regression: prepared templates lowered from a canonical AST or a policy carry synthetic
+  // WriteNodes with the -1 "no location" sentinel. Instrumenting a Source-attached template via
+  // PreparedProgram.instantiate(Source) must not throw IllegalArgumentException("charIndex < 0")
+  // from CelNode.getSourceSection during the probe traversal that runs on first execution.
+
+  @Test
+  public void instrumentedCanonicalTemplateSkipsSyntheticBindingsGracefully() {
+    // Ast.prepare lowers every canonical binding with the -1 sentinel (code-point offsets cannot
+    // convert to UTF-16); instrumenting such a template must degrade gracefully, not crash.
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        Environment env = Cel.newBuilder().build();
+        Message parsed = CanonicalAst.parse(env, "[1, 2, 3].map(i, i * 2)");
+        var prepared = CanonicalAst.ast(env, parsed).prepare(env);
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", "", "canonical.cel").build();
+        var program = prepared.instantiate(source);
+        assertEquals(List.of(2L, 4L, 6L), program.evaluate());
+        // Synthetic (-1,-1) bindings report no section and are skipped, not crashed.
+        assertFalse(events.tags.contains(StandardTags.WriteVariableTag.class));
+        assertEquals(0, events.failures);
+      } finally {
+        context.leave();
+      }
+    }
+  }
+
+  @Test
+  public void instrumentedPolicyTemplateSkipsSyntheticBindAndKeepsRealOffsetEvents() {
+    // PolicyCompiler.bind scaffolds a synthetic (-1,-1) WriteNode for $policy:result; the
+    // user-expression nodes carry real parser offsets and must keep emitting events.
+    Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
+    String yaml =
+        "name: repro\nrule:\n  match:\n    - condition: 'x > 1'\n"
+            + "      output: '[1, 2, 3].map(i, i * 2)'\n";
+    var prepared = PolicyCompiler.prepare(env, yaml);
+    try (Context context = Context.newBuilder("cel").build()) {
+      Events events =
+          context.getEngine().getInstruments().get("cel-test-events").lookup(Events.class);
+      context.initialize("cel");
+      context.enter();
+      try {
+        var source =
+            com.oracle.truffle.api.source.Source.newBuilder("cel", yaml, "policy.yaml").build();
+        var program = prepared.instantiate(source);
+        assertEquals(List.of(2L, 4L, 6L), program.evaluate(Map.of("x", 5L)));
+        assertEquals(OptionalValue.none(), program.evaluate(Map.of("x", 0L)));
+        // The synthetic bind is skipped; the user comprehension's real-offset writes are observed.
+        assertTrue(events.tags.contains(StandardTags.WriteVariableTag.class));
+        assertEquals(0, events.failures);
+      } finally {
+        context.leave();
+      }
     }
   }
 }
