@@ -336,4 +336,108 @@ public class DataIntegrationTest {
     assertEquals(new UInt(0), longRead.get(0));
     assertEquals(new UInt(9L), longRead.get(1));
   }
+
+  @Test
+  public void plainListConstructsConstraintlessArrayField() {
+    // A schema-driven list(dyn) ARRAY column with no element constraints is the most
+    // common shape; a plain java.util.List (the form CEL literals and host callers
+    // supply) must construct a row instead of failing in Batch.copyOf.
+    Schema schema =
+        Schema.of(Field.requiredLong("id"), new Field("arr", Field.Kind.ARRAY, false, false));
+    var type = new DataType("Native", schema);
+    assertEquals(CelType.list(CelType.DYN), type.fields().get("arr"));
+    Object row = type.construct(Map.of("id", 1L, "arr", List.of(1L, 2L)));
+    var read = (List<?>) type.get(row, "arr");
+    assertEquals(2, read.size());
+    assertEquals(1L, read.get(0));
+    assertEquals(2L, read.get(1));
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    assertTrue(env.compile("r.id == 1 && r.arr == [1, 2] && r.arr[0] == 1").test(Map.of("r", row)));
+  }
+
+  @Test
+  public void plainListConstructsSignedElementArrayField() {
+    // A signed-width element ARRAY column also lacks unsignedElement(f); the List
+    // must still be converted to the native DataArray form.
+    Schema schema =
+        Schema.of(
+            new Field(
+                "arr",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, true, false, false))));
+    var type = new DataType("Native", schema);
+    assertEquals(CelType.list(CelType.DYN), type.fields().get("arr"));
+    Object row = type.construct(Map.of("arr", List.of(-3L, 4L)));
+    var read = (List<?>) type.get(row, "arr");
+    assertEquals(-3L, read.get(0));
+    assertEquals(4L, read.get(1));
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    assertTrue(env.compile("r.arr == [-3, 4] && r.arr[0] == -3").test(Map.of("r", row)));
+  }
+
+  @Test
+  public void celLiteralConstructsConstraintlessArrayField() {
+    // End-to-end: the CEL evaluator builds Values.OwnedList for list literals and
+    // feeds it to DataType.construct; an unconstrained ARRAY column must round-trip.
+    Schema schema =
+        Schema.of(Field.requiredLong("id"), new Field("arr", Field.Kind.ARRAY, false, false));
+    var type = new DataType("Native", schema);
+    var env = Cel.newBuilder().objectType(type).variable("r", CelType.of("Native")).build();
+    var program = env.compile("Native{arr: [1, 2], id: 1}");
+    Object row = program.evaluate(Map.of());
+    assertTrue(type.accepts(row));
+    assertTrue(env.compile("r.id == 1 && r.arr == [1, 2] && r.arr[1] == 2").test(Map.of("r", row)));
+  }
+
+  @Test
+  public void plainListWithCelNullConstructsArrayField() {
+    // CelNull list elements thread through to native DataNull on the construct path
+    // for non-unsigned element ARRAY columns (nullable element) and read back as
+    // CEL null identity.
+    Schema schema =
+        Schema.of(
+            new Field(
+                "vals",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, true, true, false))));
+    var type = new DataType("Native", schema);
+    Object row = type.construct(Map.of("vals", List.of(5L, CelNull.INSTANCE)));
+    var read = (List<?>) type.get(row, "vals");
+    assertEquals(5L, read.get(0));
+    assertEquals(CelNull.INSTANCE, read.get(1));
+  }
+
+  @Test
+  public void dataArrayListStillConstructsArrayField() {
+    // A hand-built DataArray (the previously-required native form) must continue to
+    // flow through construct unchanged for both unsigned and non-unsigned elements.
+    Schema unsignedSchema =
+        Schema.of(
+            new Field(
+                "u",
+                Field.Kind.ARRAY,
+                false,
+                false,
+                Constraints.NONE.withElement(Field.integer("e", 64, false, false, false))));
+    var unsignedType = new DataType("Native", unsignedSchema);
+    Object unsignedRow =
+        unsignedType.construct(
+            Map.of(
+                "u", new DataArray(new Object[] {new ExactNumber(new BigDecimal("4294967296"))})));
+    assertEquals(new UInt(4294967296L), ((List<?>) unsignedType.get(unsignedRow, "u")).get(0));
+
+    Schema plainSchema =
+        Schema.of(Field.requiredLong("id"), new Field("arr", Field.Kind.ARRAY, false, false));
+    var plainType = new DataType("Native", plainSchema);
+    Object plainRow =
+        plainType.construct(
+            Map.of("id", 9L, "arr", new DataArray(new Object[] {1L, DataNull.INSTANCE})));
+    var read = (List<?>) plainType.get(plainRow, "arr");
+    assertEquals(1L, read.get(0));
+    assertEquals(CelNull.INSTANCE, read.get(1));
+  }
 }
