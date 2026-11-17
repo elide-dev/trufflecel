@@ -287,4 +287,80 @@ public final class PojoTest {
     // Values.equal falls back to host equals when only the left operand is a PojoType.Value.
     assertFalse(Values.equal(nanA, "x"));
   }
+
+  @Test
+  public void constructChargesEachPreOwnedSnapshotNodeOncePerConstructCall() {
+    var userType = PojoFixtures_UserCel.INSTANCE;
+    var pairType = PojoFixtures_PairUserCel.INSTANCE;
+
+    // Sanity: a pre-existing Value referenced from several slots of one construct
+    // call appears verbatim (same Java instance) under each slot.
+    Object small = userType.construct(Map.of("id", 1L));
+    Object pairSmall = pairType.construct(Map.of("a", small, "b", small));
+    assertSame(small, pairType.get(pairSmall, "a"));
+    assertSame(small, pairType.get(pairSmall, "b"));
+    assertSame(pairType.get(pairSmall, "a"), pairType.get(pairSmall, "b"));
+
+    // Construct a retained subgraph whose footprint is a single Long scalar instance
+    // (Integer literal 1 normalizes through scalar() to the JVM-cached Long.valueOf
+    // 1L), repeated 600,000 times as list entries. Keeping the same instance under
+    // every slot implies the 1,000,000 node budget must be charged against the
+    // shared scalar once, not 600,000 times.
+    Object bigShared =
+        userType.construct(Map.of("groups", Map.of("k", Collections.nCopies(600_000, 1))));
+
+    // Two references to the same big subgraph under one construct call. Prior to the
+    // fix, inspectOwned re-entered and re-charged the same shared scalar subgraph a
+    // second time (~600,000 fresh charge calls via scalar() under the same
+    // SnapshotContext on top of the ~600,000 already charged during the first
+    // walk), totalling ~1,200,000 charged nodes and exceeding the 1,000,000 node
+    // budget, so this construct raised RESOURCE_EXHAUSTED. After the fix the shared
+    // scalar is charged once per construct call (inspected.add identity memo), so the
+    // construct succeeds and the constructed Value retains the single shared Long.
+    Object pairSharedBig = pairType.construct(Map.of("a", bigShared, "b", bigShared));
+    assertSame(bigShared, pairType.get(pairSharedBig, "a"));
+    assertSame(bigShared, pairType.get(pairSharedBig, "b"));
+    assertSame(pairType.get(pairSharedBig, "a"), pairType.get(pairSharedBig, "b"));
+
+    // Regression: distinct pre-existing subgraphs are still charged separately.
+    // The per-construct memoization is identity-keyed, so two *distinct* subgraphs
+    // each holding 600,000 identity-distinct scalar Longs (Integer literal 1000 is
+    // outside the JVM's [-128, 127] cache, so scalar() allocates a fresh Long for
+    // each list slot) do not dedupe against each other. Either subgraph alone fits
+    // under the 1,000,000 node budget; combining two distinct references in one
+    // construct call must exceed it and raise RESOURCE_EXHAUSTED.
+    var hostA =
+        new PojoFixtures.User(
+            0, null, Map.of("k", Collections.nCopies(600_000, 1000)), null, null, null);
+    Object bigA = userType.snapshot(hostA, 100, 10_000_000);
+    var hostB =
+        new PojoFixtures.User(
+            0, null, Map.of("k", Collections.nCopies(600_000, 1000)), null, null, null);
+    Object bigB = userType.snapshot(hostB, 100, 10_000_000);
+    assertEquals(
+        CelException.Code.RESOURCE_EXHAUSTED,
+        assertThrows(CelException.class, () -> pairType.construct(Map.of("a", bigA, "b", bigB)))
+            .code());
+  }
+
+  @Test
+  public void celConstructorWithSharedBindingSucceedsOverLargeSharedSnapshot() {
+    var userType = PojoFixtures_UserCel.INSTANCE;
+    var pairType = PojoFixtures_PairUserCel.INSTANCE;
+    Object bigShared =
+        userType.construct(Map.of("groups", Map.of("k", Collections.nCopies(600_000, 1))));
+    var environment =
+        pairType
+            .register(userType.register(Cel.newBuilder()))
+            .variable("u", CelType.of(userType.name()))
+            .build();
+    // CEL constructor expression T{a: u, b: u} routes through PojoType.construct
+    // with the same pre-existing Value under both fields; before the fix this raised
+    // RESOURCE_EXHAUSTED at evaluation time.
+    Object result =
+        environment.compile("example.PairUser{a: u, b: u}").evaluate(Map.of("u", bigShared));
+    assertTrue(pairType.accepts(result));
+    assertSame(bigShared, pairType.get(result, "a"));
+    assertSame(bigShared, pairType.get(result, "b"));
+  }
 }
