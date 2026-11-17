@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.0](https://github.com/elide-dev/trufflecel/compare/v0.12.1...v0.13.0) (2026-11-17)
+
+
+### Bug Fixes
+
+* **ci:** create trufflecheck report directories ([04d0eb1](https://github.com/elide-dev/trufflecel/commit/04d0eb1bbf28c50a22690446c2dba17ec8d8bc51))
+* **ci:** keep same-line findings and never upload partial scans ([03c1bd8](https://github.com/elide-dev/trufflecel/commit/03c1bd838c12fa8bbdddac9959f63a5f02da0f41))
+
+
+### Build System
+
+* **deps:** adopt TruffleData 0.14.0 ([d273016](https://github.com/elide-dev/trufflecel/commit/d273016aece866d9fbebe3c4860f8fea170efc73))
+
 ## [0.12.1](https://github.com/elide-dev/trufflecel/compare/v0.12.0...v0.12.1) (2026-11-13)
 
 
