@@ -173,4 +173,76 @@ public class CostEstimatorTest {
       assertFalse(source, CostEstimator.estimate(dynamic, source).maximum().isPresent());
     }
   }
+
+  @Test
+  public void dynamicStringBytesConcatenationIsNotCertifiedAsFinite() {
+    // Runtime '+' charges x.length() + y.length() for String operands and x.size() + y.size()
+    // for Bytes operands (Functions.apply, commit 86fb114); without static length bounds the
+    // charge is unbounded, so an unfoldable concatenation must not be certified as a finite
+    // per-node tick. Constant-folded concatenations are excluded via node.fold in cost().
+    var env =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .variable("b", CelType.BYTES)
+            .variable("xs", CelType.list(CelType.STRING))
+            .build();
+    for (String source :
+        List.of(
+            "s + s",
+            "b + b",
+            "s + 'literal'",
+            "cel.bind(a, s, a + a)",
+            "dyn(s) + dyn(s)",
+            "xs.map(i, i + s)")) {
+      var estimate = CostEstimator.estimate(env, source, Map.of("xs", 4L));
+      assertFalse(source + ": " + estimate, estimate.maximum().isPresent());
+      assertFalse(source + ": " + estimate, estimate.unknowns().isEmpty());
+      assertTrue(
+          source + ": " + estimate,
+          estimate.unknowns().stream().anyMatch(reason -> reason.contains("concatenation")));
+    }
+  }
+
+  @Test
+  public void concatenationBoundsCoverActualChargedOperations() {
+    // The estimator contract (docs/TOOLING.md): maximum() is a conservative upper bound of
+    // actualCost(), or absent when the work cannot be bounded. String/bytes concatenation over
+    // dynamic operands grows with host-provided lengths, so a finite per-node estimate would be
+    // unsound; the sound estimate is an absent maximum. Numeric, list and constant-folded '+'
+    // remain a valid finite flat upper bound.
+    var env =
+        Cel.newBuilder()
+            .variable("s", CelType.STRING)
+            .variable("b", CelType.BYTES)
+            .variable("x", CelType.INT)
+            .variable("xs", CelType.list(CelType.INT))
+            .build();
+    var bindings =
+        Map.<String, Object>of(
+            "s",
+            "a".repeat(1000),
+            "b",
+            new Bytes(new byte[1000]),
+            "x",
+            3L,
+            "xs",
+            List.of(1, 2, 3, 4));
+    // Dynamic concat: absent maximum; runtime charge grows with operand length.
+    var estimate = CostEstimator.estimate(env, "cel.bind(a, s, a + a + a + a)", Map.of("xs", 4L));
+    assertFalse(estimate.toString(), estimate.maximum().isPresent());
+    var actual =
+        env.compile("cel.bind(a, s, a + a + a + a)")
+            .evaluateWithDetails(bindings, EvaluationOptions.newBuilder().build());
+    assertTrue("actual=" + actual.actualCost(), actual.actualCost() > 100);
+    // Non-text concat: finite flat maximum that bounds the runtime charge.
+    for (String source : List.of("'ab' + 'cd' + 'ef'", "xs + xs", "[1, 2] + [3]", "dyn(x) + 1")) {
+      var nonText = CostEstimator.estimate(env, source, Map.of("xs", 4L));
+      var result =
+          env.compile(source).evaluateWithDetails(bindings, EvaluationOptions.newBuilder().build());
+      assertTrue(source + ": " + nonText, nonText.maximum().isPresent());
+      assertTrue(
+          source + ": actual=" + result.actualCost() + ", estimate=" + nonText,
+          result.actualCost() <= nonText.maximum().getAsLong());
+    }
+  }
 }
