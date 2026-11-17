@@ -693,12 +693,10 @@ class ExprNode extends CelNode {
         if (a == PartialState.MISSING) {
           // Mirror the SELECT hop: a deep unknown pattern intersecting this read path produces an
           // Unknown instead of a hard UNDECLARED error so resolve-and-retry can make progress.
+          // `attributeIntersect` only ever returns NONE or an Unknown, so the optional-lifting form
+          // used for `override` above is not needed here.
           Object intersect = ctx.attributeIntersect(path);
-          if (intersect != PartialState.NONE)
-            yield !(intersect instanceof Unknown)
-                    && (Boolean.TRUE.equals(value) || a instanceof OptionalValue)
-                ? OptionalValue.of(intersect)
-                : intersect;
+          if (intersect != PartialState.NONE) yield intersect;
           if (b instanceof Unknown u) yield u;
           throw missingAttribute(parent);
         }
@@ -783,14 +781,10 @@ class ExprNode extends CelNode {
       // AttributePattern.matches is one-directional; fall back to overlap semantics so that a
       // missing receiver at this hop yields an Unknown instead of a hard UNDECLARED error,
       // mirroring cel-go / cel-java. A resolution that has supplied an ancestor is left to
-      // surface the existing error.
+      // surface the existing error. `attributeIntersect` only ever returns NONE or an Unknown,
+      // so the optional-lifting form used for `override` above is not needed here.
       Object intersect = ctx.attributeIntersect(path);
-      if (intersect != PartialState.NONE)
-        return !presence
-                && !(intersect instanceof Unknown)
-                && (Boolean.TRUE.equals(value) || operand instanceof OptionalValue)
-            ? OptionalValue.of(intersect)
-            : intersect;
+      if (intersect != PartialState.NONE) return intersect;
       throw missingAttribute(parent);
     }
     if (fieldRead != null && fieldRead.accepts(operand))

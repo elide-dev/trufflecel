@@ -188,4 +188,47 @@ public class DeepPatternReproTest {
     assertTrue(partial.isComplete());
     assertEquals(Set.of(), partial.unknownAttributes());
   }
+
+  /**
+   * When the receiver is missing (undeclared) and the index key is itself an {@link Unknown}, the
+   * unknown key propagates instead of a hard {@code UNDECLARED} error, so resolve-and-retry can
+   * supply the key's attribute. No pattern intersects the read path (the key is the unknown), so
+   * the overlap fallback declines and the {@code b instanceof Unknown} arm fires.
+   */
+  @Test
+  public void missingReceiverWithUnknownIndexKeyYieldsUnknownKey() {
+    var activation =
+        PartialActivation.of(
+            Map.of(), AttributePattern.of("data").qualify("secret"), AttributePattern.of("k"));
+    var partial = Cel.compile("data[k]").partialEvaluate(activation);
+    assertNull("missing receiver with unknown key should not raise a hard error", partial.error());
+    assertTrue(partial.value() instanceof Unknown);
+    assertFalse(partial.isComplete());
+  }
+
+  /**
+   * A deep unknown pattern intersecting a missing field on a runtime {@link ObjectType} surfaces an
+   * {@link Unknown} instead of a hard {@code NO_SUCH_FIELD}; the field is reached via {@code dyn}
+   * so the static type checker does not reject it.
+   */
+  @Test
+  public void deepPatternOnRuntimeObjectMissingFieldYieldsUnknownInsteadOfNoSuchField() {
+    var schema =
+        new ProtoSchema(
+            Map.of(
+                "Msg", Map.of("count", new ProtoSchema.Field(1, 5, "", false, false, false, 0L))));
+    var builder = Cel.newBuilder();
+    schema.register(builder);
+    var env = builder.variable("m", CelType.of("Msg")).build();
+    var activation =
+        PartialActivation.of(
+            Map.of("m", schema.construct("Msg", Map.of("count", 1L))),
+            AttributePattern.of("m").qualify("missing").qualify("deep"));
+    var partial = env.compile("dyn(m).missing").partialEvaluate(activation);
+    assertNull(
+        "missing field on runtime object with deep pattern should not raise a hard error",
+        partial.error());
+    assertTrue(partial.value() instanceof Unknown);
+    assertFalse(partial.isComplete());
+  }
 }
