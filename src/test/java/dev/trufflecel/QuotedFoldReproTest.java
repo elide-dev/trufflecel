@@ -8,9 +8,9 @@ import org.junit.Test;
 
 /**
  * Regression coverage for source locations of CEL expressions embedded inside quoted YAML scalars.
- * Reported bug: {@link ConfigurationData} paired the YAML-decoded quoted scalar with a
- * raw document base offset, so diagnostics on tokens past the first YAML line fold drifted left by
- * the folded-region size; the caret landed on indentation instead of the defect.
+ * Reported bug: {@link ConfigurationData} paired the YAML-decoded quoted scalar with a raw document
+ * base offset, so diagnostics on tokens past the first YAML line fold drifted left by the
+ * folded-region size; the caret landed on indentation instead of the defect.
  */
 public class QuotedFoldReproTest {
 
