@@ -690,7 +690,18 @@ class ExprNode extends CelNode {
                   && (Boolean.TRUE.equals(value) || a instanceof OptionalValue)
               ? OptionalValue.of(override)
               : override;
-        if (a == PartialState.MISSING) throw missingAttribute(parent);
+        if (a == PartialState.MISSING) {
+          // Mirror the SELECT hop: a deep unknown pattern intersecting this read path produces an
+          // Unknown instead of a hard UNDECLARED error so resolve-and-retry can make progress.
+          Object intersect = ctx.attributeIntersect(path);
+          if (intersect != PartialState.NONE)
+            yield !(intersect instanceof Unknown)
+                    && (Boolean.TRUE.equals(value) || a instanceof OptionalValue)
+                ? OptionalValue.of(intersect)
+                : intersect;
+          if (b instanceof Unknown u) yield u;
+          throw missingAttribute(parent);
+        }
         if (a instanceof Unknown u) yield b instanceof Unknown v ? u.merge(v) : u;
         if (b instanceof Unknown u) yield u;
         if (error != null) throw error;
@@ -706,6 +717,15 @@ class ExprNode extends CelNode {
           if (optional
               && (e.code() == CelException.Code.NO_SUCH_KEY || e.code() == CelException.Code.INDEX))
             yield OptionalValue.none();
+          if (!optional
+              && (e.code() == CelException.Code.NO_SUCH_KEY
+                  || e.code() == CelException.Code.INDEX)) {
+            // Container present but the key/index is missing: a deep unknown pattern intersecting
+            // this read path turns the hard error into an Unknown for resolve-and-retry; a
+            // resolution that supplies (or has supplied) an ancestor still raises the error.
+            Object intersect = ctx.attributeIntersect(path);
+            if (intersect != PartialState.NONE) yield intersect;
+          }
           throw e;
         }
       }
@@ -749,7 +769,8 @@ class ExprNode extends CelNode {
   private Object select(VirtualFrame frame, EvalContext ctx, boolean presence) {
     Object operand = children[0].execute(frame, ctx);
     Attribute parent = ctx.attribute();
-    Object override = ctx.attributeRead(ctx.qualify(parent, name), presence);
+    Attribute path = ctx.qualify(parent, name);
+    Object override = ctx.attributeRead(path, presence);
     if (presence) ctx.attribute(null);
     if (override != PartialState.NONE)
       return !presence
@@ -757,10 +778,24 @@ class ExprNode extends CelNode {
               && (Boolean.TRUE.equals(value) || operand instanceof OptionalValue)
           ? OptionalValue.of(override)
           : override;
-    if (operand == PartialState.MISSING) throw missingAttribute(parent);
+    if (operand == PartialState.MISSING) {
+      // A deep unknown pattern (deeper than this hop) was invisible to `override` because
+      // AttributePattern.matches is one-directional; fall back to overlap semantics so that a
+      // missing receiver at this hop yields an Unknown instead of a hard UNDECLARED error,
+      // mirroring cel-go / cel-java. A resolution that has supplied an ancestor is left to
+      // surface the existing error.
+      Object intersect = ctx.attributeIntersect(path);
+      if (intersect != PartialState.NONE)
+        return !presence
+                && !(intersect instanceof Unknown)
+                && (Boolean.TRUE.equals(value) || operand instanceof OptionalValue)
+            ? OptionalValue.of(intersect)
+            : intersect;
+      throw missingAttribute(parent);
+    }
     if (fieldRead != null && fieldRead.accepts(operand))
       return presence ? fieldRead.has(operand) : fieldRead.read(operand);
-    return selectValue(ctx, presence, operand);
+    return selectValue(ctx, presence, operand, path);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
@@ -769,7 +804,7 @@ class ExprNode extends CelNode {
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private Object selectValue(EvalContext ctx, boolean presence, Object operand) {
+  private Object selectValue(EvalContext ctx, boolean presence, Object operand, Attribute path) {
     if (operand instanceof Unknown) return operand;
     if (extensionSelect) {
       for (ObjectType type : ctx.environment.runtimeObjectTypes)
@@ -790,13 +825,24 @@ class ExprNode extends CelNode {
       boolean present = map.containsKey(name);
       if (presence) return present;
       if (lifted) return present ? OptionalValue.of(map.get(name)) : OptionalValue.none();
-      if (!present) throw Values.error(CelException.Code.NO_SUCH_KEY, "no such key: " + name);
+      if (!present) {
+        // The container is present but the key is missing: a deep unknown pattern intersecting
+        // this read path means the missing key is part of the unknown attribute subtree, so
+        // surface an Unknown for resolve-and-retry instead of a hard NO_SUCH_KEY; a resolution
+        // that supplies (or has supplied) an ancestor steers the existing error path.
+        Object intersect = ctx.attributeIntersect(path);
+        if (intersect != PartialState.NONE) return intersect;
+        throw Values.error(CelException.Code.NO_SUCH_KEY, "no such key: " + name);
+      }
       return map.get(name);
     }
     for (ObjectType type : ctx.environment.runtimeObjectTypes)
       if (type.accepts(operand)) {
-        if (!type.fields().containsKey(name))
+        if (!type.fields().containsKey(name)) {
+          Object intersect = ctx.attributeIntersect(path);
+          if (intersect != PartialState.NONE) return intersect;
           throw Values.error(CelException.Code.NO_SUCH_FIELD, "no such field: " + name);
+        }
         if (presence) return type.has(operand, name);
         if (lifted)
           return type.has(operand, name)
