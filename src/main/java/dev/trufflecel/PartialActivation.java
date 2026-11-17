@@ -48,7 +48,26 @@ public final class PartialActivation {
         throw new IllegalArgumentException("attribute is outside unknown patterns: " + attribute);
       Object value = Values.in(entry.getValue());
       requireKnown(value);
-      supplied.put(attribute, value);
+      // Attribute's record equality uses List.equals, which disagrees with same()/prefixOf() for a
+      // non-negative Long and a UInt with equal bits: two such keys can coexist as distinct map
+      // entries with one resolve() call. The size-based sort below cannot break that tie, and the
+      // last one in caller iteration order would silently win. Collapse same()-equivalent supplies
+      // to a single canonical entry; reject conflicting values so the outcome is caller-order
+      // independent instead of silently dependent on insertion order.
+      Attribute duplicate = null;
+      for (var suppliedEntry : supplied.entrySet()) {
+        Attribute existing = suppliedEntry.getKey();
+        if (attribute.prefixOf(existing) && existing.prefixOf(attribute)) {
+          duplicate = existing;
+          break;
+        }
+      }
+      if (duplicate != null) {
+        if (!Values.equal(supplied.get(duplicate), value))
+          throw new IllegalArgumentException(
+              "conflicting resolutions for the same attribute: " + attribute);
+        // Same value: keep the existing canonical key and discard the duplicate.
+      } else supplied.put(attribute, value);
     }
     // A newly supplied parent replaces previous child resolutions. A child may refine a parent.
     // Drop only pre-existing resolutions covered by a supplied attribute, then insert the

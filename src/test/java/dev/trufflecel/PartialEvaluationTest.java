@@ -587,4 +587,94 @@ public class PartialEvaluationTest {
               .code());
     }
   }
+
+  @Test
+  public void mixedLongUIntQualifierKeysAreOrderIndependent() {
+    // A non-negative Long qualifier and a UInt with equal bits are semantically the same qualifier
+    // (Attribute.same/prefixOf). Attribute's record equality uses List.equals, which disagrees and
+    // lets the two typings coexist as distinct map keys in a single resolve() call. resolve() must
+    // collapse the duplicate deterministically so the caller's iteration order cannot silently
+    // pick a winner.
+    var activation = PartialActivation.of(Map.of(), AttributePattern.of("data").wildcard());
+    var longKey = Attribute.of("data").qualify(1L);
+    var uintKey = Attribute.of("data").qualify(new UInt(1));
+
+    // Record equality still treats the two typings as distinct keys in a caller's outer map (this
+    // is exactly what lets both keys reach resolve() in one call), even though same()/prefixOf()
+    // treat them as the same qualifier.
+    assertNotEquals(longKey, uintKey);
+    assertTrue(longKey.prefixOf(uintKey));
+    assertTrue(uintKey.prefixOf(longKey));
+    // A negative Long and a UInt with the same low bits stay distinct: same() requires the Long to
+    // be non-negative, so neither covers the other.
+    var negLong = Attribute.of("data").qualify(-1L);
+    var maxUint = Attribute.of("data").qualify(new UInt(-1));
+    assertFalse(negLong.prefixOf(maxUint));
+    assertFalse(maxUint.prefixOf(negLong));
+    // Distinct qualifier values or variables are never equivalent under same().
+    assertFalse(longKey.prefixOf(Attribute.of("data").qualify(2L)));
+    assertFalse(longKey.prefixOf(Attribute.of("data").qualify(new UInt(2))));
+    assertFalse(longKey.prefixOf(Attribute.of("other").qualify(new UInt(1))));
+
+    var program = Cel.compile("data[1]");
+    // Equivalent keys with the same value collapse into one resolution regardless of caller order.
+    var longFirst = new LinkedHashMap<Attribute, Object>();
+    longFirst.put(longKey, "A");
+    longFirst.put(uintKey, "A");
+    var uintFirst = new LinkedHashMap<Attribute, Object>();
+    uintFirst.put(uintKey, "A");
+    uintFirst.put(longKey, "A");
+    assertEquals("A", program.partialEvaluate(activation.resolve(longFirst)).value());
+    assertEquals("A", program.partialEvaluate(activation.resolve(uintFirst)).value());
+    // A plain HashMap has arbitrary iteration order; the outcome must still collapse identically.
+    assertEquals(
+        "A", program.partialEvaluate(activation.resolve(new HashMap<>(longFirst))).value());
+
+    // Equivalent keys with conflicting values must not silently let caller order pick a winner:
+    // both call orders fail identically (and a plain HashMap with arbitrary order fails too).
+    var longFirstConflict = new LinkedHashMap<Attribute, Object>();
+    longFirstConflict.put(longKey, "A");
+    longFirstConflict.put(uintKey, "B");
+    var uintFirstConflict = new LinkedHashMap<Attribute, Object>();
+    uintFirstConflict.put(uintKey, "B");
+    uintFirstConflict.put(longKey, "A");
+    assertThrows(IllegalArgumentException.class, () -> activation.resolve(longFirstConflict));
+    assertThrows(IllegalArgumentException.class, () -> activation.resolve(uintFirstConflict));
+    assertThrows(
+        IllegalArgumentException.class, () -> activation.resolve(new HashMap<>(longFirstConflict)));
+
+    // A rejected resolve leaves the original activation usable for the documented single-key path.
+    assertEquals("A", program.partialEvaluate(activation.resolve(Map.of(longKey, "A"))).value());
+    assertEquals("A", program.partialEvaluate(activation.resolve(Map.of(uintKey, "A"))).value());
+  }
+
+  @Test
+  public void equivalentQualifierKeysAcrossSuccessiveCallsCollapseDeterministically() {
+    // Cross-call same-equivalent keys still replace via prefixOf removal (the documented
+    // incremental pattern); the in-call conflict check now applies symmetrically within each call.
+    var activation = PartialActivation.of(Map.of(), AttributePattern.of("data").wildcard());
+    var longKey = Attribute.of("data").qualify(1L);
+    var uintKey = Attribute.of("data").qualify(new UInt(1));
+    var program = Cel.compile("data[1]");
+
+    // Each later call supersedes the prior equivalent entry: the final value is the last call's
+    // value, regardless of which caller order was used to supply the first and second keys.
+    var longThenUint = activation.resolve(Map.of(longKey, "A")).resolve(Map.of(uintKey, "B"));
+    var uintThenLong = activation.resolve(Map.of(uintKey, "B")).resolve(Map.of(longKey, "A"));
+    assertEquals("B", program.partialEvaluate(longThenUint).value());
+    assertEquals("A", program.partialEvaluate(uintThenLong).value());
+
+    // A sibling key with a different qualifier value stays independent of the equivalent-key
+    // collapse and is reachable through its own expression.
+    var withSibling =
+        activation
+            .resolve(Map.of(longKey, "P"))
+            .resolve(Map.of(Attribute.of("data").qualify(2L), "Q"));
+    assertEquals("P", Cel.compile("data[1]").partialEvaluate(withSibling).value());
+    assertEquals("Q", Cel.compile("data[2]").partialEvaluate(withSibling).value());
+    // The UInt-typed supply still resolves a Long-typed index expression through same().
+    assertEquals(
+        "P",
+        Cel.compile("data[1]").partialEvaluate(activation.resolve(Map.of(uintKey, "P"))).value());
+  }
 }
