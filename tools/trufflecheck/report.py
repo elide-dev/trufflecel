@@ -67,7 +67,9 @@ def parse(log):
         caret = lines[index + 2] if index + 2 < len(lines) else ""
         # javac echoes the source line verbatim, then a caret under the reported position.
         column = caret.index("^") + 1 if caret.strip() == "^" else None
-        key = (match["path"], int(match["line"]), match["check"], match["message"])
+        # The column keeps distinct same-line diagnostics apart; a file compiled by several targets repeats the
+        # same position, which collapses.
+        key = (match["path"], int(match["line"]), column, match["check"], match["message"])
         findings[key] = {"path": match["path"], "line": int(match["line"]), "column": column,
                          "check": match["check"], "message": match["message"].strip(), "snippet": snippet.strip(),
                          "kind": match["kind"]}
@@ -358,7 +360,10 @@ def main():
     if options.output:
         write(workspace / options.output, render(findings, probe, severity, meta))
         print("wrote %s: %d findings, %d NullAway probe findings" % (options.output, len(findings), len(probe)))
-    if options.sarif:
+    if options.sarif and failures:
+        # A failed build covers only some targets; uploading it would close the alerts of every file it missed.
+        print("not writing %s: the analysis build failed" % options.sarif, file=sys.stderr)
+    elif options.sarif:
         write(workspace / options.sarif, json.dumps(sarif(findings, severity, meta), indent=1) + "\n")
         print("wrote %s: %d results" % (options.sarif, len(findings)))
     return 1 if failures else 0

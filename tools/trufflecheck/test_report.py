@@ -24,6 +24,12 @@ src/test/java/dev/trufflecel/ParserTest.java:9: warning: [MissingOverride] run i
               ^
 bazel-out/cfg/bin/third_party/Gen.java:3: warning: [deprecation] old() in Gen has been deprecated
 src/main/java/dev/trufflecel/CelLanguage.java:216: warning: [deprecation] asHostObject(Object) in Env has been deprecated
+src/main/java/dev/trufflecel/Values.java:7: warning: [TruffleStackfulException] Filling in a stack trace walks the stack.
+    if (a) throw new IllegalStateException(); else throw new IllegalStateException();
+                 ^
+src/main/java/dev/trufflecel/Values.java:7: warning: [TruffleStackfulException] Filling in a stack trace walks the stack.
+    if (a) throw new IllegalStateException(); else throw new IllegalStateException();
+                                                         ^
 """
 SEVERITY = {"TruffleMissingBoundary": "ERROR", "MissingOverride": "WARN"}
 META = {"errorprone": "2.50.0", "trufflecheck": "0.1.1", "nullaway": "0.14.3"}
@@ -31,10 +37,11 @@ META = {"errorprone": "2.50.0", "trufflecheck": "0.1.1", "nullaway": "0.14.3"}
 
 class ParseTest(unittest.TestCase):
     def setUp(self):
-        self.findings = {(f["path"], f["line"], f["check"]): f for f in report.parse(LOG)}
+        self.parsed = report.parse(LOG)
+        self.findings = {(f["path"], f["line"], f["check"]): f for f in self.parsed}
 
     def test_deduplicates_and_skips_generated_sources(self):
-        self.assertEqual(len(self.findings), 3)
+        self.assertEqual(len(self.parsed), 5)
         self.assertFalse(any(path.startswith("bazel-out/") for path, _, _ in self.findings))
 
     def test_reads_column_from_caret(self):
@@ -43,6 +50,10 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(finding["snippet"], "return cache.get(key);")
         javac = self.findings[("src/main/java/dev/trufflecel/CelLanguage.java", 216, "deprecation")]
         self.assertIsNone(javac["column"])
+
+    def test_keeps_distinct_columns_on_one_line(self):
+        columns = sorted(f["column"] for f in self.parsed if f["path"].endswith("Values.java"))
+        self.assertEqual(columns, [18, 58])
 
     def test_severity_and_priority(self):
         self.assertEqual(report.effective("deprecation", SEVERITY), "WARN")
@@ -55,7 +66,8 @@ class ParseTest(unittest.TestCase):
 
 class SarifTest(unittest.TestCase):
     def test_document(self):
-        document = json.loads(json.dumps(report.sarif(report.parse(LOG), SEVERITY, META)))
+        findings = [f for f in report.parse(LOG) if not f["path"].endswith("Values.java")]
+        document = json.loads(json.dumps(report.sarif(findings, SEVERITY, META)))
         self.assertEqual(document["version"], "2.1.0")
         run = document["runs"][0]
         rules = run["tool"]["driver"]["rules"]
