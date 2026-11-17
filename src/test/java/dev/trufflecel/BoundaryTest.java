@@ -262,10 +262,11 @@ public class BoundaryTest {
         java.time.Instant.ofEpochSecond(1),
         deferred.compile("google.protobuf.Timestamp{seconds: 1}").evaluate());
     assertEquals("a,b", deferred.compile("google.protobuf.FieldMask{paths: ['a','b']}").evaluate());
-    assertThrows(CelException.class, () -> deferred.parse("timestamp(1).seconds").evaluate());
-    assertThrows(
-        CelException.class,
-        () -> deferred.parse("google.protobuf.Timestamp{seconds: 1}.seconds").evaluate());
+    var deferredFieldOnTimestamp = deferred.parse("timestamp(1).seconds");
+    assertThrows(CelException.class, deferredFieldOnTimestamp::evaluate);
+    var deferredFieldOnTimestampLiteral =
+        deferred.parse("google.protobuf.Timestamp{seconds: 1}.seconds");
+    assertThrows(CelException.class, deferredFieldOnTimestampLiteral::evaluate);
   }
 
   @Test
