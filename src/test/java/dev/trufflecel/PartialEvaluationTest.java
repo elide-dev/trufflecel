@@ -640,8 +640,8 @@ public class PartialEvaluationTest {
     uintFirstConflict.put(longKey, "A");
     assertThrows(IllegalArgumentException.class, () -> activation.resolve(longFirstConflict));
     assertThrows(IllegalArgumentException.class, () -> activation.resolve(uintFirstConflict));
-    assertThrows(
-        IllegalArgumentException.class, () -> activation.resolve(new HashMap<>(longFirstConflict)));
+    var conflictHashOrder = new HashMap<Attribute, Object>(longFirstConflict);
+    assertThrows(IllegalArgumentException.class, () -> activation.resolve(conflictHashOrder));
 
     // A rejected resolve leaves the original activation usable for the documented single-key path.
     assertEquals("A", program.partialEvaluate(activation.resolve(Map.of(longKey, "A"))).value());
