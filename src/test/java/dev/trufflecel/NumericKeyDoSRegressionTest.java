@@ -14,6 +14,9 @@ import org.junit.Test;
  * Long}/{@code UInt} duplicates, and {@code mergeEntries} charges one {@code ctx.tick()} per merged
  * entry so the budget observes the per-entry work.
  */
+// jspecify is not yet a dependency (dev.trufflecel is not @NullMarked package-by-package;
+// see docs/TRUFFLECHECK_BASELINE.md), so this top-level test class is not @NullMarked.
+@SuppressWarnings("RequireExplicitNullMarking")
 public class NumericKeyDoSRegressionTest {
 
   @Test
