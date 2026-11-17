@@ -685,3 +685,16 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "foreignEqualBug",
+    srcs = ["ForeignEqualBugTest.java"],
+    test_class = "dev.trufflecel.ForeignEqualBugTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
