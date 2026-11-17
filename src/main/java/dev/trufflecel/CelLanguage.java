@@ -120,6 +120,7 @@ public final class CelLanguage extends TruffleLanguage<CelLanguage.Scope> {
       }
 
       @Override
+      @CompilerDirectives.TruffleBoundary
       public String getName() {
         return "CEL: " + sourceName;
       }

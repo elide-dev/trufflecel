@@ -1,0 +1,53 @@
+load("@rules_java//java:defs.bzl", "java_plugin")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+# Error Prone checkers (trufflecheck rules and NullAway). A java_plugin without processor_class is loaded into
+# JavaBuilder's bundled Error Prone; enable it with --config=trufflecheck (errorprone.bazelrc).
+java_plugin(
+    name = "errorprone",
+    data = [
+        "classinit-buildtime.txt",
+        "classinit-runtime.txt",
+        "trufflecheck.properties",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@trufflecheck//:com_uber_nullaway_nullaway",
+        "@trufflecheck//:dev_elide_trufflecheck_errorprone",
+    ],
+)
+
+sh_binary(
+    name = "sync_profile",
+    srcs = ["sync_profile.py"],
+    args = [
+        "$(rootpath @trufflecheck_profiles//:profiles/jvm/errorprone.args)",
+        "tools/trufflecheck/errorprone-default-warnings.txt",
+        "tools/trufflecheck/errorprone.bazelrc",
+    ],
+    data = ["@trufflecheck_profiles//:profiles/jvm/errorprone.args"],
+    tags = ["manual"],
+)
+
+sh_test(
+    name = "profile_sync_test",
+    srcs = ["sync_profile.py"],
+    args = [
+        "--check",
+        "$(rootpath @trufflecheck_profiles//:profiles/jvm/errorprone.args)",
+        "$(rootpath errorprone-default-warnings.txt)",
+        "$(rootpath errorprone.bazelrc)",
+    ],
+    data = [
+        "errorprone-default-warnings.txt",
+        "errorprone.bazelrc",
+        "@trufflecheck_profiles//:profiles/jvm/errorprone.args",
+    ],
+)
+
+sh_binary(
+    name = "report",
+    srcs = ["report.py"],
+    tags = ["manual"],
+)

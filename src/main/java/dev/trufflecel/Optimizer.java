@@ -387,8 +387,8 @@ final class Optimizer {
   }
 
   private static long weight(Object value) {
-    if (value instanceof String s) return 1 + s.length() / 16;
-    if (value instanceof Bytes b) return 1 + b.size() / 16;
+    if (value instanceof String s) return 1L + s.length() / 16;
+    if (value instanceof Bytes b) return 1L + b.size() / 16;
     if (value instanceof OptionalValue o) return 1 + (o.present() ? weight(o.value()) : 0);
     long total = 1;
     if (value instanceof List<?> list) for (Object item : list) total += weight(item);

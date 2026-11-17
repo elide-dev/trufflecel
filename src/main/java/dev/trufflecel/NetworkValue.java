@@ -11,6 +11,7 @@ sealed interface NetworkValue {
         throw new IllegalArgumentException("invalid address");
     }
 
+    @Override
     public String toString() {
       if (width == 32) {
         long n = bits.longValue();
@@ -90,6 +91,7 @@ sealed interface NetworkValue {
         throw new IllegalArgumentException("invalid prefix length");
     }
 
+    @Override
     public String toString() {
       return address + "/" + length;
     }

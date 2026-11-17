@@ -32,11 +32,22 @@ class ExprNode extends CelNode {
     for (ExprNode child : children) child.instantiateFieldPlans();
   }
 
-  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode blockOwner;
-  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private ExprNode lazyInitializer;
+  // Non-owning references to nodes adopted elsewhere in this tree (the enclosing block, the bind
+  // initializer); @Child would re-parent them. @CompilationFinal lets compiled code fold them.
+  @SuppressWarnings("TruffleNodeChildren")
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal
+  private ExprNode blockOwner;
+
+  @SuppressWarnings("TruffleNodeChildren")
+  @com.oracle.truffle.api.CompilerDirectives.CompilationFinal
+  private ExprNode lazyInitializer;
+
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal private boolean isolatedInitializer;
 
+  // Planning methods (resolve*, finishPlanning, free, qualifiedName) run on host-side copies before
+  // a call target exists; neverPartOfCompilation fails partial evaluation if that ever changes.
   void resolveLazyBindings(Map<String, ExprNode> owners) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     if (kind == Kind.IDENT) {
       lazyInitializer = owners.get(name);
       return;
@@ -69,6 +80,7 @@ class ExprNode extends CelNode {
   @com.oracle.truffle.api.CompilerDirectives.CompilationFinal boolean instrumentedSource;
 
   void resolveAttributes(boolean defer) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     deferAttribute = defer;
     for (int i = 0; i < children.length; i++) {
       boolean childDefer =
@@ -86,6 +98,7 @@ class ExprNode extends CelNode {
   }
 
   void resolveBlocks(ExprNode owner) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     if (children.length == 0) children = NO_CHILDREN;
     if (kind == Kind.BLOCK_INDEX) blockOwner = owner;
     for (ExprNode child : children) child.resolveBlocks(kind == Kind.BLOCK ? this : owner);
@@ -93,6 +106,7 @@ class ExprNode extends CelNode {
 
   /** Complete the owned runtime copy once; source templates keep their planning annotations. */
   void finishPlanning(ExprNode owner) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     fold = null;
     checkedType = null;
     macroCall = null;
@@ -142,6 +156,7 @@ class ExprNode extends CelNode {
   }
 
   @Override
+  @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   public Object getNodeObject() {
     return kind == Kind.IDENT || kind == Kind.BLOCK_INDEX
         ? GuestValue.wrap(Map.of(StandardTags.ReadVariableTag.NAME, name))
@@ -245,6 +260,7 @@ class ExprNode extends CelNode {
   }
 
   void resolveLocals(ArrayList<String> locals, FrameDescriptor frameDescriptor) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     if (kind == Kind.COMPREHENSION) {
       ((ComprehensionNode) this).resolveComprehensionLocals(locals);
       return;
@@ -535,6 +551,7 @@ class ExprNode extends CelNode {
   }
 
   String qualifiedName() {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     if (extensionSelect) return null;
     if (kind == Kind.IDENT) return name;
     if (kind == Kind.SELECT && !Boolean.TRUE.equals(value)) {
@@ -545,6 +562,7 @@ class ExprNode extends CelNode {
   }
 
   void free(Set<String> bound, Set<String> out) {
+    com.oracle.truffle.api.CompilerAsserts.neverPartOfCompilation();
     String qualified = qualifiedName();
     if (qualified != null
         && Environment.builtinType(qualified) != null

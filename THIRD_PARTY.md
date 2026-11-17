@@ -10,6 +10,7 @@ licenses of third-party code, schemas, fonts, data or tools.
 | Runtime Maven libraries | `MODULE.bazel` and `maven_install.json` pin dependencies; publication POMs declare consumer dependencies. The thin JARs do not shade these libraries. Dependencies retain their own licenses. |
 | cel-java comparison engine | The isolated `cel_java` Maven installation and `benchmarks/` pin comparison-only dependencies. Production code must not depend on cel-java. |
 | GraalVM, TruffleData and build tools | Versioned archives, checksums, overrides and lockfiles in the Bazel configuration define the inputs. Their distribution licenses remain separate from TruffleCEL's license. |
+| Static analysis | The isolated `trufflecheck` Maven installation (`trufflecheck_install.json`) pins trufflecheck (`Apache-2.0 OR MIT`), NullAway and their dependencies as compiler plugins; the `trufflecheck_profiles` archive supplies the Error Prone profile. They never enter runtime JARs or publication POMs. |
 | Chart fonts | [`tools/bench/charts/fonts`](tools/bench/charts/fonts) contains unmodified Fontsource 5.3.0 Latin variable fonts: Inter, Instrument Sans and JetBrains Mono. Each has its own SIL Open Font License and copyright notice. They are documentation tooling assets, not runtime dependencies. Release benchmark cards embed glyph subsets of these fonts (name tables removed) under the same licenses. |
 
 This is a scope guide, not a complete transitive SBOM. Review the resolved

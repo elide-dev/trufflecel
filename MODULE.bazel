@@ -59,6 +59,17 @@ maven.install(
 )
 use_repo(maven, "fuzzing")
 
+# Static analysis (tools/trufflecheck): Error Prone checkers loaded into JavaBuilder's bundled Error Prone. Compiler
+# plugins only; never a runtime or publication dependency. Versions match the trufflecheck profile's pins.
+maven.install(
+    name = "trufflecheck",
+    artifacts = ["dev.elide:trufflecheck-errorprone:0.1.1", "com.uber.nullaway:nullaway:0.14.3"],
+    repositories = ["https://repo.maven.apache.org/maven2", "https://maven.elide.dev"],
+    lock_file = "//:trufflecheck_install.json",
+    fail_if_repin_required = True,
+)
+use_repo(maven, "trufflecheck")
+
 bazel_dep(name = "gazelle", version = "0.54.0", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.65.0", dev_dependency = True)
 bazel_dep(name = "platforms", version = "1.1.0")
@@ -112,4 +123,13 @@ http_archive(
     strip_prefix = "instrument-hooks-8fd5b878499f819561b33219cdafaa6f8c28b4e4",
     urls = ["https://codeload.github.com/CodSpeedHQ/instrument-hooks/tar.gz/8fd5b878499f819561b33219cdafaa6f8c28b4e4"],
     type = "tar.gz",
+)
+
+# trufflecheck shared profiles (Error Prone/NullAway flags). Release asset with a build provenance attestation;
+# tools/trufflecheck:profile_sync_test keeps tools/trufflecheck/errorprone.bazelrc identical to its errorprone.args.
+http_archive(
+    name = "trufflecheck_profiles",
+    build_file_content = 'exports_files(glob(["profiles/**"]))',
+    sha256 = "c815ce50b4930e97a6e5678387d62aa6f6705032222b923489a907f5519a3882",
+    urls = ["https://github.com/elide-dev/trufflecheck/releases/download/v0.1.1/trufflecheck-profiles-0.1.1.tar.gz"],
 )

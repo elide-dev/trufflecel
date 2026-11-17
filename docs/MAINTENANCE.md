@@ -22,6 +22,7 @@ Maintainers should review these remaining pins monthly and before releases:
 | Dependency | Update and validation |
 | --- | --- |
 | Maven libraries, including TruffleData | Update MODULE.bazel; run `REPIN=1 bazel run --config=local @maven//:pin`; update publication POM dependencies in `tools/release/BUILD.bazel` |
+| trufflecheck, NullAway (static analysis) | Bump `@trufflecheck` pins and the `trufflecheck_profiles` release URL/digest together (`gh attestation verify` the assets); run `REPIN=1 bazel run --config=local @trufflecheck//:pin` and `bazel run --config=local //tools/trufflecheck:sync_profile`; after a rules_java upgrade also run `tools/trufflecheck/list_default_warnings.sh`; regenerate the baseline |
 | Comparison-only cel-java | Update its isolated Maven installation; run `REPIN=1 bazel run --config=local @cel_java//:pin`; rerun comparisons |
 | GraalVM and rules_graalvm fork | Update matching Maven versions, repositories, archive URLs, checksums and fork commit together; run native JIT/blocklist and allocation gates |
 | Bazel, Go SDK, CodSpeed hooks, downloaded CI tools | Review upstream releases, update versions and verified digests, regenerate Bazel lockfile, run affected tooling |
@@ -38,6 +39,9 @@ extensions or custom repositories cannot run inside its updater environment.
 - `security.yml` runs CodeQL on Java, Python and Actions on PRs, main and weekly.
   Java uses source analysis (`build-mode: none`); generated Truffle classes and full
   build dependency resolution are outside this analysis. CI still compiles and tests them.
+- `security.yml` also runs Error Prone, NullAway and trufflecheck (`tools/trufflecheck/report.py`) over every
+  Java target and uploads SARIF to code scanning (category `trufflecheck`; fork PRs keep the artifact only).
+  Findings are not yet a build gate; see `docs/TRUFFLECHECK_BASELINE.md`.
 - Dependency review rejects introduced high/critical known vulnerabilities on PRs.
   Its visibility is limited to dependencies recognized by GitHub's dependency graph;
   custom archives and embedded dependency representations still need manual review.

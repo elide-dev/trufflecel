@@ -93,16 +93,19 @@ final class Regex {
       return handle;
     }
 
+    @Override
     public boolean find(String text) {
       return handle().find(text);
     }
 
+    @Override
     public int programSize() {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT,
           "RE2 instruction counts are unavailable in TruffleRegex-only mode");
     }
 
+    @Override
     public Object apply(String name, Object[] arguments, EvalContext context) {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT,

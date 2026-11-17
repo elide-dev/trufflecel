@@ -13,10 +13,12 @@ public abstract class PojoType<T> implements ObjectType {
     this.fields = Map.copyOf(fields);
   }
 
+  @Override
   public final String name() {
     return name;
   }
 
+  @Override
   public final Map<String, CelType> fields() {
     return fields;
   }
@@ -39,6 +41,7 @@ public abstract class PojoType<T> implements ObjectType {
 
   protected abstract Map<String, Object> snapshotFields(T value, SnapshotContext context);
 
+  @Override
   public final boolean accepts(Object value) {
     return value instanceof Value snapshot && name.equals(snapshot.type);
   }
@@ -48,6 +51,7 @@ public abstract class PojoType<T> implements ObjectType {
     return accepts(a) && accepts(b) && Values.equal(a, b);
   }
 
+  @Override
   public final Object construct(Map<String, Object> values) {
     var owned = new LinkedHashMap<String, Object>();
     var context = new SnapshotContext(100, 1_000_000);
@@ -78,6 +82,7 @@ public abstract class PojoType<T> implements ObjectType {
     return (Value) value;
   }
 
+  @Override
   public final Object get(Object value, String field) {
     field(field);
     Object result = value(value).fields.get(field);
@@ -85,6 +90,7 @@ public abstract class PojoType<T> implements ObjectType {
     return result;
   }
 
+  @Override
   public final boolean has(Object value, String field) {
     field(field);
     return value(value).fields.containsKey(field);

@@ -400,14 +400,17 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       extensions = Map.copyOf(selectedExtensions);
     }
 
+    @Override
     public String name() {
       return name;
     }
 
+    @Override
     public Map<String, CelType> fields() {
       return fields;
     }
 
+    @Override
     public Map<String, CelType> extensions() {
       return extensions;
     }
@@ -445,14 +448,17 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       return new Projected(this, source.snapshot(message));
     }
 
+    @Override
     public Object decode(Bytes bytes) {
       return new Projected(this, (Value) source.decode(bytes));
     }
 
+    @Override
     public boolean accepts(Object value) {
       return value instanceof Projected p && p.type == this;
     }
 
+    @Override
     public Object get(Object value, String field) {
       require(field);
       Object result = source.get(((Projected) value).value, field);
@@ -460,6 +466,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       return projection == null ? result : new Projected(projection, (Value) result);
     }
 
+    @Override
     public boolean has(Object value, String field) {
       require(field);
       return source.has(((Projected) value).value, field);
@@ -471,6 +478,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
             CelException.Code.NO_SUCH_FIELD, "field is outside protobuf mask: " + field);
     }
 
+    @Override
     public Object construct(Map<String, Object> values) {
       var unwrapped = new LinkedHashMap<String, Object>();
       for (var entry : values.entrySet()) {
@@ -481,6 +489,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       return new Projected(this, (Value) source.construct(unwrapped));
     }
 
+    @Override
     public boolean equal(Object a, Object b) {
       if (!accepts(a) || !accepts(b)) return false;
       for (String field : fields.keySet())
@@ -545,18 +554,22 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return result;
   }
 
+  @Override
   public String name() {
     return descriptor.getFullName();
   }
 
+  @Override
   public Map<String, CelType> fields() {
     return fields;
   }
 
+  @Override
   public Map<String, CelType> extensions() {
     return extensionTypes;
   }
 
+  @Override
   public boolean accepts(Object value) {
     return value instanceof Value v && v.type.descriptor == descriptor;
   }
@@ -607,6 +620,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
   private record MappedField(ProtobufType type, int ordinal, String wrapper, boolean duration)
       implements FieldPlan {
+    @Override
     public ReadNode instantiate() {
       return new MappedRead(this);
     }
@@ -621,10 +635,12 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       this.field = field;
     }
 
+    @Override
     boolean accepts(Object value) {
       return value instanceof Value v && v.type == field.type;
     }
 
+    @Override
     Object read(Object value) {
       Object nested = data.read(((Value) value).row, field.ordinal);
       if (field.wrapper != null) {
@@ -638,6 +654,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
           field.duration);
     }
 
+    @Override
     boolean has(Object value) {
       return ((Value) value).row.has(field.ordinal);
     }
@@ -670,6 +687,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
   private record PreparedField(
       ProtobufType type, int ordinal, boolean repeated, ProtobufType nested, MapField map)
       implements FieldPlan {
+    @Override
     public ReadNode instantiate() {
       return new PreparedRead(this);
     }
@@ -683,11 +701,13 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       this.field = field;
     }
 
+    @Override
     boolean accepts(Object value) {
       // Value construction guarantees this adapter's exact plan; descriptor identity is weaker.
       return value instanceof Value v && v.type == field.type;
     }
 
+    @Override
     Object read(Object value) {
       Object result = data.read(((Value) value).row, field.ordinal);
       if (field.map != null) return readMap((DataArray) result, field.map);
@@ -700,6 +720,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
       return field.nested == null ? result : message(result, field.nested);
     }
 
+    @Override
     boolean has(Object value) {
       return ((Value) value).row.has(field.ordinal);
     }
@@ -735,6 +756,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return Values.ownedMap(values);
   }
 
+  @Override
   public boolean isZero(Object value) {
     Value v = (Value) value;
     if (v.type.descriptor != descriptor) return false;
@@ -747,6 +769,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return row.unknownFieldBytes().length == 0;
   }
 
+  @Override
   public boolean equal(Object a, Object b) {
     Value left = (Value) a;
     if (!(b instanceof Value right) || left.type.descriptor != right.type.descriptor) return false;
@@ -772,6 +795,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return f;
   }
 
+  @Override
   public boolean has(Object value, String name) {
     Value v = (Value) value;
     if (v.type != this) return v.type.has(v, name);
@@ -786,6 +810,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return canonical(new Value(this, row));
   }
 
+  @Override
   public Object get(Object value, String name) {
     Value v = (Value) value;
     if (v.type != this) return v.type.get(v, name);
@@ -843,6 +868,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     };
   }
 
+  @Override
   public Object construct(Map<String, Object> values) {
     try {
       var builder = plan.newBuilder();
@@ -1034,6 +1060,7 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
     return (int) value.bits();
   }
 
+  @Override
   public Object decode(Bytes bytes) {
     try {
       // Bytes already owns its immutable input. Both normalization and the native codec
