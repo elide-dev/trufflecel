@@ -234,6 +234,39 @@ public class CheckerTest {
   }
 
   @Test
+  public void sameNameDifferentArityCustomTypesDecayToDyn() {
+    var env =
+        Cel.newBuilder()
+            .variable("cond", CelType.BOOL)
+            .variable("p1", new CelType("pair", List.of(CelType.INT)))
+            .variable("p2", new CelType("pair", List.of(CelType.INT, CelType.INT)))
+            .variable("m1", new CelType("pair", List.of(CelType.STRING, CelType.INT)))
+            .variable("m2", new CelType("pair", List.of(CelType.STRING, CelType.INT, CelType.INT)))
+            .build();
+    assertEquals(CelType.DYN, env.compile("cond ? p1 : p2").resultType());
+    assertEquals(CelType.DYN, env.compile("cond ? p2 : p1").resultType());
+    assertEquals(CelType.DYN, env.compile("(cond ? p1 : p2)[0]").resultType());
+    assertEquals(CelType.DYN, env.compile("(cond ? m1 : m2)[0]").resultType());
+    assertEquals(CelType.list(CelType.DYN), env.compile("[p1, p2]").resultType());
+    assertEquals(CelType.list(CelType.DYN), env.compile("[m1, m2]").resultType());
+    assertEquals(CelType.map(CelType.INT, CelType.DYN), env.compile("{1: p1, 2: p2}").resultType());
+    assertEquals(CelType.list(CelType.DYN), env.compile("[p1] + [p2]").resultType());
+  }
+
+  @Test
+  public void sameNameSameArityCustomTypesStillJoinElementWise() {
+    var env =
+        Cel.newBuilder()
+            .variable("cond", CelType.BOOL)
+            .variable("p1", new CelType("pair", List.of(CelType.INT, CelType.STRING)))
+            .variable("p2", new CelType("pair", List.of(CelType.INT, CelType.INT)))
+            .build();
+    assertEquals(
+        new CelType("pair", List.of(CelType.INT, CelType.DYN)),
+        env.compile("cond ? p1 : p2").resultType());
+  }
+
+  @Test
   public void nullIsOnlyAssignableToNullableMessageFields() {
     var builder = Cel.newBuilder();
     TestObjects.register(builder);
