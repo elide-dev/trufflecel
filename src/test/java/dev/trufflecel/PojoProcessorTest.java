@@ -289,11 +289,7 @@ public final class PojoProcessorTest {
                 + "@CelPojo(\"example.X\") class Q {} "
                 + "@CelPojo(\"example.X\") class R {}");
     assertFalse(triple.diagnostics, triple.success);
-    long reported =
-        DUPLICATE_CEL_OBJECT_TYPE_NAME
-            .matcher(triple.diagnostics)
-            .results()
-            .count();
+    long reported = DUPLICATE_CEL_OBJECT_TYPE_NAME.matcher(triple.diagnostics).results().count();
     assertTrue(triple.diagnostics, reported >= 1);
     assertEquals(triple.diagnostics, 1, triple.generated.size());
 
