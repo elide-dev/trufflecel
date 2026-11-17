@@ -267,43 +267,43 @@ sealed class EvalContext {
     if (override != PartialState.NONE) return override;
     // Program normalizes host nulls to CelNull, so null denotes an absent binding.
     Object value;
+    boolean walk = !absolute && !environment.container.isEmpty();
     if (activation instanceof Object[] arguments) {
       Object binding = arguments[0];
       value =
           binding instanceof String single
-              ? matchesRoot(single, name, absolute) ? arguments[1] : null
-              : resolveRoot(binding, name, absolute);
+              ? (walk ? matchesRoot(single, name) : single.equals(name)) ? arguments[1] : null
+              : walk ? resolveRoot(binding, name) : lookup(binding, name);
     } else if (this instanceof Scoped scoped && scoped.singleName != null)
-      value = matchesRoot(scoped.singleName, name, absolute) ? activation : null;
-    else value = resolveRoot(activation, name, absolute);
+      value =
+          (walk ? matchesRoot(scoped.singleName, name) : scoped.singleName.equals(name))
+              ? activation
+              : null;
+    else value = walk ? resolveRoot(activation, name) : lookup(activation, name);
     if (value != null) return value;
     if (path != null && evaluation.partial.containsUnknown(path)) return PartialState.MISSING;
     throw undeclared(name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private Object resolveRoot(Object activation, String name, boolean absolute) {
-    if (!absolute) {
-      String prefix = environment.container;
-      while (!prefix.isEmpty()) {
-        Object value = lookup(activation, prefix + "." + name);
-        if (value != null) return value;
-        int dot = prefix.lastIndexOf('.');
-        prefix = dot < 0 ? "" : prefix.substring(0, dot);
-      }
+  private Object resolveRoot(Object activation, String name) {
+    String prefix = environment.container;
+    while (!prefix.isEmpty()) {
+      Object value = lookup(activation, prefix + "." + name);
+      if (value != null) return value;
+      int dot = prefix.lastIndexOf('.');
+      prefix = dot < 0 ? "" : prefix.substring(0, dot);
     }
     return lookup(activation, name);
   }
 
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
-  private boolean matchesRoot(String binding, String name, boolean absolute) {
-    if (!absolute) {
-      String prefix = environment.container;
-      while (!prefix.isEmpty()) {
-        if (binding.equals(prefix + "." + name)) return true;
-        int dot = prefix.lastIndexOf('.');
-        prefix = dot < 0 ? "" : prefix.substring(0, dot);
-      }
+  private boolean matchesRoot(String binding, String name) {
+    String prefix = environment.container;
+    while (!prefix.isEmpty()) {
+      if (binding.equals(prefix + "." + name)) return true;
+      int dot = prefix.lastIndexOf('.');
+      prefix = dot < 0 ? "" : prefix.substring(0, dot);
     }
     return binding.equals(name);
   }
