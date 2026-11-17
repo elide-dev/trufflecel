@@ -468,6 +468,76 @@ public final class AstInterchangeTest {
     CanonicalAst.ast(ENV, withTiny);
   }
 
+  /**
+   * Importing a navigable tree must honor the importing environment's configured limits, exactly as
+   * {@link CanonicalAst#parse}, {@link CanonicalAst#check}, {@link CanonicalAst#program} and {@link
+   * Ast#parse} already do. Previously {@link CanonicalAst#ast} wrapped the snapshot with {@link
+   * Ast#of(dev.trufflecel.Ast.Node)}, whose 100,000-node/256-depth caps silently clamped imports
+   * below the documented environment bounds.
+   */
+  @Test
+  public void canonicalAstImportHonorsEnvironmentDepthAboveDefaults() {
+    Environment relaxed = Cel.newBuilder().maxDepth(300).build();
+    StringBuilder source = new StringBuilder("1");
+    for (int i = 0; i < 280; i++) source.append(" + 1");
+    String deepSource = source.toString();
+    Message parsed = CanonicalAst.parse(relaxed, deepSource);
+    // The other import APIs already honor the environment; this anchors the divergence.
+    assertEquals(281L, program(relaxed, parsed).evaluate());
+    check(relaxed, parsed);
+    Ast.parse(relaxed, deepSource);
+    // A 281-deep tree exceeds Ast.of's hardcoded 256 but fits the environment's 300.
+    Ast imported = ast(relaxed, parsed);
+    assertEquals(281L, relaxed.compile(imported.unparse()).evaluate());
+    assertEquals(281L, relaxed.compile(unparse(relaxed, parsed)).evaluate());
+  }
+
+  @Test
+  public void canonicalAstImportRejectsDeepTreeUnderDefaultEnvironment() {
+    Environment relaxed = Cel.newBuilder().maxDepth(300).build();
+    Environment defaults = Cel.newBuilder().build();
+    StringBuilder source = new StringBuilder("1");
+    for (int i = 0; i < 280; i++) source.append(" + 1");
+    Message parsed = CanonicalAst.parse(relaxed, source.toString());
+    CelException failure = assertThrows(CelException.class, () -> ast(defaults, parsed));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, failure.code());
+  }
+
+  @Test
+  public void canonicalAstImportHonorsEnvironmentNodeCountAboveDefaults() {
+    Environment wide = Cel.newBuilder().maxAstNodes(200_000).maxSourceLength(500_000).build();
+    StringBuilder source = new StringBuilder("[");
+    for (int i = 0; i < 100_000; i++) {
+      if (i > 0) source.append(",");
+      source.append("1");
+    }
+    source.append("]");
+    // Ast.parse is environment-aware (100,001 nodes fit 200,000); it produces the payload.
+    Ast parsed = Ast.parse(wide, source.toString());
+    Message canonical = CanonicalAst.parsed(parsed);
+    // 100,001 nodes exceed Ast.of's hardcoded 100,000 but fit the environment's 200,000.
+    Ast imported = CanonicalAst.ast(wide, canonical);
+    assertEquals(100_001, imported.nodes().size());
+    // The same payload imports and evaluates through program(), which already honored the env.
+    assertEquals(100_000, ((List<?>) CanonicalAst.program(wide, canonical).evaluate()).size());
+  }
+
+  @Test
+  public void canonicalAstImportRejectsWideTreeUnderDefaultEnvironment() {
+    Environment wide = Cel.newBuilder().maxAstNodes(200_000).maxSourceLength(500_000).build();
+    Environment defaults = Cel.newBuilder().build();
+    StringBuilder source = new StringBuilder("[");
+    for (int i = 0; i < 100_000; i++) {
+      if (i > 0) source.append(",");
+      source.append("1");
+    }
+    source.append("]");
+    Message canonical = CanonicalAst.parsed(Ast.parse(wide, source.toString()));
+    CelException failure =
+        assertThrows(CelException.class, () -> CanonicalAst.ast(defaults, canonical));
+    assertEquals(CelException.Code.RESOURCE_EXHAUSTED, failure.code());
+  }
+
   private static Message source(Message parsed, Map<Long, Message> macros) {
     return parsed.toBuilder()
         .setField(

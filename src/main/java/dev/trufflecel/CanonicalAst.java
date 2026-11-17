@@ -155,7 +155,7 @@ public final class CanonicalAst {
         reader.references.put((Long) field(entry, "key"), child(entry, "value"));
     ExprNode tree = reader.expression(child(ast, "expr"), 0);
     attachMacroCalls(tree, reader);
-    return Ast.of(Ast.snapshot(tree));
+    return Ast.of(Ast.snapshot(tree), environment.maxAstNodes, environment.maxDepth);
   }
 
   public static String unparse(Environment environment, Message ast) {
