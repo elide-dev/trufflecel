@@ -93,4 +93,26 @@ public final class ContainerResolutionTest {
     assertEquals(Boolean.TRUE, program.evaluate(Activation.snapshot(Map.of("x.y", true))));
     assertEquals("false", program.evaluate(Activation.snapshot(Map.of("y", "false"))));
   }
+
+  @Test
+  public void singleEntryActivationMissingIdentifierErrorsAfterContainerWalk() {
+    Program program = parsedProgram("y", "x");
+    // Object[] fast path: a single String binding that matches neither the container-qualified
+    // name nor the bare name must fall through to UNDECLARED after the container walk.
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(
+                CelException.class, () -> program.evaluate(Activation.snapshot(Map.of("z", 1))))
+            .code());
+    // Scoped single-name path (options-driven evaluation): same container walk, no match.
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    program.evaluate(
+                        Activation.snapshot(Map.of("z", 1)),
+                        EvaluationOptions.newBuilder().build()))
+            .code());
+  }
 }
