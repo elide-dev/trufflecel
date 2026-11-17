@@ -538,10 +538,12 @@ final class ExtensionFunctions {
       case "sqrt" -> Math.sqrt(d);
       case "ceil" -> Math.ceil(d);
       case "floor" -> Math.floor(d);
-      case "round" ->
-          Double.isFinite(d) && Math.abs(d) < 0x1p52
-              ? Math.copySign(Math.floor(Math.abs(d) + 0.5), d)
-              : d;
+      case "round" -> {
+        if (!Double.isFinite(d) || Math.abs(d) >= 0x1p52) yield d;
+        double floorAbs = Math.floor(Math.abs(d));
+        double frac = Math.abs(d) - floorAbs;
+        yield Math.copySign(floorAbs + (frac >= 0.5 ? 1 : 0), d);
+      }
       case "trunc" -> d < 0 ? Math.ceil(d) : Math.floor(d);
       case "isNaN" -> Double.isNaN(d);
       case "isInf" -> Double.isInfinite(d);

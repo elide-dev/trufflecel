@@ -302,6 +302,42 @@ public class ExtensionsTest {
   }
 
   @Test
+  public void mathRoundTiesAwayFromZeroWithoutFloatAdditionArtifact() {
+    yes("math.round(0.49999999999999994) == 0.0");
+    yes("math.round(-0.49999999999999994) == 0.0");
+    yes("math.round(0.5) == 1.0 && math.round(-0.5) == -1.0");
+    yes("math.round(2.5) == 3.0 && math.round(-2.5) == -3.0");
+    yes("math.round(1.5) == 2.0 && math.round(-1.5) == -2.0");
+    yes("math.round(1.2) == 1.0 && math.round(-1.4) == -1.0");
+    yes("math.round(-1.6) == -2.0 && math.round(0.6) == 1.0 && math.round(-0.6) == -1.0");
+    yes("math.isNaN(math.round(0.0/0.0))");
+    yes("math.round(1.0/0.0) == 1.0/0.0 && math.round(-1.0/0.0) == -1.0/0.0");
+    assertEquals(0.0, (Double) Cel.compile("math.round(0.49999999999999994)").evaluate(), 0.0);
+    assertEquals(
+        1L,
+        Double.doubleToRawLongBits(
+                (Double) Cel.compile("math.round(-0.49999999999999994)").evaluate())
+            >>> 63);
+    var env = Cel.newBuilder().variable("x", CelType.DOUBLE).build();
+    assertEquals(
+        0.0, (Double) env.compile("math.round(x)").evaluate(Map.of("x", 0.49999999999999994)), 0.0);
+    assertEquals(
+        1L,
+        Double.doubleToRawLongBits(
+                (Double) env.compile("math.round(x)").evaluate(Map.of("x", -0.49999999999999994)))
+            >>> 63);
+    assertEquals(2.0, (Double) env.compile("math.round(x)").evaluate(Map.of("x", 1.6)), 0.0);
+    assertEquals(-2.0, (Double) env.compile("math.round(x)").evaluate(Map.of("x", -1.6)), 0.0);
+    // Edge cases / passthrough (plan §1.5): signed zero and the 0x1p52 guard boundary.
+    assertEquals(
+        1L, Double.doubleToRawLongBits((Double) Cel.compile("math.round(-0.0)").evaluate()) >>> 63);
+    yes("math.round(0.0) == 0.0");
+    yes("math.round(4503599627370496.0) == 4503599627370496.0");
+    yes("math.round(4503599627370495.5) == 4503599627370496.0");
+    yes("math.round(4503599627370497.0) == 4503599627370497.0");
+  }
+
+  @Test
   public void networkParsingNeverResolvesNamesAndKeepsAddressBits() {
     yes("ip('ff12::1').isLinkLocalMulticast() && !ip('ff01::1').isLinkLocalMulticast()");
     yes("!isCIDR('::/01') && !isCIDR('1.2.3.4/+24')");
