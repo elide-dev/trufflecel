@@ -484,7 +484,23 @@ final class Optimizer {
         value = child.value;
         cost++;
       } else return;
-      types.add(Values.type(value));
+      CelType type = Values.type(value);
+      // Plan-time matching mirrors the runtime dispatch: multi-signature or receiver bindings
+      // dispatch through FunctionOverloads.select, which refines each argument via adapters and
+      // rewrites unregistered dyn values to "@unregistered"; single-global host bindings dispatch
+      // through Functions.applyHost, which matches only Values.type. Refine the same way here so
+      // a constant call folded to NO_OVERLOAD always fails at evaluation too. Constant arguments
+      // reaching here are always typed scalars (parser literals) or standard fold values, never
+      // dyn, Unknown (excluded above), or a folded CelException (errors return early), so only the
+      // adapter refinement applies at plan time.
+      if (n.customOverloads) {
+        for (ObjectType adapter : env.runtimeObjectTypes)
+          if (adapter.accepts(value)) {
+            type = CelType.of(adapter.name());
+            break;
+          }
+      }
+      types.add(type);
     }
     boolean accepted = false;
     for (var signature : env.overloads.get(n.name))
