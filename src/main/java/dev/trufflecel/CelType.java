@@ -85,6 +85,9 @@ public record CelType(String name, List<CelType> parameters) {
     if (b.name.equals("wrapper") && b.unwrapped().equals(a)) return b;
     if (a.name.equals("wrapper") && b.name.equals("wrapper")) return DYN;
     if (a.name.equals(b.name)) {
+      if (!a.parameters.isEmpty()
+          && !b.parameters.isEmpty()
+          && a.parameters.size() != b.parameters.size()) return DYN;
       int n = Math.max(a.parameters.size(), b.parameters.size());
       var args = new java.util.ArrayList<CelType>();
       for (int i = 0; i < n; i++)
