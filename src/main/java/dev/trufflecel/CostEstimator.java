@@ -132,6 +132,12 @@ public final class CostEstimator {
           if (hostFunctions.contains(node.name)) yield unknown("host function: " + node.name);
           if (!FIXED_CALLS.contains(node.name))
             yield unknown("function cost is not modeled: " + node.name);
+          // Runtime '+' charges proportionally to operand lengths when both operands are String
+          // or both are Bytes (Functions.apply, commit 86fb114); the operand lengths are not
+          // bounded by node data alone, so an unfoldable concatenation must not be certified as a
+          // finite per-node tick. Constant-folded concatenations return earlier via node.fold.
+          if (maybeTextConcat(node))
+            yield unknown("string/bytes concatenation length is not bounded");
           yield children(node, 1);
         }
         case CONDITIONAL -> {
@@ -170,6 +176,21 @@ public final class CostEstimator {
     private long children(ExprNode node, long base) {
       for (ExprNode child : node.children) base = plus(base, cost(child));
       return base;
+    }
+
+    // Whether a binary '+' could feed the runtime's length-proportional String/Bytes charge. The
+    // charge fires only when both operands are String or both are Bytes, so reporting unbounded
+    // is required unless each operand is provably something else. A typed numeric/list/timestamp/
+    // duration operand keeps the existing flat charge; dyn and untyped operands are conservative.
+    // The checker requires every '+' CALL to have exactly two arguments, so node.children[0]/[1]
+    // are always present here.
+    private static boolean maybeTextConcat(ExprNode node) {
+      return node.name.equals("+") && maybeText(node.children[0]) && maybeText(node.children[1]);
+    }
+
+    private static boolean maybeText(ExprNode operand) {
+      CelType type = operand.checkedType.unwrapped();
+      return type.isDyn() || type.equals(CelType.STRING) || type.equals(CelType.BYTES);
     }
 
     private long macro(ExprNode node) {
