@@ -135,6 +135,7 @@ public abstract class PojoType<T> implements ObjectType {
    */
   public static final class SnapshotContext {
     private final IdentityHashMap<Object, Boolean> active = new IdentityHashMap<>();
+    private final Set<Object> inspected = Collections.newSetFromMap(new IdentityHashMap<>());
     private final int maxDepth;
     private int remaining, depth;
 
@@ -204,6 +205,7 @@ public abstract class PojoType<T> implements ObjectType {
     }
 
     private void inspectOwned(Object value) {
+      if (!inspected.add(value)) return;
       if (value instanceof Value object) {
         enter(object);
         try {
