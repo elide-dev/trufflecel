@@ -1130,7 +1130,7 @@ class ExprNode extends CelNode {
     boolean sorting = name.equals("sortBy");
     boolean mapping = name.equals("map") || name.startsWith("transform");
     boolean filtering = name.equals("filter");
-    var mapped = mapResult ? HostCollections.<Object>map() : null;
+    var mapped = mapResult ? HostCollections.numericKeyMap() : null;
     var sortKeys = sorting ? HostCollections.list() : null;
     long index = 0;
     var result =
@@ -1183,10 +1183,10 @@ class ExprNode extends CelNode {
               continue;
             }
           }
-          if (name.equals("transformMap")) HostCollections.put(mapped, key, predicate);
+          if (name.equals("transformMap")) mapped.put(key, predicate);
           else if (name.equals("transformMapEntry")) {
             if (!(predicate instanceof Map<?, ?> entries)) throw Values.overload(name);
-            HostCollections.mergeEntries(mapped, entries);
+            mapped.mergeEntries(entries, ctx);
           } else if (countResult) count++;
           else HostCollections.add(result, predicate);
           continue;
@@ -1218,7 +1218,7 @@ class ExprNode extends CelNode {
       case "all" -> true;
       case "exists" -> false;
       case "exists_one", "existsOne" -> count == 1;
-      case "transformMap", "transformMapEntry" -> HostCollections.freezeMap(mapped);
+      case "transformMap", "transformMapEntry" -> mapped.freeze();
       case "sortBy" -> {
         // The canonical expansion evaluates keys before dispatching the list-only sort overload.
         // Keep its key-error/unknown precedence for dynamic and unchecked receivers.
@@ -1267,7 +1267,7 @@ class ExprNode extends CelNode {
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
   private Object map(VirtualFrame frame, EvalContext ctx) {
-    var map = HostCollections.<Object>map();
+    var map = HostCollections.numericKeyMap();
     Unknown unknown = null;
     CelException error = null;
     for (int i = 0; i < children.length; i += 2) {
@@ -1301,15 +1301,13 @@ class ExprNode extends CelNode {
         if (!o.present()) continue;
         v = o.value();
       }
-      if (!Values.validKey(k))
-        throw Values.error(CelException.Code.INVALID_ARGUMENT, "invalid map key");
-      if (Values.key(map, k) != null)
-        throw Values.error(CelException.Code.INVALID_ARGUMENT, "duplicate map key");
-      HostCollections.put(map, k, v);
+      // NumericKeyMap.putLiteral preserves map-literal error semantics ("invalid map key" /
+      // "duplicate map key") while detecting cross-type Long/UInt duplicates in O(1) per entry.
+      map.putLiteral(k, v);
     }
     if (unknown != null) return unknown;
     if (error != null) throw error;
-    return HostCollections.freezeMap(map);
+    return map.freeze();
   }
 
   @com.oracle.truffle.api.nodes.ExplodeLoop
