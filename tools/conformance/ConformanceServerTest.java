@@ -404,6 +404,53 @@ public final class ConformanceServerTest {
     assertTrue(has(response, "checked_expr"));
   }
 
+  @Test
+  public void evalParsedExprResolvesContainerQualifiedBindings() {
+    var service = new ConformanceServer();
+    Message parsed =
+        nested(service.parse(message(P + "ParseRequest", "cel_source", "y")), "parsed_expr");
+    Message bindingXY =
+        message("cel.expr.ExprValue", "value", message("cel.expr.Value", "bool_value", true));
+    Message bindingY =
+        message("cel.expr.ExprValue", "value", message("cel.expr.Value", "string_value", "false"));
+    var both = new LinkedHashMap<String, Message>();
+    both.put("x.y", bindingXY);
+    both.put("y", bindingY);
+    Message bothResult =
+        nested(
+            service.eval(
+                message(
+                    P + "EvalRequest", "parsed_expr", parsed, "container", "x", "bindings", both)),
+            "result");
+    assertEquals(true, field(nested(bothResult, "value"), "bool_value"));
+    Message qualifiedOnly =
+        nested(
+            service.eval(
+                message(
+                    P + "EvalRequest",
+                    "parsed_expr",
+                    parsed,
+                    "container",
+                    "x",
+                    "bindings",
+                    Map.of("x.y", bindingXY))),
+            "result");
+    assertEquals(true, field(nested(qualifiedOnly, "value"), "bool_value"));
+    Message bareOnly =
+        nested(
+            service.eval(
+                message(
+                    P + "EvalRequest",
+                    "parsed_expr",
+                    parsed,
+                    "container",
+                    "x",
+                    "bindings",
+                    Map.of("y", bindingY))),
+            "result");
+    assertEquals("false", field(nested(bareOnly, "value"), "string_value"));
+  }
+
   @SuppressWarnings("unchecked")
   private static List<String> overloadIds(Message checked) {
     var ids = new ArrayList<String>();
