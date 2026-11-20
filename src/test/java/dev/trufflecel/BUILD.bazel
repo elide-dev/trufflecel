@@ -685,3 +685,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "deepPatternRepro",
+    srcs = ["DeepPatternReproTest.java"],
+    test_class = "dev.trufflecel.DeepPatternReproTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+    ],
+)
