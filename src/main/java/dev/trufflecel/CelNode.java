@@ -7,6 +7,7 @@ import com.oracle.truffle.api.library.*;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 import java.util.*;
+import org.jspecify.annotations.Nullable;
 
 /** Source and lexical state exposed lazily, without allocating metadata during evaluation. */
 @ExportLibrary(NodeLibrary.class)
@@ -21,10 +22,11 @@ abstract class CelNode extends Node implements InstrumentableNode {
   // Root source lookup can reach other languages' parsers during Native Image analysis.
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   @Override
+  @Nullable
   public SourceSection getSourceSection() {
     var root = getRootNode();
     SourceSection section = root == null ? null : root.getSourceSection();
-    return section == null
+    return sourceStart < 0 || section == null
         ? null
         : section.getSource().createSection(sourceStart, sourceEnd - sourceStart);
   }

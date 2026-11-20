@@ -58,6 +58,7 @@ var external = map[string][]string{
 	"org.graalvm.polyglot.":           {"@maven//:org_graalvm_polyglot_polyglot"},
 	"com.google.re2j.":                {"@maven//:com_google_re2j_re2j"},
 	"com.google.gson.":                {"@maven//:com_google_code_gson_gson"},
+	"org.jspecify.annotations.":       {"@maven//:org_jspecify_jspecify"},
 	"org.junit.":                      {"@maven//:junit_junit"},
 }
 
