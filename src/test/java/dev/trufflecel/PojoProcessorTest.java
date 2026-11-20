@@ -6,10 +6,14 @@ import dev.trufflecel.processor.PojoProcessor;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
+import java.util.regex.Pattern;
 import javax.tools.*;
 import org.junit.Test;
 
 public final class PojoProcessorTest {
+  private static final Pattern DUPLICATE_CEL_OBJECT_TYPE_NAME =
+      Pattern.compile("duplicate CEL object type name: example\\.X");
+
   private record Compilation(boolean success, String diagnostics, Map<String, String> generated) {}
 
   private static Compilation compile(boolean core, String... sources) throws Exception {
@@ -233,11 +237,91 @@ public final class PojoProcessorTest {
             Map.entry(
                 "@CelPojo class Bad { public java.util.List<?> x; }", "unsupported POJO field"),
             Map.entry("@CelPojo class Bad { public java.util.Map<Double, String> x; }", "map keys"),
-            Map.entry("@CelPojo class Bad {} class BadCel {}", "cannot generate adapter"));
+            Map.entry("@CelPojo class Bad {} class BadCel {}", "cannot generate adapter"),
+            Map.entry(
+                "@CelPojo(\"example.Foo\") class A {} @CelPojo(\"example.Foo\") class B {}",
+                "duplicate CEL object type name: example.Foo"));
     for (var entry : invalid.entrySet()) {
       var result = compile(true, "Bad", "import dev.trufflecel.*; " + entry.getKey());
       assertFalse(entry.getKey(), result.success);
       assertTrue(result.diagnostics, result.diagnostics.contains(entry.getValue()));
     }
+  }
+
+  @Test
+  public void rejectsDuplicateCelObjectNamesAcrossTypes() throws Exception {
+    // Two classes in one compilation both declaring @CelPojo("example.Foo"): the second (in
+    // iteration order) must fail with a mirror of the field-level "duplicate CEL field"
+    // diagnostic, and only the first declarer's adapter may be generated.
+    var collision =
+        compile(
+            true,
+            "Bad",
+            "import dev.trufflecel.*; "
+                + "@CelPojo(\"example.Foo\") class A { public String shared; public String alpha; } "
+                + "@CelPojo(\"example.Foo\") class B { public String shared; public String beta; }");
+    assertFalse(collision.diagnostics, collision.success);
+    assertTrue(
+        collision.diagnostics, collision.diagnostics.contains("duplicate CEL object type name"));
+    assertTrue(
+        collision.diagnostics,
+        collision.diagnostics.contains("also declared by A")
+            || collision.diagnostics.contains("also declared by B"));
+    assertEquals(
+        collision.diagnostics,
+        1,
+        collision.generated.size()); // surviving declarer's adapter, conflict's is suppressed
+    assertTrue(
+        collision.generated.containsKey("ACel.java")
+            || collision.generated.containsKey("BCel.java"));
+    assertFalse(
+        "the surviving adapter must not name fields absent from its own schema",
+        collision.generated.values().stream()
+            .anyMatch(source -> source.contains("\"alpha\"") && source.contains("\"beta\"")));
+
+    // Three colliding declarations: at least the second and third must be diagnosed.
+    var triple =
+        compile(
+            true,
+            "Bad",
+            "import dev.trufflecel.*; "
+                + "@CelPojo(\"example.X\") class P {} "
+                + "@CelPojo(\"example.X\") class Q {} "
+                + "@CelPojo(\"example.X\") class R {}");
+    assertFalse(triple.diagnostics, triple.success);
+    long reported = DUPLICATE_CEL_OBJECT_TYPE_NAME.matcher(triple.diagnostics).results().count();
+    assertTrue(triple.diagnostics, reported >= 1);
+    assertEquals(triple.diagnostics, 1, triple.generated.size());
+
+    // Explicit value colliding with another class's implicit (qualified-Java) default name.
+    var implicit =
+        compile(
+            true,
+            "Bad",
+            "import dev.trufflecel.*; "
+                + "@CelPojo class ImplicitName {} "
+                + "@CelPojo(\"ImplicitName\") class Other {}");
+    assertFalse(implicit.diagnostics, implicit.success);
+    assertTrue(
+        implicit.diagnostics,
+        implicit.diagnostics.contains("duplicate CEL object type name: ImplicitName"));
+
+    // Control: distinct @CelPojo names across multiple classes still compile cleanly.
+    var distinct =
+        compile(
+            true,
+            "Bad",
+            "import dev.trufflecel.*; "
+                + "@CelPojo(\"example.One\") class One { public String a; } "
+                + "@CelPojo(\"example.Two\") class Two { public String b; } "
+                + "@CelPojo(\"example.Three\") class Three { public String c; }");
+    assertTrue(distinct.diagnostics, distinct.success);
+    assertEquals(
+        distinct.diagnostics,
+        3,
+        distinct.generated.size()); // OneCel, TwoCel, ThreeCel — no false-positive collision
+    assertTrue(distinct.generated.containsKey("OneCel.java"));
+    assertTrue(distinct.generated.containsKey("TwoCel.java"));
+    assertTrue(distinct.generated.containsKey("ThreeCel.java"));
   }
 }

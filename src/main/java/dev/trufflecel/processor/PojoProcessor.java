@@ -14,6 +14,7 @@ public final class PojoProcessor extends AbstractProcessor {
   private static final String POJO = "dev.trufflecel.CelPojo", FIELD = "dev.trufflecel.CelField";
   private boolean invalid;
   private int variable;
+  private final Map<String, TypeElement> objectNames = new HashMap<>();
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
@@ -60,6 +61,15 @@ public final class PojoProcessor extends AbstractProcessor {
       error(type, "invalid CEL object type name: " + name);
       return;
     }
+    TypeElement first = objectNames.putIfAbsent(name, type);
+    if (first != null)
+      error(
+          type,
+          "duplicate CEL object type name: "
+              + name
+              + " (also declared by "
+              + first.getQualifiedName()
+              + ")");
     var properties = new LinkedHashMap<String, Property>();
     if (type.getKind() == ElementKind.RECORD) {
       for (RecordComponentElement component : type.getRecordComponents())
