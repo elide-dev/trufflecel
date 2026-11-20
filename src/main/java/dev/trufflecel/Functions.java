@@ -403,11 +403,21 @@ final class Functions {
   }
 
   // Unchecked programs dispatch host functions by arity and runtime argument types, like
-  // standard overloads; a declared binding never receives arguments it did not declare.
+  // standard overloads; a declared binding never receives arguments it did not declare. Opaque
+  // unregistered host objects report a raw dyn type from Values.type, which CelType.accepts would
+  // admit for any declared parameter; remap dyn to @unregistered (the same remap
+  // FunctionOverloads.select applies) so the value matches only bindings that declare dyn, never
+  // a concrete declared type. This path is never reached with Unknown or CelException argument
+  // values: ExprNode.call short-circuits them (returns Unknown, rethrows the error) before falling
+  // through to Functions.apply, and non-strict custom bindings go through FunctionOverloads.select,
+  // whose own guard preserves dyn for those values.
   private static boolean accepts(Environment.FunctionBinding f, Object... args) {
     if (f == null || f.arguments().size() != args.length) return false;
-    for (int i = 0; i < args.length; i++)
-      if (!f.arguments().get(i).accepts(Values.type(args[i]))) return false;
+    for (int i = 0; i < args.length; i++) {
+      CelType type = Values.type(args[i]);
+      if (type.isDyn()) type = CelType.of("@unregistered");
+      if (!f.arguments().get(i).accepts(type)) return false;
+    }
     return true;
   }
 
