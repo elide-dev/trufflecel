@@ -27,6 +27,25 @@ final class GuestValue implements TruffleObject {
     return unwrap(value, depth, new int[] {1_000_000});
   }
 
+  /**
+   * Host Java types that {@link CelLanguage.Scope#writeMember} unwraps from the polyglot
+   * host-object wrapper before conversion. They are converted by Java {@code instanceof} in {@link
+   * #unwrap}, bypassing host-access-gated interop. {@code byte[]} is included so this generalizes
+   * the previous byte[]-only unwrapping.
+   */
+  static boolean isHostDataContainer(Object hostObject) {
+    return hostObject instanceof byte[]
+        || hostObject instanceof Map<?, ?>
+        || hostObject instanceof Iterable<?>
+        || hostObject instanceof Object[]
+        || hostObject instanceof int[]
+        || hostObject instanceof long[]
+        || hostObject instanceof short[]
+        || hostObject instanceof boolean[]
+        || hostObject instanceof float[]
+        || hostObject instanceof double[];
+  }
+
   private static Object unwrap(Object value, int depth, int[] remaining) throws InteropException {
     if (--remaining[0] < 0)
       throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "host data size limit exceeded");
@@ -49,6 +68,25 @@ final class GuestValue implements TruffleObject {
         || value == dev.elide.truffledata.Missing.INSTANCE) return DataValues.from(value);
     if (value instanceof Double || value instanceof Float) return ((Number) value).doubleValue();
     if (value instanceof byte[] b) return new Bytes(b);
+    // Raw Java data containers reach unwrap after CelLanguage.Scope.writeMember unwraps the
+    // polyglot host-object wrapper via env.asHostObject. Converting them via Values.in (rather
+    // than interop) keeps polyglot bindings working under Truffle's default, restrictive host
+    // access, where getMembers/hasArrayElements would otherwise expose nothing. Values.in
+    // snapshots Map/List/Iterable/Object[] and scalars with its own depth/size bounds and leaves
+    // temporals (Instant, Duration) as native CEL values rather than routing them back through
+    // interop, which would reject a raw host temporal under default access. Values.in does not
+    // handle primitive arrays, so those are boxed separately below.
+    if (value instanceof Map<?, ?> || value instanceof Iterable<?> || value instanceof Object[])
+      return Values.in(value);
+    if (value instanceof int[] arr) return primitiveList(arr.length, i -> (long) arr[i], remaining);
+    if (value instanceof long[] arr) return primitiveList(arr.length, i -> arr[i], remaining);
+    if (value instanceof short[] arr)
+      return primitiveList(arr.length, i -> (long) arr[i], remaining);
+    if (value instanceof boolean[] arr)
+      return primitiveList(arr.length, i -> (Boolean) arr[i], remaining);
+    if (value instanceof float[] arr)
+      return primitiveList(arr.length, i -> (double) arr[i], remaining);
+    if (value instanceof double[] arr) return primitiveList(arr.length, i -> arr[i], remaining);
     InteropLibrary lib = InteropLibrary.getUncached(value);
     if (lib.isNull(value)) return CelNull.INSTANCE;
     if (lib.isBoolean(value)) return lib.asBoolean(value);
@@ -86,6 +124,13 @@ final class GuestValue implements TruffleObject {
       long count = keys.getArraySize(members);
       if (count > 1000000)
         throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "host map size limit exceeded");
+      // Under Truffle's default (restrictive) host access a raw host object reports
+      // hasMembers == true but exposes zero readable members; converting that to an empty
+      // CEL map would silently drop the bound data. Host objects that expose no members are
+      // not valid CEL input — reject them loudly. Genuine interop proxies (e.g. an empty
+      // ProxyObject) are not host objects and still bind as an intentional empty CEL map.
+      if (count == 0 && lib.isHostObject(value))
+        throw UnsupportedTypeException.create(new Object[] {value}, "unsupported CEL input");
       for (long i = 0; i < count; i++) {
         String key = (String) keys.readArrayElement(members, i);
         result.put(key, unwrap(lib.readMember(value, key), depth + 1, remaining));
@@ -93,6 +138,20 @@ final class GuestValue implements TruffleObject {
       return Collections.unmodifiableMap(result);
     }
     throw UnsupportedTypeException.create(new Object[] {value}, "unsupported CEL input");
+  }
+
+  /**
+   * Boxes a primitive array into an immutable list of CEL scalar values, enforcing the size bound.
+   */
+  private static List<Object> primitiveList(
+      int length, java.util.function.IntFunction<Object> at, int[] remaining) {
+    if (length > 1000000)
+      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "host array size limit exceeded");
+    if ((remaining[0] -= length) < 0)
+      throw Values.error(CelException.Code.RESOURCE_EXHAUSTED, "host data size limit exceeded");
+    var result = new ArrayList<Object>(length);
+    for (int i = 0; i < length; i++) result.add(at.apply(i));
+    return List.copyOf(result);
   }
 
   @ExportMessage
