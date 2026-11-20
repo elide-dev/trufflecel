@@ -118,6 +118,7 @@ final class Functions {
     } catch (CelException e) {
       throw e;
     } catch (ArithmeticException e) {
+      if ("/ by zero".equals(e.getMessage())) throw divideByZero();
       throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
     } catch (IllegalArgumentException
         | DateTimeException

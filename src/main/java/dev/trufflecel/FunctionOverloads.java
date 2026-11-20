@@ -62,6 +62,7 @@ final class FunctionOverloads {
     } catch (CelException e) {
       throw e;
     } catch (ArithmeticException e) {
+      if ("/ by zero".equals(e.getMessage())) throw Functions.divideByZero();
       throw Values.error(CelException.Code.OVERFLOW, "numeric overflow");
     } catch (IllegalArgumentException
         | IndexOutOfBoundsException
