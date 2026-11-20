@@ -50,8 +50,19 @@ public final class PolicyCompiler {
     var runtime = configured.toBuilder().libraries(libraries);
     if (configured.libraryPolicy.functions != null) {
       var functions = new HashSet<>(configured.libraryPolicy.functions);
+      // cel.block and cel.index are the CSE scaffolding generated when commonSubexpressions
+      // is enabled, symmetric with the lazy-binding cel.bind above.
       functions.addAll(
-          Set.of("optional.of", "optional.none", "value", "hasValue", "or", "dyn", "cel.bind"));
+          Set.of(
+              "optional.of",
+              "optional.none",
+              "value",
+              "hasValue",
+              "or",
+              "dyn",
+              "cel.bind",
+              "cel.block",
+              "cel.index"));
       runtime.allowedFunctions(functions);
     }
     PreparedProgram result = runtime.build().prepare(yaml, expression, true);

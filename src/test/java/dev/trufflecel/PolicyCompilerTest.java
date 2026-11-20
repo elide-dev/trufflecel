@@ -251,6 +251,44 @@ public class PolicyCompilerTest {
   }
 
   @Test
+  public void commonSubexpressionsRemainUsableUnderRestrictedFunctionAllowList() {
+    // PolicyCompiler augments the runtime allow-list with cel.block/cel.index symmetrically with
+    // cel.bind so commonSubexpressions(true) can drive its own scaffolding without throwing;
+    // user-written blocks stay gated by the original (non-augmented) environment.
+    var env =
+        Cel.newBuilder().allowedFunctions(Set.of("+", "*")).commonSubexpressions(true).build();
+    var program =
+        PolicyCompiler.compile(
+            env, "name: cse\nrule: {match: [{output: '(1 + 2 + 3) + (1 + 2 + 3) * 2'}]}");
+    assertEquals(18L, program.evaluate(Map.of()));
+    // The runtime augmentation only unlocks the compiler's own scaffolding; user-written
+    // cel.block is still checked against the original user environment and rejected.
+    assertEquals(
+        CelException.Code.UNDECLARED,
+        assertThrows(
+                CelException.class,
+                () ->
+                    PolicyCompiler.compile(
+                        env,
+                        "name: blocked\nrule: {match: [{output: 'cel.block([1 + 1], cel.index(0))'}]}"))
+            .code());
+    // Restricted libraries (no bindings capacity) likewise keep working end-to-end under CSE,
+    // since the optimizer falls back, leaving no synthetic blocks for the runtime to reject.
+    var noBindings =
+        Cel.newBuilder()
+            .allowedFunctions(Set.of("+", "*"))
+            .libraries(Map.of())
+            .commonSubexpressions(true)
+            .build();
+    assertEquals(
+        18L,
+        PolicyCompiler.compile(
+                noBindings,
+                "name: no-bindings\nrule: {match: [{output: '(1 + 2 + 3) + (1 + 2 + 3) * 2'}]}")
+            .evaluate(Map.of()));
+  }
+
+  @Test
   public void firstMatchAndConditionalResults() {
     Environment env = Cel.newBuilder().variable("x", CelType.INT).build();
     var complete =
