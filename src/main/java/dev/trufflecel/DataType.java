@@ -140,7 +140,7 @@ public final class DataType implements ObjectType {
     boolean exact = element.kind() == Field.Kind.EXACT;
     var nativeValues = new ArrayList<Object>(list.size());
     for (Object item : list) {
-      if (item == CelNull.INSTANCE) nativeValues.add(DataNull.INSTANCE);
+      if (item == null || item == CelNull.INSTANCE) nativeValues.add(DataNull.INSTANCE);
       else if (item instanceof UInt u)
         nativeValues.add(
             exact ? new ExactNumber(new java.math.BigDecimal(u.toBigInteger())) : u.bits());
