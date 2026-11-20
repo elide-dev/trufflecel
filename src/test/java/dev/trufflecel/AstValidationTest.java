@@ -182,4 +182,20 @@ public final class AstValidationTest {
         CelType.list(CelType.INT), parameterized.compile(Cel.newBuilder().build()).evaluate());
     assertThrows(IllegalArgumentException.class, parameterized::unparse);
   }
+
+  @Test
+  public void astOfAppliesExplicitDepthAndNodeLimits() {
+    Ast.Node deep = ONE;
+    for (int i = 0; i < 10; i++) deep = Ast.Node.list(deep);
+    Ast.Node deepTree = deep;
+    // 11-deep nesting exceeds 5 but fits 20.
+    assertThrows(CelException.class, () -> Ast.of(deepTree, 100_000, 5));
+    Ast.of(deepTree, 100_000, 20);
+    Ast.Node[] elements = new Ast.Node[50];
+    Arrays.fill(elements, ONE);
+    Ast.Node wide = Ast.Node.list(elements);
+    // 51 nodes exceed 10 but fit 100.
+    assertThrows(CelException.class, () -> Ast.of(wide, 10, 256));
+    Ast.of(wide, 100, 256);
+  }
 }
