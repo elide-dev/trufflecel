@@ -122,3 +122,5 @@ TruffleCEL releases starting at 0.12.0; the Elide GraalVM pin stays at
 The 0.13.0 dependency wave advances the policy to TruffleData 0.14.0 (built with
 Myna 0.19.0) for TruffleCEL releases starting at 0.13.0. TruffleData 0.13.x was
 not adopted. The Elide GraalVM pin stays at 25.5.5-elide.28.
+
+The 0.14.0 release wave requires TruffleData 0.15.0 and uses Elide GraalVM 25.5.5-elide.31.
