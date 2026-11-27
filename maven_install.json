@@ -10,10 +10,10 @@
     "com.google.protobuf:protobuf-java": -226930769,
     "com.google.re2j:re2j": 207020501,
     "com.h2database:h2": -1123940597,
-    "dev.elide:truffledata-core": -536988735,
-    "dev.elide:truffledata-jdbc": 1761414173,
-    "dev.elide:truffledata-protobuf": 688611757,
-    "dev.elide:truffledata-protobuf-runtime": 1222133752,
+    "dev.elide:truffledata-core": 1961027202,
+    "dev.elide:truffledata-jdbc": -35537186,
+    "dev.elide:truffledata-protobuf": -1108339602,
+    "dev.elide:truffledata-protobuf-runtime": -574817607,
     "io.grpc:grpc-netty-shaded": -1834167451,
     "io.grpc:grpc-protobuf": 264074958,
     "io.grpc:grpc-stub": 1519309041,
@@ -43,10 +43,10 @@
     "com.google.protobuf:protobuf-java-util": 204051468,
     "com.google.re2j:re2j": -1730109305,
     "com.h2database:h2": -1852482952,
-    "dev.elide:truffledata-core": -1656832216,
-    "dev.elide:truffledata-jdbc": -1876135559,
-    "dev.elide:truffledata-protobuf": 1648238216,
-    "dev.elide:truffledata-protobuf-runtime": -796207584,
+    "dev.elide:truffledata-core": 766273351,
+    "dev.elide:truffledata-jdbc": 1791113845,
+    "dev.elide:truffledata-protobuf": 1705194054,
+    "dev.elide:truffledata-protobuf-runtime": 1054138234,
     "io.grpc:grpc-api": 143374178,
     "io.grpc:grpc-context": -556232365,
     "io.grpc:grpc-core": 80340529,
@@ -167,25 +167,25 @@
       "shasums": {
         "jar": "afae3e2b7a5500c527d34c2dc83030bb710ec0fbbfe2281e1b6504c2ec4de68d"
       },
-      "version": "0.17.0"
+      "version": "0.18.0"
     },
     "dev.elide:truffledata-jdbc": {
       "shasums": {
         "jar": "100bc1224b8fcace15a1aaca128b8edb983854573c40b8c821c4f6ebf5f38394"
       },
-      "version": "0.17.0"
+      "version": "0.18.0"
     },
     "dev.elide:truffledata-protobuf": {
       "shasums": {
         "jar": "c923020d924acc0574be8cdc57cb020e31cc4b5e049c45218f614bf28af189f5"
       },
-      "version": "0.17.0"
+      "version": "0.18.0"
     },
     "dev.elide:truffledata-protobuf-runtime": {
       "shasums": {
         "jar": "f6dd2b3825b51a3d0f61e26d7e6cb89c5c0fa85152aa3db9e2da3819de6e4c1a"
       },
-      "version": "0.17.0"
+      "version": "0.18.0"
     },
     "io.grpc:grpc-api": {
       "shasums": {
