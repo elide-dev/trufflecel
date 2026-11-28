@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/elide-dev/trufflecel/compare/v0.14.0...v0.15.0) (2026-11-28)
+
+
+### Features
+
+* **deps:** adopt TruffleData 0.18.0 and Elide GraalVM .33 ([#213](https://github.com/elide-dev/trufflecel/issues/213)) ([a889a71](https://github.com/elide-dev/trufflecel/commit/a889a71465873ba4e601d060435b12f6d60f8529))
+
 ## [0.14.0](https://github.com/elide-dev/trufflecel/compare/v0.13.0...v0.14.0) (2026-11-20)
 
 
