@@ -283,6 +283,26 @@ final class Functions {
         if (a instanceof String x && b instanceof String y) return x + y;
         if (a instanceof Bytes x && b instanceof Bytes y) return x.concat(y);
         if (a instanceof List<?> x && b instanceof List<?> y) {
+          // List concatenation allocates a result proportional to the sum of operand
+          // sizes (ArrayList(x) + addAll + List.copyOf). A flat one-tick-per-node budget
+          // charge (CostEstimator keeps `+` in FIXED_CALLS) lets a small nested cel.bind
+          // doubling expression grow values exponentially while consuming only node-tick
+          // cost, exhausting the JVM heap at both plan time and evaluation time. Proportional
+          // operation-budget charging cannot live in apply(name, a, EvalContext) — list
+          // operands are an open set of List implementations, so the inline `instanceof
+          // List<?>` trips Graal's VIRTUAL_INSTANCEOF performance warning (treated as a
+          // compilation error by benchmarks:compiled), and any restructuring of apply()'s
+          // call chain defeats escape analysis of the Object[] in ExprNode.scalarBinary's
+          // fallback (regressing per-evaluation allocation budgets). Instead, cap the
+          // result at the same 1,000,000-element ceiling already enforced by
+          // Values.listRange/mapRange/scalarRange/ownedList and ExtensionFunctions.flatten,
+          // before the allocation; the RESOURCE_EXHAUSTED CelException is caught by the
+          // Optimizer's attempt() skip-fold path, so plan-time folding also stops before OOM
+          // (and OutOfMemoryError, an Error, would otherwise escape that catch and crash).
+          long result = (long) x.size() + (long) y.size();
+          if (result >= 1_000_000L)
+            throw Values.error(
+                CelException.Code.RESOURCE_EXHAUSTED, "list concatenation size limit exceeded");
           var r = new ArrayList<Object>(x);
           r.addAll(y);
           return List.copyOf(r);
