@@ -59,7 +59,7 @@ final class Regex {
     } catch (LinkageError missing) {
       throw Values.error(
           CelException.Code.INVALID_ARGUMENT,
-          "RE2/J backend is unavailable; add com.google.re2j:re2j:1.8 or select truffleRegexOnly");
+          "RE2/J backend is unavailable; add com.google.re2j:re2j:1.9 or select truffleRegexOnly");
     }
   }
 

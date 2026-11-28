@@ -51,7 +51,7 @@ inputs. Declare an environment with `Cel.newBuilder()` for typed variables,
 custom functions, and explicit resource limits.
 
 RE2/J is optional. For compatibility-mode regex support, add
-`com.google.re2j:re2j:1.8`. Applications can omit it by selecting
+`com.google.re2j:re2j:1.9`. Applications can omit it by selecting
 [TruffleRegex-only mode](docs/INTEGRATION.md#omitting-re2j), subject to its explicit
 context and supported-pattern contract.
 

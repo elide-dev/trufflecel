@@ -186,9 +186,9 @@ continue through the generic adapter.
 ## Published TruffleData integration
 
 The lockfile pins `dev.elide:truffledata-core`, `truffledata-protobuf`, and `truffledata-jdbc`
-at `0.15.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
-Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.31` Elide GraalVM artifacts.
-The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.15.0`,
+at `0.18.0` from `https://maven.elide.dev`. Compilation and JVM testing use Java 25;
+Truffle/Polyglot are aligned in the current source tree to `25.5.5-elide.33` Elide GraalVM artifacts.
+The protobuf adapter also directly depends on `truffledata-protobuf-runtime` at `0.18.0`,
 which contains the native plans and codecs split from the protobuf-java bridge.
 No sibling checkout or local Maven cache is required.
 
@@ -608,7 +608,7 @@ getters or constructs host objects.
 ### Omitting RE2/J
 
 RE2/J is an optional Maven dependency. Applications using the default compatibility
-mode must declare `com.google.re2j:re2j:1.8` explicitly. To omit it, opt in to:
+mode must declare `com.google.re2j:re2j:1.9` explicitly. To omit it, opt in to:
 
 ```java
 var environment = Cel.newBuilder().truffleRegexOnly(10_000).build();

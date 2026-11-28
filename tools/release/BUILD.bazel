@@ -12,32 +12,32 @@ release_version(
 DEPENDENCIES = {
     "processor": [],
     "core": [
-        "org.graalvm.polyglot:polyglot:25.5.5-elide.31",
-        "org.graalvm.truffle:truffle-api:25.5.5-elide.31",
-        "org.graalvm.regex:regex:25.5.5-elide.31",
-        "dev.elide:truffledata-core:0.15.0",
-        "com.google.re2j:re2j:1.8",
+        "org.graalvm.polyglot:polyglot:25.5.5-elide.33",
+        "org.graalvm.truffle:truffle-api:25.5.5-elide.33",
+        "org.graalvm.regex:regex:25.5.5-elide.33",
+        "dev.elide:truffledata-core:0.18.0",
+        "com.google.re2j:re2j:1.9",
         "com.google.code.gson:gson:2.15.0",
         "org.snakeyaml:snakeyaml-engine:3.2",
     ],
     "protobuf": [
         "dev.elide:trufflecel-core:{version}",
-        "org.graalvm.truffle:truffle-api:25.5.5-elide.31",
-        "dev.elide:truffledata-core:0.15.0",
-        "dev.elide:truffledata-protobuf:0.15.0",
-        "dev.elide:truffledata-protobuf-runtime:0.15.0",
+        "org.graalvm.truffle:truffle-api:25.5.5-elide.33",
+        "dev.elide:truffledata-core:0.18.0",
+        "dev.elide:truffledata-protobuf:0.18.0",
+        "dev.elide:truffledata-protobuf-runtime:0.18.0",
         "com.google.protobuf:protobuf-java:4.36.2",
     ],
     "json": [
         "dev.elide:trufflecel-core:{version}",
-        "org.graalvm.shadowed:json:25.5.5-elide.31",
+        "org.graalvm.shadowed:json:25.5.5-elide.33",
     ],
 }
 
 [maven_publication(
     name = module,
     dependencies = dependencies,
-    optional_dependencies = ["com.google.re2j:re2j:1.8"] if module == "core" else [],
+    optional_dependencies = ["com.google.re2j:re2j:1.9"] if module == "core" else [],
     library = "//:trufflecel" + ("" if module == "core" else "-" + module),
     module = module,
 ) for module, dependencies in DEPENDENCIES.items()]
