@@ -109,6 +109,25 @@ public class BoundaryTest {
   }
 
   @Test
+  public void joinDecaysArityMismatchedCustomTypesToDyn() {
+    var pair1 = new CelType("pair", List.of(CelType.INT));
+    var pair2 = new CelType("pair", List.of(CelType.INT, CelType.INT));
+    assertEquals(CelType.DYN, CelType.join(pair1, pair2));
+    assertEquals(CelType.DYN, CelType.join(pair2, pair1));
+    assertFalse(pair1.accepts(pair2));
+    assertFalse(pair2.accepts(pair1));
+    var even = new CelType("even", List.of(CelType.STRING, CelType.INT));
+    var odd = new CelType("even", List.of(CelType.INT));
+    assertEquals(CelType.DYN, CelType.join(even, odd));
+    assertEquals(CelType.DYN, CelType.join(odd, even));
+    assertEquals(CelType.list(CelType.DYN), CelType.join(CelType.list(pair1), CelType.list(pair2)));
+    var same1 = new CelType("pair", List.of(CelType.INT, CelType.STRING));
+    var same2 = new CelType("pair", List.of(CelType.INT, CelType.INT));
+    assertEquals(
+        new CelType("pair", List.of(CelType.INT, CelType.DYN)), CelType.join(same1, same2));
+  }
+
+  @Test
   public void activationAndDebugScopeContracts() throws Exception {
     var context = new EvalContext.Scoped(env, Map.of("x", 1L));
     context.push("x", 2L);
