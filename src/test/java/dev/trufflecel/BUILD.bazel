@@ -313,6 +313,19 @@ java_test(
 )
 
 java_test(
+    name = "hostOverloadAdapter",
+    srcs = ["HostOverloadAdapterTest.java"],
+    test_class = "dev.trufflecel.HostOverloadAdapterTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "@maven//:junit_junit",
+        "@maven//:org_graalvm_polyglot_polyglot",
+        "@maven//:org_graalvm_truffle_truffle_api",
+    ],
+)
+
+java_test(
     name = "libraryPolicy",
     srcs = ["LibraryPolicyTest.java"],
     test_class = "dev.trufflecel.LibraryPolicyTest",
