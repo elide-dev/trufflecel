@@ -106,6 +106,7 @@ java_library(
         # The language is loaded through Env.parseInternal, without Java implementation imports.
         "@maven//:org_graalvm_regex_regex",  # keep
         "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_jspecify_jspecify",
         "@maven//:org_snakeyaml_snakeyaml_engine",
     ],
 )
