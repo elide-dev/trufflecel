@@ -220,6 +220,19 @@ java_test(
 )
 
 java_test(
+    name = "containerResolution",
+    srcs = ["ContainerResolutionTest.java"],
+    test_class = "dev.trufflecel.ContainerResolutionTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "encoder",
     srcs = ["EncoderTest.java"],
     test_class = "dev.trufflecel.EncoderTest",
