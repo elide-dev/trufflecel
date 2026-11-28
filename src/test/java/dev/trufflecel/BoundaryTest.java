@@ -269,7 +269,10 @@ public class BoundaryTest {
         CelException.Code.RESOURCE_EXHAUSTED,
         assertThrows(CelException.class, () -> Values.in(many)).code());
     assertThrows(
-        CelException.class, () -> HostCollections.mergeEntries(new HashMap<>(), Map.of(1.5, 1L)));
+        CelException.class,
+        () ->
+            HostCollections.numericKeyMap()
+                .mergeEntries(Map.of(1.5, 1L), new EvalContext(env, Map.of())));
     assertEquals(
         false,
         NetworkValue.apply(

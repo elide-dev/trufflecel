@@ -685,3 +685,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "numericKeyDoSRegression",
+    srcs = ["NumericKeyDoSRegressionTest.java"],
+    test_class = "dev.trufflecel.NumericKeyDoSRegressionTest",
+    deps = [
+        ":test_support",
+        "//:trufflecel",
+        "//:trufflecel-protobuf",
+        "@maven//:junit_junit",
+    ],
+)
