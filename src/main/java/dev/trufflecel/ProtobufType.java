@@ -33,20 +33,39 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
 
     @Override
     public boolean equals(Object other) {
-      return other instanceof Value v
-          && type.descriptor == v.type.descriptor
-          && message().equals(v.message());
+      // Compare both sides under a single registry so a registered extension parses the same way
+      // for each value: sibling adapters with different extension sets must not turn identical
+      // wire content into a real field on one side and an UnknownFieldSet entry on the other.
+      if (!(other instanceof Value v) || type.descriptor != v.type.descriptor) return false;
+      ExtensionRegistry registry = type.registry;
+      return parseUnder(this, registry).equals(parseUnder(v, registry));
     }
 
     @Override
     public int hashCode() {
-      return message().hashCode();
+      // Pair the single-registry comparison above with a registry-invariant hash. Sibling
+      // adapters with byte-identical wire content compare equal under equals(); they must
+      // hash identically too, regardless of which producing adapter registered extensions.
+      // The empty registry sees every extension as an opaque unknown field, so its parse
+      // result is the same regardless of which sibling's registry governs the comparison.
+      return parseUnder(this, ExtensionRegistry.getEmptyRegistry()).hashCode();
     }
 
     /** Explicit host export. Binary ingestion and CEL field access use the native row directly. */
     public Message message() {
+      return parseUnder(this, type.registry);
+    }
+
+    /**
+     * Parse {@code value}'s wire bytes under {@code registry}, governed by one adapter. The catch
+     * only fires on a corrupt native row, which host snapshotting cannot produce, so the stack walk
+     * is diagnostic-only and never runs on a hot path.
+     */
+    @SuppressWarnings("TruffleStackfulException")
+    private static Message parseUnder(Value value, ExtensionRegistry registry) {
       try {
-        return DynamicMessage.parseFrom(type.descriptor, toBytes().toByteArray(), type.registry);
+        return DynamicMessage.parseFrom(
+            value.type.descriptor, value.toBytes().toByteArray(), registry);
       } catch (InvalidProtocolBufferException e) {
         throw new IllegalStateException("Invalid native protobuf row", e);
       }
@@ -773,8 +792,15 @@ public final class ProtobufType implements ObjectType, FieldPlan.Provider {
   public boolean equal(Object a, Object b) {
     Value left = (Value) a;
     if (!(b instanceof Value right) || left.type.descriptor != right.type.descriptor) return false;
+    // Interpret both sides under one registry so a registered extension parses the same way on
+    // each side: a sibling adapter that registered a different extension set must not turn
+    // identical wire content into a real field on one side and an UnknownFieldSet entry on the
+    // other. The left side's producing adapter's registry governs, mirroring the producing-adapter
+    // delegation already used by has()/get().
     Message message = left.message();
-    return message.equals(right.message()) && reflexive(message);
+    Message other =
+        left.type == right.type ? right.message() : Value.parseUnder(right, left.type.registry);
+    return message.equals(other) && reflexive(message);
   }
 
   // protobuf-java considers NaNs equal; CEL preserves IEEE equality inside messages.
