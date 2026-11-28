@@ -26,6 +26,9 @@ public final class PojoFixtures {
   @CelPojo
   public record Envelope(User user) {}
 
+  @CelPojo("example.PairUser")
+  public record PairUser(User a, User b) {}
+
   @CelPojo
   public static final class Bean {
     public int count;
