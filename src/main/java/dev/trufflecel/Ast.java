@@ -260,6 +260,11 @@ public final class Ast {
     return new Ast(root, "", 100_000, 256);
   }
 
+  /** Construct an owned tree with explicit limits, mirroring {@link #parse(Environment,String)}. */
+  public static Ast of(Node root, int maxNodes, int maxDepth) {
+    return new Ast(root, "", maxNodes, maxDepth);
+  }
+
   /** Parse without type checking; configured syntax, expansion and structural limits apply. */
   public static Ast parse(Environment environment, String source) {
     Objects.requireNonNull(source);
