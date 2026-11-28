@@ -125,8 +125,14 @@ public final class DataType implements ObjectType {
             f.kind() == Field.Kind.EXACT
                 ? new ExactNumber(new java.math.BigDecimal(u.toBigInteger()))
                 : u.bits();
-      else if (f.kind() == Field.Kind.ARRAY && unsignedElement(f) && value instanceof List<?> list)
-        value = toUnsignedArray(list, f.constraints().element());
+      else if (f.kind() == Field.Kind.ARRAY && value instanceof List<?> list)
+        value =
+            unsignedElement(f)
+                ? toUnsignedArray(list, f.constraints().element())
+                : new DataArray(
+                    list.stream()
+                        .map(item -> item == CelNull.INSTANCE ? DataNull.INSTANCE : item)
+                        .toArray());
       row[i] = value == CelNull.INSTANCE ? DataNull.INSTANCE : value;
     }
     try {
