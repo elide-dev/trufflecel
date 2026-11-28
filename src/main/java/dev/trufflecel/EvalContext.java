@@ -178,6 +178,16 @@ sealed class EvalContext {
         : evaluation.partial.override(path, presence);
   }
 
+  /**
+   * Overlap-based unknown fallback for SELECT/INDEX hops; see {@link
+   * PartialState#unknownIntersect}.
+   */
+  Object attributeIntersect(Attribute path) {
+    return evaluation == null || evaluation.partial == null
+        ? PartialState.NONE
+        : evaluation.partial.unknownIntersect(path);
+  }
+
   @com.oracle.truffle.api.CompilerDirectives.TruffleBoundary
   static Attribute qualify(Attribute parent, Object qualifier) {
     if (parent == null) return null;
